@@ -1,4 +1,4 @@
-Long-term kidney outcomes after SARS-CoV-2 infection
+# Long-term kidney outcomes after SARS-CoV-2 infection
 
 This is the code and configuration for our research: "Long-term kidney outcomes after SARS-CoV-2 infection"
 
