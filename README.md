@@ -2,6 +2,8 @@
 
 This is the code and configuration for our research: "Long-term kidney outcomes after SARS-CoV-2 infection"
 
+This project is ongoing. Results in this repository MUST NOT be considered an accurate or valid representation of the study purpose. These data may reflect an incomplete or incorrect analysis with no further ongoing work. The repository content has ONLY been made public to support the OpenSAFELY open science and transparency principles and to support the sharing of re-usable code for other subsequent users. The results have not been peer-reviewed. No clinical, policy or safety conclusions must be drawn from any of the data here.
+
 You can run this project via [Gitpod](https://gitpod.io) in a web browser by clicking on this badge: [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/opensafely/post-covid-kidney-outcomes)
 
 * Our study protocol can be found [here](https://docs.google.com/document/d/1F4JLdLSn7KLxwhZFdPE6veX9p-CNyqQC_jub4hcqXEg/edit?usp=sharing)
