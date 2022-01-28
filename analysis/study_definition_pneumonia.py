@@ -47,12 +47,5 @@ study = StudyDefinition(
         find_first_match_in_period=True,
         return_expectations={"date": {"earliest": "index_date"}},
     ),
-    date_icu_admission=patients.admitted_to_icu(
-        find_first_match_in_period=True,
-        on_or_after="index_date",
-        returning="date_admitted",
-        date_format="YYYY-MM-DD",
-        return_expectations={"date": {"earliest": "index_date"}},
-    ),
     **common_variables
 )
