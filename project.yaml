@@ -1,12 +1,184 @@
-version: '3.0'
+version: "3.0"
 
 expectations:
-  population_size: 1000
+  population_size: 100000
 
+# Match covid_all_for_matching to comparators in potential_historical_general_population and potential_contemporary_general_population
+# https://docs.opensafely.org/case-control-studies/
+
+  # Extract data for covid_all_for_matching
+  actions:
+    extract_covid_all:
+      run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_all_for_matching
+      outputs:
+        highly_sensitive:
+          cohort: output/input_covid_all_for_matching.csv
+
+# Extract data for potential_historical_general_population
 actions:
-
-  generate_study_population:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition
+  # ...
+  extract_potential_historical_general_population:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_potential_historical_general_population
     outputs:
       highly_sensitive:
-        cohort: output/input.csv
+        cohort: output/input_potential_historical_general_population.csv
+
+# Extract date for potential_contemporary_general_population
+actions:
+  # ...
+  extract_potential_contemporary_general_population:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_potential_contemporary_general_population
+    outputs:
+      highly_sensitive:
+        cohort: output/input_potential_contemporary_general_population.csv
+
+# Match covid_all_for_matching to potential_historical_general_population
+actions:
+  # ...
+  matching:
+    run: python:latest python analysis/match.py
+    needs: [extract_covid_all_for_matching, extract_potential_historical_general_population]
+    outputs:
+      moderately_sensitive:
+        matching_report: output/matching_report_historical.txt
+      highly_sensitive:
+        matched_matches: output/matched_matches_historical.csv
+
+# Match covid_all_for_matching to potential_contemporary_general_population
+actions:
+  # ...
+  matching:
+    run: python:latest python analysis/match.py
+    needs: [extract_covid_all_for_matching, extract_potential_contemporary_general_population]
+    outputs:
+      moderately_sensitive:
+        matching_report: output/matching_report_contemporary.txt
+      highly_sensitive:
+        matched_matches: output/matched_matches_contemporary.csv
+
+# Extract data for matched_historical_general_population
+actions:
+  # ...
+  extract_controls:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_matched_historical_general_population
+    needs: [matching]
+    outputs:
+      highly_sensitive:
+        cohort: output/input_matched_historical_general_population.csv
+
+# Extract data for matched_contemporary_general_population
+actions:
+  # ...
+  extract_controls:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_matched_contemporary_general_population
+    needs: [matching]
+    outputs:
+      highly_sensitive:
+        cohort: output/input_matched_contemporary_general_population.csv
+
+# Extract data for covid_all
+actions:
+  generate_covid_all_cohort:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_all
+    outputs:
+      highly_sensitive:
+        cohort: output/input_covid.csv
+
+# Extract data for covid_hospitalised
+actions:
+  generate_covid_hospitalised_cohort:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_hospitalised
+    outputs:
+      highly_sensitive:
+        cohort: output/input_covid.csv
+
+# Extract data for pneumonia
+  generate_pneumonia_cohort:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_pneumonia
+    outputs:
+      highly_sensitive:
+        cohort: output/input_pneumonia.csv
+
+# Stata analysis files
+# From https://github.com/opensafely/post-covid-outcomes-research/blob/main/project.yaml
+      
+  covid_rates_cohort:
+    run: stata-mp:latest analysis/000_cr_define_covariates_simple_rates.do "covid"
+    needs: [generate_covid_cohort]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/cohort_rates_covid.dta
+
+  covid_community_rates_cohort:
+    run: stata-mp:latest analysis/000_cr_define_covariates_simple_rates.do "covid_community"
+    needs: [generate_covid_community_cohort]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/cohort_rates_covid_community.dta
+
+  pneumonia_rates_cohort:
+    run: stata-mp:latest analysis/000_cr_define_covariates_simple_rates.do "pneumonia"
+    needs: [generate_pneumonia_cohort]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/cohort_rates_pneumonia.dta
+
+  gen_pop_rates_cohort:
+    run: stata-mp:latest analysis/000_cr_define_covariates_simple_rates.do "matched_combined_general_population"
+    needs: [matching]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/cohort_rates_gen_population.dta
+
+  covid_rates:
+    run: stata-mp:latest analysis/201_cr_simple_rates.do "covid"
+    needs: [covid_rates_cohort]
+    outputs:
+      moderately_sensitive:
+        rates: output/tabfig/rates_summary_covid.csv
+
+  covid_comm_rates:
+    run: stata-mp:latest analysis/201_cr_simple_rates.do "covid_community"
+    needs: [covid_community_rates_cohort]
+    outputs:
+      moderately_sensitive:
+        rates: output/tabfig/rates_summary_covid_community.csv
+
+  pneumonia_rates:
+    run: stata-mp:latest analysis/201_cr_simple_rates.do "pneumonia"
+    needs: [pneumonia_rates_cohort]
+    outputs:
+      moderately_sensitive:
+        rates: output/tabfig/rates_summary_pneumonia.csv
+
+  gen_pop_rates:
+    run: stata-mp:latest analysis/201_cr_simple_rates.do "gen_population"
+    needs: [gen_pop_rates_cohort]
+    outputs:
+      moderately_sensitive:
+        rates: output/tabfig/rates_summary_gen_population.csv
+
+  baseline_characteristics:
+    run: stata-mp:latest analysis/400_baseline_characteristics.do
+    needs: [covid_rates_cohort, covid_community_rates_cohort, pneumonia_rates_cohort, gen_pop_rates_cohort]
+    outputs:
+      moderately_sensitive:
+        tables: output/tabfig/an_descriptiveTable_*.txt
+
+  append_cohorts:
+    run: stata-mp:latest analysis/300_cr_data_management_matching.do
+    needs: [covid_rates_cohort, pneumonia_rates_cohort, gen_pop_rates_cohort]
+    outputs:
+      moderately_sensitive:
+        log: output/append_cohorts.txt
+      highly_sensitive: 
+        dataset: output/combined_covid_pneumonia.dta
+        dataset2: output/combined_covid_gen_population.dta
+
+  cox_models:
+    run: stata-mp:latest analysis/302_cox_models.do
+    needs: [append_cohorts]
+    outputs:
+      moderately_sensitive:
+        log: output/cox_models.txt
+        dataset: output/tabfig/cox_model_summary.csv
