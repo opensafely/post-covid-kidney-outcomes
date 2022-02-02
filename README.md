@@ -6,7 +6,7 @@ This project is ongoing. Results in this repository MUST NOT be considered an ac
 
 You can run this project via [Gitpod](https://gitpod.io) in a web browser by clicking on this badge: [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/opensafely/post-covid-kidney-outcomes)
 
-* Our study protocol can be found [here](https://github.com/opensafely/post-covid-kidney-outcomes/blob/main/Protocol_%20Kidney%20outcomes%20after%20SARS-CoV-2%20infection.pdf)
+* Our study protocol can be found [here](https://github.com/opensafely/post-covid-kidney-outcomes/blob/working/Protocol_%20Kidney%20outcomes%20after%20SARS-CoV-2%20infection.pdf)
 * This study is ongoing and is yet to be published()
 * Raw model outputs, including charts, crosstabs, etc, will be in `released_outputs/`
 * If you are interested in how we defined our variables, take a look at the [study definition](analysis/study_definition.py); this is written in `python`, but non-programmers should be able to understand what is going on there
