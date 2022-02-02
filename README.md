@@ -9,7 +9,7 @@ You can run this project via [Gitpod](https://gitpod.io) in a web browser by cli
 * Our study protocol can be found [here](https://github.com/opensafely/post-covid-kidney-outcomes/blob/working/Protocol_%20Kidney%20outcomes%20after%20SARS-CoV-2%20infection.pdf)
 * This study is ongoing and is yet to be published()
 * Raw model outputs, including charts, crosstabs, etc, will be in `released_outputs/`
-* If you are interested in how we are defining our variables, take a look at the [study definition](analysis/study_definition.py); this is written in `python`, but non-programmers should be able to understand what is going on there
+* If you are interested in how we are defining our variables, take a look at the [analysis folder](https://github.com/opensafely/post-covid-kidney-outcomes/tree/working/analysis); this is written in `python`, but non-programmers should be able to understand what is going on there
 * If you are interested in how we are defining our code lists, look in the [codelists folder](https://github.com/opensafely/post-covid-kidney-outcomes/tree/working/codelists).
 * Developers and epidemiologists interested in the framework should review [the OpenSAFELY documentation](https://docs.opensafely.org)
 
