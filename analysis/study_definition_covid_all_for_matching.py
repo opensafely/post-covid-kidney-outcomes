@@ -12,17 +12,17 @@ from codelists import *
 
 from common_variables import generate_common_variables
 
+#covid_all_for matching will be matched to potential_contemporary_general_population and potential_historical_general_population using age, sex, STP, IMD and date
+#only matching variables (demographic_variables) need to be extracted at this stage
 (
-    outcome_variables,
     demographic_variables,
-    clinical_variables,
 ) = generate_common_variables(index_date_variable="patient_index_date")
 
 study = StudyDefinition(
     default_expectations={
         "date": {"earliest": "1980-01-01", "latest": "today"},
         "rate": "uniform",
-        "incidence": 0.7,
+        "incidence": 0.7, #incidence of?
     },
     population=patients.satisfying(
         """
@@ -38,7 +38,9 @@ study = StudyDefinition(
         ),
     ),
     index_date="2020-02-01",
-    # COVID infection
+    #Should this be patient_index_date? i.e. date when cases started to be picked up
+    
+    #SARS-CoV_2 infection:
     sgss_positive=patients.with_test_result_in_sgss(
         pathogen="SARS-CoV-2",
         test_result="positive",
@@ -64,11 +66,7 @@ study = StudyDefinition(
         covid_diagnosis_date=patients.minimum_of(
         "sgss_positive", "primary_care_covid", "hospital_covid"
     ),
-        patient_index_date=patients.minimum_of(
-        "sgss_positive", "primary_care_covid", "hospital_covid"
-    ),
 
 #Anyone with a code for dialysis or kidney transplant or with eGFR <15 before covid_diagnosis_date will be excluded
 
     **demographic_variables,
-#Only matching variables need to be extracted = age, sex, STP, IMD
