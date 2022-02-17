@@ -1,3 +1,22 @@
+#covid_all_for matching will be matched to potential_contemporary_general_population and potential_historical_general_population
+
+#Only matching variables (demographic_variables) and exclusion variables need to be extracted at this stage
+
+#Matching variables:
+# - age
+# - sex
+# - stp
+# - imd
+# - patient_index_date (using sgss_positive, primary_care_covid or hospital_covid)
+
+#Exclusion variables:
+# - esrd
+# - died_before_patient_index_date (using patient_died_date_gp)
+
+#Note:
+# - Variables will be extracted at covid_diagnosis_date
+# - Matching and follow-up will commence at patient_index_date
+
 from cohortextractor import (
     StudyDefinition,
     Measure,
@@ -12,8 +31,6 @@ from codelists import *
 
 from common_variables import generate_common_variables
 
-#covid_all_for matching will be matched to potential_contemporary_general_population and potential_historical_general_population using age, sex, STP, IMD and date
-#only matching variables (demographic_variables) need to be extracted at this stage
 (
     demographic_variables,
 ) = generate_common_variables(index_date_variable="patient_index_date")
@@ -32,13 +49,16 @@ study = StudyDefinition(
         AND imd > 0
         AND NOT covid_classification = "0"
         AND NOT stp = ""
+        AND NOT died_before_patient_index_date
+        AND NOT esrd
         """,
         has_follow_up=patients.registered_with_one_practice_between(
-            "patient_index_date - 3 months", "patient_index_date"
+            "covid_diagnosis_date - 3 months", "covid_diagnosis_date"
         ),
+        died_before_patient_index_date=patients.died_date_gp(
+            on_or_before="patient_index_date")
     ),
     index_date="2020-02-01",
-    #Should this be patient_index_date? i.e. date when cases started to be picked up
     
     #SARS-CoV_2 infection:
     sgss_positive=patients.with_test_result_in_sgss(
@@ -67,6 +87,6 @@ study = StudyDefinition(
         "sgss_positive", "primary_care_covid", "hospital_covid"
     ),
 
-#Anyone with a code for dialysis or kidney transplant or with eGFR <15 before covid_diagnosis_date will be excluded
-
     **demographic_variables,
+
+    ##What's the function of demographic_variables?

@@ -5,8 +5,9 @@ def generate_common_variables(index_date_variable):
         deregistered=patients.date_deregistered_from_all_supported_practices(
             date_format="YYYY-MM-DD"
         ),
-        
 
+#Matching and exclusion variables
+        
         age=patients.age_as_of(
             f"{index_date_variable}",
             return_expectations={
@@ -19,65 +20,6 @@ def generate_common_variables(index_date_variable):
                 "rate": "universal",
                 "category": {"ratios": {"M": 0.49, "F": 0.51}},
             }
-        ),
-        ethnicity=patients.with_these_clinical_events(
-            ethnicity_codes,
-            returning="category",
-            find_last_match_in_period=True,
-            on_or_before=f"{index_date_variable}",
-            return_expectations={
-                "category": {"ratios": {"1": 0.8, "5": 0.1, "3": 0.1}},
-                "incidence": 0.75,
-            },
-        ),
-        practice_id=patients.registered_practice_as_of(
-            "index_date",
-            returning="pseudo_id",
-            return_expectations={
-                "int": {"distribution": "normal", "mean": 1000, "stddev": 100},
-                "incidence": 1,
-            },
-        ),
-        stp=patients.registered_practice_as_of(
-            "index_date",
-            returning="stp_code",
-            return_expectations={
-                "rate": "universal",
-                "category": {
-                    "ratios": {
-                        "STP1": 0.1,
-                        "STP2": 0.1,
-                        "STP3": 0.1,
-                        "STP4": 0.1,
-                        "STP5": 0.1,
-                        "STP6": 0.1,
-                        "STP7": 0.1,
-                        "STP8": 0.1,
-                        "STP9": 0.1,
-                        "STP10": 0.1,
-                    }
-                },
-            },
-        ),
-        region=patients.registered_practice_as_of(
-            "index_date",
-            returning="nuts1_region_name",
-            return_expectations={
-                "rate": "universal",
-                "category": {
-                    "ratios": {
-                        "North East": 0.1,
-                        "North West": 0.1,
-                        "Yorkshire and The Humber": 0.1,
-                        "East Midlands": 0.1,
-                        "West Midlands": 0.1,
-                        "East": 0.1,
-                        "London": 0.2,
-                        "South East": 0.1,
-                        "South West": 0.1,
-                    },
-                },
-            },
         ),
         imd=patients.address_as_of(
             "index_date",
@@ -101,6 +43,97 @@ def generate_common_variables(index_date_variable):
                 },
             },
         ),
+        stp=patients.registered_practice_as_of(
+            "index_date",
+            returning="stp_code",
+            return_expectations={
+                "rate": "universal",
+                "category": {
+                    "ratios": {
+                        "STP1": 0.1,
+                        "STP2": 0.1,
+                        "STP3": 0.1,
+                        "STP4": 0.1,
+                        "STP5": 0.1,
+                        "STP6": 0.1,
+                        "STP7": 0.1,
+                        "STP8": 0.1,
+                        "STP9": 0.1,
+                        "STP10": 0.1,
+                    }
+                },
+            },
+        ),
+        died_date_gp=patients.with_death_recorded_in_primary_care(
+            on_or_after="2020-02-01",
+            returning="date_of_death",
+            return_expectations={
+                "date": {"earliest" : "2020-02-01"},
+                "rate" : "exponential_increase"
+                },
+        ),
+
+
+#From: https://github.com/opensafely/COVID-19-vaccine-breakthrough/blob/updates-november/analysis/study_definition.py
+
+  ## Dialysis
+  dialysis = patients.with_these_clinical_events(
+    dialysis_codes,
+    find_last_match_in_period = True,
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    on_or_before = "covid_vax_2_date",
+  ),
+
+    ## Kidney transplant
+  kidney_transplant = patients.with_these_clinical_events(
+    kidney_transplant_codes, 
+    returning = "date",
+    date_format = "YYYY-MM-DD",
+    find_last_match_in_period = True,
+    on_or_before = "covid_vax_2_date"
+  ),
+
+
+        ethnicity=patients.with_these_clinical_events(
+            ethnicity_codes,
+            returning="category",
+            find_last_match_in_period=True,
+            on_or_before=f"{index_date_variable}",
+            return_expectations={
+                "category": {"ratios": {"1": 0.8, "5": 0.1, "3": 0.1}},
+                "incidence": 0.75,
+            },
+        ),
+        practice_id=patients.registered_practice_as_of(
+            "index_date",
+            returning="pseudo_id",
+            return_expectations={
+                "int": {"distribution": "normal", "mean": 1000, "stddev": 100},
+                "incidence": 1,
+            },
+        ),
+        region=patients.registered_practice_as_of(
+            "index_date",
+            returning="nuts1_region_name",
+            return_expectations={
+                "rate": "universal",
+                "category": {
+                    "ratios": {
+                        "North East": 0.1,
+                        "North West": 0.1,
+                        "Yorkshire and The Humber": 0.1,
+                        "East Midlands": 0.1,
+                        "West Midlands": 0.1,
+                        "East": 0.1,
+                        "London": 0.2,
+                        "South East": 0.1,
+                        "South West": 0.1,
+                    },
+                },
+            },
+        ),
+        
         af=patients.with_these_clinical_events(
             af_codes,
             on_or_before=f"{index_date_variable}",
