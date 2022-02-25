@@ -72,7 +72,9 @@ def generate_common_variables(index_date_variable):
                 "rate" : "exponential_increase"
                 },
         ),
-
+        died_before_patient_index_date=patients.died_date_gp(
+            on_or_before="patient_index_date")
+        ),
 
 #From: https://github.com/opensafely/COVID-19-vaccine-breakthrough/blob/updates-november/analysis/study_definition.py
 
@@ -82,7 +84,7 @@ def generate_common_variables(index_date_variable):
     find_last_match_in_period = True,
     returning = "date",
     date_format = "YYYY-MM-DD",
-    on_or_before = "covid_vax_2_date",
+    on_or_before = "covid_diagnosis_date",
   ),
 
     ## Kidney transplant
@@ -91,9 +93,20 @@ def generate_common_variables(index_date_variable):
     returning = "date",
     date_format = "YYYY-MM-DD",
     find_last_match_in_period = True,
-    on_or_before = "covid_vax_2_date"
+    on_or_before = "covid_diagnosis_date"
   ),
 
+end_stage_renal_disease=patients.satisfying(
+            "dialysis OR kidney_transplant",
+            dialysis=patients.with_these_clinical_events(
+                filter_codes_by_category(dialysis_codes, include=["dialysis"]),
+                on_or_before = "covid_diagnosis_date",
+            ),
+            kidney_transplant=patients.with_these_clinical_events(
+                filter_codes_by_category(kidney_transplant_codes, include=["kidney_transplant"]),
+                on_or_before = "covid_diagnosis_date",
+            ),
+        ),
 
         ethnicity=patients.with_these_clinical_events(
             ethnicity_codes,

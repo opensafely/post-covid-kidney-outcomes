@@ -34,6 +34,7 @@ from common_variables import generate_common_variables
 (
     demographic_variables,
 ) = generate_common_variables(index_date_variable="patient_index_date")
+#What is the purpose of demographic_variables here?
 
 study = StudyDefinition(
     default_expectations={
@@ -50,14 +51,13 @@ study = StudyDefinition(
         AND NOT covid_classification = "0"
         AND NOT stp = ""
         AND NOT died_before_patient_index_date
-        AND NOT esrd
+        AND NOT end_stage_renal_disease
         """,
         has_follow_up=patients.registered_with_one_practice_between(
             "covid_diagnosis_date - 3 months", "covid_diagnosis_date"
         ),
-        died_before_patient_index_date=patients.died_date_gp(
-            on_or_before="patient_index_date")
     ),
+
     index_date="2020-02-01",
     
     #SARS-CoV_2 infection:
@@ -86,7 +86,3 @@ study = StudyDefinition(
         covid_diagnosis_date=patients.minimum_of(
         "sgss_positive", "primary_care_covid", "hospital_covid"
     ),
-
-    **demographic_variables,
-
-    ##What's the function of demographic_variables?

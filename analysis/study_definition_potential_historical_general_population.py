@@ -1,3 +1,22 @@
+#potential_historical_general_population will be matched to covid_all_for_matching
+
+#Only matching variables (demographic_variables) and exclusion variables need to be extracted at this stage
+
+#Matching variables:
+# - age
+# - sex
+# - stp
+# - imd
+# - patient_index_date (using sgss_positive, primary_care_covid or hospital_covid) from covid_all_for_matching
+
+#Exclusion variables:
+# - esrd
+# - died_before_patient_index_date_minus_two_years (using patient_died_date_gp)
+
+#Note:
+# - Variables will be extracted at covid_diagnosis_date_minus_2_years
+# - Matching and follow-up will commence at patient_index_date_minus_2_years
+
 from cohortextractor import (
     StudyDefinition,
     Measure,
@@ -13,10 +32,8 @@ from codelists import *
 from common_variables import generate_common_variables
 
 (
-    outcome_variables,
     demographic_variables,
-    clinical_variables,
-) = generate_common_variables(index_date_variable="patient_index_date")
+) = generate_common_variables(index_date_variable="patient_index_date_minus_2_years")
 
 study = StudyDefinition(
     default_expectations={
@@ -31,16 +48,15 @@ study = StudyDefinition(
         AND (sex = "M" OR sex = "F")
         AND imd > 0
         AND NOT stp = ""
+        AND NOT died_before_patient_index_date_minus_2_years
+        AND NOT end_stage_renal_disease
         """,
-        has_follow_up=patients.registered_with_one_practice_between(
-            "patient_index_date - 3 months", "patient_index_date"
+        has_follow_up_minus_2_years=patients.registered_with_one_practice_between(
+            "covid_diagnosis_date - 27 months", "covid_diagnosis_date - 2 years"
         ),
+        died_before_patient_index_date_minus_2_years=patients.died_date_gp(
+            on_or_before="patient_index_date - 2 years")
     ),
     index_date="2018-02-01",
 
-#Anyone with a code for dialysis or kidney transplant or with eGFR <15 before 2018-02-01 will be excluded
-
     ),
-
-    **demographic_variables,
-#Only matching variables need to be extracted = age, sex, STP, IMD
