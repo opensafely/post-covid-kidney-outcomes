@@ -6,7 +6,7 @@ def generate_common_variables(index_date_variable):
             date_format="YYYY-MM-DD"
         ),
 
-#Matching and exclusion variables
+#Matching variables
         
         age=patients.age_as_of(
             f"{index_date_variable}",
@@ -72,10 +72,6 @@ def generate_common_variables(index_date_variable):
                 "rate" : "exponential_increase"
                 },
         ),
-        died_before_patient_index_date=patients.died_date_gp(
-            on_or_before="patient_index_date")
-        ),
-
         ethnicity=patients.with_these_clinical_events(
             ethnicity_codes,
             returning="category",
