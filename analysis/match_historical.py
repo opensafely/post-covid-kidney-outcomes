@@ -35,7 +35,7 @@ match(
     index_date_variable="covid_diagnosis_date",
     closest_match_variables=["age"],
     date_exclusion_variables={
-        "end_stage_renal_disease": "before",
+        "renal_replacement_therapy_date": "before",
         "died_date_gp": "before",
     },
     output_suffix="_historical",

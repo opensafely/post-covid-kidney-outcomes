@@ -110,6 +110,52 @@ def generate_common_variables(index_date_variable):
                 },
             },
         ),
+
+    #Dialysis & transplant code adapted from: https://github.com/opensafely/COVID-19-vaccine-breakthrough/blob/updates-november/analysis/study_definition.py
+
+    #Dialysis
+    dialysis_date = patients.with_these_clinical_events(
+        dialysis_codes,
+        find_first_match_in_period = True,
+            #First_match_in_period intended to find first dialysis code from 1980 onwards
+        returning = "date",
+        date_format = "YYYY-MM-DD",
+        ),
+   
+    #Kidney transplant
+    kidney_transplant_date = patients.with_these_clinical_events(
+        kidney_transplant_codes, 
+        find_first_match_in_period = True,
+            #First_match_in_period intended to find first transplant code from 1980 onwards
+        returning = "date",
+        date_format = "YYYY-MM-DD",
+        ),
+
+    renal_replacement_therapy_date=minumum.of(
+        "dialysis_date", "kidney_transplant_date"   
+        ),
+
+
+    end_stage_renal_disease=patients.satisfying(
+        "prevalent_dialysis OR prevalent_kidney_transplant OR baseline_egfr_below_15",
+            prevalent_dialysis=patients.with_these_clinical_events(
+                filter_codes_by_category(dialysis_codes, include=["prevalent_dialysis"]),
+                on_or_before = "covid_diagnosis_date", #Does this need to be re-specified given it is already defined above?
+            ),
+            kidney_transplant=patients.with_these_clinical_events(
+                filter_codes_by_category(kidney_transplant_codes, include=["kidney_transplant"]),
+                on_or_before = "covid_diagnosis_date",
+            ),
+            baseline_egfr_below_15=patients.satisfying(
+                filter_codes_by_category(baseline_egfr_below_15_category, include=["1"])) #"1" = eGFR <15
+        ),
+
+    #Excluding anyone who died before patient_index_date (i.e.within 28 days of covid_diagnosis_date)
+    died_before_patient_index_date=patients.died_date_gp(
+        on_or_before="patient_index_date")
+    
+
+
         
         af=patients.with_these_clinical_events(
             af_codes,
