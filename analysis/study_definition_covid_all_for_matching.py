@@ -52,34 +52,6 @@ study = StudyDefinition(
     has_follow_up=patients.registered_with_one_practice_between(
         "covid_diagnosis_date - 3 months", "covid_diagnosis_date"
         ),
-    
-    #SARS-CoV_2 infection:
-    sgss_positive=patients.with_test_result_in_sgss(
-        pathogen="SARS-CoV-2",
-        test_result="positive",
-        returning="date",
-        date_format="YYYY-MM-DD",
-        find_first_match_in_period=True,
-        return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
-    ),
-    primary_care_covid=patients.with_these_clinical_events(
-        any_primary_care_code,
-        returning="date",
-        date_format="YYYY-MM-DD",
-        find_first_match_in_period=True,
-        return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
-    ),
-    hospital_covid=patients.admitted_to_hospital(
-        with_these_diagnoses=covid_codes,
-        returning="date_admitted",
-        date_format="YYYY-MM-DD",
-        find_first_match_in_period=True,
-        return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
-    ),
-    
-    covid_diagnosis_date=patients.minimum_of(
-        "sgss_positive", "primary_care_covid", "hospital_covid"
-    ),
 
     population=patients.satisfying(
         """
@@ -87,7 +59,7 @@ study = StudyDefinition(
         AND (age >=18)
         AND (sex = "M" OR sex = "F")
         AND imd > 0
-        AND NOT covid_classification = "0"
+        AND NOT sars_cov_2 = "0"
         AND NOT stp = ""
         """,
         ),

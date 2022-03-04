@@ -21,6 +21,9 @@
 #https://github.com/opensafely-core/matching#readme:
 from osmatching import match
 
+
+
+
 match(
     case_csv="input_covid_all_for_matching",
     match_csv="input_potential_historical_general_population",
@@ -36,6 +39,7 @@ match(
     closest_match_variables=["age"],
     date_exclusion_variables={
         "renal_replacement_therapy_date": "before",
+        "baseline_egfr_below_15": "before",
         "died_date_gp": "before",
     },
     output_suffix="_historical",

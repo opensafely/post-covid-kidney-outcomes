@@ -2,7 +2,7 @@
 #https://github.com/opensafely/documentation/pull/522
 
 #Individuals extracted from study_definition_covid_all_for_matching will be matched to individuals from 
-    #study_de_contemporary_general_population
+    #study_definition_contemporary_general_population
 
 #Exclusions (by covid_diagnosis_date):
 #end_stage_renal_disease
@@ -32,7 +32,8 @@ match(
     index_date_variable="covid_diagnosis_date",
     closest_match_variables=["age"],
     date_exclusion_variables={
-        "end_stage_renal_disease": "before",
+        "renal_replacement_therapy": "before",
+        "baseline_egfr_below_15": "before",
         "died_date_gp": "before",
     },
     output_suffix="_contemporary",
