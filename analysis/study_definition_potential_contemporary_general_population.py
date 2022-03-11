@@ -10,10 +10,12 @@
 # - imd
 # - covid_diagnosis_date (from match_contemporary based on study_definition_covid_all_for_matching)
 
-#Exclusion variables:
-# - renal_replacement_therapy
-# - baseline_egfr_below_15
-# - died_before_patient_index_date (using patient_died_date_gp)
+#Exclusion variables (see match_contemporary):
+# - renal_replacement_therapy before covid_diagnosis_date
+# - died_date_gp before covid_diagnosis_date
+
+#People with eGFR <15 on 2020-02-01 will be excluded but anyone with eGFR <15 between 2020-02-01
+    # and covid_diagnosis_date will need to be excluded after cohort extraction
 
 from cohortextractor import (
     StudyDefinition,
@@ -53,55 +55,7 @@ study = StudyDefinition(
         AND (sex = "M" OR sex = "F")
         AND imd > 0
         AND NOT stp = ""
-        AND NOT died_before_patient_index_date
-        AND NOT end_stage_renal_disease
+        AND NOT egfr_below_15_february_2020 = "1"
         """,
         ),
 
-    #When matching, anyone with eGFR <15 at covid_diagnosis_date will need to be excluded
-    #If not possible, will need to extract monthly creatinine measurements from August 2018 to January 2022
-    #covid_diagnosis_date is defined in match_contemporary - will this interact with this study_defintion?
-
-    #Baseline creatinine
-    #NB missing floats/integers will be returned as 0 by default
-    baseline_creatinine=patients.most_recent_creatinine(
-        on_or_before="covid_diagnosis_date - 14 days"
-        include_measurement_date=True,
-        date_format="YYYY-MM-DD",
-        return_expectations={
-            "date": {"earliest": "covid_diagnosis_date - 18 months", "latest": "covid_diagnosis_date - 14 days"},
-            "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-            "incidence": 0.60,
-        }
-    )
-    #CKD-EPI (2009) eGFR equation (Levey et al)
-    if sex = "F" and baseline_creatinine <= 62 > 0 #Is this the correct way of specifying 0<SCr<=62?
-        baseline_egfr = round(144*(baseline_creatinine/0.7)**(-0.329) * (0.993)**(age))
-            include_measurement_date=True, #Is this the correct way of importing the date from baseline_creatinine?
-            date_format="YYYY-MM-DD"
-    if sex = "F" and baseline_creatinine > 62
-        baseline_egfr = round(144*(baseline_creatinine/0.7)**(-1.209) * (0.993)**(age))
-            include_measurement_date=True,
-            date_format="YYYY-MM-DD"
-    if sex = "M" and baseline_creatinine <= 80 > 0
-        baseline_egfr = round(141*(baseline_creatinine/0.9)**(-0.411) * (0.993)**(age))
-            include_measurement_date=True,
-            date_format="YYYY-MM-DD"
-    if sex = "M" and baseline_creatinine > 80
-        baseline_egfr = round(141*(baseline_creatinine/0.9)**(-1.209) * (0.993)**(age))
-            include_measurement_date=True,
-            date_format="YYYY-MM-DD"
-    if baseline_creatinine = 0
-        baseline_egfr = 0 #I.e. if no available baseline creatinine, no eGFR
-            include_measurement_date=False 
-
-    baseline_egfr_below_15=patients.satisfying(
-        ""
-            baseline_egfr <15
-        AND NOT baseline_egfr = "0"
-        ""
-            include_measurement_date=True
-            date_format="YYYY-MM-DD"
-            return_expectations={
-                "incidence": 0.01,}
-    ),

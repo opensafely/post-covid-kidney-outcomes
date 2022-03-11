@@ -11,9 +11,12 @@
 # - imd
 # - patient_index_date (using sgss_positive, primary_care_covid or hospital_covid)
 
-#Exclusion variables:
-# - end_stage_renal_disease
-# - died_date_gp
+#Exclusion variables (see match_historical and match_contemporary):
+# - renal_replacement_therapy before covid_diagnosis_date
+# - died_date_gp before covid_diagnosis_date
+
+#People with eGFR <15 on 2020-02-01 will be excluded but anyone with eGFR <15 between 2020-02-01
+    # and covid_diagnosis_date will need to be excluded after cohort extraction
 
 #Note:
 # - Variables will be extracted at covid_diagnosis_date
@@ -61,6 +64,7 @@ study = StudyDefinition(
         AND imd > 0
         AND NOT sars_cov_2 = "0"
         AND NOT stp = ""
+        AND NOT egfr_below_15_february_2020 = "1"
         """,
         ),
 

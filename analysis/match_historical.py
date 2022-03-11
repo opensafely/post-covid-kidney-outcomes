@@ -5,11 +5,8 @@
     #study_definition_potential_historical_general_population
 
 #Exclusions:
-#end_stage_renal_disease 
-    #(before exactly 2 years before covid_diagnosis_date in study_definition_covid_all_for_matching)
-#died_before_patient_index_date_minus_2_years
-    #(before exactly 2 years before patient_index_date in study_definition_covid_all_for_matching
-        #(i.e. 28 days after covid_diagnosis_date in study_definition_covid_all_for_matching))
+#renal_replacement_therapy
+#died_date_gp
 
 #5 individuals will then be matched based on:
     # age (within 1 year),
@@ -20,9 +17,6 @@
 
 #https://github.com/opensafely-core/matching#readme:
 from osmatching import match
-
-
-
 
 match(
     case_csv="input_covid_all_for_matching",
@@ -39,7 +33,6 @@ match(
     closest_match_variables=["age"],
     date_exclusion_variables={
         "renal_replacement_therapy_date": "before",
-        "baseline_egfr_below_15": "before",
         "died_date_gp": "before",
     },
     output_suffix="_historical",

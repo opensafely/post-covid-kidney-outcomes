@@ -1,6 +1,8 @@
 #Need to add:
-    #dialysis_codes +/- haemofiltration_codes
-    #acute_kidney_injury_codes
+    #dialysis_codes +/- haemofiltration_codes (ICD-10 & OPCS-4)
+    #acute_kidney_injury_codes (ICD-10)
+    #critical_care_codes (ICD-10)
+    #kidney transplant (ICD-10)
 
 #Note:
     #opensafely-kidney-transplant contains a glomerulonephritis code which needs to be removed

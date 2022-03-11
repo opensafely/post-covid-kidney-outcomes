@@ -5,7 +5,7 @@
     #study_definition_contemporary_general_population
 
 #Exclusions (by covid_diagnosis_date):
-#end_stage_renal_disease
+#renal_replacement_therapy
 #died_date_gp
 
 #5 individuals will then be matched based on:
@@ -33,7 +33,6 @@ match(
     closest_match_variables=["age"],
     date_exclusion_variables={
         "renal_replacement_therapy": "before",
-        "baseline_egfr_below_15": "before",
         "died_date_gp": "before",
     },
     output_suffix="_contemporary",

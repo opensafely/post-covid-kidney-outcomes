@@ -246,20 +246,95 @@ def generate_common_variables(index_date_variable):
         "dialysis_date", "kidney_transplant_date"   
         ),
 
+    #When matching, anyone with eGFR <15 by 2020-02-01 (for contemporary) or 2018-02-01 (for historical) will be excluded
 
-    end_stage_renal_disease=patients.satisfying(
-        "prevalent_dialysis OR prevalent_kidney_transplant OR baseline_egfr_below_15",
-            prevalent_dialysis=patients.with_these_clinical_events(
-                filter_codes_by_category(dialysis_codes, include=["prevalent_dialysis"]),
-                on_or_before = "covid_diagnosis_date", #Does this need to be re-specified given it is already defined above?
-            ),
-            kidney_transplant=patients.with_these_clinical_events(
-                filter_codes_by_category(kidney_transplant_codes, include=["kidney_transplant"]),
-                on_or_before = "covid_diagnosis_date",
-            ),
-            baseline_egfr_below_15=patients.satisfying(
-                filter_codes_by_category(baseline_egfr_below_15_category, include=["1"])) #"1" = eGFR <15
-        ),
+    #Creatinine as of 2020-02-01
+    #NB missing floats/integers will be returned as 0 by default
+    creatinine_february_2020=patients.most_recent_creatinine(
+        on_or_before="2020-02-01"
+        include_measurement_date=True,
+        date_format="YYYY-MM-DD",
+        return_expectations={
+            "date": {"earliest": "2018-02-01 - 18 months", "latest": "2020-01-31"},
+            "float": {"distribution": "normal", "mean": 80, "stdev": 40},
+            "incidence": 0.60,
+        }
+    )
+    #CKD-EPI (2009) eGFR equation (Levey et al)
+    if sex = "F" and creatinine_february_2020 <= 62 > 0 #Is this the correct way of specifying 0<SCr<=62?
+        egfr_february_2020 = round(144*(creatinine_february_2020/0.7)**(-0.329) * (0.993)**(age))
+            include_measurement_date=True, #Is this the correct way of importing the date from creatinine_february_2020?
+            date_format="YYYY-MM-DD"
+    if sex = "F" and creatinine_february_2020 > 62
+        egfr_february_2020 = round(144*(creatinine_february_2020/0.7)**(-1.209) * (0.993)**(age))
+            include_measurement_date=True,
+            date_format="YYYY-MM-DD"
+    if sex = "M" and creatinine_february_2020 <= 80 > 0
+        egfr_february_2020 = round(141*(creatinine_february_2020/0.9)**(-0.411) * (0.993)**(age))
+            include_measurement_date=True,
+            date_format="YYYY-MM-DD"
+    if sex = "M" and creatinine_february_2020 > 80
+        egfr_february_2020 = round(141*(creatinine_february_2020/0.9)**(-1.209) * (0.993)**(age))
+            include_measurement_date=True,
+            date_format="YYYY-MM-DD"
+    if creatinine_february_2020 = 0
+        egfr_february_2020 = 0 #I.e. if no available creatinine_february_2020, no eGFR
+            include_measurement_date=False 
+
+    egfr_below_15_february_2020=patients.satisfying(
+        ""
+            egfr_february_2020 <15
+        AND NOT egfr_february_2020 = "0"
+        ""
+            include_measurement_date=True
+            date_format="YYYY-MM-DD"
+            return_expectations={
+                "incidence": 0.01,}
+    ),
+
+    #Creatinine as of 2018-02-01
+    #NB missing floats/integers will be returned as 0 by default
+    creatinine_february_2018=patients.most_recent_creatinine(
+        on_or_before="2018-02-01"
+        include_measurement_date=True,
+        date_format="YYYY-MM-DD",
+        return_expectations={
+            "date": {"earliest": "2016-02-01 - 18 months", "latest": "2018-01-31"},
+            "float": {"distribution": "normal", "mean": 80, "stdev": 40},
+            "incidence": 0.60,
+        }
+    )
+    #CKD-EPI (2009) eGFR equation (Levey et al)
+    if sex = "F" and creatinine_february_2018 <= 62 > 0 #Is this the correct way of specifying 0<SCr<=62?
+        egfr_february_2018 = round(144*(creatinine_february_2018/0.7)**(-0.329) * (0.993)**(age))
+            include_measurement_date=True, #Is this the correct way of importing the date from creatinine_february_2020?
+            date_format="YYYY-MM-DD"
+    if sex = "F" and creatinine_february_2018 > 62
+        egfr_february_2018 = round(144*(creatinine_february_2018/0.7)**(-1.209) * (0.993)**(age))
+            include_measurement_date=True,
+            date_format="YYYY-MM-DD"
+    if sex = "M" and creatinine_february_2018 <= 80 > 0
+        egfr_february_2018 = round(141*(creatinine_february_2018/0.9)**(-0.411) * (0.993)**(age))
+            include_measurement_date=True,
+            date_format="YYYY-MM-DD"
+    if sex = "M" and creatinine_february_2018 > 80
+        egfr_february_2018 = round(141*(creatinine_february_2018/0.9)**(-1.209) * (0.993)**(age))
+            include_measurement_date=True,
+            date_format="YYYY-MM-DD"
+    if creatinine_february_2018 = 0
+        egfr_february_2018 = 0 #I.e. if no available creatinine_february_2018, no eGFR
+            include_measurement_date=False 
+
+    egfr_below_15_february_2018=patients.satisfying(
+        ""
+            egfr_february_2018 <15
+        AND NOT egfr_february_2020 = "0"
+        ""
+            include_measurement_date=True
+            date_format="YYYY-MM-DD"
+            return_expectations={
+                "incidence": 0.01,}
+    ),
 
     #Excluding anyone who died before patient_index_date (i.e.within 28 days of covid_diagnosis_date)
     died_before_patient_index_date=patients.died_date_gp(
