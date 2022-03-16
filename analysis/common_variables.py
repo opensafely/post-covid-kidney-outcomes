@@ -54,7 +54,7 @@ def generate_common_variables(index_date_variable):
         },
     ),
 
-    #Need ICD-10 codelist for critical_care_codes
+    #Need to develop OPCS-4 codelist for critical_care_codes
 
     critical_care_covid=patients.admitted_to_hospital(
         with_these_diagnoses=covid_codes AND critical_care_codes
