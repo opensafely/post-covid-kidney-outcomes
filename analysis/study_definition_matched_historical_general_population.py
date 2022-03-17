@@ -4,7 +4,7 @@ CONTROLS = "output/matched_contemporary_general_population.csv"
 codelist = codelist_from_csv("codelists/codelist.csv")
 
 study = StudyDefinition(
-    index_date="2021-02-01",  # Ignored
+    index_date="2018-02-01",  # Ignored
     population=patients.which_exist_in_file(CONTROLS),
     case_index_date=patients.with_value_from_file(
         CONTROLS,
