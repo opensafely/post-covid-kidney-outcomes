@@ -12,7 +12,7 @@
 # - patient_index_date (using sgss_positive, primary_care_covid or hospital_covid)
 
 #Exclusion variables (see match_historical and match_contemporary):
-# - renal_replacement_therapy before covid_diagnosis_date
+# - kidney_replacement_therapy before covid_diagnosis_date
 # - died_date_gp before covid_diagnosis_date
 
 #People with eGFR <15 on 2020-02-01 will be excluded but anyone with eGFR <15 between 2020-02-01

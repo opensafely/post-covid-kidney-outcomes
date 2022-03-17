@@ -11,7 +11,7 @@
 # - covid_diagnosis_date_minus_2_years (from match_historical based on study_definition_covid_all_for_matching)
 
 #Exclusion variables (see match_historical):
-# - renal_replacement_therapy before covid_diagnosis_date_minus_2_years
+# - kidney_replacement_therapy_datet before covid_diagnosis_date_minus_2_years
 # - died_date_gp before covid_diagnosis_date_minus_2_years
 
 #People with eGFR <15 on 2018-02-01 will be excluded but anyone with eGFR <15 between 2018-02-01

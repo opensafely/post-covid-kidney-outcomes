@@ -11,7 +11,7 @@
 # - covid_diagnosis_date (from match_contemporary based on study_definition_covid_all_for_matching)
 
 #Exclusion variables (see match_contemporary):
-# - renal_replacement_therapy before covid_diagnosis_date
+# - kidney_replacement_therapy_date before covid_diagnosis_date
 # - died_date_gp before covid_diagnosis_date
 
 #People with eGFR <15 on 2020-02-01 will be excluded but anyone with eGFR <15 between 2020-02-01

@@ -5,7 +5,7 @@
     #study_definition_potential_historical_general_population
 
 #Exclusions:
-#renal_replacement_therapy
+#kidney_replacement_therapy_date
 #died_date_gp
 
 #5 individuals will then be matched based on:
@@ -32,7 +32,7 @@ match(
     index_date_variable="covid_diagnosis_date",
     closest_match_variables=["age"],
     date_exclusion_variables={
-        "renal_replacement_therapy_date": "before",
+        "kidney_replacement_therapy_date": "before",
         "died_date_gp": "before",
     },
     output_suffix="_historical",

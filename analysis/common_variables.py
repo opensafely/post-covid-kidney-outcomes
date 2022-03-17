@@ -53,9 +53,6 @@ def generate_common_variables(index_date_variable):
             },
         },
     ),
-
-    #Need to develop OPCS-4 codelist for critical_care_codes
-
     critical_care_covid=patients.admitted_to_hospital(
         with_these_diagnoses=covid_codes AND critical_care_codes
         returning="date_admitted",
@@ -105,8 +102,25 @@ def generate_common_variables(index_date_variable):
         return_expectations={"incidence": 0.05, "date": {"earliest": "index_date"}},
     ),
 
+    kidney_replacement_therapy_icd_10=patients.admitted_to_hospital(
+        with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
+        returning="date_admitted",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        return_expectations={"incidence": 0.05, "date": {"earliest": "2000-01-01"}},
+    ),
+    kidney_replacement_therapy_opcs_4=patients.admitted_to_hospital(
+        with_these_diagnoses=kidney_replacement_therapy_opcs_4_codes,
+        returning="date_admitted",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        return_expectations={"incidence": 0.05, "date": {"earliest": "2000-01-01"}},
+    ),
+    hospital_kidney_replacement_therapy_date=patients.minimum_of(
+        "kidney_replacement_therapy_icd_10", "kidney_replacement_therapy_opcs_4"
+    ),
     covid_hospitalised_dialysis=patients.admitted_to_hospital(
-        with_these_diagnoses=covid_codes AND dialysis_codes
+        with_these_diagnoses=covid_codes AND hospital_kidney_replacement_therapy_date #is this possible??
         returning="date_admitted",
         between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
         date_format="YYYY-MM-DD",
@@ -126,7 +140,7 @@ def generate_common_variables(index_date_variable):
         "covid hospitalised acute kidney injury": 
             """
             covid_hospitalised_acute_kidney_injury
-            AND NOT covid__hospitalised_dialysis
+            AND NOT covid_hospitalised_dialysis
             """,
         "covid hospitalised dialysis":
             """
@@ -144,7 +158,16 @@ def generate_common_variables(index_date_variable):
             },
         },
     ),
-
+    kidney_replacement_therapy_primary_care=patients.with_these_clinical_events(
+        kidney_replacement_therapy_primary_care_codes,
+        between = ["1980-01-01", "2022-02-01"],
+        find_first_match_in_period=True,
+        returning="date",
+        date_format="YYYY-MM-DD",
+    ),
+    kidney_replacement_therapy_date=patients.minimum_of(
+        "kidney_replacement_therapy_primary_care", "kidney_replacement_therapy_icd_10", "kidney_replacement_therapy_opcs_4"
+    ),
 
     #Matching variables
     
@@ -167,6 +190,7 @@ def generate_common_variables(index_date_variable):
                 "category": {"ratios": {"M": 0.49, "F": 0.51}},
             }
         ),
+
     imd=patients.address_as_of(
         "index_date",
         returning="index_of_multiple_deprivation",
@@ -189,6 +213,7 @@ def generate_common_variables(index_date_variable):
                 },
             },
         ),
+
     stp=patients.registered_practice_as_of(
         "index_date",
         returning="stp_code",
@@ -222,30 +247,6 @@ def generate_common_variables(index_date_variable):
             "rate" : "exponential_increase"
             },
         ),
-
-
-    #Dialysis
-    dialysis_date = patients.with_these_clinical_events(
-        dialysis_codes,
-        between = ["1980-01-01", "2022-02-01"]
-        find_first_match_in_period = True,
-        returning = "date",
-        date_format = "YYYY-MM-DD",
-        ),
-   
-    #Kidney transplant
-    kidney_transplant_date = patients.with_these_clinical_events(
-        kidney_transplant_codes, 
-        between = ["1980-01-01", "2022-02-01"]
-        find_first_match_in_period = True,
-        returning = "date",
-        date_format = "YYYY-MM-DD",
-        ),
-
-    renal_replacement_therapy_date=minumum.of(
-        "dialysis_date", "kidney_transplant_date"   
-        ),
-
     #When matching, anyone with eGFR <15 by 2020-02-01 (for contemporary) or 2018-02-01 (for historical) will be excluded
 
     #Creatinine as of 2020-02-01
@@ -891,3 +892,6 @@ def generate_common_variables(index_date_variable):
         ),
     )
     return outcome_variables, demographic_variables, clinical_variables
+
+
+    with_these_decision_support_values(algorithm, on_or_before=None, on_or_after=None, between=None, find_first_match_in_period=None, find_last_match_in_period=None, returning='numeric_value', include_date_of_match=False, date_format=None, ignore_missing_values=False, return_expectations=None)

@@ -1,14 +1,6 @@
-#Need to add:
-    #dialysis_codes +/- haemofiltration_codes (ICD-10 & OPCS-4)
-    #acute_kidney_injury_codes (ICD-10)
-    #critical_care_codes (OPCS-4)
-    #kidney transplant (ICD-10 & OPCS-4)
+#Outstanding - vasculitis codelist - being developed?
 
-#Note:
-    #opensafely-kidney-transplant contains a glomerulonephritis code which needs to be removed
-    #?system to define drug codelists
-
-#Codelists from OpenCodelists in codelists.txt:
+#Codelists from OpenCodelists:
     #opensafely/antidiabetic-drugs
     #opensafely/atrial-fibrillation-or-flutter
     #opensafely/cancer-excluding-lung-and-haematological-snomed
@@ -30,6 +22,7 @@
     #opensafely/low-molecular-weight-heparins-dmd   
     #opensafely/myocardial-infarction
     #opensafely/other-neurological-conditions-snomed
+    #opensafely/permanent-immunosuppression-snomed
     #opensafely/peripheral-arterial-disease
     #opensafely/pneumonia-secondary-care
     #opensafely/rheumatoid-arthritis
@@ -43,20 +36,18 @@
     #primis-covid19-vacc-uptake/resp_cov
 
 #Manual codelists:
-
 #critical_care_opcs_4
     #NB - search terms: intensive, critical, intubation, ventilation, mechanical, invasive, haemofiltration,
         #vasopressor, inotrope, central, arterial, artery, pressure, flow, optiflow, nasal, high-flow,
         #paralysis, noradrenaline, norepinephrine, rocuronium, cardiac output, organ
 #acute_kidney_injury_icd_10
-#esrd_icd_10
+#kidney_replacement_therapy_icd_10
     #NB - very few kidney transplant codes in icd_10 - is this correct?
-#esrd_opcs_4
+#kidney_replacement_therapy_opcs_4
 
 # Some covariates used in the study are created from codelists of clinical conditions or 
 # numerical values available on a patient records.
 # This script fetches all of the codelists identified in codelists.txt from OpenCodelists.
-
 # Import code building blocks from cohort extractor package
 from cohortextractor import (codelist, codelist_from_csv, combine_codelists)
 
@@ -98,7 +89,7 @@ creatinine_codes = codelist(["XE2q5"], system="ctv3"
 #Critical care 
     #OPCS-4 procedural codes to determine people hospitalised with COVID admitted to critical care
     #Need to clarify "column"
-critical_care = codelist_from_csv(
+critical_care_codes = codelist_from_csv(
     "codelists/critical_care_opcs_4",
     system="opcs4",
     column="????",
@@ -107,23 +98,23 @@ critical_care = codelist_from_csv(
     #ICD-10 codes to determine:
         #1. People hospitalised with COVID with acute kidney injury
         #2. Acute kidney injury as a post-COVID outcome
-acute_kidney_injury_icd_10 = codelist_from_csv(
+acute_kidney_injury_codes = codelist_from_csv(
     "codelists/acute_kidney_injury_icd_10",
     system="icd10",
     column="icd10_code",
 )
-#End-stage renal disease
+#Kidney replacement therapy
     #ICD-10 and OPCS-4 codes to determine:
         #1. People with COVID-19 who required acute kidney replacement therapy
         #2. End-stage renal disease as a post-COVID outcome
         #NB this includes acute and chronic kidney replacement therapy codes
-end_stage_renal_disease_icd_10 = codelist_from_csv(
-    "codelists/end_stage_renal_disease_icd_10",
+kidney_replacement_therapy_icd_10_codes = codelist_from_csv(
+    "codelists/kidney_replacement_therapy_icd_10",
     system="icd10",
     column="icd10_code",
 )
-end_stage_renal_disease_opcs_4 = codelist_from_csv(
-    "codelists/end_stage_renal_disease_icd_10",
+kidney_replacement_therapy_opcs_4_codes = codelist_from_csv(
+    "codelists/kidney_replacement_therapy_icd_10",
     system="opcs4",
     column="????",
 )
@@ -137,6 +128,11 @@ kidney_transplant_codes = codelist_from_csv(
     system="ctv3",
     column="CTV3ID"
 )
+kidney_replacement_therapy_primary_care_codes = combine_codelists(
+    dialysis_codes,
+    kidney_transplant_codes,
+)
+    #NB this codelist contains a glomerulonephritis code which needs to be removed
 #Pneumonia
     #ICD-10 codes to restrict additional comparator population to people with hospitalised pneumonia in 2018-2019
 pneumonia_codelist = codelist_from_csv(
@@ -146,10 +142,6 @@ pneumonia_codelist = codelist_from_csv(
 )
 
 #Covariable codes
-#Missing:
-#vasculitis - UCL?
-#Drugs
-#Vaccines
 
 #Ethnicity
     #https://github.com/opensafely/ethnicity-covid-research/blob/main/analysis/codelists.py
@@ -281,4 +273,56 @@ bmi_codes = codelist_from_csv(
     "codelists/primis-covid19-vacc-uptake-bmi.csv",
     system="snomed",
     column="code",
+)
+#Diabetes drugs
+    #NB metformin & SGLT2 inhibitors can be used for indications other than diabetes
+#Insulin
+    #https://github.com/opensafely/ethnicity-covid-research/blob/main/analysis/codelists.py
+insulin_codes = codelist_from_csv(
+    "codelists/opensafely-insulin-medication.csv", 
+    system="snomed", 
+    column="id",
+)
+#Non-insulin medication
+non_insulin_antidiabetic_drugs_codes = codelist_from_csv(
+    "codelists/opensafely-antidiabetic-drugs.csv", 
+    system="snomed", 
+    column="id",
+)
+diabetes_drugs_codes = combine_codelists(
+    insulin_codes,
+    non_insulin_antidiabetic_drugs_codes,
+)
+#Immunosuppression
+    #This codelist does not appear to be signed off
+    #NB snomed rather than dm+d
+    #Alternatively: https://www.opencodelists.org/codelist/primis-covid19-vacc-uptake/immrx/v1/
+immunosuppression_codes = codelist_from_csv(
+    "codelists/opensafely-permanent-immunosuppression-snomed",
+    system="snomed",
+    column="code",
+)
+#Anticoagulation
+#Direct acting oral anticoagulants
+direct_acting_oral_anticoagulants_codes = codelist_from_csv(
+    "codelists/opensafely-direct-acting-oral-anticoagulants-doac.csv", 
+    system="snomed", 
+    column="id",
+)
+#Low molecular weight heparins
+low_molecular_weight_heparins_codes = codelist_from_csv(
+    "codelists/opensafely-low-molecular-weight-heparins-dmd.csv", 
+    system="snomed", 
+    column="id",
+)
+#Warfarin
+warfarin_codes = codelist_from_csv(
+    "codelists/opensafely-warfarin.csv",
+    system="snomed",
+    column="id",
+)
+anticoagulation_codes = combine_codelists(
+    direct_acting_oral_anticoagulants_codes,
+    low_molecular_weight_heparins_codes,
+    warfarin_codes,
 )
