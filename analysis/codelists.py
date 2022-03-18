@@ -268,8 +268,8 @@ smoking_codes = codelist_from_csv(
     system="snomed",
     column="code",
 )
-#BMI
-bmi_codes = codelist_from_csv(
+#Body mass index
+body_mass_index_codes = codelist_from_csv(
     "codelists/primis-covid19-vacc-uptake-bmi.csv",
     system="snomed",
     column="code",
