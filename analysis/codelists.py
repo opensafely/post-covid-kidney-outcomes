@@ -1,40 +1,5 @@
 #Outstanding - vasculitis codelist - being developed?
 
-#Codelists from OpenCodelists:
-    #opensafely/antidiabetic-drugs
-    #opensafely/atrial-fibrillation-or-flutter
-    #opensafely/cancer-excluding-lung-and-haematological-snomed
-    #opensafely/covid-identification
-    #opensafely/covid-identification-in-primary-care-probable-covid-positive-test
-    #opensafely/covid-identification-in-primary-care-probable-covid-clinical-code
-    #opensafely/covid-identification-in-primary-care-probable-covid-probable-covid-sequelae
-    #opensafely/dementia-snomed
-    #opensafely/diabetes-snomed
-    #opensafely/dialysis
-    #opensafely/direct-acting-oral-anticoagulants-doac
-    #opensafely/ethnicity
-    #opensafely/haematological-cancer-snomed
-    #opensafely/heart-failure
-    #opensafely/hiv-snomed
-    #opensafely/hypertension-snomed
-    #opensafely/insulin-medication
-    #opensafely/kidney-transplant
-    #opensafely/low-molecular-weight-heparins-dmd   
-    #opensafely/myocardial-infarction
-    #opensafely/other-neurological-conditions-snomed
-    #opensafely/permanent-immunosuppression-snomed
-    #opensafely/peripheral-arterial-disease
-    #opensafely/pneumonia-secondary-care
-    #opensafely/rheumatoid-arthritis
-    #opensafely/sickle-cell-disease-snomed
-    #opensafely/smoking-clear-snomed
-    #opensafely/stroke-snomed
-    #opensafely/systemic-lupus-erythematosis-sle
-    #opensafely/warfarin
-    #primis-covid19-vacc-uptake/bmi
-    #primis-covid19-vacc-uptake/cld
-    #primis-covid19-vacc-uptake/resp_cov
-
 #Manual codelists:
 #critical_care_opcs_4
     #NB - search terms: intensive, critical, intubation, ventilation, mechanical, invasive, haemofiltration,
@@ -42,7 +7,7 @@
         #paralysis, noradrenaline, norepinephrine, rocuronium, cardiac output, organ
 #acute_kidney_injury_icd_10
 #kidney_replacement_therapy_icd_10
-    #NB - very few kidney transplant codes in icd_10 - is this correct?
+    #NB - very few kidney transplant codes in icd_10
 #kidney_replacement_therapy_opcs_4
 
 # Some covariates used in the study are created from codelists of clinical conditions or 
@@ -90,7 +55,7 @@ creatinine_codes = codelist(["XE2q5"], system="ctv3"
     #OPCS-4 procedural codes to determine people hospitalised with COVID admitted to critical care
     #Need to clarify "column"
 critical_care_codes = codelist_from_csv(
-    "codelists/critical_care_opcs_4",
+    "codelists/user-viyaasan-critical_care",
     system="opcs4",
     column="????",
 )
