@@ -67,4 +67,4 @@ study = StudyDefinition(
         AND NOT egfr_below_15_february_2020 = "1"
         """,
         ),
-
+    )
