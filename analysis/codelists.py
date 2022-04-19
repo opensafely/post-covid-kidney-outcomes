@@ -55,7 +55,7 @@ creatinine_codes = codelist(["XE2q5"], system="ctv3"
     #OPCS-4 procedural codes to determine people hospitalised with COVID admitted to critical care
     #Need to clarify "column"
 critical_care_codes = codelist_from_csv(
-    "codelists/user-viyaasan-critical_care",
+    "codelists/user-viyaasan-critical-care",
     system="opcs4",
     column="opcs4_code",
 )
