@@ -1,3 +1,61 @@
+# Extract data for potential_historical_general_population
+  extract_potential_historical_general_population:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_potential_historical_general_population
+    outputs:
+      highly_sensitive:
+        cohort: output/input_potential_historical_general_population.csv
+
+# Extract date for potential_contemporary_general_population
+  extract_potential_contemporary_general_population:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_potential_contemporary_general_population
+    outputs:
+      highly_sensitive:
+        cohort: output/input_potential_contemporary_general_population.csv
+
+# Match covid_all_for_matching to potential_historical_general_population
+  matching:
+    run: python:latest python analysis/match_historical.py
+    needs: [extract_covid_all_for_matching, extract_potential_historical_general_population]
+    outputs:
+      moderately_sensitive:
+        matching_report: output/matching_report_historical.txt
+      highly_sensitive:
+        matched_matches: output/matched_matches_historical.csv
+
+# Match covid_all_for_matching to potential_contemporary_general_population
+  matching:
+    run: python:latest python analysis/match_contemporary.py
+    needs: [extract_covid_all_for_matching, extract_potential_contemporary_general_population]
+    outputs:
+      moderately_sensitive:
+        matching_report: output/matching_report_contemporary.txt
+      highly_sensitive:
+        matched_matches: output/matched_matches_contemporary.csv
+
+# Extract data for matched_historical_general_population
+
+  extract_controls:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_matched_historical_general_population
+    needs: [matching]
+    outputs:
+      highly_sensitive:
+        cohort: output/input_matched_historical_general_population.csv
+
+# Extract data for matched_contemporary_general_population
+  extract_controls:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_matched_contemporary_general_population
+    needs: [matching]
+    outputs:
+      highly_sensitive:
+        cohort: output/input_matched_contemporary_general_population.csv
+
+# Extract data for covid_all
+  generate_covid_all_cohort:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_all
+    outputs:
+      highly_sensitive:
+        cohort: output/input_covid.csv
+
 # Stata analysis files (currently example code - do files for this project not yet written)
 # From https://github.com/opensafely/post-covid-outcomes-research/blob/main/project.yaml
       
