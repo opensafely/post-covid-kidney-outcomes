@@ -57,14 +57,14 @@ creatinine_codes = codelist(["XE2q5"], system="ctv3"
 critical_care_codes = codelist_from_csv(
     "codelists/user-viyaasan-critical_care",
     system="opcs4",
-    column="????",
+    column="opcs4_code",
 )
 #Acute kidney injury
     #ICD-10 codes to determine:
         #1. People hospitalised with COVID with acute kidney injury
         #2. Acute kidney injury as a post-COVID outcome
 acute_kidney_injury_codes = codelist_from_csv(
-    "codelists/acute_kidney_injury_icd_10",
+    "codelists/user-viyaasan-acute-kidney-injury",
     system="icd10",
     column="icd10_code",
 )
@@ -74,14 +74,14 @@ acute_kidney_injury_codes = codelist_from_csv(
         #2. End-stage renal disease as a post-COVID outcome
         #NB this includes acute and chronic kidney replacement therapy codes
 kidney_replacement_therapy_icd_10_codes = codelist_from_csv(
-    "codelists/kidney_replacement_therapy_icd_10",
+    "codelists/user-viyaasan-kidney-replacement-therapy",
     system="icd10",
     column="icd10_code",
 )
 kidney_replacement_therapy_opcs_4_codes = codelist_from_csv(
-    "codelists/kidney_replacement_therapy_icd_10",
+    "codelists/user-viyaasan-kidney-replacement-therapy-opcs-4",
     system="opcs4",
-    column="????",
+    column="opcs4_code",
 )
 dialysis_codes = codelist_from_csv(
     "codelists/opensafely-dialysis.csv",
