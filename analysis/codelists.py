@@ -167,7 +167,7 @@ cancer_excluding_lung_and_haematological_codes = codelist_from_csv(
 lung_cancer_codes = codelist_from_csv(
     "codelists/opensafely-lung-cancer-snomed.csv",
     system="snomed",
-    column="code",
+    column="id",
 )
 non_haematological_cancer_codes = combine_codelists(
     cancer_excluding_lung_and_haematological_codes,
@@ -183,29 +183,23 @@ myocardial_infarction_codes = codelist_from_csv(
 peripheral_vascular_disease_codes = codelist_from_csv(
     "codelists/opensafely-peripheral-arterial-disease.csv",
     system="ctv3",
-    column="CTV3ID",
+    column="code",
 )
 #Rheumatoid arthritis
 rheumatoid_arthritis_codes = codelist_from_csv(
-    "codelists/opensafely-rheumatoid_arthritis.csv",
+    "codelists/opensafely-rheumatoid-arthritis.csv",
     system="ctv3",
     column="CTV3ID",
-)
-#Sickle cell disease
-sickle_cell_disease_codes = codelist_from_csv(
-    "codelists/opensafely-sickle-cell-disease-snomed.csv",
-    system="snomed",
-    column="code",
 )
 #Stroke
 stroke_codes = codelist_from_csv(
     "codelists/opensafely-stroke-snomed.csv",
     system="snomed",
-    column="code",
+    column="id",
 )
 #Systemic lupus erythematosus
 systemic_lupus_erythematosus_codes = codelist_from_csv(
-    "codelists/opensafely-systemic-lupus-erythematosis-sle.csv",
+    "codelists/opensafely-systemic-lupus-erythematosus-sle.csv",
     system="ctv3",
     column="CTV3ID",
 )
@@ -213,32 +207,13 @@ systemic_lupus_erythematosus_codes = codelist_from_csv(
 smoking_codes = codelist_from_csv(
     "codelists/opensafely-smoking-clear-snomed.csv",
     system="snomed",
-    column="code",
+    column="id",
 )
 #Body mass index
 body_mass_index_codes = codelist_from_csv(
     "codelists/primis-covid19-vacc-uptake-bmi.csv",
     system="snomed",
     column="code",
-)
-#Diabetes drugs
-    #NB metformin & SGLT2 inhibitors can be used for indications other than diabetes
-#Insulin
-    #https://github.com/opensafely/ethnicity-covid-research/blob/main/analysis/codelists.py
-insulin_codes = codelist_from_csv(
-    "codelists/opensafely-insulin-medication.csv", 
-    system="snomed", 
-    column="id",
-)
-#Non-insulin medication
-non_insulin_antidiabetic_drugs_codes = codelist_from_csv(
-    "codelists/opensafely-antidiabetic-drugs.csv", 
-    system="snomed", 
-    column="id",
-)
-diabetes_drugs_codes = combine_codelists(
-    insulin_codes,
-    non_insulin_antidiabetic_drugs_codes,
 )
 #Immunosuppression
     #This codelist does not appear to be signed off
@@ -247,5 +222,5 @@ diabetes_drugs_codes = combine_codelists(
 immunosuppression_codes = codelist_from_csv(
     "codelists/opensafely-permanent-immunosuppression-snomed.csv",
     system="snomed",
-    column="code",
+    column="id",
 )

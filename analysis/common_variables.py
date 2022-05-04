@@ -1,7 +1,7 @@
 #https://github.com/opensafely/post-covid-outcomes-research/blob/main/analysis/common_variables.py
 
 def generate_common_variables(index_date_variable):
-common_variables = dict(
+    common_variables = dict(
     deregistered=patients.date_deregistered_from_all_supported_practices(
         date_format="YYYY-MM-DD"
     ),
@@ -54,7 +54,8 @@ sars_cov_2=patients.categorised_as(
     },
 ),
 critical_care_covid=patients.admitted_to_hospital(
-    with_these_diagnoses=covid_codes AND critical_care_codes
+    with_these_diagnoses=covid_codes,
+    with_these_procedures=critical_care_codes,
     returning="date_admitted",
     between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
     date_format="YYYY-MM-DD",
@@ -94,7 +95,8 @@ covid_severity=patients.categorised_as(
 ),
 
 covid_hospitalised_acute_kidney_injury=patients.admitted_to_hospital(
-    with_these_diagnoses=covid_codes AND acute_kidney_injury_codes
+    with_these_diagnoses=covid_codes,
+    with_these_diagnoses=acute_kidney_injury_codes,
     returning="date_admitted",
     between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
     date_format="YYYY-MM-DD",
