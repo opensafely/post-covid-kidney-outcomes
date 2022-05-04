@@ -66,7 +66,7 @@ critical_care_codes = codelist_from_csv(
 acute_kidney_injury_codes = codelist_from_csv(
     "codelists/user-viyaasan-acute-kidney-injury.csv",
     system="icd10",
-    column="icd10_code",
+    column="code",
 )
 #Kidney replacement therapy
     #ICD-10 and OPCS-4 codes to determine:
@@ -76,7 +76,7 @@ acute_kidney_injury_codes = codelist_from_csv(
 kidney_replacement_therapy_icd_10_codes = codelist_from_csv(
     "codelists/user-viyaasan-kidney-replacement-therapy.csv",
     system="icd10",
-    column="icd10_code",
+    column="code",
 )
 kidney_replacement_therapy_opcs_4_codes = codelist_from_csv(
     "codelists/user-viyaasan-kidney-replacement-therapy-opcs-4.csv",
