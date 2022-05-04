@@ -128,18 +128,6 @@ chronic_liver_disease_codes = codelist_from_csv(
     system="snomed",
     column="code",
 )
-#Chronic respiratory disease
-chronic_respiratory_disease_codes = codelist_from_csv(
-    "codelists/primis-covid19-vacc-uptake-resp_cov.csv",
-    system="snomed",
-    column="code",
-)
-#Dementia
-dementia_codes = codelist_from_csv(
-    "codelists/opensafely-dementia-snomed.csv",
-    system="snomed",
-    column="code",
-)
 #Diabetes
 diabetes_codes = codelist_from_csv(
     "codelists/opensafely-diabetes-snomed.csv",
@@ -190,12 +178,6 @@ myocardial_infarction_codes = codelist_from_csv(
     "codelists/opensafely-myocardial-infarction.csv",
     system="ctv3",
     column="CTV3ID",
-)
-#Other neurological conditions
-other_neurological_conditions_codes = codelist_from_csv(
-    "codelists/opensafely-other-neurological-conditions-snomed.csv",
-    system="snomed",
-    column="code",
 )
 #Peripheral vascular disease
 peripheral_vascular_disease_codes = codelist_from_csv(
@@ -266,28 +248,4 @@ immunosuppression_codes = codelist_from_csv(
     "codelists/opensafely-permanent-immunosuppression-snomed.csv",
     system="snomed",
     column="code",
-)
-#Anticoagulation
-#Direct acting oral anticoagulants
-direct_acting_oral_anticoagulants_codes = codelist_from_csv(
-    "codelists/opensafely-direct-acting-oral-anticoagulants-doac.csv", 
-    system="snomed", 
-    column="id",
-)
-#Low molecular weight heparins
-low_molecular_weight_heparins_codes = codelist_from_csv(
-    "codelists/opensafely-low-molecular-weight-heparins-dmd.csv", 
-    system="snomed", 
-    column="id",
-)
-#Warfarin
-warfarin_codes = codelist_from_csv(
-    "codelists/opensafely-warfarin.csv",
-    system="snomed",
-    column="id",
-)
-anticoagulation_codes = combine_codelists(
-    direct_acting_oral_anticoagulants_codes,
-    low_molecular_weight_heparins_codes,
-    warfarin_codes,
 )
