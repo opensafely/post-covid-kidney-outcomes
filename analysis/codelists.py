@@ -263,7 +263,7 @@ diabetes_drugs_codes = combine_codelists(
     #NB snomed rather than dm+d
     #Alternatively: https://www.opencodelists.org/codelist/primis-covid19-vacc-uptake/immrx/v1/
 immunosuppression_codes = codelist_from_csv(
-    "codelists/opensafely-permanent-immunosuppression-snomed",
+    "codelists/opensafely-permanent-immunosuppression-snomed.csv",
     system="snomed",
     column="code",
 )
