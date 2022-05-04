@@ -132,17 +132,17 @@ chronic_liver_disease_codes = codelist_from_csv(
 diabetes_codes = codelist_from_csv(
     "codelists/opensafely-diabetes-snomed.csv",
     system="snomed",
-    column="code",
+    column="id",
 )
 #Haematological cancer
 haematological_cancer_codes = codelist_from_csv(
-    "codelists/haematological-cancer-snomed.csv",
+    "codelists/opensafely-haematological-cancer-snomed.csv",
     system="snomed",
-    column="code",
+    column="id",
 )
 #Heart failure
 heart_failure_codes = codelist_from_csv(
-    "codelists/opensafely-heart_failure.csv",
+    "codelists/opensafely-heart-failure.csv",
     system="ctv3",
     column="CTV3ID",
 )
@@ -150,19 +150,19 @@ heart_failure_codes = codelist_from_csv(
 hiv_codes = codelist_from_csv(
     "codelists/opensafely-hiv-snomed.csv",
     system="snomed",
-    column="code",
+    column="id",
 )
 #Hypertension
 hypertension_codes = codelist_from_csv(
     "codelists/opensafely-hypertension-snomed.csv",
     system="snomed",
-    column="code",
+    column="id",
 )
 #Non-haematological cancer
 cancer_excluding_lung_and_haematological_codes = codelist_from_csv(
     "codelists/opensafely-cancer-excluding-lung-and-haematological-snomed.csv",
     system="snomed",
-    column="code",
+    column="id",
 )
 lung_cancer_codes = codelist_from_csv(
     "codelists/opensafely-lung-cancer-snomed.csv",
