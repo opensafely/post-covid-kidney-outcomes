@@ -120,7 +120,7 @@ ethnicity_codes = codelist_from_csv(
 atrial_fibrillation_or_flutter_codes = codelist_from_csv(
     "codelists/opensafely-atrial-fibrillation-or-flutter.csv",
     system="ctv3",
-    column="CTV3ID",
+    column="CTV3Code",
 )
 #Chronic liver disease
 chronic_liver_disease_codes = codelist_from_csv(
