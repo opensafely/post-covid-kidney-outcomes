@@ -2,7 +2,7 @@
 #Is it possible to use "OR"?
 #I.e. covid_codes AND kidney_replacement_therapy_icd_10 OR kidney_replacement_therapy_opcs_4
 covid_hospitalised_dialysis=patients.admitted_to_hospital(
-    with_these_diagnoses=covid_codes AND hospital_kidney_replacement_therapy_date
+    with_these_diagnoses=covid_codes AND hospital_kidney_replacement_therapy_date,
     returning="date_admitted",
     between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
     date_format="YYYY-MM-DD",

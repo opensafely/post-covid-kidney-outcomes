@@ -1,4 +1,7 @@
 #https://github.com/opensafely/post-covid-outcomes-research/blob/main/analysis/common_variables.py
+from cohortextractor import filter_codes_by_category, patients, combine_codelists
+from codelists import *
+from datetime import datetime, timedelta
 
 def generate_common_variables(index_date_variable):
     common_variables = dict(
@@ -31,7 +34,8 @@ hospital_covid=patients.admitted_to_hospital(
 ),
     
 covid_diagnosis_date=patients.minimum_of(
-    "sgss_positive", "primary_care_covid", "hospital_covid"
+    "sgss_positive", "primary_care_covid", "hospital_covid",
+    date_format="YYYY-MM-DD"
 ),
 
 sars_cov_2=patients.categorised_as(
@@ -94,8 +98,7 @@ covid_severity=patients.categorised_as(
     },
 ),
 
-covid_hospitalised_acute_kidney_injury=patients.admitted_to_hospital(
-    with_these_diagnoses=covid_codes,
+hospitalised_acute_kidney_injury=patients.admitted_to_hospital(
     with_these_diagnoses=acute_kidney_injury_codes,
     returning="date_admitted",
     between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
@@ -165,56 +168,56 @@ kidney_replacement_therapy_date=patients.minimum_of(
 
 ),
 
-covid_vax_1_date = patients.with_vaccination_record(
+covid_vax_1_date = patients.with_tpp_vaccination_record(
+    target_disease_matches = "SARS-2 CORONAVIRUS",
     returning = "date",
-    tpp = {"target_disease_matches": "SARS-2 CORONAVIRUS",},
     find_first_match_in_period = True,
-    between = ["2020-11-01", end_date],
+    between = ["2020-11-01", "2022-01-31"],
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {
         "earliest": "2020-12-08",
-        "latest": end_date,
+        "latest": "2022-01-31",
       }
     },
 ),
-covid_vax_2_date = patients.with_vaccination_record(
+covid_vax_2_date = patients.with_tpp_vaccination_record(
+    target_disease_matches = "SARS-2 CORONAVIRUS",
     returning = "date",
-    tpp = {"target_disease_matches": "SARS-2 CORONAVIRUS",},
     find_first_match_in_period = True,
-    between = ["covid_vax_1_date + 15 days", end_date],
+    between = ["covid_vax_1_date + 15 days", "2022-01-31"],
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {
         "earliest": "2020-12-31",
-        "latest": end_date,
+        "latest": "2022-01-31",
       }
     },
 ),
-covid_vax_3_date = patients.with_vaccination_record(
+covid_vax_3_date = patients.with_tpp_vaccination_record(
+    target_disease_matches = "SARS-2 CORONAVIRUS",
     returning = "date",
-    tpp = {"target_disease_matches": "SARS-2 CORONAVIRUS",},
     find_first_match_in_period = True,
-    between = ["covid_vax_2_date + 15 days", end_date],
+    between = ["covid_vax_2_date + 15 days", "2022-01-31"],
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {
         "earliest": "2021-03-31",
-        "latest": end_date,
+        "latest": "2022-01-31",
       }
     },
 ),
 
-covid_vax_4_date = patients.with_vaccination_record(
+covid_vax_4_date = patients.with_tpp_vaccination_record(
+    target_disease_matches = "SARS-2 CORONAVIRUS",    
     returning = "date",
-    tpp = {"target_disease_matches": "SARS-2 CORONAVIRUS",},
     find_first_match_in_period = True,
-    between = ["covid_vax_3_date + 15 days", end_date],
+    between = ["covid_vax_3_date + 15 days", "2022-01-31"],
     date_format = "YYYY-MM-DD",
     return_expectations = {
       "date": {
         "earliest": "2021-04-31",
-        "latest": end_date,
+        "latest": "2022-01-31",
       }
     },
 ),
@@ -299,9 +302,9 @@ died_date_gp=patients.with_death_recorded_in_primary_care(
 
 #Creatinine as of 2020-02-01
 #NB missing floats/integers will be returned as 0 by default
-creatinine_february_2020=patients.most_recent_creatinine(
+creatinine_february_2020=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2020-02-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2019-08-01", "latest": "2020-01-31"},
@@ -311,9 +314,9 @@ creatinine_february_2020=patients.most_recent_creatinine(
 ),
 #Creatinine as of 2018-02-01 (for historical comparator group)
 #NB missing floats/integers will be returned as 0 by default
-creatinine_february_2018=patients.most_recent_creatinine(
+creatinine_february_2018=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2018-02-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2016-08-01", "latest": "2018-01-31"},
@@ -377,18 +380,6 @@ chronic_liver_disease=patients.with_these_clinical_events(
     on_or_before=f"{index_date_variable}",
         return_expectations={"incidence": 0.02},
 ),
-chronic_respiratory_disease=patients.with_these_clinical_events(
-    chronic_respiratory_disease_codes,
-    returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.05},
-),
-dementia=patients.with_these_clinical_events(
-    dementia_codes,
-    returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.03},
-),
 diabetes=patients.with_these_clinical_events(
     diabetes_codes,
     returning="binary_flag",
@@ -450,8 +441,8 @@ stroke=patients.with_these_clinical_events(
         return_expectations={"incidence": 0.02},
 ),
 systemic_lupus_erythematosus=patients.with_these_clinical_events(
-    returning="binary_flag",
     systemic_lupus_erythematosus_codes,
+    returning="binary_flag",
     on_or_before=f"{index_date_variable}",
         return_expectations={"incidence": 0.02},
 ),
@@ -471,15 +462,9 @@ immunosuppression=patients.with_these_clinical_events(
     on_or_before=f"{index_date_variable}",
         return_expectations={"incidence": 0.05},
 ),
-anticoagulation=patients.with_these_clinical_events(
-    anticoagulation_codes,
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.05},
-),
-
-creatinine_march_2020=patients.most_recent_creatinine(
+creatinine_march_2020=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2020-03-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2020-02-01 - 17 months", "latest": "2020-02-29"},
@@ -487,9 +472,9 @@ creatinine_march_2020=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_april_2020=patients.most_recent_creatinine(
+creatinine_april_2020=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2020-04-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2020-03-01 - 17 months", "latest": "2020-03-31"},
@@ -497,9 +482,9 @@ creatinine_april_2020=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_may_2020=patients.most_recent_creatinine(
+creatinine_may_2020=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2020-05-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2020-04-01 - 17 months", "latest": "2020-04-30"},
@@ -507,9 +492,9 @@ creatinine_may_2020=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_june_2020=patients.most_recent_creatinine(
+creatinine_june_2020=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2020-06-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2020-05-01 - 17 months", "latest": "2020-05-31"},
@@ -517,9 +502,9 @@ creatinine_june_2020=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_july_2020=patients.most_recent_creatinine(
+creatinine_july_2020=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2020-07-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2020-06-01 - 17 months", "latest": "2020-06-30"},
@@ -527,9 +512,9 @@ creatinine_july_2020=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_august_2020=patients.most_recent_creatinine(
+creatinine_august_2020=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2020-08-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2020-07-01 - 17 months", "latest": "2020-07-31"},
@@ -537,9 +522,9 @@ creatinine_august_2020=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_september_2020=patients.most_recent_creatinine(
+creatinine_september_2020=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2020-09-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2020-08-01 - 17 months", "latest": "2020-08-31"},
@@ -547,9 +532,9 @@ creatinine_september_2020=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_october_2020=patients.most_recent_creatinine(
+creatinine_october_2020=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2020-10-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2020-09-01 - 17 months", "latest": "2020-09-30"},
@@ -557,9 +542,9 @@ creatinine_october_2020=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_november_2020=patients.most_recent_creatinine(
+creatinine_november_2020=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2020-11-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2020-10-01 - 17 months", "latest": "2020-10-31"},
@@ -567,9 +552,9 @@ creatinine_november_2020=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_december_2020=patients.most_recent_creatinine(
+creatinine_december_2020=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2020-12-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2020-11-01 - 17 months", "latest": "2020-11-30"},
@@ -577,9 +562,9 @@ creatinine_december_2020=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_january_2021=patients.most_recent_creatinine(
+creatinine_january_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-01-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2020-12-01 - 17 months", "latest": "2020-12-31"},
@@ -587,9 +572,9 @@ creatinine_january_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_february_2021=patients.most_recent_creatinine(
+creatinine_february_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-02-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-01-01 - 17 months", "latest": "2021-01-31"},
@@ -597,9 +582,9 @@ creatinine_february_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_march_2021=patients.most_recent_creatinine(
+creatinine_march_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-03-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-02-01 - 17 months", "latest": "2021-02-29"},
@@ -607,9 +592,9 @@ creatinine_march_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_april_2021=patients.most_recent_creatinine(
+creatinine_april_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-04-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-03-01 - 17 months", "latest": "2021-03-31"},
@@ -617,9 +602,9 @@ creatinine_april_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_may_2021=patients.most_recent_creatinine(
+creatinine_may_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-05-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-04-01 - 17 months", "latest": "2021-04-30"},
@@ -627,9 +612,9 @@ creatinine_may_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_june_2021=patients.most_recent_creatinine(
+creatinine_june_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-06-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-05-01 - 17 months", "latest": "2021-05-31"},
@@ -637,9 +622,9 @@ creatinine_june_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_july_2021=patients.most_recent_creatinine(
+creatinine_july_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-07-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-06-01 - 17 months", "latest": "2021-06-30"},
@@ -647,9 +632,9 @@ creatinine_july_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_august_2021=patients.most_recent_creatinine(
+creatinine_august_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-08-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-07-01 - 17 months", "latest": "2021-07-31"},
@@ -657,9 +642,9 @@ creatinine_august_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_september_2021=patients.most_recent_creatinine(
+creatinine_september_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-09-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-08-01 - 17 months", "latest": "2021-08-31"},
@@ -667,9 +652,9 @@ creatinine_september_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_october_2021=patients.most_recent_creatinine(
+creatinine_october_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-10-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-09-01 - 17 months", "latest": "2021-09-30"},
@@ -677,9 +662,9 @@ creatinine_october_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_november_2021=patients.most_recent_creatinine(
+creatinine_november_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-11-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-10-01 - 17 months", "latest": "2021-10-31"},
@@ -687,9 +672,9 @@ creatinine_november_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_december_2021=patients.most_recent_creatinine(
+creatinine_december_2021=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2021-12-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-11-01 - 17 months", "latest": "2021-11-30"},
@@ -697,13 +682,16 @@ creatinine_december_2021=patients.most_recent_creatinine(
         "incidence": 0.60,
     }
 ),
-creatinine_january_2022=patients.most_recent_creatinine(
+creatinine_january_2022=patients.with_these_clinical_events(
+    creatinine_codes,
     on_or_before="2022-01-01",
-    include_measurement_date=True,
     date_format="YYYY-MM-DD",
     return_expectations={
         "date": {"earliest": "2021-12-01 - 17 months", "latest": "2021-12-31"},
         "float": {"distribution": "normal", "mean": 80, "stdev": 40},
         "incidence": 0.60,
     }
+),
+
 )
+

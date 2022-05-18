@@ -23,11 +23,9 @@ study = StudyDefinition(
             #Is this the incidence of COVID? 
             #How does this interact with the incidence of #sgss_positive, primary_care_covid and hospital_covid (each 0.1)?
     },
-    
-    index_date="2020-02-01",
 
     has_follow_up=patients.registered_with_one_practice_between(
-        "covid_diagnosis_date - 3 months", "covid_diagnosis_date"
+        "index_date - 3 months", "index_date"
         ),
 
     population=patients.satisfying(

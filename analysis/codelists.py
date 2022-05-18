@@ -49,7 +49,10 @@ any_covid_primary_care_code = combine_codelists(
         #1. Exclude people with eGFR <15 at the index date
         #2. 50% reduction in eGFR as a post-COVID outcome
         #3. Determine eGFR category as a covariable
-creatinine_codes = codelist(["XE2q5"], system="ctv3"
+creatinine_codes = codelist_from_csv(
+    "codelists/user-bangzheng-creatinine-value.csv",
+    system="snomed",
+    column="code",
 )
 #Critical care 
     #OPCS-4 procedural codes to determine people hospitalised with COVID admitted to critical care

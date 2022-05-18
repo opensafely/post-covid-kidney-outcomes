@@ -33,13 +33,9 @@ from cohortextractor import (
 )
 
 from codelists import *
-
 from common_variables import generate_common_variables
 
-(
-    demographic_variables,
-) = generate_common_variables(index_date_variable="covid_diagnosis_date")
-#What is the purpose of demographic_variables here?
+common_variables = generate_common_variables(index_date_variable="covid_diagnosis_date")
 
 study = StudyDefinition(
     default_expectations={
@@ -49,12 +45,8 @@ study = StudyDefinition(
             #Is this the incidence of COVID? 
             #How does this interact with the incidence of #sgss_positive, primary_care_covid and hospital_covid (each 0.1)?
     },
-    
-    index_date="2020-02-01",
 
-    has_follow_up=patients.registered_with_one_practice_between(
-        "covid_diagnosis_date - 3 months", "covid_diagnosis_date"
-        ),
+    index_date="2020-02-01",
 
     population=patients.satisfying(
         """
@@ -66,5 +58,8 @@ study = StudyDefinition(
         AND NOT stp = ""
         AND NOT egfr_below_15_february_2020 = "1"
         """,
+        has_follow_up=patients.registered_with_one_practice_between(
+        "covid_diagnosis_date - 3 months", "covid_diagnosis_date"
         ),
-    )
+    ),    
+)
