@@ -33,7 +33,7 @@ from cohortextractor import (
 )
 
 from codelists import *
-from common_variables import generate_common_variables
+from common_variables import common_variables
 
 study = StudyDefinition(
     default_expectations={
@@ -44,6 +44,8 @@ study = StudyDefinition(
             #How does this interact with the incidence of #sgss_positive, primary_care_covid and hospital_covid (each 0.1)?
     },
 
+    index_date="2020-02-01",  
+
     population=patients.satisfying(
         """
         has_follow_up
@@ -52,14 +54,9 @@ study = StudyDefinition(
         AND imd > 0
         AND NOT sars_cov_2 = "0"
         AND NOT stp = ""
-        AND NOT egfr_below_15_february_2020 = "1"
         """,
-        has_follow_up=patients.registered_with_one_practice_between(
-        "covid_diagnosis_date - 3 months", "covid_diagnosis_date"
-        ),
     ),  
-
-    index_date="2020-02-01",  
+    #    AND NOT egfr_below_15_february_2020 = "1"
 
     sgss_positive=patients.with_test_result_in_sgss(
         pathogen="SARS-CoV-2",
@@ -91,6 +88,10 @@ study = StudyDefinition(
     
     covid_diagnosis_date=patients.minimum_of(
         "sgss_positive", "primary_care_covid", "hospital_covid",
+    ),
+       
+    has_follow_up=patients.registered_with_one_practice_between(
+        "covid_diagnosis_date - 3 months", "covid_diagnosis_date"
     ),
 
 **common_variables
