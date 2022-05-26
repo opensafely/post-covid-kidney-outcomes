@@ -12,7 +12,7 @@ from codelists import *
 
 from common_variables import generate_common_variables
 
-generate_common_variables(index_date_variable="covid_diagnosis_date")
+ 
 
 
 study = StudyDefinition(

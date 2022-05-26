@@ -35,8 +35,6 @@ from cohortextractor import (
 from codelists import *
 from common_variables import generate_common_variables
 
-common_variables = generate_common_variables(index_date_variable="covid_diagnosis_date")
-
 study = StudyDefinition(
     default_expectations={
         "date": {"earliest": "1980-01-01", "latest": "today"},
@@ -46,11 +44,9 @@ study = StudyDefinition(
             #How does this interact with the incidence of #sgss_positive, primary_care_covid and hospital_covid (each 0.1)?
     },
 
-    index_date="2020-02-01",
-
     population=patients.satisfying(
         """
-            has_follow_up
+        has_follow_up
         AND (age >=18)
         AND (sex = "M" OR sex = "F")
         AND imd > 0
@@ -61,5 +57,41 @@ study = StudyDefinition(
         has_follow_up=patients.registered_with_one_practice_between(
         "covid_diagnosis_date - 3 months", "covid_diagnosis_date"
         ),
-    ),    
+    ),  
+
+    index_date="2020-02-01",  
+
+    sgss_positive=patients.with_test_result_in_sgss(
+        pathogen="SARS-CoV-2",
+        test_result="positive",
+        returning="date",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        on_or_before="2022-01-31",
+        return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
+    ),
+    
+    primary_care_covid=patients.with_these_clinical_events(
+        any_covid_primary_care_code,
+        returning="date",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        on_or_before="2022-01-31",
+        return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
+    ),
+
+    hospital_covid=patients.admitted_to_hospital(
+        with_these_diagnoses=covid_codes,
+        returning="date_admitted",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        on_or_before="2022-01-31",
+        return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
+    ),
+    
+    covid_diagnosis_date=patients.minimum_of(
+        "sgss_positive", "primary_care_covid", "hospital_covid",
+    ),
+
+**common_variables
 )

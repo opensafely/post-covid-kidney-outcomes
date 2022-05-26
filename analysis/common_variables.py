@@ -10,33 +10,6 @@ def generate_common_variables(index_date_variable):
     ),
 
 #Exposure - SARS-CoV-2 infection:
-sgss_positive=patients.with_test_result_in_sgss(
-    pathogen="SARS-CoV-2",
-    test_result="positive",
-    returning="date",
-    date_format="YYYY-MM-DD",
-    find_first_match_in_period=True,
-    return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
-),
-primary_care_covid=patients.with_these_clinical_events(
-    any_covid_primary_care_code,
-    returning="date",
-    date_format="YYYY-MM-DD",
-    find_first_match_in_period=True,
-    return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
-),
-hospital_covid=patients.admitted_to_hospital(
-    with_these_diagnoses=covid_codes,
-    returning="date_admitted",
-    date_format="YYYY-MM-DD",
-    find_first_match_in_period=True,
-    return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
-),
-    
-covid_diagnosis_date=patients.minimum_of(
-    "sgss_positive", "primary_care_covid", "hospital_covid",
-    date_format="YYYY-MM-DD"
-),
 
 sars_cov_2=patients.categorised_as(
     {
@@ -53,6 +26,7 @@ sars_cov_2=patients.categorised_as(
         "category": {
             "ratios": {
                 "SARS-COV-2": 0.7,
+                "0": 0.3,
             }
         },
     },
@@ -90,7 +64,7 @@ covid_severity=patients.categorised_as(
         "rate": "universal",
         "category": {
             "ratios": {
-                "sars-cov-2 on-hospitalised": 0.8,
+                "sars-cov-2 non-hospitalised": 0.8,
                 "covid hospitalised": 0.18,
                 "covid critical care": 0.02,
             }
@@ -109,6 +83,7 @@ hospitalised_acute_kidney_injury=patients.admitted_to_hospital(
 kidney_replacement_therapy_icd_10=patients.admitted_to_hospital(
     with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
     returning="date_admitted",
+    between = ["1980-01-01", "2022-02-01"],
     date_format="YYYY-MM-DD",
     find_first_match_in_period=True,
     return_expectations={"incidence": 0.05, "date": {"earliest": "2000-01-01"}},
@@ -116,6 +91,7 @@ kidney_replacement_therapy_icd_10=patients.admitted_to_hospital(
 kidney_replacement_therapy_opcs_4=patients.admitted_to_hospital(
     with_these_diagnoses=kidney_replacement_therapy_opcs_4_codes,
     returning="date_admitted",
+    between = ["1980-01-01", "2022-02-01"],
     date_format="YYYY-MM-DD",
     find_first_match_in_period=True,
     return_expectations={"incidence": 0.05, "date": {"earliest": "2000-01-01"}},
@@ -224,12 +200,15 @@ covid_vax_4_date = patients.with_tpp_vaccination_record(
 
 #Matching variables
 month_of_birth=patients.date_of_birth(
-    date_format=None, 
-    return_expectations=None
+    date_format= "YYYY-MM", 
+    return_expectations={
+        "date": {"earliest": "1950-01-01", "latest": "2000-01-01"},
+        "rate": "uniform",
+    },
 ),
 
 age=patients.age_as_of(
-    f"{index_date_variable}",
+    "index_date_variable",
     return_expectations={
         "rate": "universal",
         "int": {"distribution": "population_ages"},
@@ -304,10 +283,9 @@ died_date_gp=patients.with_death_recorded_in_primary_care(
 #NB missing floats/integers will be returned as 0 by default
 creatinine_february_2020=patients.with_these_clinical_events(
     creatinine_codes,
-    on_or_before="2020-02-01",
-    date_format="YYYY-MM-DD",
+    between=["2018-08-01","2020-01-31"],
+    returning="numeric_value",
     return_expectations={
-        "date": {"earliest": "2019-08-01", "latest": "2020-01-31"},
         "float": {"distribution": "normal", "mean": 80, "stdev": 40},
         "incidence": 0.60,
     }
@@ -316,13 +294,12 @@ creatinine_february_2020=patients.with_these_clinical_events(
 #NB missing floats/integers will be returned as 0 by default
 creatinine_february_2018=patients.with_these_clinical_events(
     creatinine_codes,
-    on_or_before="2018-02-01",
-    date_format="YYYY-MM-DD",
+    between=["2016-08-01","2018-01-31"],
+    returning="numeric_value",
     return_expectations={
-        "date": {"earliest": "2016-08-01", "latest": "2018-01-31"},
         "float": {"distribution": "normal", "mean": 80, "stdev": 40},
         "incidence": 0.60,
-    },
+    }
 ),
 
 #Social variables
@@ -359,7 +336,7 @@ ethnicity=patients.with_these_clinical_events(
     ethnicity_codes,
     returning="category",
     find_last_match_in_period=True,
-    on_or_before=f"{index_date_variable}",
+    on_or_before="index_date_variable",
     return_expectations={
         "category": {"ratios": {"1": 0.8, "5": 0.1, "3": 0.1}},
         "incidence": 0.75,
@@ -371,327 +348,140 @@ ethnicity=patients.with_these_clinical_events(
 atrial_fibrillation_or_flutter=patients.with_these_clinical_events(
     atrial_fibrillation_or_flutter_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-            return_expectations={"incidence": 0.05},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.05},
 ),
 chronic_liver_disease=patients.with_these_clinical_events(
     chronic_liver_disease_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.02},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.02},
 ),
 diabetes=patients.with_these_clinical_events(
     diabetes_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.2},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.2},
 ),
 haematological_cancer=patients.with_these_clinical_events(
     haematological_cancer_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.01},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.01},
 ),
 heart_failure=patients.with_these_clinical_events(
     heart_failure_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.04},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.04},
 ),
 hiv=patients.with_these_clinical_events(
     hiv_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.02},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.02},
 ),
 hypertension=patients.with_these_clinical_events(
     hypertension_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.2},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.2},
 ),
 non_haematological_cancer=patients.with_these_clinical_events(
     non_haematological_cancer_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.02},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.02},
 ),
 myocardial_infarction=patients.with_these_clinical_events(
     myocardial_infarction_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.1},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.1},
 ),
 peripheral_vascular_disease=patients.with_these_clinical_events(
     peripheral_vascular_disease_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.02},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.02},
 ),
 rheumatoid_arthritis=patients.with_these_clinical_events(
     rheumatoid_arthritis_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.05},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.05},
 ),
 stroke=patients.with_these_clinical_events(
     stroke_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.02},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.02},
 ),
 systemic_lupus_erythematosus=patients.with_these_clinical_events(
     systemic_lupus_erythematosus_codes,
     returning="binary_flag",
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.02},
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.02},
 ),
 smoking=patients.with_these_clinical_events(
     smoking_codes,
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.2},
+    returning="binary_flag",
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.2},
 ),
 #These need to be done differently
-body_mass_index=patients.with_these_clinical_events(
-    body_mass_index_codes,
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.05},
+body_mass_index=patients.most_recent_bmi(
+    on_or_before="index_date_variable",
+    minimum_age_at_measurement=18,
+    include_measurement_date=True,
+    date_format="YYYY-MM-DD",
+    return_expectations={
+        "date": {"earliest": "2020-01-01", "latest": "today"},
+        "float": {"distribution": "normal", "mean": 28, "stddev": 8},
+        "incidence": 0.95,
+    }
 ),
 immunosuppression=patients.with_these_clinical_events(
     immunosuppression_codes,
-    on_or_before=f"{index_date_variable}",
-        return_expectations={"incidence": 0.05},
+    returning="binary_flag",
+    on_or_before="index_date_variable",
+    return_expectations={"incidence": 0.05},
+),
+most_recent_creatinine_march_2020=patients.with_these_clinical_events(
+    creatinine_codes,
+    between=["2018-09-01","2020-02-29"],
+    returning="numeric_value",
+    return_expectations={
+        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
+        "incidence": 0.60,
+    }
 ),
 creatinine_march_2020=patients.with_these_clinical_events(
     creatinine_codes,
-    on_or_before="2020-03-01",
-    date_format="YYYY-MM-DD",
+    between=["2020-02-01","2020-02-29"],
+    returning="numeric_value",
     return_expectations={
-        "date": {"earliest": "2020-02-01 - 17 months", "latest": "2020-02-29"},
+        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
+        "incidence": 0.60,
+    }
+),
+most_recent_creatinine_april_2020=patients.with_these_clinical_events(
+    creatinine_codes,
+    between=["2018-10-01","2020-03-31"],
+    returning="numeric_value",
+    return_expectations={
         "float": {"distribution": "normal", "mean": 80, "stdev": 40},
         "incidence": 0.60,
     }
 ),
 creatinine_april_2020=patients.with_these_clinical_events(
     creatinine_codes,
-    on_or_before="2020-04-01",
-    date_format="YYYY-MM-DD",
+    between=["2020-02-01","2020-02-29"],
+    returning="numeric_value",
     return_expectations={
-        "date": {"earliest": "2020-03-01 - 17 months", "latest": "2020-03-31"},
         "float": {"distribution": "normal", "mean": 80, "stdev": 40},
         "incidence": 0.60,
     }
 ),
-creatinine_may_2020=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2020-05-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2020-04-01 - 17 months", "latest": "2020-04-30"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_june_2020=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2020-06-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2020-05-01 - 17 months", "latest": "2020-05-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_july_2020=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2020-07-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2020-06-01 - 17 months", "latest": "2020-06-30"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_august_2020=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2020-08-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2020-07-01 - 17 months", "latest": "2020-07-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_september_2020=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2020-09-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2020-08-01 - 17 months", "latest": "2020-08-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_october_2020=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2020-10-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2020-09-01 - 17 months", "latest": "2020-09-30"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_november_2020=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2020-11-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2020-10-01 - 17 months", "latest": "2020-10-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_december_2020=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2020-12-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2020-11-01 - 17 months", "latest": "2020-11-30"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_january_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-01-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2020-12-01 - 17 months", "latest": "2020-12-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_february_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-02-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-01-01 - 17 months", "latest": "2021-01-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_march_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-03-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-02-01 - 17 months", "latest": "2021-02-29"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_april_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-04-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-03-01 - 17 months", "latest": "2021-03-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_may_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-05-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-04-01 - 17 months", "latest": "2021-04-30"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_june_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-06-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-05-01 - 17 months", "latest": "2021-05-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_july_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-07-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-06-01 - 17 months", "latest": "2021-06-30"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_august_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-08-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-07-01 - 17 months", "latest": "2021-07-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_september_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-09-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-08-01 - 17 months", "latest": "2021-08-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_october_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-10-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-09-01 - 17 months", "latest": "2021-09-30"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_november_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-11-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-10-01 - 17 months", "latest": "2021-10-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_december_2021=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2021-12-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-11-01 - 17 months", "latest": "2021-11-30"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-creatinine_january_2022=patients.with_these_clinical_events(
-    creatinine_codes,
-    on_or_before="2022-01-01",
-    date_format="YYYY-MM-DD",
-    return_expectations={
-        "date": {"earliest": "2021-12-01 - 17 months", "latest": "2021-12-31"},
-        "float": {"distribution": "normal", "mean": 80, "stdev": 40},
-        "incidence": 0.60,
-    }
-),
-
 )
 
