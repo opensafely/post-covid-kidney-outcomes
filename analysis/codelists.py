@@ -86,6 +86,16 @@ kidney_replacement_therapy_opcs_4_codes = codelist_from_csv(
     system="opcs4",
     column="code",
 )
+dialysis_icd_10_codes = codelist_from_csv(
+    "codelists/user-viyaasan-dialysis.csv",
+    system="icd10",
+    column="code",
+)
+dialysis_opcs_4_codes = codelist_from_csv(
+    "codelists/user-viyaasan-dialysis-opcs-4.csv",
+    system="opcs4",
+    column="code",
+)
 dialysis_codes = codelist_from_csv(
     "codelists/opensafely-dialysis.csv",
     system="ctv3",
