@@ -65,7 +65,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
         on_or_before="2022-01-31",
-        return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
+        return_expectations={"incidence": 0.4, "date": {"earliest": "index_date"}},
     ),
     
     primary_care_covid=patients.with_these_clinical_events(
@@ -74,7 +74,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
         on_or_before="2022-01-31",
-        return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
+        return_expectations={"incidence": 0.2, "date": {"earliest": "index_date"}},
     ),
 
     hospital_covid=patients.admitted_to_hospital(
@@ -91,7 +91,9 @@ study = StudyDefinition(
     ),
        
     has_follow_up=patients.registered_with_one_practice_between(
-        "covid_diagnosis_date - 3 months", "covid_diagnosis_date"
+        "covid_diagnosis_date - 3 months", "covid_diagnosis_date",
+        return_expectations={"incidence":0.95,
+    }
     ),
 
 **common_variables

@@ -41,37 +41,6 @@ common_variables = dict(
         return_expectations={"incidence": 0.05, "date": {"earliest": "index_date"}},
     ),
 
-    covid_severity=patients.categorised_as(
-        {
-        "0": "DEFAULT",
-        "sars-cov-2 non-hospitalised": 
-            """
-            primary_care_covid
-            OR sgss_positive
-            AND NOT hospital_covid
-            """,
-        "covid hospitalised":
-            """
-            hospital_covid
-            AND NOT critical_care_covid
-            """,
-        "covid critical care": 
-            """
-            critical_care_covid
-            """,
-        },
-        return_expectations={
-            "rate": "universal",
-            "category": {
-                "ratios": {
-                    "sars-cov-2 non-hospitalised": 0.8,
-                    "covid hospitalised": 0.18,
-                    "covid critical care": 0.02,
-                }
-            },
-        },
-    ),
-
     hospitalised_acute_kidney_injury=patients.admitted_to_hospital(
         with_these_diagnoses=acute_kidney_injury_codes,
         returning="date_admitted",
@@ -157,6 +126,12 @@ common_variables = dict(
         find_first_match_in_period=True,
         returning="date",
         date_format="YYYY-MM-DD",
+        return_expectations = {
+        "date": {
+            "earliest": "2000-01-01",
+            "latest": "2022-01-31"},
+        "incidence": 0.01,
+        }
     ),
 
     kidney_replacement_therapy_date=patients.minimum_of(
@@ -224,6 +199,7 @@ common_variables = dict(
         return_expectations={
             "date": {"earliest": "1950-01-01", "latest": "2000-01-01"},
             "rate": "uniform",
+            "incidence": 1,
         },
     ),
 
@@ -292,6 +268,7 @@ common_variables = dict(
     died_date_gp=patients.with_death_recorded_in_primary_care(
         on_or_after="2020-02-01",
         returning="date_of_death",
+        date_format= "YYYY-MM-DD",
         return_expectations={
             "date": {"earliest" : "2020-02-01"},
             "rate" : "exponential_increase"
@@ -306,7 +283,7 @@ common_variables = dict(
         between=["2018-08-01","2020-01-31"],
         returning="numeric_value",
         return_expectations={
-            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40, "min": 50, "max": 500},
             "incidence": 0.60,
         }
     ),
@@ -317,7 +294,7 @@ common_variables = dict(
         between=["2016-08-01","2018-01-31"],
         returning="numeric_value",
         return_expectations={
-            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40, "min": 50, "max": 500},
             "incidence": 0.60,
         }
     ),
@@ -457,7 +434,7 @@ common_variables = dict(
         date_format="YYYY-MM-DD",
         return_expectations={
             "date": {"earliest": "2020-01-01", "latest": "today"},
-            "float": {"distribution": "normal", "mean": 28, "stddev": 8},
+            "float": {"distribution": "normal", "mean": 28, "stddev": 8, "min": 18, "max": 45},
             "incidence": 0.95,
         }
     ),
