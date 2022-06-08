@@ -110,6 +110,11 @@ kidney_replacement_therapy_primary_care_codes = combine_codelists(
     dialysis_codes,
     kidney_transplant_codes,
 )
+haemofiltration_opcs_4_codes = codelist_from_csv(
+    "codelists/user-viyaasan-haemofiltration.csv",
+    system="opcs4",
+    column="code",
+)
     #NB this codelist contains a glomerulonephritis code which needs to be removed
 #Pneumonia
     #ICD-10 codes to restrict additional comparator population to people with hospitalised pneumonia in 2018-2019
