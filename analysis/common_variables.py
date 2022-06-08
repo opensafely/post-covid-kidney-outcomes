@@ -34,7 +34,7 @@ common_variables = dict(
     ),
 
     imd=patients.address_as_of(
-        "index_date",
+        "covid_diagnosis_date",
         returning="index_of_multiple_deprivation",
         round_to_nearest=100,
         return_expectations={
@@ -57,7 +57,7 @@ common_variables = dict(
     ),
 
     stp=patients.registered_practice_as_of(
-        "index_date",
+        "covid_diagnosis_date",
         returning="stp_code",
         return_expectations={
             "rate": "universal",
@@ -92,7 +92,7 @@ common_variables = dict(
 
     #Social variables
     practice_id=patients.registered_practice_as_of(
-        "index_date",
+        "covid_diagnosis_date",
         returning="pseudo_id",
         return_expectations={
             "int": {"distribution": "normal", "mean": 25, "stddev": 5},
@@ -100,7 +100,7 @@ common_variables = dict(
         },
     ),
     region=patients.registered_practice_as_of(
-        "index_date",
+        "covid_diagnosis_date",
         returning="nuts1_region_name",
         return_expectations={
             "rate": "universal",

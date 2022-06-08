@@ -9,7 +9,7 @@
 # - sex
 # - stp
 # - imd
-# - patient_index_date (using sgss_positive, primary_care_covid or hospital_covid)
+# - covid_diagnosis_date + 28 days
 
 #Exclusion variables (see match_historical and match_contemporary):
 # - kidney_replacement_therapy before covid_diagnosis_date
@@ -20,7 +20,7 @@
 
 #Note:
 # - Variables will be extracted at covid_diagnosis_date
-# - Matching and follow-up will commence at patient_index_date (i.e. 28 days after covid_diagnosis_date)
+# - Matching and follow-up will commence at 28 days after covid_diagnosis_date
 
 from cohortextractor import (
     StudyDefinition,
@@ -44,8 +44,6 @@ study = StudyDefinition(
             #How does this interact with the incidence of #sgss_positive, primary_care_covid and hospital_covid (each 0.1)?
     },
 
-    index_date="2020-02-01",  
-
     population=patients.satisfying(
         """
         has_follow_up
@@ -67,7 +65,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
         on_or_before="2022-01-31",
-        return_expectations={"incidence": 0.4, "date": {"earliest": "index_date"}},
+        return_expectations={"incidence": 0.4, "date": {"earliest": "2020-02-01"}},
     ),
     
     primary_care_covid_date=patients.with_these_clinical_events(
@@ -76,7 +74,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
         on_or_before="2022-01-31",
-        return_expectations={"incidence": 0.2, "date": {"earliest": "index_date"}},
+        return_expectations={"incidence": 0.2, "date": {"earliest": "2020-02-01"}},
     ),
 
     hospital_covid_date=patients.admitted_to_hospital(
@@ -85,7 +83,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
         on_or_before="2022-01-31",
-        return_expectations={"incidence": 0.1, "date": {"earliest": "index_date"}},
+        return_expectations={"incidence": 0.1, "date": {"earliest": "2020-02-01"}},
     ),
     
     covid_diagnosis_date=patients.minimum_of(
@@ -117,40 +115,37 @@ study = StudyDefinition(
         with_these_diagnoses=covid_codes,
         returning="binary_flag",
         between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
-        return_expectations={"incidence": 0.1},
+        return_expectations={"incidence": 0.1, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
     ),
     covid_critical_care=patients.admitted_to_hospital(
         with_these_diagnoses=covid_codes,
         with_these_procedures=critical_care_codes,
         returning="binary_flag",
         between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
-        return_expectations={"incidence": 0.05, "date": {"earliest": "index_date"}},
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
     ),
     covid_acute_kidney_injury=patients.admitted_to_hospital(
         with_these_diagnoses=acute_kidney_injury_codes,
         returning="binary_flag",
         between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
-        return_expectations={"incidence": 0.05, "date": {"earliest": "index_date"}},
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
     ),
     covid_krt_icd_10=patients.admitted_to_hospital(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="binary_flag",
         between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
-        return_expectations={"incidence": 0.05, "date": {"earliest": "index_date"}},
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
     ),
     covid_krt_opcs_4=patients.admitted_to_hospital(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="binary_flag",
         between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
-        return_expectations={"incidence": 0.05, "date": {"earliest": "index_date"}},
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
     ),
     covid_death=patients.with_death_recorded_in_primary_care(
         returning="binary_flag",
         between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
-        return_expectations={
-            "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"},
-            "incidence": 0.10,
-            },
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
         ),
 
     #To exclude individuals with pre-existing kidney replacement therapy at the time of COVID diagnosis:
@@ -418,7 +413,7 @@ study = StudyDefinition(
     krt_outcome_date=patients.minimum_of(
         "krt_outcome_primary_care", "krt_outcome_icd_10", "krt_outcome_opcs_4"
     ),
-    measured_creatinine_feb2020=patients.mean_recorded_value(
+    followup_creatinine_feb2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-02-01","2020-02-29"],
@@ -427,7 +422,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_mar2020=patients.mean_recorded_value(
+    followup_creatinine_mar2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-03-01","2020-03-31"],
@@ -436,7 +431,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_apr2020=patients.mean_recorded_value(
+    followup_creatinine_apr2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-04-01","2020-04-30"],
@@ -445,7 +440,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_may2020=patients.mean_recorded_value(
+    followup_creatinine_may2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-05-01","2020-05-31"],
@@ -454,7 +449,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_jun2020=patients.mean_recorded_value(
+    followup_creatinine_jun2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-06-01","2020-06-30"],
@@ -463,7 +458,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_jul2020=patients.mean_recorded_value(
+    followup_creatinine_jul2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-07-01","2020-07-31"],
@@ -472,7 +467,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_aug2020=patients.mean_recorded_value(
+    followup_creatinine_aug2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-08-01","2020-08-31"],
@@ -481,7 +476,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_sep2020=patients.mean_recorded_value(
+    followup_creatinine_sep2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-09-01","2020-09-30"],
@@ -490,7 +485,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_oct2020=patients.mean_recorded_value(
+    followup_creatinine_oct2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-10-01","2020-10-31"],
@@ -499,7 +494,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_nov2020=patients.mean_recorded_value(
+    followup_creatinine_nov2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-11-01","2020-11-30"],
@@ -508,7 +503,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_dec2020=patients.mean_recorded_value(
+    followup_creatinine_dec2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-12-01","2020-12-31"],
@@ -517,7 +512,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_jan2021=patients.mean_recorded_value(
+    followup_creatinine_jan2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-01-01","2021-01-31"],
@@ -526,7 +521,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_feb2021=patients.mean_recorded_value(
+    followup_creatinine_feb2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-02-01","2021-02-28"],
@@ -535,7 +530,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_mar2021=patients.mean_recorded_value(
+    followup_creatinine_mar2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-03-01","2021-03-31"],
@@ -544,7 +539,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_apr2021=patients.mean_recorded_value(
+    followup_creatinine_apr2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-04-01","2021-04-30"],
@@ -553,7 +548,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_may2021=patients.mean_recorded_value(
+    followup_creatinine_may2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-05-01","2021-05-31"],
@@ -562,7 +557,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_jun2021=patients.mean_recorded_value(
+    followup_creatinine_jun2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-06-01","2021-06-30"],
@@ -571,7 +566,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_jul2021=patients.mean_recorded_value(
+    followup_creatinine_jul2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-07-01","2021-07-31"],
@@ -580,7 +575,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_aug2021=patients.mean_recorded_value(
+    followup_creatinine_aug2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-08-01","2021-08-31"],
@@ -589,7 +584,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_sep2021=patients.mean_recorded_value(
+    followup_creatinine_sep2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-09-01","2021-09-30"],
@@ -598,7 +593,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_oct2021=patients.mean_recorded_value(
+    followup_creatinine_oct2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-10-01","2021-10-31"],
@@ -607,7 +602,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_nov2021=patients.mean_recorded_value(
+    followup_creatinine_nov2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-11-01","2021-11-30"],
@@ -616,7 +611,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_dec2021=patients.mean_recorded_value(
+    followup_creatinine_dec2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-12-01","2021-12-31"],
@@ -625,7 +620,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    measured_creatinine_jan2022=patients.mean_recorded_value(
+    followup_creatinine_jan2022=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2022-01-01","2022-01-31"],
