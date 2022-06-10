@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 common_variables = dict(
     deregistered=patients.date_deregistered_from_all_supported_practices(
-        on_or_after="2020-02-01",
+        between= ["2020-02-01", "2022-01-31"],
         date_format="YYYY-MM-DD"
     ),
 

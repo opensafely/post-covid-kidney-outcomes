@@ -1,5 +1,11 @@
 cd repos/output
 log using covid_all_for_matching, replace
+
+**Need to include date of death
+gen end_of_follow_up = date(deregistered, "YMD")
+format end_of_follow_up %td
+replace end_of_follow_up = 2022-01-31 if end_of_follow_up==.
+
 insheet using "input_covid_all_for_matching.csv", comma
 
 gen indexdate = date(covid_diagnosis_date, "YMD")
@@ -7,6 +13,9 @@ format indexdate %td
 drop if indexdate ==.
 gen indexmonth = mofd(indexdate)
 format indexmonth %tm
+
+
+
 **This should be 0 if only individuals with COVID were extracted
 drop covid_diagnosis_date
 drop sgss_positive_date
@@ -224,6 +233,17 @@ drop mgdl_`baseline_creatinine_monthly'
 drop min_`baseline_creatinine_monthly'
 drop max_`baseline_creatinine_monthly'
 }
+
+gen indexdate_string=string(indexdate, "%td") 
+gen index_month=substr( indexdate_string ,3,7)
+
+gen baseline_egfr=.
+local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
+foreach x of  local month_year  {
+replace baseline_egfr=egfr_baseline_creatinine_`x' if  index_month=="`x'" 
+drop egfr_baseline_creatinine_`x'
+}
+
 
 foreach followup_creatinine_monthly of varlist 	followup_creatinine_feb2020 ///
 												followup_creatinine_mar2020 ///
