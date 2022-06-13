@@ -642,7 +642,6 @@ study = StudyDefinition(
         between = ["covid_diagnosis_date + 28 days", "2022-01-31"],
         returning="date_of_death",
         date_format= "YYYY-MM-DD",
-        find_first_match_in_period=True,
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-01-31"}},
     ),
 
