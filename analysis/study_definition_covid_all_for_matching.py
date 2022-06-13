@@ -2,8 +2,6 @@
     #study_definition_potential_historical_general_population
     #and study_definition_potential_contemporary_general_population
 
-#Only matching variables and exclusion variables need to be extracted at this stage
-
 #Matching variables:
 # - age
 # - sex
@@ -14,9 +12,6 @@
 #Exclusion variables (see match_historical and match_contemporary):
 # - kidney_replacement_therapy before covid_diagnosis_date
 # - died_date_gp before covid_diagnosis_date
-
-#People with eGFR <15 on 2020-02-01 will be excluded but anyone with eGFR <15 between 2020-02-01
-    # and covid_diagnosis_date will need to be excluded after cohort extraction
 
 #Note:
 # - Variables will be extracted at covid_diagnosis_date
@@ -40,8 +35,6 @@ study = StudyDefinition(
         "date": {"earliest": "1980-01-01", "latest": "today"},
         "rate": "uniform",
         "incidence": 0.7, 
-            #Is this the incidence of COVID? 
-            #How does this interact with the incidence of #sgss_positive, primary_care_covid and hospital_covid (each 0.1)?
     },
 
     population=patients.satisfying(
@@ -385,7 +378,7 @@ study = StudyDefinition(
     ),
 
 
-#To ascertain incident kidney replacement therapy as an outcome:
+#Incident kidney replacement therapy as an outcome:
     krt_outcome_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
         between = ["covid_diagnosis_date", "2022-02-01"],
@@ -704,9 +697,6 @@ study = StudyDefinition(
         return_expectations={"incidence":0.95,
     }
     ),
-
-
-
 
 **common_variables
 )

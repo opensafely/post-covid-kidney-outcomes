@@ -475,6 +475,12 @@ foreach stratum of varlist 	covid_severity 				///
 							calendar_period {
 	tab _d `stratum', col chi
 	strate `stratum'
+	strate `stratum' agegroup
+	strate `stratum' male
+	strate `stratum' ethnicity
+	strate `stratum' imd
+	strate `stratum' baseline_egfr_cat
+	strate `stratum' diabetes
 	}
 
 stset exit_date, fail(death_date) origin(index_date) id(patient_id) scale(365.25)
@@ -485,6 +491,12 @@ foreach stratum of varlist 	covid_severity 				///
 							calendar_period {
 	tab _d `stratum', col chi
 	strate `stratum'
+	strate `stratum' agegroup
+	strate `stratum' male
+	strate `stratum' ethnicity
+	strate `stratum' imd
+	strate `stratum' baseline_egfr_cat
+	strate `stratum' diabetes
 	}
 
 stset exit_date, fail(aki_outcome_date) origin(index_date) id(patient_id) scale(365.25)
@@ -495,6 +507,12 @@ foreach stratum of varlist 	covid_severity 				///
 							calendar_period {
 	tab _d `stratum', col chi
 	strate `stratum'
+	strate `stratum' agegroup
+	strate `stratum' male
+	strate `stratum' ethnicity
+	strate `stratum' imd
+	strate `stratum' baseline_egfr_cat
+	strate `stratum' diabetes
 	}
 	
 	
