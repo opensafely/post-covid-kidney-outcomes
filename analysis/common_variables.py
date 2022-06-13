@@ -78,18 +78,6 @@ common_variables = dict(
             },
         ),
         
-    #Exclusion variables
-
-    died_date_gp=patients.with_death_recorded_in_primary_care(
-        on_or_after="2018-02-01",
-        returning="date_of_death",
-        date_format= "YYYY-MM-DD",
-        return_expectations={
-            "date": {"earliest" : "2018-02-01", "latest": "2022-01-31"},
-            "incidence": 0.10,
-            },
-        ),
-
     #Social variables
     practice_id=patients.registered_practice_as_of(
         "covid_diagnosis_date",

@@ -14,8 +14,6 @@ drop if indexdate ==.
 gen indexmonth = mofd(indexdate)
 format indexmonth %tm
 
-
-
 **This should be 0 if only individuals with COVID were extracted
 drop covid_diagnosis_date
 drop sgss_positive_date

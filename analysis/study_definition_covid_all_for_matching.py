@@ -637,6 +637,15 @@ study = StudyDefinition(
         find_first_match_in_period=True,    
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-03-01", "latest": "2022-01-31"}},
     ),
+
+    death_date_gp=patients.with_death_recorded_in_primary_care(
+        between = ["covid_diagnosis_date + 28 days", "2022-01-31"],
+        returning="date_of_death",
+        date_format= "YYYY-MM-DD",
+        find_first_match_in_period=True,
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-01-31"}},
+    ),
+
     covid_vax_1_date = patients.with_tpp_vaccination_record(
         target_disease_matches = "SARS-2 CORONAVIRUS",
         returning = "date",
