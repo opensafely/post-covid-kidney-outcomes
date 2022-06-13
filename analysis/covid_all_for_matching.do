@@ -1,18 +1,34 @@
 cd repos/output
 log using covid_all_for_matching, replace
 
-**Need to include date of death
-gen end_of_follow_up = date(deregistered, "YMD")
-format end_of_follow_up %td
-replace end_of_follow_up = 2022-01-31 if end_of_follow_up==.
-
 insheet using "input_covid_all_for_matching.csv", comma
+
+drop if has_follow_up==0
 
 gen indexdate = date(covid_diagnosis_date, "YMD")
 format indexdate %td
 drop if indexdate ==.
 gen indexmonth = mofd(indexdate)
 format indexmonth %tm
+
+gen death_date = date(died_date_gp, "YMD")
+format death_date %td
+drop died_date_gp
+gen krt_outcome = date(krt_outcome_date, "YMD")
+format krt_outcome %td
+drop krt_outcome_date
+gen exit_date = krt_outcome
+format exit_date %td
+gen deregistered_date = date(deregistered, "YMD")
+format deregistered_date %td
+drop deregistered
+replace exit_date = deregistered_date if krt_outcome==.
+replace exit_date = death_date if exit_date==.
+gen end_date = date("2022-01-31", "YMD")
+format end_date %td
+replace exit_date = end_date if exit_date==.
+drop end_date
+
 
 **This should be 0 if only individuals with COVID were extracted
 drop covid_diagnosis_date
@@ -238,10 +254,24 @@ gen index_month=substr( indexdate_string ,3,7)
 gen baseline_egfr=.
 local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
 foreach x of  local month_year  {
-replace baseline_egfr=egfr_baseline_creatinine_`x' if  index_month=="`x'" 
+replace baseline_egfr=egfr_baseline_creatinine_`x' if  index_month=="`x'"
+drop if baseline_egfr <15
 drop egfr_baseline_creatinine_`x'
 }
 
+
+* Categorise into eGFR groups stages
+* There should only be people with eGFR >15
+egen baseline_egfr_cat = cut(baseline_egfr), at(0, 15, 30, 45, 60, 75, 90, 105, 5000)
+recode baseline_egfr_cat 0=1 15=2 30=3 45=4 60=5 75=6 90=7 105=8
+label define egfr_group 1 "<15" 2 "15-29" 3 "30-44" 4 "45-59" 5 "60-74" 6 "75-89" 7 "90-104" 8 "≥105"
+label values baseline_egfr_cat egfr_group
+label var baseline_egfr_cat "Baseline eGFR"
+gen ckd_stage = baseline_egfr_cat
+recode ckd_stage 6/8=5 .=6
+label define ckd_stage 1 "CKD 5" 2 "CKD 4" 3 "CKD 3B" 4 "CKD 3A" 5 "No CKD" 6 "No eGFR measurement"
+label values ckd_stage ckd_stage
+label var ckd_stage "CKD stage"
 
 foreach followup_creatinine_monthly of varlist 	followup_creatinine_feb2020 ///
 												followup_creatinine_mar2020 ///
@@ -289,8 +319,6 @@ drop min_`followup_creatinine_monthly'
 drop max_`followup_creatinine_monthly'
 }
 
-
-
-
+stset exit_date, fail(krt_outcome) origin(indexdate) id(patient_id) scale(365.25)
 
 save $outdir/covid_all_for_matching, replace -
