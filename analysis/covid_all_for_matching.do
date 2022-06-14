@@ -370,7 +370,6 @@ replace exit_date = death_date if exit_date==.
 gen end_date = date("2022-01-31", "YMD")
 format end_date %td
 replace exit_date = end_date if exit_date==.
-drop end_date
 gen follow_up_time = (exit_date - index_date)
 label var follow_up_time "Follow-up time (Days)"
 
@@ -425,6 +424,16 @@ drop max_`followup_creatinine_monthly'
 gen aki_outcome_date = date(acute_kidney_injury_outcome, "YMD")
 format aki_outcome_date %td
 
+* Exit date (AKI)
+gen exit_date_aki = aki_outcome_date
+format exit_date_aki %td
+replace exit_date_aki = deregistered_date if aki_outcome_date==.
+replace exit_date_aki = krt_outcome if exit_date_aki==.
+replace exit_date_aki = death_date if exit_date_aki==.
+replace exit_date_aki = end_date if exit_date_aki==.
+gen follow_up_time_aki = (exit_date_aki - index_date)
+label var follow_up_time "Follow-up time (AKI) (Days)"
+
 **Descriptive statistics
 * By COVID-19 severity
 foreach stratum of varlist 	covid_severity 				///
@@ -467,6 +476,7 @@ foreach var of varlist 	agegroup 						///
 	tab `var' calendar_period, m col chi
 	}
 
+* Kidney replacement therapy rates (stratified)
 stset exit_date, fail(krt_outcome) origin(index_date) id(patient_id) scale(365.25)
 foreach stratum of varlist 	covid_severity 				///
 							covid_acute_kidney_injury 	///
@@ -481,9 +491,12 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
+	sts graph, failure by(`stratum') title(Cumulative kidney replacement therapy after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative kidney replacement therapy) xtitle(Follow-up (years))
+	graph save krt_outcome_`stratum'.gph, replace
 	}
 
-stset exit_date, fail(death_date) origin(index_date) id(patient_id) scale(365.25)
+* Death rates (stratified)
+streset, fail(death_date)
 foreach stratum of varlist 	covid_severity 				///
 							covid_acute_kidney_injury 	///
 							covid_krt					///
@@ -497,9 +510,12 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
+	sts graph, failure by(`stratum') title(Cumulative mortality after SARS-CoV-2 survival by `stratum') ylab(0(0.10)0.50, angle(horizontal)) ytitle(Cumulative mortality) xtitle(Follow-up (years))
+	graph save mortality_`stratum'.gph, replace
 	}
 
-stset exit_date, fail(aki_outcome_date) origin(index_date) id(patient_id) scale(365.25)
+* Acute kidney injury rates (stratified)
+stset exit_date_aki, fail(aki_outcome_date) origin(index_date) id(patient_id) scale(365.25)
 foreach stratum of varlist 	covid_severity 				///
 							covid_acute_kidney_injury 	///
 							covid_krt					///
@@ -513,6 +529,8 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
+	sts graph, failure by(`stratum') title(Cumulative AKI after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative AKI) xtitle(Follow-up (years))
+	graph save aki_`stratum'.gph, replace
 	}
 	
 	
