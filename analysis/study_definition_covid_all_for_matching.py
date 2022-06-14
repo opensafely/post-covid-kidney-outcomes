@@ -642,7 +642,7 @@ study = StudyDefinition(
         target_disease_matches = "SARS-2 CORONAVIRUS",
         returning = "date",
         find_first_match_in_period = True,
-        between = ["2020-11-01", "covid_diagnosis_date - 14 days"],
+        between = ["2020-11-01", "covid_diagnosis_date - 7 days"],
         date_format = "YYYY-MM-DD",
         return_expectations = {
         "date": {
@@ -655,7 +655,7 @@ study = StudyDefinition(
         target_disease_matches = "SARS-2 CORONAVIRUS",
         returning = "date",
         find_first_match_in_period = True,
-        between = ["covid_vax_1_date + 15 days", "covid_diagnosis_date - 14 days"],
+        between = ["covid_vax_1_date + 15 days", "covid_diagnosis_date - 7 days"],
         date_format = "YYYY-MM-DD",
         return_expectations = {
         "date": {
@@ -668,7 +668,7 @@ study = StudyDefinition(
         target_disease_matches = "SARS-2 CORONAVIRUS",
         returning = "date",
         find_first_match_in_period = True,
-        between = ["covid_vax_2_date + 15 days", "covid_diagnosis_date - 14 days"],
+        between = ["covid_vax_2_date + 15 days", "covid_diagnosis_date - 7 days"],
         date_format = "YYYY-MM-DD",
         return_expectations = {
         "date": {
@@ -682,7 +682,7 @@ study = StudyDefinition(
         target_disease_matches = "SARS-2 CORONAVIRUS",    
         returning = "date",
         find_first_match_in_period = True,
-        between = ["covid_vax_3_date + 15 days", "covid_diagnosis_date - 14 days"],
+        between = ["covid_vax_3_date + 15 days", "covid_diagnosis_date - 7 days"],
         date_format = "YYYY-MM-DD",
         return_expectations = {
         "date": {

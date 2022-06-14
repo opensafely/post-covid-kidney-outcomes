@@ -1,5 +1,5 @@
-cd repos/output
 log using covid_all_for_matching, replace
+clear
 
 insheet using "input_covid_all_for_matching.csv", comma
 
@@ -139,38 +139,23 @@ drop covid_krt_opcs_4
 * COVID-19 vaccination status
 gen covidvax1date = date(covid_vax_1_date, "YMD")
 format covidvax1date %td
-gen covid_post_vax_1 = covid_date - covidvax1date
-
 gen covidvax2date = date(covid_vax_2_date, "YMD")
 format covidvax2date %td
-gen covid_post_vax_2 = covid_date - covidvax2date
-
 gen covidvax3date = date(covid_vax_3_date, "YMD")
 format covidvax3date %td
-gen covid_post_vax_3 = covid_date - covidvax3date
-
 gen covidvax4date = date(covid_vax_4_date, "YMD")
 format covidvax4date %td
-gen covid_post_vax_4 = covid_date - covidvax4date
+gen covid_vax_status = covidvax4date
+replace covid_vax_status = 4 if covidvax4date!=.
+replace covid_vax_status = 3 if covid_vax_status==. &covidvax3date!=.
+replace covid_vax_status = 2 if covid_vax_status==. &covidvax2date!=.
+replace covid_vax_status = 1 if covid_vax_status==. &covidvax4date!=.
+replace covid_vax_status = 0 if covidvax4date!=.
 
-gen covid_vax_status = covid_post_vax_1
-replace covid_vax_status = 0 if covid_post_vax_1 <7
-replace covid_vax_status = 1 if covid_post_vax_1 >6
-replace covid_vax_status = 2 if covid_post_vax_2 >6
-replace covid_vax_status = 3 if covid_post_vax_3 >6
-replace covid_vax_status = 4 if covid_post_vax_4 >6
-drop covid_vax_1_date
-drop covid_vax_2_date
-drop covid_vax_3_date
-drop covid_vax_4_date
 drop covidvax1date
 drop covidvax2date
 drop covidvax3date
 drop covidvax4date
-drop covid_post_vax_1
-drop covid_post_vax_2
-drop covid_post_vax_3
-drop covid_post_vax_4
 label define covid_vax_label	0 "SARS-CoV-2 pre-vaccination"			///
 								1 "SARS-CoV-2 after 1 vaccine dose"		///
 								2 "SARS-CoV-2 after 2 vaccine doses"	///
@@ -242,7 +227,6 @@ mkspline age = age, cubic nknots(4)
 rename imd imd_o
 egen imd = cut(imd_o), group(5) icodes
 replace imd = imd + 1
-replace imd = . if imd_o==-1
 drop imd_o
 recode imd 5=1 4=2 3=3 2=4 1=5 .=.
 label define imd 1 "1 least deprived" 2 "2" 3 "3" 4 "4" 5 "5 most deprived" 
