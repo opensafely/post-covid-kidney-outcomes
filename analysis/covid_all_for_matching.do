@@ -475,8 +475,8 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
-	sts graph, failure by(`stratum') title(Cumulative kidney replacement therapy after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative kidney replacement therapy) xtitle(Follow-up (years))
-	graph save krt_outcome_`stratum'.gph, replace
+	sts graph, failure by(`stratum') title(Cumulative kidney replacement therapy after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) xtitle(Follow-up (years))
+	graph export krt_outcome_`stratum'.png, width(1366) height(788) replace
 	}
 
 * Death rates (stratified)
@@ -494,8 +494,8 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
-	sts graph, failure by(`stratum') title(Cumulative mortality after SARS-CoV-2 survival by `stratum') ylab(0(0.10)0.50, angle(horizontal)) ytitle(Cumulative mortality) xtitle(Follow-up (years))
-	graph save mortality_`stratum'.gph, replace
+	sts graph, failure by(`stratum') title(Cumulative mortality after SARS-CoV-2 survival by `stratum') ylab(0(0.10)0.50, angle(horizontal)) xtitle(Follow-up (years))
+	graph export mortality_`stratum'.png, width(1366) height(788) replace
 	}
 
 * Acute kidney injury rates (stratified)
@@ -513,9 +513,9 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
-	sts graph, failure by(`stratum') title(Cumulative AKI after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative AKI) xtitle(Follow-up (years))
-	graph save aki_`stratum'.gph, replace
+	sts graph, failure by(`stratum') title(Cumulative AKI after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) xtitle(Follow-up (years))
+	graph export aki_`stratum'.png, width(1366) height(788) replace
 	}
 	
 	
-save $outdir/covid_all_for_matching, replace -
+save $outdir/covid_all_for_matching, replace
