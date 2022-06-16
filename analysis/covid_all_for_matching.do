@@ -1,7 +1,8 @@
-log using covid_all_for_matching, replace
+cap log close
+log using ./logs/covid_all_for_matching, replace t
 clear
 
-insheet using "input_covid_all_for_matching.csv", comma
+import delimited ./output/input_covid_all_for_matching.csv, delimiter(comma) varnames(1) case(preserve) 
 
 **Exclusions
 * Age <18
@@ -145,12 +146,12 @@ gen covidvax3date = date(covid_vax_3_date, "YMD")
 format covidvax3date %td
 gen covidvax4date = date(covid_vax_4_date, "YMD")
 format covidvax4date %td
-gen covid_vax_status = covidvax4date
+gen covid_vax_status = .
 replace covid_vax_status = 4 if covidvax4date!=.
 replace covid_vax_status = 3 if covid_vax_status==. &covidvax3date!=.
 replace covid_vax_status = 2 if covid_vax_status==. &covidvax2date!=.
-replace covid_vax_status = 1 if covid_vax_status==. &covidvax4date!=.
-replace covid_vax_status = 0 if covidvax4date!=.
+replace covid_vax_status = 1 if covid_vax_status==. &covidvax1date!=.
+replace covid_vax_status = 0 if covid_vax_status==.
 
 drop covidvax1date
 drop covidvax2date
@@ -338,9 +339,9 @@ gen index_date = covid_date + 28
 format index_date %td
 
 * Exit date
-gen death_date = date(died_date_gp, "YMD")
+gen death_date = date(death_date_gp, "YMD")
 format death_date %td
-drop died_date_gp
+drop death_date_gp
 gen krt_outcome = date(krt_outcome_date, "YMD")
 format krt_outcome %td
 drop krt_outcome_date
@@ -349,11 +350,9 @@ format exit_date %td
 gen deregistered_date = date(deregistered, "YMD")
 format deregistered_date %td
 drop deregistered
-replace exit_date = deregistered_date if krt_outcome==.
-replace exit_date = death_date if exit_date==.
 gen end_date = date("2022-01-31", "YMD")
 format end_date %td
-replace exit_date = end_date if exit_date==.
+replace exit_date = min(deregistered_date, death_date, end_date) if krt_outcome==.
 gen follow_up_time = (exit_date - index_date)
 label var follow_up_time "Follow-up time (Days)"
 
@@ -403,6 +402,19 @@ drop mgdl_`followup_creatinine_monthly'
 drop min_`followup_creatinine_monthly'
 drop max_`followup_creatinine_monthly'
 }
+*earliest month of egfr_followup<15*
+gen date_egfr_followup_below15=.
+local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
+foreach x of  local month_year  {
+  replace date_egfr_followup_below15=date("15`x'", "DMY") if date_egfr_followup_below15==.& egfr_followup_creatinine_`x'<15 & date("01`x'", "DMY")>=index_date
+}
+*earliest month of egfr_followup<50% of baseline value*
+gen date_egfr_followup_half_baseline=.
+local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
+foreach x of  local month_year  {
+  replace date_egfr_followup_half_baseline=date("15`x'", "DMY") if date_egfr_followup_half_baseline==.& egfr_followup_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>=index_date
+}
+
 
 * AKI date
 gen aki_outcome_date = date(acute_kidney_injury_outcome, "YMD")
@@ -411,12 +423,9 @@ format aki_outcome_date %td
 * Exit date (AKI)
 gen exit_date_aki = aki_outcome_date
 format exit_date_aki %td
-replace exit_date_aki = deregistered_date if aki_outcome_date==.
-replace exit_date_aki = krt_outcome if exit_date_aki==.
-replace exit_date_aki = death_date if exit_date_aki==.
-replace exit_date_aki = end_date if exit_date_aki==.
+replace exit_date_aki = min(deregistered_date,krt_outcome,death_date,end_date)  if aki_outcome_date==.
 gen follow_up_time_aki = (exit_date_aki - index_date)
-label var follow_up_time "Follow-up time (AKI) (Days)"
+label var follow_up_time_aki "Follow-up time (AKI) (Days)"
 
 **Descriptive statistics
 * By COVID-19 severity
@@ -425,7 +434,7 @@ foreach stratum of varlist 	covid_severity 				///
 							covid_krt					///
 							covid_vax_status			///
 							calendar_period {
-	univar age baseline_egfr body_mass_index follow_up_time, by(`stratum')
+	by `stratum',sort: sum age baseline_egfr body_mass_index follow_up_time, de
 	total follow_up_time, over(`stratum')
 	}
 
@@ -476,11 +485,18 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
 	sts graph, failure by(`stratum') title(Cumulative kidney replacement therapy after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative kidney replacement therapy) xtitle(Follow-up (years))
-	graph save krt_outcome_`stratum'.gph, replace
+	graph export ./output/krt_outcome_`stratum'.svg,  replace
 	}
 
+* Exit date (death)
+gen exit_date_death = death_date
+format exit_date_death %td
+replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
+gen follow_up_time_death = (exit_date_death - index_date)
+label var follow_up_time_death "Follow-up time (death) (Days)"
+
 * Death rates (stratified)
-streset, fail(death_date)
+stset exit_date_death, fail(death_date) origin(index_date) id(patient_id) scale(365.25)
 foreach stratum of varlist 	covid_severity 				///
 							covid_acute_kidney_injury 	///
 							covid_krt					///
@@ -495,7 +511,7 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
 	sts graph, failure by(`stratum') title(Cumulative mortality after SARS-CoV-2 survival by `stratum') ylab(0(0.10)0.50, angle(horizontal)) ytitle(Cumulative mortality) xtitle(Follow-up (years))
-	graph save mortality_`stratum'.gph, replace
+	graph export ./output/mortality_`stratum'.svg,  replace
 	}
 
 * Acute kidney injury rates (stratified)
@@ -514,8 +530,9 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
 	sts graph, failure by(`stratum') title(Cumulative AKI after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative AKI) xtitle(Follow-up (years))
-	graph save aki_`stratum'.gph, replace
+	graph export ./output/aki_`stratum'.svg, replace
 	}
 	
 	
-save $outdir/covid_all_for_matching, replace -
+save ./output/covid_all_for_matching.dta, replace 
+log close
