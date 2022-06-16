@@ -337,24 +337,7 @@ label var bmicat "BMI category"
 * Index date (COVID-19 diagnosis + 28 days)
 gen index_date = covid_date + 28
 format index_date %td
-
-* Exit date
-gen death_date = date(death_date_gp, "YMD")
-format death_date %td
-drop death_date_gp
-gen krt_outcome = date(krt_outcome_date, "YMD")
-format krt_outcome %td
-drop krt_outcome_date
-gen exit_date = krt_outcome
-format exit_date %td
-gen deregistered_date = date(deregistered, "YMD")
-format deregistered_date %td
-drop deregistered
-gen end_date = date("2022-01-31", "YMD")
-format end_date %td
-replace exit_date = min(deregistered_date, death_date, end_date) if krt_outcome==.
-gen follow_up_time = (exit_date - index_date)
-label var follow_up_time "Follow-up time (Days)"
+label var index_date "Index date"
 
 * Monthly eGFR follow-up
 foreach followup_creatinine_monthly of varlist 	followup_creatinine_feb2020 ///
@@ -402,19 +385,55 @@ drop mgdl_`followup_creatinine_monthly'
 drop min_`followup_creatinine_monthly'
 drop max_`followup_creatinine_monthly'
 }
-*earliest month of egfr_followup<15*
-gen date_egfr_followup_below15=.
-local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
-foreach x of  local month_year  {
-  replace date_egfr_followup_below15=date("15`x'", "DMY") if date_egfr_followup_below15==.& egfr_followup_creatinine_`x'<15 & date("01`x'", "DMY")>=index_date
-}
-*earliest month of egfr_followup<50% of baseline value*
-gen date_egfr_followup_half_baseline=.
-local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
-foreach x of  local month_year  {
-  replace date_egfr_followup_half_baseline=date("15`x'", "DMY") if date_egfr_followup_half_baseline==.& egfr_followup_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>=index_date
-}
 
+* eGFR <15 (earliest month)
+gen egfr_below15_outcome_date=.
+local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
+foreach x of  local month_year  {
+  replace egfr_below15_outcome_date=date("15`x'", "DMY") if egfr_below15_outcome_date==.& egfr_followup_creatinine_`x'<15 & date("01`x'", "DMY")>=index_date
+}
+format egfr_below15_outcome_date %td
+
+* ESRD date
+gen esrd_date = egfr_below15_outcome_date
+format esrd_date %td
+gen krt_outcome = date(krt_outcome_date, "YMD")
+replace esrd_date = krt_outcome if esrd_date==.
+
+* Exit date
+gen death_date = date(death_date_gp, "YMD")
+format death_date %td
+drop death_date_gp
+gen exit_date = esrd_date
+format exit_date %td
+gen deregistered_date = date(deregistered, "YMD")
+format deregistered_date %td
+drop deregistered
+gen end_date = date("2022-01-31", "YMD")
+format end_date %td
+replace exit_date = min(deregistered_date, death_date, end_date) if esrd_date==.
+gen follow_up_time = (exit_date - index_date)
+label var follow_up_time "Follow-up time (Days)"
+
+* 50% reduction in eGFR (earliest month) (or ESRD)
+gen egfr_reduction50_outcome_date=.
+local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
+foreach x of  local month_year  {
+  replace egfr_reduction50_outcome_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_reduction50_outcome_date==.& egfr_followup_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>=index_date
+  format egfr_reduction50_outcome_date %td
+}
+replace egfr_reduction50_outcome_date=esrd_date if egfr_reduction50_outcome_date==.
+
+* Index date (50% reduction in eGFR)
+gen index_date_egfr_reduction = index_date
+replace index_date_egfr_reduction =. if baseline_egfr==.
+
+* Exit date (50% reduction in eGFR)
+gen exit_date_egfr_reduction = egfr_reduction50_outcome_date
+format exit_date_egfr_reduction %td
+replace exit_date_egfr_reduction = min(deregistered_date,death_date,end_date)  if egfr_reduction50_outcome_date==.
+gen follow_up_time_egfr_outcome = (exit_date_egfr_reduction - index_date)
+label var follow_up_time_egfr_outcome "Follow-up time (50% eGFR reduction) (Days)"
 
 * AKI date
 gen aki_outcome_date = date(acute_kidney_injury_outcome, "YMD")
@@ -423,9 +442,16 @@ format aki_outcome_date %td
 * Exit date (AKI)
 gen exit_date_aki = aki_outcome_date
 format exit_date_aki %td
-replace exit_date_aki = min(deregistered_date,krt_outcome,death_date,end_date)  if aki_outcome_date==.
+replace exit_date_aki = min(deregistered_date,esrd_date,death_date,end_date)  if aki_outcome_date==.
 gen follow_up_time_aki = (exit_date_aki - index_date)
 label var follow_up_time_aki "Follow-up time (AKI) (Days)"
+
+* Exit date (death)
+gen exit_date_death = death_date
+format exit_date_death %td
+replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
+gen follow_up_time_death = (exit_date_death - index_date)
+label var follow_up_time_death "Follow-up time (death) (Days)"
 
 **Descriptive statistics
 * By COVID-19 severity
@@ -469,8 +495,10 @@ foreach var of varlist 	agegroup 						///
 	tab `var' calendar_period, m col chi
 	}
 
-* Kidney replacement therapy rates (stratified)
-stset exit_date, fail(krt_outcome) origin(index_date) id(patient_id) scale(365.25)
+* End-stage renal disease (stratified)
+sum krt_outcome
+sum egfr_below15_outcome_date
+stset exit_date, fail(esrd_date) origin(index_date) id(patient_id) scale(365.25)
 foreach stratum of varlist 	covid_severity 				///
 							covid_acute_kidney_injury 	///
 							covid_krt					///
@@ -484,19 +512,12 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
-	sts graph, failure by(`stratum') title(Cumulative kidney replacement therapy after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative kidney replacement therapy) xtitle(Follow-up (years))
-	graph export ./output/krt_outcome_`stratum'.svg,  replace
+	sts graph, failure by(`stratum') title(Cumulative ESRD after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative ESRD) xtitle(Follow-up (years))
+	graph export ./output/esrd_`stratum'.svg,  replace
 	}
 
-* Exit date (death)
-gen exit_date_death = death_date
-format exit_date_death %td
-replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
-gen follow_up_time_death = (exit_date_death - index_date)
-label var follow_up_time_death "Follow-up time (death) (Days)"
-
-* Death rates (stratified)
-stset exit_date_death, fail(death_date) origin(index_date) id(patient_id) scale(365.25)
+* 50% reduction in eGFR (stratified)
+stset exit_date_egfr_reduction, fail(egfr_reduction50_outcome_date) origin(index_date_egfr_reduction) id(patient_id) scale(365.25)
 foreach stratum of varlist 	covid_severity 				///
 							covid_acute_kidney_injury 	///
 							covid_krt					///
@@ -510,8 +531,8 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
-	sts graph, failure by(`stratum') title(Cumulative mortality after SARS-CoV-2 survival by `stratum') ylab(0(0.10)0.50, angle(horizontal)) ytitle(Cumulative mortality) xtitle(Follow-up (years))
-	graph export ./output/mortality_`stratum'.svg,  replace
+	sts graph, failure by(`stratum') title(Cumulative 50% eGFR reduction after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative 50% eGFR reduction) xtitle(Follow-up (years))
+	graph export ./output/egfr_reduction_`stratum'.svg,  replace
 	}
 
 * Acute kidney injury rates (stratified)
@@ -533,6 +554,24 @@ foreach stratum of varlist 	covid_severity 				///
 	graph export ./output/aki_`stratum'.svg, replace
 	}
 	
+* Death rates (stratified)
+stset exit_date_death, fail(death_date) origin(index_date) id(patient_id) scale(365.25)
+foreach stratum of varlist 	covid_severity 				///
+							covid_acute_kidney_injury 	///
+							covid_krt					///
+							covid_vax_status 			///
+							calendar_period {
+	tab _d `stratum', col chi
+	strate `stratum'
+	strate `stratum' agegroup
+	strate `stratum' male
+	strate `stratum' ethnicity
+	strate `stratum' imd
+	strate `stratum' baseline_egfr_cat
+	strate `stratum' diabetes
+	sts graph, failure by(`stratum') title(Cumulative mortality after SARS-CoV-2 survival by `stratum') ylab(0(0.10)0.50, angle(horizontal)) ytitle(Cumulative mortality) xtitle(Follow-up (years))
+	graph export ./output/mortality_`stratum'.svg,  replace
+	}
 	
 save ./output/covid_all_for_matching.dta, replace 
 log close
