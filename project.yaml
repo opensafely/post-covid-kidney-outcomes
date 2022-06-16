@@ -1,12 +1,41 @@
-version: '3.0'
+
+version: "3.0"
 
 expectations:
   population_size: 1000
 
 actions:
 
-  generate_study_population:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition
+# Match covid_all_for_matching to comparators in potential_historical_general_population and potential_contemporary_general_population
+# https://docs.opensafely.org/case-control-studies/
+
+# Extract data for covid_all_for_matching
+  extract_covid_all:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_all_for_matching
     outputs:
       highly_sensitive:
-        cohort: output/input.csv
+        cohort: output/input_covid_all_for_matching.csv
+
+  covid_all_descriptive:
+    run: stata-mp:latest analysis/covid_all_for_matching.do
+    needs: [extract_covid_all]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/covid_all_for_matching.dta
+      moderately_sensitive:
+        svg1: output/krt_outcome_covid_severity.svg 
+        svg2: output/krt_outcome_covid_acute_kidney_injury.svg 
+        svg3: output/krt_outcome_covid_krt.svg
+        svg4: output/krt_outcome_covid_vax_status.svg
+        svg5: output/krt_outcome_calendar_period.svg
+        svg6: output/mortality_covid_severity.svg 
+        svg7: output/mortality_covid_acute_kidney_injury.svg 
+        svg8: output/mortality_covid_krt.svg
+        svg9: output/mortality_covid_vax_status.svg
+        svg10: output/mortality_calendar_period.svg
+        svg11: output/aki_covid_severity.svg 
+        svg12: output/aki_covid_acute_kidney_injury.svg 
+        svg13: output/aki_covid_krt.svg
+        svg14: output/aki_covid_vax_status.svg
+        svg15: output/aki_calendar_period.svg
+        log: logs/covid_all_for_matching.log
