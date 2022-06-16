@@ -512,8 +512,6 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
-	sts graph, failure by(`stratum') title(Cumulative ESRD after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative ESRD) xtitle(Follow-up (years))
-	graph export ./output/esrd_`stratum'.svg,  replace
 	}
 
 * 50% reduction in eGFR (stratified)
@@ -531,8 +529,6 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
-	sts graph, failure by(`stratum') title(Cumulative 50% eGFR reduction after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative 50% eGFR reduction) xtitle(Follow-up (years))
-	graph export ./output/egfr_reduction_`stratum'.svg,  replace
 	}
 
 * Acute kidney injury rates (stratified)
@@ -550,8 +546,6 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
-	sts graph, failure by(`stratum') title(Cumulative AKI after SARS-CoV-2 survival by `stratum') ylab(0(0.02)0.20, angle(horizontal)) ytitle(Cumulative AKI) xtitle(Follow-up (years))
-	graph export ./output/aki_`stratum'.svg, replace
 	}
 	
 * Death rates (stratified)
@@ -569,8 +563,6 @@ foreach stratum of varlist 	covid_severity 				///
 	strate `stratum' imd
 	strate `stratum' baseline_egfr_cat
 	strate `stratum' diabetes
-	sts graph, failure by(`stratum') title(Cumulative mortality after SARS-CoV-2 survival by `stratum') ylab(0(0.10)0.50, angle(horizontal)) ytitle(Cumulative mortality) xtitle(Follow-up (years))
-	graph export ./output/mortality_`stratum'.svg,  replace
 	}
 	
 save ./output/covid_all_for_matching.dta, replace 
