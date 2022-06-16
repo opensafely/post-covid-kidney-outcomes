@@ -117,6 +117,7 @@ study = StudyDefinition(
         between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
         return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
     ),
+    ## may also consider returning = "days_in_critical_care" later?
     covid_acute_kidney_injury=patients.admitted_to_hospital(
         with_these_diagnoses=acute_kidney_injury_codes,
         returning="binary_flag",
@@ -140,6 +141,7 @@ study = StudyDefinition(
         between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
         ),
+    ## may also consider ONS death data later?
 
     #To exclude individuals with pre-existing kidney replacement therapy at the time of COVID diagnosis:
     baseline_krt_primary_care=patients.with_these_clinical_events(
@@ -169,6 +171,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
+    ## may consider using latest value instead of mean, and simplify using between=["covid_diagnosis_date - 18 months","covid_diagnosis_date"]?
     baseline_creatinine_mar2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
@@ -381,7 +384,7 @@ study = StudyDefinition(
 #Incident kidney replacement therapy as an outcome:
     krt_outcome_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
-        between = ["covid_diagnosis_date", "2022-02-01"],
+        between = ["covid_diagnosis_date", "2022-01-31"],
         find_first_match_in_period=True,
         returning="date",
         date_format="YYYY-MM-DD",
