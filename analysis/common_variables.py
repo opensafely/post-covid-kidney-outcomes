@@ -118,6 +118,7 @@ common_variables = dict(
             "incidence": 0.75,
         },
     ),
+    ## may consider also using patients.with_ethnicity_from_sus?
 
     #Clinical covariates
     #index_date_variable needs to be covid_diagnosis_date or equivalent date in matched comparator groups
