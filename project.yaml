@@ -24,3 +24,19 @@ actions:
         analysis_dataset: output/covid_all_for_matching.dta
       moderately_sensitive:
         log: logs/covid_all_for_matching.log
+
+# Extract data for covid_critical_care
+  extract_covid_critical_care:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_critical_care
+    outputs:
+      highly_sensitive:
+        cohort: output/input_covid_critical_care.csv
+
+  covid_critical_care_count:
+    run: stata-mp:latest analysis/covid_critical_care.do
+    needs: [extract_covid_critical_care]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/covid_critical_care.dta
+      moderately_sensitive:
+        log: logs/covid_critical_care.log
