@@ -1,5 +1,5 @@
 cap log close
-log using ./logs/covid_all_for_matching, replace t
+log using ./logs/covid_critical_care, replace t
 clear
 
 import delimited ./output/input_covid_critical_care.csv, delimiter(comma) varnames(1) case(preserve) 
