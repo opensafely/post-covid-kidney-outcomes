@@ -156,10 +156,9 @@ replace stp = sum(stp)
 drop stp_old
 
 *Recode critical care flag variables to binary (from #days in critical care)
-replace covid_critical_care_flag = 1 if covid_critical_care_flag!=.
-replace covid_critical_care_flag = 0 if covid_critical_care_flag==.
-replace covid_critical_care_concordant = 1 if covid_critical_care_concordant!=.
-replace covid_critical_care_concordant = 0 if covid_critical_care_concordant==.
+tab covid_critical_care_flag
+replace covid_critical_care_flag = 1 if covid_critical_care_flag!=0
+replace covid_critical_care_concordant = 1 if covid_critical_care_concordant!=0
 
 *covid_critical_care_procedures = admitted to hospital + critical care procedure codes
 *covid_critical_care_flag = admitted to hospital + SUS critical care flag
