@@ -409,6 +409,8 @@ format exit_date %td
 gen deregistered_date = date(deregistered, "YMD")
 format deregistered_date %td
 drop deregistered
+gen deregistered_days = (deregistered_date - index_date)
+drop if deregistered_days<0
 gen end_date = date("2022-01-31", "YMD")
 format end_date %td
 replace exit_date = min(deregistered_date, death_date, end_date) if esrd_date==.
