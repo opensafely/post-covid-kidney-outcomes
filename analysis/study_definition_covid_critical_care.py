@@ -109,17 +109,6 @@ study = StudyDefinition(
             "incidence": 0.2,
         },
     ),
-    covid_critical_care_concordant=patients.admitted_to_hospital(
-        with_these_diagnoses=covid_codes,
-        with_these_procedures=critical_care_codes,
-        returning="days_in_critical_care",
-        find_first_match_in_period = True,
-        between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
-        return_expectations = {
-            "category": {"ratios": {"20": 0.5, "40": 0.5}},
-            "incidence": 0.2,
-        },
-    ),
     
     age=patients.age_as_of(
         "covid_diagnosis_date",

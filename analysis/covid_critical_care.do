@@ -158,29 +158,34 @@ drop stp_old
 *Recode critical care flag variables to binary (from #days in critical care)
 tab covid_critical_care_flag
 replace covid_critical_care_flag = 1 if covid_critical_care_flag!=0
-replace covid_critical_care_concordant = 1 if covid_critical_care_concordant!=0
 
 *covid_critical_care_procedures = admitted to hospital + critical care procedure codes
 *covid_critical_care_flag = admitted to hospital + SUS critical care flag
-*covid_critical_care_concordant = admitted to hospital + critical care procedure codes + SUS critical care flag
+
+label define critical_care_procedures_label		0 "No critical care" 								///
+												1 "Critical care procedures" 						///
+label values covid_critical_care_procedures critical_care_procedures_label
+label var covid_critical_care_procedures "Critical care procedure codes"
+
+label define critical_care_flag_label		0 "No critical care" 						///
+											1 "Critical care flag" 						///
+label values covid_critical_care_flag critical_care_flag_label
+label var covid_critical_care_flag "Critical care flag"
 
 *Compare covid_critical_care_procedures and covid_critical_care_flag
 tab covid_hospitalised
 tab covid_critical_care_procedures
 tab covid_critical_care_flag
-tab covid_critical_care_concordant
 
 gen critical_care = covid_hospitalised
 replace critical_care = 0 if covid_hospitalised==1
 replace critical_care = 1 if covid_critical_care_procedures==1 &covid_critical_care_flag==1
-replace critical_care = 2 if covid_critical_care_concordant==1 &critical_care==0
-replace critical_care = 3 if covid_critical_care_procedures==1 &critical_care==0
-replace critical_care = 4 if covid_critical_care_flag==1 &critical_care==0
+replace critical_care = 2 if covid_critical_care_procedures==1 &critical_care==0
+replace critical_care = 3 if covid_critical_care_flag==1 &critical_care==0
 label define critical_care_label	0 "No critical care" 								///
 									1 "Concordant critical care" 						///
-									2 "Extracted concordant critical care"				///
-									3 "Procedure only"									///
-									4 "Flagged only"
+									2 "Procedure only"									///
+									3 "Flagged only"
 label values critical_care critical_care_label
 label var critical_care "Critical care coding"
 tab critical_care
@@ -192,7 +197,9 @@ foreach var of varlist 	agegroup 						///
 						region_9 						///
 						stp								///
 						calendar_period {						
-	tab	`var' critical_care, m col chi
+	tab `var' covid_critical_care_procedures, m row chi
+	tab `var' covid_critical_care_flag, m row chi
+	tab	`var' critical_care, m row chi
 	}
 	
 save ./output/covid_critical_care.dta, replace 
