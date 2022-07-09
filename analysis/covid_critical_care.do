@@ -162,16 +162,6 @@ replace covid_critical_care_flag = 1 if covid_critical_care_flag!=0
 *covid_critical_care_procedures = admitted to hospital + critical care procedure codes
 *covid_critical_care_flag = admitted to hospital + SUS critical care flag
 
-label define critical_care_procedures_label		0 "No critical care" 								///
-												1 "Critical care procedures" 						///
-label values covid_critical_care_procedures critical_care_procedures_label
-label var covid_critical_care_procedures "Critical care procedure codes"
-
-label define critical_care_flag_label		0 "No critical care" 						///
-											1 "Critical care flag" 						///
-label values covid_critical_care_flag critical_care_flag_label
-label var covid_critical_care_flag "Critical care flag"
-
 *Compare covid_critical_care_procedures and covid_critical_care_flag
 tab covid_hospitalised
 tab covid_critical_care_procedures
