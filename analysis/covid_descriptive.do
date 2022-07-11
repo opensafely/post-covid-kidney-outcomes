@@ -2,7 +2,7 @@ cap log close
 log using ./logs/covid_descriptive, replace t
 clear
 
-import ./output/covid_england.dta
+use ./output/covid_england.dta
 
 **Descriptive statistics
 * By COVID-19 severity
