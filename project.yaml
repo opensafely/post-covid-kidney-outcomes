@@ -9,21 +9,32 @@ actions:
 # Match covid_all_for_matching to comparators in potential_historical_general_population and potential_contemporary_general_population
 # https://docs.opensafely.org/case-control-studies/
 
-# Extract data for covid_all_for_matching
-  extract_covid_all:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_all_for_matching
+# Extract data for covid_england
+  extract_covid_england:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_england
     outputs:
       highly_sensitive:
-        cohort: output/input_covid_all_for_matching.csv
+        cohort: output/input_covid_england.csv
 
-  covid_all_descriptive:
-    run: stata-mp:latest analysis/covid_all_for_matching.do
-    needs: [extract_covid_all]
+#Data management for covid_england
+  covid_england:
+    run: stata-mp:latest analysis/covid_england.do
+    needs: [extract_covid_england]
     outputs:
       highly_sensitive:
-        analysis_dataset: output/covid_all_for_matching.dta
+        analysis_dataset: output/covid_england.dta
       moderately_sensitive:
-        log: logs/covid_all_for_matching.log
+        log: logs/covid_england.log
+
+#Descriptive statitics for covid_england
+  covid_descriptive:
+    run: stata-mp:latest analysis/covid_descriptive.do
+    needs: [covid_england]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/covid_descriptive.dta
+      moderately_sensitive:
+        log: logs/covid_descriptive.log
 
 # Extract data for covid_critical_care
   extract_covid_critical_care:

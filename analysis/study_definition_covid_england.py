@@ -1,21 +1,12 @@
-#study_definition_covid_all_for matching will be matched to
-    #study_definition_potential_historical_general_population
-    #and study_definition_potential_contemporary_general_population
+#Study definition for people with SARS-CoV-2 infection across England on OpenSAFELY-TPP for descriptive statistics
+#Populations will be matched region by region before appending matched datasets
 
-#Matching variables:
-# - age
-# - sex
-# - stp
-# - imd
-# - covid_diagnosis_date + 28 days
-
-#Exclusion variables (see match_historical and match_contemporary):
+#Exclusion variables:
 # - kidney_replacement_therapy before covid_diagnosis_date
 # - died_date_gp before covid_diagnosis_date
 
 #Note:
 # - Variables will be extracted at covid_diagnosis_date
-# - Matching and follow-up will commence at 28 days after covid_diagnosis_date
 
 from cohortextractor import (
     StudyDefinition,

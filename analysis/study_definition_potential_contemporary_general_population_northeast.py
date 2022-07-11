@@ -1,5 +1,5 @@
 #study_definition_potential_contemporary_general_population will be matched to 
-    #study_definition_covid_all_for_matching
+    #study_definition_covid_all_for_matching (restricted to North-East region)
 
 #Only matching variables and exclusion variables need to be extracted at this stage
 
