@@ -1,5 +1,5 @@
 cap log close
-log using ./logs/covid_potential_general_population, replace t
+log using ./logs/potential_general_population, replace t
 clear
 
 import delimited ./output/input_potential_contemporary_general_population.csv, delimiter(comma) varnames(1) case(preserve) 
