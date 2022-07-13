@@ -1,5 +1,4 @@
-#study_definition_potential_contemporary_general_population will be matched to 
-    #study_definition_covid_all_for_matching (restricted to North-East region)
+#Template study_definition to be extracted region by region for matching
 
 #Only matching variables and exclusion variables need to be extracted at this stage
 
@@ -13,6 +12,7 @@
 # - kidney_replacement_therapy on or before 2022-01-31
 # - eGFR <15 on or before 2022-01-31
 # - deceased on or before 2022-01-31
+# - matched individuals will then be excluded if they fulfil these criteria at the covid_diagnosis_date once matched cohort obtained
 
 from cohortextractor import (
     StudyDefinition,
@@ -38,7 +38,7 @@ study = StudyDefinition(
         has_follow_up
         AND (age >=18)
         AND (sex = "M" OR sex = "F")
-        AND imd > 0
+        AND imd >= 0
         AND NOT deceased = "1"
         AND NOT stp = ""
         AND NOT baseline_krt_primary_care = "1"
@@ -46,6 +46,9 @@ study = StudyDefinition(
         AND NOT baseline_krt_opcs_4 = "1"
         """,
     ),  
+
+    index_date="2020-02-01",
+
     deregistered=patients.date_deregistered_from_all_supported_practices(
         between= ["2020-02-01", "2022-01-31"],
         date_format="YYYY-MM-DD"
@@ -74,7 +77,6 @@ study = StudyDefinition(
             "category": {"ratios": {"M": 0.49, "F": 0.51}},
         },
     ),
-
     imd=patients.address_as_of(
         "2020-01-31",
         returning="index_of_multiple_deprivation",
@@ -97,7 +99,6 @@ study = StudyDefinition(
             },
         },
     ),
-    
     region=patients.registered_practice_as_of(
         "2020-01-31",
         returning="nuts1_region_name",

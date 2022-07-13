@@ -36,6 +36,58 @@ actions:
       moderately_sensitive:
         log: logs/covid_descriptive.log
 
+#Extract matching and exclusion data for potential_contemporary_population_england
+  extract_potential_contemporary_population_england:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_potential_contemporary_population_england
+    outputs:
+      highly_sensitive:
+        cohort: output/input_potential_contemporary_population_england.csv
+
+# Extract data for covid_northeast
+  extract_covid_northeast:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_northeast
+    outputs:
+      highly_sensitive:
+        cohort: output/input_covid_northeast.csv
+
+#Data management for covid_northeast
+  covid_northeast:
+    run: stata-mp:latest analysis/covid_northeast.do
+    needs: [extract_covid_northeast]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/covid_northeast.dta
+      moderately_sensitive:
+        log: logs/covid_northeast.log
+
+#Extract matching and exclusion data for potential_contemporary_population_northeast
+  extract_potential_contemporary_population_northeast:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_potential_contemporary_population_northeast
+    outputs:
+      highly_sensitive:
+        cohort: output/input_potential_contemporary_population_northeast.csv
+
+#Data management for potential_contemporary_population_northeast
+  potential_contemporary_population_northeast:
+    run: stata-mp:latest analysis/potential_contemporary_population_northeast.do
+    needs: [extract_potential_contemporary_population_northeast]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/potential_contemporary_population_northeast.dta
+      moderately_sensitive:
+        log: logs/potential_contemporary_population_northeast.log
+
+# Match covid_northeast to potential_contemporary_population_northeast
+  matching:
+    run: python:latest python analysis/match_contemporary_northeast.py
+    needs: [extract_covid_northeast, covid_northeast, extract_potential_contemporary_population_northeast, potential_contemporary_population_northeast]
+    outputs:
+      moderately_sensitive:
+        matching_report: output/matching_report_contemporary_northeast.txt
+      highly_sensitive:
+        matched_matches: output/matched_matches_contemporary_northeast.csv
+
+
 # Extract data for covid_critical_care
   extract_covid_critical_care:
     run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_critical_care

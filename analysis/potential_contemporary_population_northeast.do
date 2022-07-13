@@ -1,15 +1,27 @@
 cap log close
-log using ./logs/potential_general_population, replace t
+log using ./logs/potential_contemporary_population_northeast, replace t
 clear
 
-import delimited ./output/input_potential_contemporary_general_population.csv, delimiter(comma) varnames(1) case(preserve) 
+import delimited ./output/input_potential_contemporary_population_northeast.csv, delimiter(comma) varnames(1) case(preserve) 
 
 **Exclusions
+* Deceased before 2020-01-31
+drop if deceased==1
+drop deceased
+
 * Age <18
 drop if age <18
 
 * Anyone not registered at one practice for 3 months before 2020-01-31
 drop if has_follow_up==0
+
+* Pre-existing kidney replacement therapy
+drop if baseline_krt_primary_care==1
+drop baseline_krt_primary_care
+drop if baseline_krt_icd_10==1
+drop baseline_krt_icd_10
+drop if baseline_krt_opcs_4==1
+drop baseline_krt_opcs_4
 
 * Baseline eGFR <15 as at February 2020
 assert inlist(sex, "M", "F")
@@ -62,5 +74,5 @@ bysort stp_old: gen stp = 1 if _n==1
 replace stp = sum(stp)
 drop stp_old
 
-save ./output/potential_contemporary_general_population.dta, replace 
+save ./output/potential_contemporary_population_northeast.dta, replace 
 log close

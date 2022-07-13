@@ -1,5 +1,5 @@
 #study_definition_potential_contemporary_general_population will be matched to 
-    #study_definition_covid_all_for_matching
+    #study_definition_covid_all_for_matching (restricted to North-East region)
 
 #Only matching variables and exclusion variables need to be extracted at this stage
 
@@ -38,7 +38,8 @@ study = StudyDefinition(
         has_follow_up
         AND (age >=18)
         AND (sex = "M" OR sex = "F")
-        AND imd > 0
+        AND imd >= 0
+        AND region = "North East"
         AND NOT deceased = "1"
         AND NOT stp = ""
         AND NOT baseline_krt_primary_care = "1"
@@ -46,6 +47,9 @@ study = StudyDefinition(
         AND NOT baseline_krt_opcs_4 = "1"
         """,
     ),  
+
+    index_date="2020-02-01",
+
     deregistered=patients.date_deregistered_from_all_supported_practices(
         between= ["2020-02-01", "2022-01-31"],
         date_format="YYYY-MM-DD"
@@ -74,7 +78,6 @@ study = StudyDefinition(
             "category": {"ratios": {"M": 0.49, "F": 0.51}},
         },
     ),
-
     imd=patients.address_as_of(
         "2020-01-31",
         returning="index_of_multiple_deprivation",
@@ -97,7 +100,6 @@ study = StudyDefinition(
             },
         },
     ),
-    
     region=patients.registered_practice_as_of(
         "2020-01-31",
         returning="nuts1_region_name",
@@ -105,15 +107,15 @@ study = StudyDefinition(
             "rate": "universal",
             "category": {
                 "ratios": {
-                    "North East": 0.1,
-                    "North West": 0.1,
-                    "Yorkshire and The Humber": 0.1,
-                    "East Midlands": 0.1,
-                    "West Midlands": 0.1,
-                    "East": 0.1,
-                    "London": 0.2,
-                    "South East": 0.1,
-                    "South West": 0.1,
+                    "North East": 1.0,
+                    "North West": 0.0,
+                    "Yorkshire and The Humber": 0.0,
+                    "East Midlands": 0.0,
+                    "West Midlands": 0.0,
+                    "East": 0.0,
+                    "London": 0.0,
+                    "South East": 0.0,
+                    "South West": 0.0,
                 },
             },
         },
