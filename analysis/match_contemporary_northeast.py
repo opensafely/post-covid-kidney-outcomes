@@ -1,15 +1,15 @@
 #https://5b5368c1.opensafely-docs.pages.dev/case-control-studies/
 #https://github.com/opensafely/documentation/pull/522
 
-#Individuals extracted from study_definition_covid_england will be matched to individuals from 
-    #study_definition_contemporary_general_population (Template only - matching will be undertaken region by region)
+#Individuals extracted from study_definition_covid_northeast will be matched to individuals from 
+    #study_definition_contemporary_general_population_northeast
 
 #https://github.com/opensafely-core/matching#readme:
 from osmatching import match
 
 match(
-    case_csv="input_covid_england",
-    match_csv="input_potential_contemporary_population_england",
+    case_csv="input_covid_northeast",
+    match_csv="input_potential_contemporary_population_northeast",
     matches_per_case=5,
     match_variables={
         "sex": "category",

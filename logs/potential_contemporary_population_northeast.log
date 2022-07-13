@@ -2,14 +2,14 @@
       name:  <unnamed>
        log:  /workspace/logs/potential_contemporary_population_northeast.log
   log type:  text
- opened on:  13 Jul 2022, 01:14:13
+ opened on:  13 Jul 2022, 13:42:32
 
 . clear
 
 . 
 . import delimited ./output/input_potential_contemporary_population_northeast.c
 > sv, delimiter(comma) varnames(1) case(preserve) 
-(14 vars, 1,000 obs)
+(18 vars, 1,000 obs)
 
 . 
 . **Exclusions
@@ -17,34 +17,26 @@
 . drop if deceased==1
 (100 observations deleted)
 
-. drop deceased
-
 . 
 . * Age <18
 . drop if age <18
-(198 observations deleted)
+(195 observations deleted)
 
 . 
 . * Anyone not registered at one practice for 3 months before 2020-01-31
 . drop if has_follow_up==0
-(33 observations deleted)
+(38 observations deleted)
 
 . 
 . * Pre-existing kidney replacement therapy
 . drop if baseline_krt_primary_care==1
-(35 observations deleted)
-
-. drop baseline_krt_primary_care
+(31 observations deleted)
 
 . drop if baseline_krt_icd_10==1
-(35 observations deleted)
-
-. drop baseline_krt_icd_10
+(26 observations deleted)
 
 . drop if baseline_krt_opcs_4==1
-(28 observations deleted)
-
-. drop baseline_krt_opcs_4
+(31 observations deleted)
 
 . 
 . * Baseline eGFR <15 as at February 2020
@@ -63,64 +55,64 @@
 . 
 . replace baseline_creatinine_feb2020 = . if !inrange(baseline_creatinine_feb20
 > 20, 20, 3000)
-(253 real changes made, 253 to missing)
+(252 real changes made, 252 to missing)
 
 . gen mgdl_baseline_creatinine_feb2020 = baseline_creatinine_feb2020/88.4
-(253 missing values generated)
+(252 missing values generated)
 
 . gen min_baseline_creatinine_feb2020=.
-(571 missing values generated)
+(579 missing values generated)
 
 . replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
 > 7 if male==0
-(160 real changes made)
+(167 real changes made)
 
 . replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
 > 9 if male==1
-(158 real changes made)
+(160 real changes made)
 
 . replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
 > 329  if male==0
-(160 real changes made)
+(167 real changes made)
 
 . replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
 > 411  if male==1
-(158 real changes made)
+(160 real changes made)
 
 . replace min_baseline_creatinine_feb2020 = 1 if min_baseline_creatinine_feb202
 > 0<1
-(176 real changes made)
+(212 real changes made)
 
 . gen max_baseline_creatinine_feb2020=.
-(571 missing values generated)
+(579 missing values generated)
 
 . replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
 > 7 if male==0
-(160 real changes made)
+(167 real changes made)
 
 . replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
 > 9 if male==1
-(158 real changes made)
+(160 real changes made)
 
 . replace max_baseline_creatinine_feb2020 = max_baseline_creatinine_feb2020^-1.
 > 209
-(318 real changes made)
+(327 real changes made)
 
 . replace max_baseline_creatinine_feb2020 = 1 if max_baseline_creatinine_feb202
 > 0>1
-(395 real changes made)
+(367 real changes made)
 
 . gen egfr_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020*max_ba
 > seline_creatinine_feb2020*141
-(253 missing values generated)
+(252 missing values generated)
 
 . replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*(
 > 0.993^age)
-(318 real changes made)
+(327 real changes made)
 
 . replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*1
 > .018 if male==0
-(160 real changes made)
+(167 real changes made)
 
 . drop if egfr_baseline_creatinine_feb2020 <15
 (0 observations deleted)
@@ -144,12 +136,12 @@
 . egen imd = cut(imd_o), group(5) icodes
 
 . replace imd = imd + 1
-(571 real changes made)
+(579 real changes made)
 
 . drop imd_o
 
 . recode imd 5=1 4=2 3=3 2=4 1=5 .=.
-(imd: 445 changes made)
+(imd: 471 changes made)
 
 . label define imd 1 "1 least deprived" 2 "2" 3 "3" 4 "4" 5 "5 most deprived" 
 
@@ -168,10 +160,10 @@ DROPPING IF NO IMD
 . rename stp stp_old
 
 . bysort stp_old: gen stp = 1 if _n==1
-(561 missing values generated)
+(569 missing values generated)
 
 . replace stp = sum(stp)
-(570 real changes made)
+(578 real changes made)
 
 . drop stp_old
 
@@ -184,5 +176,5 @@ file ./output/potential_contemporary_population_northeast.dta saved
       name:  <unnamed>
        log:  /workspace/logs/potential_contemporary_population_northeast.log
   log type:  text
- closed on:  13 Jul 2022, 01:14:13
+ closed on:  13 Jul 2022, 13:42:33
 -------------------------------------------------------------------------------

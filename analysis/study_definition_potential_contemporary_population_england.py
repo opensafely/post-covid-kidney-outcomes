@@ -161,6 +161,33 @@ study = StudyDefinition(
         between = ["1970-01-01", "2020-01-31"],
         return_expectations={"incidence": 0.05},
     ),
+    krt_date_primary_care=patients.with_these_clinical_events(
+        kidney_replacement_therapy_primary_care_codes,
+        between = ["2020-02-01", "2022-01-31"],
+        find_first_match_in_period=True,
+        returning="date",
+        date_format="YYYY-MM-DD",
+        return_expectations = {"incidence": 0.05, "date": {"earliest": "2020-02-01", "latest": "2022-01-31"}},
+    ),
+    krt_date_icd_10=patients.admitted_to_hospital(
+        with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
+        returning="date_admitted",
+        between = ["2020-02-01", "2022-01-31"],
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        return_expectations={"incidence": 0.05, "date": {"earliest": "2020-02-01", "latest": "2022-01-31"}},
+    ),
+    krt_date_opcs_4=patients.admitted_to_hospital(
+        with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
+        returning="date_admitted",
+        between = ["2020-02-01", "2022-01-31"],
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        return_expectations={"incidence": 0.05, "date": {"earliest": "2020-02-01"}},
+    ),
+    krt_date=patients.minimum_of(
+        "krt_date_primary_care", "krt_date_icd_10", "krt_date_opcs_4"
+    ),
     baseline_creatinine_feb2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,

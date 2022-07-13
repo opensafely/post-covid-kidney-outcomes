@@ -7,7 +7,6 @@ import delimited ./output/input_potential_contemporary_population_northeast.csv,
 **Exclusions
 * Deceased before 2020-01-31
 drop if deceased==1
-drop deceased
 
 * Age <18
 drop if age <18
@@ -17,11 +16,9 @@ drop if has_follow_up==0
 
 * Pre-existing kidney replacement therapy
 drop if baseline_krt_primary_care==1
-drop baseline_krt_primary_care
 drop if baseline_krt_icd_10==1
-drop baseline_krt_icd_10
 drop if baseline_krt_opcs_4==1
-drop baseline_krt_opcs_4
+gen krt_incident_date=string(krt_date, "%td") 
 
 * Baseline eGFR <15 as at February 2020
 assert inlist(sex, "M", "F")
