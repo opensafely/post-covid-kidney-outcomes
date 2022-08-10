@@ -56,9 +56,18 @@ creatinine_codes = codelist_from_csv(
 )
 #Critical care 
     #OPCS-4 procedural codes to determine people hospitalised with COVID admitted to critical care
-    #Need to clarify "column"
 critical_care_codes = codelist_from_csv(
     "codelists/user-viyaasan-critical-care.csv",
+    system="opcs4",
+    column="code",
+)
+mechanical_ventilation_codes = codelist_from_csv(
+    "codelists/user-viyaasan-mechanical-ventilation.csv",
+    system="opcs4",
+    column="code",
+)
+non_invasive_ventilation_codes = codelist_from_csv(
+    "codelists/user-viyaasan-non-invasive-ventilation",
     system="opcs4",
     column="code",
 )
