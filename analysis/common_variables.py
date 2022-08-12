@@ -200,12 +200,31 @@ common_variables = dict(
         on_or_before="covid_diagnosis_date",
         return_expectations={"incidence": 0.02},
     ),
-    smoking=patients.with_these_clinical_events(
-        smoking_codes,
-        returning="binary_flag",
-        on_or_before="covid_diagnosis_date",
-        return_expectations={"incidence": 0.2},
-    ),
+    smoking_status=patients.categorised_as(
+         {
+            "S": "most_recent_smoking_code = 'S'",
+            "E": """
+                 most_recent_smoking_code = 'E' OR (
+                   most_recent_smoking_code = 'N' AND ever_smoked
+                 )
+            """,
+            "N": "most_recent_smoking_code = 'N' AND NOT ever_smoked",
+            "M": "DEFAULT",
+         },
+        return_expectations={
+             "category": {"ratios": {"S": 0.6, "E": 0.1, "N": 0.2, "M": 0.1}}
+         },
+        most_recent_smoking_code=patients.with_these_clinical_events(
+             smoking_codes,
+             find_last_match_in_period=True,
+             on_or_before="covid_diagnosis_date",
+             returning="category",
+         ),
+        ever_smoked=patients.with_these_clinical_events(
+             filter_codes_by_category(smoking_codes, include=["S", "E"]),
+             on_or_before="covid_diagnosis_date",
+         ),
+     ),
     #These need to be done differently
     body_mass_index=patients.most_recent_bmi(
         on_or_before="covid_diagnosis_date",

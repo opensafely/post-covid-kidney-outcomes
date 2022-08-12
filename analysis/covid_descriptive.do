@@ -38,7 +38,7 @@ foreach var of varlist 	agegroup 						///
 						systemic_lupus_erythematosus	///
 						immunosuppression				///
 						bmicat							///
-						smoking {						
+						ever_smoked {						
 	tab	`var' covid_severity, m col chi
 	tab `var' covid_acute_kidney_injury, m col chi
 	tab `var' covid_krt, m col chi

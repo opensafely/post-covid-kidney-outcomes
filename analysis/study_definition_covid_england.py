@@ -109,12 +109,9 @@ study = StudyDefinition(
         return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
     ),
     covid_critical_days=patients.admitted_to_hospital(
-        with_these_diagnoses=covid_codes,
-        returning="days_in_critical_care",
+        with_at_least_one_day_in_critical_care=True,
         between= ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
-        return_expectations = {"category": {"ratios": {"0": 0.5, "1": 0.1, "2": 0.1, "3": 0.1, "4": 0.1, "5": 0.1}},
-            "incidence": 0.2,
-        },
+        return_expectations = {"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
     ),
     covid_acute_kidney_injury=patients.admitted_to_hospital(
         with_these_diagnoses=acute_kidney_injury_codes,

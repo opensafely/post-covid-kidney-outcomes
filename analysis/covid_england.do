@@ -123,7 +123,7 @@ drop covid_death
 * COVID-19 severity
 gen covid_severity = covid_hospitalised
 replace covid_severity = 2 if covid_critical_care==1
-replace covid_severity = 2 if covid_critical_days!=0
+replace covid_severity = 2 if covid_critical_days==1
 label define covid_severity_label	0 "SARS-CoV-2 without hospitalisation" 								///
 									1 "COVID-19 with hospitalisation" 2 "COVID-19 with critical care"
 label values covid_severity covid_severity_label
@@ -249,8 +249,8 @@ drop if imd>=.
 
 * Smoking
 label define smoking_label 1 "Current/former smoker" 0 "Non-smoker"
-label values smoking smoking_label
-label var smoking "Smoking status"
+label values ever_smoked smoking_label
+label var ever_smoked "Smoking status"
 
 * Ethnicity (5 category)
 replace ethnicity = 6 if ethnicity==.
