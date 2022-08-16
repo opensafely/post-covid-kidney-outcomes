@@ -6,6 +6,8 @@ use ./output/covid_england.dta
 
 **Descriptive statistics
 * By COVID-19 severity
+tab covid_severity
+
 foreach stratum of varlist 	covid_severity 				///
 							covid_acute_kidney_injury 	///
 							covid_krt					///

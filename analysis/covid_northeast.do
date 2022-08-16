@@ -201,6 +201,7 @@ replace calendar_period = 5 if covid_month=="oct2021"
 replace calendar_period = 5 if covid_month=="nov2021"
 replace calendar_period = 6 if covid_month=="dec2021"
 replace calendar_period = 6 if covid_month=="jan2022"
+drop if calendar_period==.
 label define calendar_period_label	1 "February 2020 to June 2020"		///
 									2 "July 2020 to August 2020"		///
 									3 "September 2020 to November 2020"	///
@@ -427,6 +428,8 @@ format end_date %td
 replace exit_date = min(deregistered_date, death_date, end_date) if esrd_date==.
 gen follow_up_time = (exit_date - index_date)
 label var follow_up_time "Follow-up time (Days)"
+drop if follow_up_time<0
+drop if follow_up_time>731
 
 * 50% reduction in eGFR (earliest month) (or ESRD)
 gen egfr_reduction50_outcome_date=.

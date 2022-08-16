@@ -67,7 +67,7 @@ mechanical_ventilation_codes = codelist_from_csv(
     column="code",
 )
 non_invasive_ventilation_codes = codelist_from_csv(
-    "codelists/user-viyaasan-non-invasive-ventilation",
+    "codelists/user-viyaasan-non-invasive-ventilation.csv",
     system="opcs4",
     column="code",
 )
@@ -232,9 +232,10 @@ systemic_lupus_erythematosus_codes = codelist_from_csv(
 )
 #Smoking
 smoking_codes = codelist_from_csv(
-    "codelists/opensafely-smoking-clear-snomed.csv",
-    system="snomed",
-    column="id",
+    "codelists/opensafely-smoking-clear.csv",
+    system="ctv3",
+    column="CTV3Code",
+    category_column="Category",
 )
 #Body mass index
 body_mass_index_codes = codelist_from_csv(
