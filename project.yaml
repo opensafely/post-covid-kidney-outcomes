@@ -50,27 +50,27 @@ actions:
       highly_sensitive:
         cohort: output/input_covid_northeast_matching.csv
 
-#Data management for covid_northeast
-  covid_northeast:
-    run: stata-mp:latest analysis/covid_northeast.do
-    needs: [extract_covid_northeast]
+#Data management for covid_northeast_matching
+  clean_covid_northeast_matching:
+    run: stata-mp:latest analysis/covid_northeast_matching.do
+    needs: [extract_covid_northeast_matching]
     outputs:
       highly_sensitive:
-        analysis_dataset: output/covid_northeast.dta
+        analysis_dataset: output/covid_northeast_matching.dta
       moderately_sensitive:
-        log: logs/covid_northeast.log
+        log: logs/covid_northeast_matching.log
 
-#Extract matching and exclusion data for potential_contemporary_population_northeast
-  extract_potential_contemporary_population_northeast:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_potential_contemporary_population_northeast
+# Extract data required for matching for contemporary_northeast
+  extract_contemporary_northeast_matching:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_contemporary_northeast_matching
     outputs:
       highly_sensitive:
-        cohort: output/input_potential_contemporary_population_northeast.csv
+        cohort: output/input_contemporary_northeast_matching.csv
 
 #Data management for potential_contemporary_population_northeast
   potential_contemporary_population_northeast:
     run: stata-mp:latest analysis/potential_contemporary_population_northeast.do
-    needs: [extract_potential_contemporary_population_northeast]
+    needs: [extract_contemporary_northeast_matching]
     outputs:
       highly_sensitive:
         analysis_dataset: output/potential_contemporary_population_northeast.dta
@@ -80,7 +80,7 @@ actions:
 # Match covid_northeast to potential_contemporary_population_northeast
   match_contemporary_northeast:
     run: python:latest python analysis/match_contemporary_northeast.py
-    needs: [extract_covid_northeast, covid_northeast, extract_potential_contemporary_population_northeast, potential_contemporary_population_northeast]
+    needs: [extract_covid_northeast_matching, clean_covid_northeast_matching, extract_contemporary_northeast_matching, potential_contemporary_population_northeast]
     outputs:
       moderately_sensitive:
         matching_report: output/matching_report_contemporary_northeast.txt

@@ -16,9 +16,9 @@ match(
         "age": 1,
         "stp": "category",
         "imd": "category",
-        "covid_diagnosis_date": "no_offset", #i.e. exactly the same date
+        "covid_date": "no_offset", #i.e. exactly the same date
     },
-    index_date_variable="covid_diagnosis_date",
+    index_date_variable="covid_date",
     closest_match_variables=["age"],
     date_exclusion_variables={
         "krt_incident_date": "before",

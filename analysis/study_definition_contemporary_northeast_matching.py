@@ -1,5 +1,5 @@
-#study_definition_potential_contemporary_general_population will be matched to 
-    #study_definition_covid_all_for_matching (restricted to North-East region)
+#study_definition_contemporary_northeast_matching will be matched to 
+    #study_definition_covid_northeast_matching (restricted to North-East region)
 
 #Only matching variables and exclusion variables need to be extracted at this stage
 
@@ -56,8 +56,8 @@ study = StudyDefinition(
     ),
 
 #Matching variables
-    month_of_birth=patients.date_of_birth(
-        date_format= "YYYY-MM", 
+    year_of_birth=patients.date_of_birth(
+        date_format= "YYYY", 
         return_expectations={
             "date": {"earliest": "1950-01-01", "latest": "2000-01-01"},
             "rate": "uniform",
@@ -71,15 +71,14 @@ study = StudyDefinition(
             "int": {"distribution": "population_ages"},
         },
     ),
-        
     sex=patients.sex(
         return_expectations={
             "rate": "universal",
             "category": {"ratios": {"M": 0.49, "F": 0.51}},
-        },
+        }
     ),
     imd=patients.address_as_of(
-        "2020-01-31",
+        "index_date",
         returning="index_of_multiple_deprivation",
         round_to_nearest=100,
         return_expectations={
@@ -100,29 +99,8 @@ study = StudyDefinition(
             },
         },
     ),
-    region=patients.registered_practice_as_of(
-        "2020-01-31",
-        returning="nuts1_region_name",
-        return_expectations={
-            "rate": "universal",
-            "category": {
-                "ratios": {
-                    "North East": 1.0,
-                    "North West": 0.0,
-                    "Yorkshire and The Humber": 0.0,
-                    "East Midlands": 0.0,
-                    "West Midlands": 0.0,
-                    "East": 0.0,
-                    "London": 0.0,
-                    "South East": 0.0,
-                    "South West": 0.0,
-                },
-            },
-        },
-    ),
-    
     stp=patients.registered_practice_as_of(
-        "2020-01-31",
+        "index_date",
         returning="stp_code",
         return_expectations={
             "rate": "universal",
@@ -138,56 +116,55 @@ study = StudyDefinition(
                     "STP8": 0.1,
                     "STP9": 0.1,
                     "STP10": 0.1,
-                    },
+                    }
                 },
             },
         ),
+        region=patients.registered_practice_as_of(
+        "index_date",
+        returning="nuts1_region_name",
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {
+                    "North East": 0.1,
+                    "North West": 0.1,
+                    "Yorkshire and The Humber": 0.1,
+                    "East Midlands": 0.1,
+                    "West Midlands": 0.1,
+                    "East": 0.1,
+                    "London": 0.2,
+                    "South East": 0.1,
+                    "South West": 0.1,
+                },
+            },
+        },
+    ),
 
-#Exclusion variables:
+#Exclusion variables
+
+    deceased=patients.with_death_recorded_in_primary_care(
+        returning="binary_flag",
+        between = ["1970-01-01", "index_date"],
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
+        ),
     baseline_krt_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
-        between = ["1970-01-01", "2020-01-31"],
+        between = ["1970-01-01", "index_date"],
         returning="binary_flag",
         return_expectations = {"incidence": 0.05},
     ),
     baseline_krt_icd_10=patients.admitted_to_hospital(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="binary_flag",
-        between = ["1970-01-01", "2020-01-31"],
+        between = ["1970-01-01", "index_date"],
         return_expectations={"incidence": 0.05},
     ),
     baseline_krt_opcs_4=patients.admitted_to_hospital(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="binary_flag",
-        between = ["1970-01-01", "2020-01-31"],
+        between = ["1970-01-01", "index_date"],
         return_expectations={"incidence": 0.05},
-    ),
-    krt_date_primary_care=patients.with_these_clinical_events(
-        kidney_replacement_therapy_primary_care_codes,
-        between = ["2020-02-01", "2022-01-31"],
-        find_first_match_in_period=True,
-        returning="date",
-        date_format="YYYY-MM-DD",
-        return_expectations = {"incidence": 0.05, "date": {"earliest": "2020-02-01", "latest": "2022-01-31"}},
-    ),
-    krt_date_icd_10=patients.admitted_to_hospital(
-        with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
-        returning="date_admitted",
-        between = ["2020-02-01", "2022-01-31"],
-        date_format="YYYY-MM-DD",
-        find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest": "2020-02-01", "latest": "2022-01-31"}},
-    ),
-    krt_date_opcs_4=patients.admitted_to_hospital(
-        with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
-        returning="date_admitted",
-        between = ["2020-02-01", "2022-01-31"],
-        date_format="YYYY-MM-DD",
-        find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest": "2020-02-01"}},
-    ),
-    krt_date=patients.minimum_of(
-        "krt_date_primary_care", "krt_date_icd_10", "krt_date_opcs_4"
     ),
     baseline_creatinine_feb2020=patients.mean_recorded_value(
         creatinine_codes,
@@ -196,12 +173,7 @@ study = StudyDefinition(
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
-        },
-    ),
-    deceased=patients.with_death_recorded_in_primary_care(
-        on_or_before="2020-01-31",
-        returning="binary_flag",
-        return_expectations={"incidence": 0.10},
+        }
     ),
     has_follow_up=patients.registered_with_one_practice_between(
         "2019-10-31", "2022-01-31",
