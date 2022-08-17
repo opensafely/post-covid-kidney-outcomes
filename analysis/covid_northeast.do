@@ -249,6 +249,10 @@ noi di "DROPPING IF NO IMD"
 drop if imd>=.
 
 * Smoking
+gen ever_smoked = 1 if smoking_status=="S"
+replace ever_smoked = 1 if smoking_status=="E"
+replace ever_smoked = 0 if smoking_status=="N"
+replace ever_smoked = . if smoking_status=="M"
 label define smoking_label 1 "Current/former smoker" 0 "Non-smoker"
 label values ever_smoked smoking_label
 label var ever_smoked "Smoking status"
