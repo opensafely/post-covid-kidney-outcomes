@@ -13,17 +13,13 @@ match(
     matches_per_case=5,
     match_variables={
         "sex": "category",
-        "age": 1,
+        "year_of_birth": 1,
         "stp": "category",
         "imd": "category",
         "covid_date": "no_offset", #i.e. exactly the same date
     },
     index_date_variable="covid_date",
-    closest_match_variables=["age"],
-    date_exclusion_variables={
-        "krt_incident_date": "before",
-        "deceased": "before",
-    },
+    closest_match_variables=["year_of_birth"],
     output_suffix="_contemporary",
     output_path="output",
 )

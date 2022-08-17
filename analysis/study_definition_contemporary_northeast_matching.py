@@ -50,11 +50,6 @@ study = StudyDefinition(
 
     index_date="2020-02-01",
 
-    deregistered=patients.date_deregistered_from_all_supported_practices(
-        between= ["2020-02-01", "2022-01-31"],
-        date_format="YYYY-MM-DD"
-    ),
-
 #Matching variables
     year_of_birth=patients.date_of_birth(
         date_format= "YYYY", 

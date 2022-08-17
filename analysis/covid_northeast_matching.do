@@ -58,6 +58,7 @@ drop covid_diagnosis_date
 drop sgss_positive_date
 drop primary_care_covid_date
 drop hospital_covid_date
+drop sars_cov_2
 
 foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_mar2020 ///
 												baseline_creatinine_apr2020 ///
@@ -116,6 +117,8 @@ drop egfr_baseline_creatinine_`x'
 }
 drop baseline_egfr
 drop covid_month
+drop covid_date_string
+drop age
 
 * COVID-19 death
 drop if deceased==1
@@ -139,6 +142,7 @@ rename stp stp_old
 bysort stp_old: gen stp = 1 if _n==1
 replace stp = sum(stp)
 drop stp_old
+drop region
 
 save ./output/covid_northeast_matching.dta, replace 
 log close

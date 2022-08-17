@@ -107,6 +107,14 @@ study = StudyDefinition(
 
 #Matching variables
 
+    year_of_birth=patients.date_of_birth(
+        date_format= "YYYY", 
+        return_expectations={
+            "date": {"earliest": "1950-01-01", "latest": "2000-01-01"},
+            "rate": "uniform",
+            "incidence": 1,
+        },
+    ),
     age=patients.age_as_of(
         "covid_diagnosis_date",
         return_expectations={
