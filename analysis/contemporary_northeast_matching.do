@@ -76,5 +76,5 @@ replace stp = sum(stp)
 drop stp_old
 drop region
 
-save ./output/covid_northeast_matching.dta, replace 
+export delimited using "./output/contemporary_northeast_matching", replace
 log close

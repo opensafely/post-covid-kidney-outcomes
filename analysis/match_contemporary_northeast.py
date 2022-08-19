@@ -8,18 +8,17 @@
 from osmatching import match
 
 match(
-    case_csv="input_covid_northeast",
-    match_csv="input_potential_contemporary_population_northeast",
+    case_csv="covid_northeast_matching",
+    match_csv="contemporary_northeast_matching",
     matches_per_case=5,
     match_variables={
-        "sex": "category",
-        "year_of_birth": 1,
+        "male": "category",
+        "year_of_birth": 0,
         "stp": "category",
         "imd": "category",
-        "covid_date": "no_offset", #i.e. exactly the same date
     },
     index_date_variable="covid_date",
-    closest_match_variables=["year_of_birth"],
+    replace_match_index_date_with_case="no_offset",
     output_suffix="_contemporary",
     output_path="output",
 )

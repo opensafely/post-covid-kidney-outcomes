@@ -143,6 +143,6 @@ bysort stp_old: gen stp = 1 if _n==1
 replace stp = sum(stp)
 drop stp_old
 drop region
+export delimited using "./output/covid_northeast_matching", replace
 
-save ./output/covid_northeast_matching.dta, replace 
 log close
