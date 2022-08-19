@@ -50,12 +50,13 @@ replace calendar_period = 5 if covid_month=="mar2022"
 replace calendar_period = 5 if covid_month=="apr2022"
 replace calendar_period = 5 if covid_month=="may2022"
 replace calendar_period = 5 if covid_month=="jun2022"
+replace calendar_period = 5 if covid_month=="jul2022"
 
 label define calendar_period_label	1 "Feb20-Jun20"		///
 									2 "Jul20-Nov20"		///
 									3 "Dec20-Feb21"		///
 									4 "Mar21-Nov21"		///
-									5 "Dec21-Jun22"
+									5 "Dec21-Jul22"
 label values calendar_period calendar_period_label
 label var calendar_period "Calendar period"
 
@@ -155,30 +156,72 @@ bysort stp_old: gen stp = 1 if _n==1
 replace stp = sum(stp)
 drop stp_old
 
-*Recode critical care flag variables to binary (from #days in critical care)
-tab covid_critical_care_flag
-replace covid_critical_care_flag = 1 if covid_critical_care_flag!=0
+*critical_procedures = admitted to hospital + critical care procedure codes
+*critical_days = admitted to hospital + at least 1 day in critical care in SUS
 
-*covid_critical_care_procedures = admitted to hospital + critical care procedure codes
-*covid_critical_care_flag = admitted to hospital + SUS critical care flag
+*Compare critical_procedures and critical_days
+tab hospitalised
+tab critical_procedures
+tab critical_days
 
-*Compare covid_critical_care_procedures and covid_critical_care_flag
-tab covid_hospitalised
-tab covid_critical_care_procedures
-tab covid_critical_care_flag
+*Critical care interventions
+tab mechanical_ventilation
+tab non_invasive_ventilation
+tab kidney_replacement_therapy
+tab haemofiltration
 
-gen critical_care = covid_hospitalised
-replace critical_care = 0 if covid_hospitalised==1
-replace critical_care = 1 if covid_critical_care_procedures==1 &covid_critical_care_flag==1
-replace critical_care = 2 if covid_critical_care_procedures==1 &critical_care==0
-replace critical_care = 3 if covid_critical_care_flag==1 &critical_care==0
-label define critical_care_label	0 "No critical care" 								///
-									1 "Concordant critical care" 						///
+gen critical_source = hospitalised
+replace critical_source = 0 if hospitalised==1
+replace critical_source = 1 if critical_procedures==1 &critical_days==1
+replace critical_source = 2 if critical_procedures==1 &critical_days==0
+replace critical_source = 3 if critical_procedures==0 &critical_days==1
+label define critical_source_label	0 "No critical care" 								///
+									1 "Concordant" 						///
 									2 "Procedure only"									///
-									3 "Flagged only"
-label values critical_care critical_care_label
-label var critical_care "Critical care coding"
-tab critical_care
+									3 "Days only"
+label values critical_source critical_source_label
+label var critical_source "Critical care coding source"
+tab critical_source
+
+gen critical = critical_source
+replace critical = 1 if critical_source==2
+replace critical = 1 if critical_source==3
+label define critical_label	0 "No critical care" 					///
+							1 "Critical  care" 						
+label values critical critical_label
+label var critical "COVID-19 severity"
+tab critical
+
+foreach var of varlist	mechanical_ventilation			///
+						non_invasive_ventilation		///
+						kidney_replacement_therapy		///
+						haemofiltration {
+		tab `var' critical_procedures, m row chi
+		}
+
+gen interventions = critical_procedures
+**Critical care interventions in those with procedure codes**
+replace interventions = 2 if interventions==1 &mechanical_ventilation==1
+replace interventions = 3 if interventions==2 &haemofiltration==1
+replace interventions = 4 if interventions==2 &kidney_replacement_therapy==1
+replace interventions = 5 if interventions==1 &non_invasive_ventilation==1
+replace interventions = 6 if interventions==5 &haemofiltration==1
+replace interventions = 7 if interventions==5 &kidney_replacement_therapy==1
+replace interventions = 8 if interventions==1 &haemofiltration==1
+replace interventions = 9 if interventions==1 &kidney_replacement_therapy==1
+label define interventions_label 	0 "No critical interventions"	///
+									1 "Other interventions"			///
+									2 "MV only"						///
+									3 "MV+CVVH"						///
+									4 "MV+KRT"						///	
+									5 "NIV only"					///
+									6 "NIV+CVVH"					///		
+									7 "NIV+KRT"						///
+									8 "CVVH only"					///
+									9 "KRT only"					
+label values interventions interventions_label
+label var interventions "Critical care interventions"
+tab interventions
 
 foreach var of varlist 	agegroup 						///
 						male 							///
@@ -187,9 +230,9 @@ foreach var of varlist 	agegroup 						///
 						region_9 						///
 						stp								///
 						calendar_period {						
-	tab `var' covid_critical_care_procedures, m row chi
-	tab `var' covid_critical_care_flag, m row chi
-	tab	`var' critical_care, m row chi
+	tab `var' critical_procedures, m row chi
+	tab `var' critical_days, m row chi
+	tab	`var' critical, m row chi
 	}
 	
 save ./output/covid_critical_care.dta, replace 

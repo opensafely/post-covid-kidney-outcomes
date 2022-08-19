@@ -14,7 +14,7 @@ from codelists import *
 
 study = StudyDefinition(
     default_expectations={
-        "date": {"earliest": "1980-01-01", "latest": "today"},
+        "date": {"earliest": "1980-01-01", "latest": "2022-07-31"},
         "rate": "uniform",
         "incidence": 0.7, 
     },
@@ -27,7 +27,7 @@ study = StudyDefinition(
         AND imd > 0
         AND NOT sars_cov_2 = "0"
         AND NOT stp = ""
-        AND NOT covid_hospitalised ="0"
+        AND NOT hospitalised ="0"
         """,
     ),  
 
@@ -84,31 +84,60 @@ study = StudyDefinition(
         },
     ),
 
-    covid_hospitalised=patients.admitted_to_hospital(
+    hospitalised=patients.admitted_to_hospital(
         with_these_diagnoses=covid_codes,
         returning="binary_flag",
         find_first_match_in_period = True,
         between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
-        return_expectations={"incidence": 0.2, "date": {"earliest" : "2020-02-01", "latest": "2022-06-30"}},
+        return_expectations={"incidence": 0.2, "date": {"earliest" : "2020-02-01", "latest": "2022-07-31"}},
     ),
-    covid_critical_care_procedures=patients.admitted_to_hospital(
+    critical_procedures=patients.admitted_to_hospital(
         with_these_diagnoses=covid_codes,
         with_these_procedures=critical_care_codes,
         returning="binary_flag",
         find_first_match_in_period = True,
         between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-06-30"}},
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-07-31"}},
     ),
-    covid_critical_care_flag=patients.admitted_to_hospital(
+    critical_days=patients.admitted_to_hospital(
         with_these_diagnoses=covid_codes,
-        returning="days_in_critical_care",
-        find_first_match_in_period = True,
-        between = ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
-        return_expectations = {
-            "category": {"ratios": {"20": 0.5, "40": 0.5}},
-            "incidence": 0.2,
-        },
+        with_at_least_one_day_in_critical_care=True,
+        find_first_match_in_period=True,
+        between= ["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
+        return_expectations = {"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-07-31"}},
     ),
+    mechanical_ventilation=patients.admitted_to_hospital(
+        with_these_diagnoses=covid_codes,
+        with_these_procedures=mechanical_ventilation_codes,
+        returning="binary_flag",
+        find_first_match_in_period=True,
+        between=["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
+        return_expectations={"incidence": 0.04, "date": {"earliest": "2020-02-01", "latest": "2022-07-31"}},
+    ),
+    non_invasive_ventilation=patients.admitted_to_hospital(
+        with_these_diagnoses=covid_codes,
+        with_these_procedures=non_invasive_ventilation_codes,
+        returning="binary_flag",
+        find_first_match_in_period=True,
+        between=["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
+        return_expectations={"incidence": 0.04, "date": {"earliest": "2020-02-01", "latest": "2022-07-31"}},
+    ), 
+    kidney_replacement_therapy=patients.admitted_to_hospital(
+        with_these_diagnoses=covid_codes,
+        with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
+        returning="binary_flag",
+        find_first_match_in_period=True,
+        between=["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
+        return_expectations={"incidence": 0.04, "date": {"earliest": "2020-02-01", "latest": "2022-07-31"}},
+    ),    
+    haemofiltration=patients.admitted_to_hospital(
+        with_these_diagnoses=covid_codes,
+        with_these_procedures=haemofiltration_opcs_4_codes,
+        returning="binary_flag",
+        find_first_match_in_period=True,
+        between=["covid_diagnosis_date", "covid_diagnosis_date + 28 days"],
+        return_expectations={"incidence": 0.04, "date": {"earliest": "2020-02-01", "latest": "2022-07-31"}},
+    ),    
     
     age=patients.age_as_of(
         "covid_diagnosis_date",
