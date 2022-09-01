@@ -53,6 +53,33 @@ actions:
       moderately_sensitive:
         log: logs/covid_stp01_matching.log
 
+# Extract data required for matching for contemporary_stp01
+  extract_contemporary_stp01_matching:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_contemporary_stp01_matching
+    outputs:
+      highly_sensitive:
+        cohort: output/input_contemporary_stp01_matching.csv
+
+#Data management for contemporary_stp01_matching
+  clean_contemporary_stp01_matching:
+    run: stata-mp:latest analysis/contemporary_stp01_matching.do
+    needs: [extract_contemporary_stp01_matching]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/contemporary_stp01_matching.csv
+      moderately_sensitive:
+        log: logs/contemporary_stp01_matching.log
+
+# Match covid_stp01_matching to contemporary_stp01_matching
+  match_contemporary_stp01:
+    run: python:latest python analysis/match_contemporary_stp01.py
+    needs: [extract_covid_stp01_matching, clean_covid_stp01_matching, extract_contemporary_stp01_matching, clean_contemporary_stp01_matching]
+    outputs:
+      moderately_sensitive:
+        matching_report: output/matching_report_contemporary_stp01.txt
+      highly_sensitive:
+        matched_matches: output/matched_matches_contemporary_stp01.csv
+
 # Extract data required for matching for covid_northeast
   extract_covid_northeast_matching:
     run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_northeast_matching
