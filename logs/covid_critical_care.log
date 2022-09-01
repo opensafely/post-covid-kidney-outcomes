@@ -1,0 +1,1349 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /workspace/logs/covid_critical_care.log
+  log type:  text
+ opened on:  19 Aug 2022, 15:28:23
+
+. clear
+
+. 
+. import delimited ./output/input_covid_critical_care.csv, delimiter(comma) var
+> names(1) case(preserve) 
+(20 vars, 1,000 obs)
+
+. 
+. **Exclusions
+. * Age <18
+. drop if age <18
+(201 observations deleted)
+
+. 
+. * Anyone not registered at one practice for 3 months before COVID-19 diagnosi
+> s
+. drop if has_follow_up==0
+(44 observations deleted)
+
+. 
+. * Calendar period
+. gen covid_date = date(covid_diagnosis_date, "YMD")
+(400 missing values generated)
+
+. format covid_date %td
+
+. drop if covid_date ==.
+(400 observations deleted)
+
+. drop covid_diagnosis_date
+
+. drop sgss_positive_date
+
+. drop primary_care_covid_date
+
+. drop hospital_covid_date
+
+. gen covid_date_string=string(covid_date, "%td") 
+
+. gen covid_month=substr( covid_date_string ,3,7)
+
+. gen calendar_period = 1 if covid_month=="feb2020"
+(342 missing values generated)
+
+. replace calendar_period = 1 if covid_month=="mar2020"
+(13 real changes made)
+
+. replace calendar_period = 1 if covid_month=="apr2020"
+(21 real changes made)
+
+. replace calendar_period = 1 if covid_month=="may2020"
+(20 real changes made)
+
+. replace calendar_period = 1 if covid_month=="jun2020"
+(12 real changes made)
+
+. replace calendar_period = 2 if covid_month=="jul2020"
+(9 real changes made)
+
+. replace calendar_period = 2 if covid_month=="aug2020"
+(9 real changes made)
+
+. replace calendar_period = 2 if covid_month=="sep2020"
+(23 real changes made)
+
+. replace calendar_period = 2 if covid_month=="oct2020"
+(11 real changes made)
+
+. replace calendar_period = 2 if covid_month=="nov2020"
+(16 real changes made)
+
+. replace calendar_period = 3 if covid_month=="dec2020"
+(15 real changes made)
+
+. replace calendar_period = 3 if covid_month=="jan2021"
+(15 real changes made)
+
+. replace calendar_period = 3 if covid_month=="feb2021"
+(14 real changes made)
+
+. replace calendar_period = 4 if covid_month=="mar2021"
+(13 real changes made)
+
+. replace calendar_period = 4 if covid_month=="apr2021"
+(21 real changes made)
+
+. replace calendar_period = 4 if covid_month=="may2021"
+(13 real changes made)
+
+. replace calendar_period = 4 if covid_month=="jun2021"
+(16 real changes made)
+
+. replace calendar_period = 4 if covid_month=="jul2021"
+(19 real changes made)
+
+. replace calendar_period = 4 if covid_month=="aug2021"
+(8 real changes made)
+
+. replace calendar_period = 4 if covid_month=="sep2021"
+(14 real changes made)
+
+. replace calendar_period = 4 if covid_month=="oct2021"
+(13 real changes made)
+
+. replace calendar_period = 4 if covid_month=="nov2021"
+(13 real changes made)
+
+. replace calendar_period = 5 if covid_month=="dec2021"
+(14 real changes made)
+
+. replace calendar_period = 5 if covid_month=="jan2022"
+(20 real changes made)
+
+. replace calendar_period = 5 if covid_month=="feb2022"
+(0 real changes made)
+
+. replace calendar_period = 5 if covid_month=="mar2022"
+(0 real changes made)
+
+. replace calendar_period = 5 if covid_month=="apr2022"
+(0 real changes made)
+
+. replace calendar_period = 5 if covid_month=="may2022"
+(0 real changes made)
+
+. replace calendar_period = 5 if covid_month=="jun2022"
+(0 real changes made)
+
+. replace calendar_period = 5 if covid_month=="jul2022"
+(0 real changes made)
+
+. 
+. label define calendar_period_label      1 "Feb20-Jun20"         ///
+>                                                                         2 "Ju
+> l20-Nov20"         ///
+>                                                                         3 "De
+> c20-Feb21"         ///
+>                                                                         4 "Ma
+> r21-Nov21"         ///
+>                                                                         5 "De
+> c21-Jul22"
+
+. label values calendar_period calendar_period_label
+
+. label var calendar_period "Calendar period"
+
+. 
+. **Covariates
+. * Age
+. recode  age                     min/49.9999=1   ///
+>                                                 50/59.9999=2    ///
+>                                                 60/69.9999=3    ///
+>                                                 70/79.9999=4    ///
+>                                                 80/max=5,               ///
+>                                                 gen(agegroup) 
+(355 differences between age and agegroup)
+
+. 
+. label define agegroup   1 "18-<50"              ///
+>                                                 2 "50-<60"              ///
+>                                                 3 "60-<70"              ///
+>                                                 4 "70-<80"              ///
+>                                                 5 "80+"
+
+. label values agegroup agegroup
+
+. label var agegroup "Age group"
+
+. 
+. 
+. * Check there are no missing ages
+. assert age<.
+
+. assert agegroup<.
+
+. 
+. *Sex
+. assert inlist(sex, "M", "F")
+
+. gen male = (sex=="M")
+
+. drop sex
+
+. label define sexLab 1 "Male" 0 "Female"
+
+. label values male sexLab
+
+. label var male "Sex (0=F 1=M)"
+
+. 
+. * IMD
+. rename imd imd_o
+
+. egen imd = cut(imd_o), group(5) icodes
+
+. replace imd = imd + 1
+(355 real changes made)
+
+. drop imd_o
+
+. recode imd 5=1 4=2 3=3 2=4 1=5 .=.
+(imd: 258 changes made)
+
+. label define imd 1 "1 least deprived" 2 "2" 3 "3" 4 "4" 5 "5 most deprived" 
+
+. label values imd imd
+
+. label var imd "Index of Multiple Deprivation"
+
+. noi di "DROPPING IF NO IMD" 
+DROPPING IF NO IMD
+
+. drop if imd>=.
+(0 observations deleted)
+
+. 
+. * Ethnicity (5 category)
+. replace ethnicity = 6 if ethnicity==.
+(87 real changes made)
+
+. label define ethnicity_label    1 "White"                                    
+>                            ///
+>                                                                 2 "Mixed"    
+>                                                            ///
+>                                                                 3 "Asian or A
+> sian British"                              ///
+>                                                                 4 "Black"    
+>                                                            ///
+>                                                                 5 "Other"    
+>                                                            ///
+>                                                                 6 "Unknown"
+
+. label values ethnicity ethnicity_label
+
+. label var ethnicity "Ethnicity"
+
+. 
+. 
+. /*  Geographical location  */
+. * Region
+. rename region region_string
+
+. assert inlist(region_string,                                                 
+>            ///
+>                                         "East Midlands",                     
+>                            ///
+>                                         "East",                              
+>                                    ///
+>                                         "London",                            
+>                                    ///
+>                                         "North East",                        
+>                            ///
+>                                         "North West",                        
+>                            ///
+>                                         "South East",                        
+>                            ///
+>                                         "South West",                        
+>                            ///
+>                                         "West Midlands",                     
+>                            ///
+>                                         "Yorkshire and The Humber") 
+
+. * Nine regions
+. gen     region_9 = 1 if region_string=="East Midlands"
+(314 missing values generated)
+
+. replace region_9 = 2 if region_string=="East"
+(29 real changes made)
+
+. replace region_9 = 3 if region_string=="London"
+(73 real changes made)
+
+. replace region_9 = 4 if region_string=="North East"
+(29 real changes made)
+
+. replace region_9 = 5 if region_string=="North West"
+(38 real changes made)
+
+. replace region_9 = 6 if region_string=="South East"
+(33 real changes made)
+
+. replace region_9 = 7 if region_string=="South West"
+(39 real changes made)
+
+. replace region_9 = 8 if region_string=="West Midlands"
+(34 real changes made)
+
+. replace region_9 = 9 if region_string=="Yorkshire and The Humber"
+(39 real changes made)
+
+. 
+. label define region_9   1 "East Midlands"                                    
+>    ///
+>                                                 2 "East"                     
+>                                    ///
+>                                                 3 "London"                   
+>                                    ///
+>                                                 4 "North East"               
+>                            ///
+>                                                 5 "North West"               
+>                            ///
+>                                                 6 "South East"               
+>                            ///
+>                                                 7 "South West"               
+>                            ///
+>                                                 8 "West Midlands"            
+>                            ///
+>                                                 9 "Yorkshire and The Humber"
+
+. label values region_9 region_9
+
+. label var region_9 "Region of England (9 regions)"
+
+. 
+. * STP 
+. rename stp stp_old
+
+. bysort stp_old: gen stp = 1 if _n==1
+(345 missing values generated)
+
+. replace stp = sum(stp)
+(354 real changes made)
+
+. drop stp_old
+
+. 
+. *critical_procedures = admitted to hospital + critical care procedure codes
+. *critical_days = admitted to hospital + at least 1 day in critical care in SU
+> S
+. 
+. *Compare critical_procedures and critical_days
+. tab hospitalised
+
+hospitalise |
+          d |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        287       80.85       80.85
+          1 |         68       19.15      100.00
+------------+-----------------------------------
+      Total |        355      100.00
+
+. tab critical_procedures
+
+critical_pr |
+   ocedures |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        335       94.37       94.37
+          1 |         20        5.63      100.00
+------------+-----------------------------------
+      Total |        355      100.00
+
+. tab critical_days
+
+critical_da |
+         ys |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        336       94.65       94.65
+          1 |         19        5.35      100.00
+------------+-----------------------------------
+      Total |        355      100.00
+
+. 
+. *Critical care interventions
+. tab mechanical_ventilation
+
+mechanical_ |
+ventilation |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        339       95.49       95.49
+          1 |         16        4.51      100.00
+------------+-----------------------------------
+      Total |        355      100.00
+
+. tab non_invasive_ventilation
+
+non_invasiv |
+e_ventilati |
+         on |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        343       96.62       96.62
+          1 |         12        3.38      100.00
+------------+-----------------------------------
+      Total |        355      100.00
+
+. tab kidney_replacement_therapy
+
+kidney_repl |
+acement_the |
+       rapy |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        341       96.06       96.06
+          1 |         14        3.94      100.00
+------------+-----------------------------------
+      Total |        355      100.00
+
+. tab haemofiltration
+
+haemofiltra |
+       tion |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        343       96.62       96.62
+          1 |         12        3.38      100.00
+------------+-----------------------------------
+      Total |        355      100.00
+
+. 
+. gen critical_source = hospitalised
+
+. replace critical_source = 0 if hospitalised==1
+(68 real changes made)
+
+. replace critical_source = 1 if critical_procedures==1 &critical_days==1
+(0 real changes made)
+
+. replace critical_source = 2 if critical_procedures==1 &critical_days==0
+(20 real changes made)
+
+. replace critical_source = 3 if critical_procedures==0 &critical_days==1
+(19 real changes made)
+
+. label define critical_source_label      0 "No critical care"                 
+>                                            ///
+>                                                                         1 "Co
+> ncordant"                                          ///
+>                                                                         2 "Pr
+> ocedure only"                                                                
+>       ///
+>                                                                         3 "Da
+> ys only"
+
+. label values critical_source critical_source_label
+
+. label var critical_source "Critical care coding source"
+
+. tab critical_source
+
+   Critical care |
+   coding source |      Freq.     Percent        Cum.
+-----------------+-----------------------------------
+No critical care |        316       89.01       89.01
+  Procedure only |         20        5.63       94.65
+       Days only |         19        5.35      100.00
+-----------------+-----------------------------------
+           Total |        355      100.00
+
+. 
+. gen critical = critical_source
+
+. replace critical = 1 if critical_source==2
+(20 real changes made)
+
+. replace critical = 1 if critical_source==3
+(19 real changes made)
+
+. label define critical_label     0 "No critical care"                         
+>            ///
+>                                                         1 "Critical  care"   
+>                                            
+
+. label values critical critical_label
+
+. label var critical "COVID-19 severity"
+
+. tab critical
+
+        COVID-19 |
+        severity |      Freq.     Percent        Cum.
+-----------------+-----------------------------------
+No critical care |        316       89.01       89.01
+  Critical  care |         39       10.99      100.00
+-----------------+-----------------------------------
+           Total |        355      100.00
+
+. 
+. foreach var of varlist  mechanical_ventilation                  ///
+>                                                 non_invasive_ventilation     
+>            ///
+>                                                 kidney_replacement_therapy   
+>            ///
+>                                                 haemofiltration {
+  2.                 tab `var' critical_procedures, m row chi
+  3.                 }
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+mechanical |
+_ventilati |  critical_procedures
+        on |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       321         18 |       339 
+           |     94.69       5.31 |    100.00 
+-----------+----------------------+----------
+         1 |        14          2 |        16 
+           |     87.50      12.50 |    100.00 
+-----------+----------------------+----------
+     Total |       335         20 |       355 
+           |     94.37       5.63 |    100.00 
+
+          Pearson chi2(1) =   1.4858   Pr = 0.223
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+non_invasi |
+ve_ventila |  critical_procedures
+      tion |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       323         20 |       343 
+           |     94.17       5.83 |    100.00 
+-----------+----------------------+----------
+         1 |        12          0 |        12 
+           |    100.00       0.00 |    100.00 
+-----------+----------------------+----------
+     Total |       335         20 |       355 
+           |     94.37       5.63 |    100.00 
+
+          Pearson chi2(1) =   0.7415   Pr = 0.389
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+kidney_rep |
+lacement_t |  critical_procedures
+    herapy |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       321         20 |       341 
+           |     94.13       5.87 |    100.00 
+-----------+----------------------+----------
+         1 |        14          0 |        14 
+           |    100.00       0.00 |    100.00 
+-----------+----------------------+----------
+     Total |       335         20 |       355 
+           |     94.37       5.63 |    100.00 
+
+          Pearson chi2(1) =   0.8701   Pr = 0.351
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+haemofiltr |  critical_procedures
+     ation |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       324         19 |       343 
+           |     94.46       5.54 |    100.00 
+-----------+----------------------+----------
+         1 |        11          1 |        12 
+           |     91.67       8.33 |    100.00 
+-----------+----------------------+----------
+     Total |       335         20 |       355 
+           |     94.37       5.63 |    100.00 
+
+          Pearson chi2(1) =   0.1702   Pr = 0.680
+
+. 
+. gen interventions = critical_procedures
+
+. **Critical care interventions in those with procedure codes**
+. replace interventions = 2 if interventions==1 &mechanical_ventilation==1
+(2 real changes made)
+
+. replace interventions = 3 if interventions==2 &haemofiltration==1
+(0 real changes made)
+
+. replace interventions = 4 if interventions==2 &kidney_replacement_therapy==1
+(0 real changes made)
+
+. replace interventions = 5 if interventions==1 &non_invasive_ventilation==1
+(0 real changes made)
+
+. replace interventions = 6 if interventions==5 &haemofiltration==1
+(0 real changes made)
+
+. replace interventions = 7 if interventions==5 &kidney_replacement_therapy==1
+(0 real changes made)
+
+. replace interventions = 8 if interventions==1 &haemofiltration==1
+(1 real change made)
+
+. replace interventions = 9 if interventions==1 &kidney_replacement_therapy==1
+(0 real changes made)
+
+. label define interventions_label        0 "No critical interventions"   ///
+>                                                                         1 "Ot
+> her interventions"                 ///
+>                                                                         2 "MV
+>  only"                                             ///
+>                                                                         3 "MV
+> +CVVH"                                             ///
+>                                                                         4 "MV
+> +KRT"                                              ///     
+>                                                                         5 "NI
+> V only"                                    ///
+>                                                                         6 "NI
+> V+CVVH"                                    ///             
+>                                                                         7 "NI
+> V+KRT"                                             ///
+>                                                                         8 "CV
+> VH only"                                   ///
+>                                                                         9 "KR
+> T only"                                    
+
+. label values interventions interventions_label
+
+. label var interventions "Critical care interventions"
+
+. tab interventions
+
+            Critical care |
+            interventions |      Freq.     Percent        Cum.
+--------------------------+-----------------------------------
+No critical interventions |        335       94.37       94.37
+      Other interventions |         17        4.79       99.15
+                  MV only |          2        0.56       99.72
+                CVVH only |          1        0.28      100.00
+--------------------------+-----------------------------------
+                    Total |        355      100.00
+
+. 
+. foreach var of varlist  agegroup                                             
+>    ///
+>                                                 male                         
+>                            ///
+>                                                 imd                          
+>                            ///
+>                                                 ethnicity                    
+>                            ///
+>                                                 region_9                     
+>                            ///
+>                                                 stp                          
+>                                    ///
+>                                                 calendar_period {            
+>                                    
+  2.         tab `var' critical_procedures, m row chi
+  3.         tab `var' critical_days, m row chi
+  4.         tab     `var' critical, m row chi
+  5.         }
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+           |  critical_procedures
+ Age group |         0          1 |     Total
+-----------+----------------------+----------
+    18-<50 |       168         10 |       178 
+           |     94.38       5.62 |    100.00 
+-----------+----------------------+----------
+    50-<60 |        59          4 |        63 
+           |     93.65       6.35 |    100.00 
+-----------+----------------------+----------
+    60-<70 |        50          2 |        52 
+           |     96.15       3.85 |    100.00 
+-----------+----------------------+----------
+    70-<80 |        36          4 |        40 
+           |     90.00      10.00 |    100.00 
+-----------+----------------------+----------
+       80+ |        22          0 |        22 
+           |    100.00       0.00 |    100.00 
+-----------+----------------------+----------
+     Total |       335         20 |       355 
+           |     94.37       5.63 |    100.00 
+
+          Pearson chi2(4) =   3.1211   Pr = 0.538
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+           |     critical_days
+ Age group |         0          1 |     Total
+-----------+----------------------+----------
+    18-<50 |       168         10 |       178 
+           |     94.38       5.62 |    100.00 
+-----------+----------------------+----------
+    50-<60 |        59          4 |        63 
+           |     93.65       6.35 |    100.00 
+-----------+----------------------+----------
+    60-<70 |        51          1 |        52 
+           |     98.08       1.92 |    100.00 
+-----------+----------------------+----------
+    70-<80 |        37          3 |        40 
+           |     92.50       7.50 |    100.00 
+-----------+----------------------+----------
+       80+ |        21          1 |        22 
+           |     95.45       4.55 |    100.00 
+-----------+----------------------+----------
+     Total |       336         19 |       355 
+           |     94.65       5.35 |    100.00 
+
+          Pearson chi2(4) =   1.7480   Pr = 0.782
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+           |   COVID-19 severity
+ Age group | No critic  Critical  |     Total
+-----------+----------------------+----------
+    18-<50 |       158         20 |       178 
+           |     88.76      11.24 |    100.00 
+-----------+----------------------+----------
+    50-<60 |        55          8 |        63 
+           |     87.30      12.70 |    100.00 
+-----------+----------------------+----------
+    60-<70 |        49          3 |        52 
+           |     94.23       5.77 |    100.00 
+-----------+----------------------+----------
+    70-<80 |        33          7 |        40 
+           |     82.50      17.50 |    100.00 
+-----------+----------------------+----------
+       80+ |        21          1 |        22 
+           |     95.45       4.55 |    100.00 
+-----------+----------------------+----------
+     Total |       316         39 |       355 
+           |     89.01      10.99 |    100.00 
+
+          Pearson chi2(4) =   4.3163   Pr = 0.365
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+  Sex (0=F |  critical_procedures
+      1=M) |         0          1 |     Total
+-----------+----------------------+----------
+    Female |       192          8 |       200 
+           |     96.00       4.00 |    100.00 
+-----------+----------------------+----------
+      Male |       143         12 |       155 
+           |     92.26       7.74 |    100.00 
+-----------+----------------------+----------
+     Total |       335         20 |       355 
+           |     94.37       5.63 |    100.00 
+
+          Pearson chi2(1) =   2.2999   Pr = 0.129
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+  Sex (0=F |     critical_days
+      1=M) |         0          1 |     Total
+-----------+----------------------+----------
+    Female |       188         12 |       200 
+           |     94.00       6.00 |    100.00 
+-----------+----------------------+----------
+      Male |       148          7 |       155 
+           |     95.48       4.52 |    100.00 
+-----------+----------------------+----------
+     Total |       336         19 |       355 
+           |     94.65       5.35 |    100.00 
+
+          Pearson chi2(1) =   0.3796   Pr = 0.538
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+  Sex (0=F |   COVID-19 severity
+      1=M) | No critic  Critical  |     Total
+-----------+----------------------+----------
+    Female |       180         20 |       200 
+           |     90.00      10.00 |    100.00 
+-----------+----------------------+----------
+      Male |       136         19 |       155 
+           |     87.74      12.26 |    100.00 
+-----------+----------------------+----------
+     Total |       316         39 |       355 
+           |     89.01      10.99 |    100.00 
+
+          Pearson chi2(1) =   0.4553   Pr = 0.500
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+        Index of |
+        Multiple |  critical_procedures
+     Deprivation |         0          1 |     Total
+-----------------+----------------------+----------
+1 least deprived |        70          1 |        71 
+                 |     98.59       1.41 |    100.00 
+-----------------+----------------------+----------
+               2 |        69          6 |        75 
+                 |     92.00       8.00 |    100.00 
+-----------------+----------------------+----------
+               3 |        92          5 |        97 
+                 |     94.85       5.15 |    100.00 
+-----------------+----------------------+----------
+               4 |        67          6 |        73 
+                 |     91.78       8.22 |    100.00 
+-----------------+----------------------+----------
+ 5 most deprived |        37          2 |        39 
+                 |     94.87       5.13 |    100.00 
+-----------------+----------------------+----------
+           Total |       335         20 |       355 
+                 |     94.37       5.63 |    100.00 
+
+          Pearson chi2(4) =   4.1526   Pr = 0.386
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+        Index of |
+        Multiple |     critical_days
+     Deprivation |         0          1 |     Total
+-----------------+----------------------+----------
+1 least deprived |        66          5 |        71 
+                 |     92.96       7.04 |    100.00 
+-----------------+----------------------+----------
+               2 |        69          6 |        75 
+                 |     92.00       8.00 |    100.00 
+-----------------+----------------------+----------
+               3 |        93          4 |        97 
+                 |     95.88       4.12 |    100.00 
+-----------------+----------------------+----------
+               4 |        70          3 |        73 
+                 |     95.89       4.11 |    100.00 
+-----------------+----------------------+----------
+ 5 most deprived |        38          1 |        39 
+                 |     97.44       2.56 |    100.00 
+-----------------+----------------------+----------
+           Total |       336         19 |       355 
+                 |     94.65       5.35 |    100.00 
+
+          Pearson chi2(4) =   2.5483   Pr = 0.636
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+        Index of |
+        Multiple |   COVID-19 severity
+     Deprivation | No critic  Critical  |     Total
+-----------------+----------------------+----------
+1 least deprived |        65          6 |        71 
+                 |     91.55       8.45 |    100.00 
+-----------------+----------------------+----------
+               2 |        63         12 |        75 
+                 |     84.00      16.00 |    100.00 
+-----------------+----------------------+----------
+               3 |        88          9 |        97 
+                 |     90.72       9.28 |    100.00 
+-----------------+----------------------+----------
+               4 |        64          9 |        73 
+                 |     87.67      12.33 |    100.00 
+-----------------+----------------------+----------
+ 5 most deprived |        36          3 |        39 
+                 |     92.31       7.69 |    100.00 
+-----------------+----------------------+----------
+           Total |       316         39 |       355 
+                 |     89.01      10.99 |    100.00 
+
+          Pearson chi2(4) =   3.2513   Pr = 0.517
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+                      |  critical_procedures
+            Ethnicity |         0          1 |     Total
+----------------------+----------------------+----------
+                White |       195         11 |       206 
+                      |     94.66       5.34 |    100.00 
+----------------------+----------------------+----------
+Asian or Asian Britis |        29          2 |        31 
+                      |     93.55       6.45 |    100.00 
+----------------------+----------------------+----------
+                Other |        28          3 |        31 
+                      |     90.32       9.68 |    100.00 
+----------------------+----------------------+----------
+              Unknown |        83          4 |        87 
+                      |     95.40       4.60 |    100.00 
+----------------------+----------------------+----------
+                Total |       335         20 |       355 
+                      |     94.37       5.63 |    100.00 
+
+          Pearson chi2(3) =   1.2016   Pr = 0.753
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+                      |     critical_days
+            Ethnicity |         0          1 |     Total
+----------------------+----------------------+----------
+                White |       196         10 |       206 
+                      |     95.15       4.85 |    100.00 
+----------------------+----------------------+----------
+Asian or Asian Britis |        29          2 |        31 
+                      |     93.55       6.45 |    100.00 
+----------------------+----------------------+----------
+                Other |        28          3 |        31 
+                      |     90.32       9.68 |    100.00 
+----------------------+----------------------+----------
+              Unknown |        83          4 |        87 
+                      |     95.40       4.60 |    100.00 
+----------------------+----------------------+----------
+                Total |       336         19 |       355 
+                      |     94.65       5.35 |    100.00 
+
+          Pearson chi2(3) =   1.4174   Pr = 0.701
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+                      |   COVID-19 severity
+            Ethnicity | No critic  Critical  |     Total
+----------------------+----------------------+----------
+                White |       185         21 |       206 
+                      |     89.81      10.19 |    100.00 
+----------------------+----------------------+----------
+Asian or Asian Britis |        27          4 |        31 
+                      |     87.10      12.90 |    100.00 
+----------------------+----------------------+----------
+                Other |        25          6 |        31 
+                      |     80.65      19.35 |    100.00 
+----------------------+----------------------+----------
+              Unknown |        79          8 |        87 
+                      |     90.80       9.20 |    100.00 
+----------------------+----------------------+----------
+                Total |       316         39 |       355 
+                      |     89.01      10.99 |    100.00 
+
+          Pearson chi2(3) =   2.7541   Pr = 0.431
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+ Region of England (9 |  critical_procedures
+             regions) |         0          1 |     Total
+----------------------+----------------------+----------
+        East Midlands |        41          0 |        41 
+                      |    100.00       0.00 |    100.00 
+----------------------+----------------------+----------
+                 East |        26          3 |        29 
+                      |     89.66      10.34 |    100.00 
+----------------------+----------------------+----------
+               London |        70          3 |        73 
+                      |     95.89       4.11 |    100.00 
+----------------------+----------------------+----------
+           North East |        26          3 |        29 
+                      |     89.66      10.34 |    100.00 
+----------------------+----------------------+----------
+           North West |        34          4 |        38 
+                      |     89.47      10.53 |    100.00 
+----------------------+----------------------+----------
+           South East |        32          1 |        33 
+                      |     96.97       3.03 |    100.00 
+----------------------+----------------------+----------
+           South West |        38          1 |        39 
+                      |     97.44       2.56 |    100.00 
+----------------------+----------------------+----------
+        West Midlands |        32          2 |        34 
+                      |     94.12       5.88 |    100.00 
+----------------------+----------------------+----------
+Yorkshire and The Hum |        36          3 |        39 
+                      |     92.31       7.69 |    100.00 
+----------------------+----------------------+----------
+                Total |       335         20 |       355 
+                      |     94.37       5.63 |    100.00 
+
+          Pearson chi2(8) =   8.3257   Pr = 0.402
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+ Region of England (9 |     critical_days
+             regions) |         0          1 |     Total
+----------------------+----------------------+----------
+        East Midlands |        39          2 |        41 
+                      |     95.12       4.88 |    100.00 
+----------------------+----------------------+----------
+                 East |        26          3 |        29 
+                      |     89.66      10.34 |    100.00 
+----------------------+----------------------+----------
+               London |        70          3 |        73 
+                      |     95.89       4.11 |    100.00 
+----------------------+----------------------+----------
+           North East |        26          3 |        29 
+                      |     89.66      10.34 |    100.00 
+----------------------+----------------------+----------
+           North West |        38          0 |        38 
+                      |    100.00       0.00 |    100.00 
+----------------------+----------------------+----------
+           South East |        32          1 |        33 
+                      |     96.97       3.03 |    100.00 
+----------------------+----------------------+----------
+           South West |        36          3 |        39 
+                      |     92.31       7.69 |    100.00 
+----------------------+----------------------+----------
+        West Midlands |        33          1 |        34 
+                      |     97.06       2.94 |    100.00 
+----------------------+----------------------+----------
+Yorkshire and The Hum |        36          3 |        39 
+                      |     92.31       7.69 |    100.00 
+----------------------+----------------------+----------
+                Total |       336         19 |       355 
+                      |     94.65       5.35 |    100.00 
+
+          Pearson chi2(8) =   6.8281   Pr = 0.555
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+ Region of England (9 |   COVID-19 severity
+             regions) | No critic  Critical  |     Total
+----------------------+----------------------+----------
+        East Midlands |        39          2 |        41 
+                      |     95.12       4.88 |    100.00 
+----------------------+----------------------+----------
+                 East |        23          6 |        29 
+                      |     79.31      20.69 |    100.00 
+----------------------+----------------------+----------
+               London |        67          6 |        73 
+                      |     91.78       8.22 |    100.00 
+----------------------+----------------------+----------
+           North East |        23          6 |        29 
+                      |     79.31      20.69 |    100.00 
+----------------------+----------------------+----------
+           North West |        34          4 |        38 
+                      |     89.47      10.53 |    100.00 
+----------------------+----------------------+----------
+           South East |        31          2 |        33 
+                      |     93.94       6.06 |    100.00 
+----------------------+----------------------+----------
+           South West |        35          4 |        39 
+                      |     89.74      10.26 |    100.00 
+----------------------+----------------------+----------
+        West Midlands |        31          3 |        34 
+                      |     91.18       8.82 |    100.00 
+----------------------+----------------------+----------
+Yorkshire and The Hum |        33          6 |        39 
+                      |     84.62      15.38 |    100.00 
+----------------------+----------------------+----------
+                Total |       316         39 |       355 
+                      |     89.01      10.99 |    100.00 
+
+          Pearson chi2(8) =   9.5027   Pr = 0.302
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+           |  critical_procedures
+       stp |         0          1 |     Total
+-----------+----------------------+----------
+         1 |        28          1 |        29 
+           |     96.55       3.45 |    100.00 
+-----------+----------------------+----------
+         2 |        37          4 |        41 
+           |     90.24       9.76 |    100.00 
+-----------+----------------------+----------
+         3 |        31          2 |        33 
+           |     93.94       6.06 |    100.00 
+-----------+----------------------+----------
+         4 |        38          1 |        39 
+           |     97.44       2.56 |    100.00 
+-----------+----------------------+----------
+         5 |        23          1 |        24 
+           |     95.83       4.17 |    100.00 
+-----------+----------------------+----------
+         6 |        24          1 |        25 
+           |     96.00       4.00 |    100.00 
+-----------+----------------------+----------
+         7 |        31          3 |        34 
+           |     91.18       8.82 |    100.00 
+-----------+----------------------+----------
+         8 |        47          4 |        51 
+           |     92.16       7.84 |    100.00 
+-----------+----------------------+----------
+         9 |        44          1 |        45 
+           |     97.78       2.22 |    100.00 
+-----------+----------------------+----------
+        10 |        32          2 |        34 
+           |     94.12       5.88 |    100.00 
+-----------+----------------------+----------
+     Total |       335         20 |       355 
+           |     94.37       5.63 |    100.00 
+
+          Pearson chi2(9) =   4.6044   Pr = 0.867
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+           |     critical_days
+       stp |         0          1 |     Total
+-----------+----------------------+----------
+         1 |        27          2 |        29 
+           |     93.10       6.90 |    100.00 
+-----------+----------------------+----------
+         2 |        40          1 |        41 
+           |     97.56       2.44 |    100.00 
+-----------+----------------------+----------
+         3 |        33          0 |        33 
+           |    100.00       0.00 |    100.00 
+-----------+----------------------+----------
+         4 |        36          3 |        39 
+           |     92.31       7.69 |    100.00 
+-----------+----------------------+----------
+         5 |        23          1 |        24 
+           |     95.83       4.17 |    100.00 
+-----------+----------------------+----------
+         6 |        25          0 |        25 
+           |    100.00       0.00 |    100.00 
+-----------+----------------------+----------
+         7 |        34          0 |        34 
+           |    100.00       0.00 |    100.00 
+-----------+----------------------+----------
+         8 |        45          6 |        51 
+           |     88.24      11.76 |    100.00 
+-----------+----------------------+----------
+         9 |        42          3 |        45 
+           |     93.33       6.67 |    100.00 
+-----------+----------------------+----------
+        10 |        31          3 |        34 
+           |     91.18       8.82 |    100.00 
+-----------+----------------------+----------
+     Total |       336         19 |       355 
+           |     94.65       5.35 |    100.00 
+
+          Pearson chi2(9) =  11.6163   Pr = 0.236
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+           |   COVID-19 severity
+       stp | No critic  Critical  |     Total
+-----------+----------------------+----------
+         1 |        26          3 |        29 
+           |     89.66      10.34 |    100.00 
+-----------+----------------------+----------
+         2 |        36          5 |        41 
+           |     87.80      12.20 |    100.00 
+-----------+----------------------+----------
+         3 |        31          2 |        33 
+           |     93.94       6.06 |    100.00 
+-----------+----------------------+----------
+         4 |        35          4 |        39 
+           |     89.74      10.26 |    100.00 
+-----------+----------------------+----------
+         5 |        22          2 |        24 
+           |     91.67       8.33 |    100.00 
+-----------+----------------------+----------
+         6 |        24          1 |        25 
+           |     96.00       4.00 |    100.00 
+-----------+----------------------+----------
+         7 |        31          3 |        34 
+           |     91.18       8.82 |    100.00 
+-----------+----------------------+----------
+         8 |        41         10 |        51 
+           |     80.39      19.61 |    100.00 
+-----------+----------------------+----------
+         9 |        41          4 |        45 
+           |     91.11       8.89 |    100.00 
+-----------+----------------------+----------
+        10 |        29          5 |        34 
+           |     85.29      14.71 |    100.00 
+-----------+----------------------+----------
+     Total |       316         39 |       355 
+           |     89.01      10.99 |    100.00 
+
+          Pearson chi2(9) =   7.0566   Pr = 0.631
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+   Calendar |  critical_procedures
+     period |         0          1 |     Total
+------------+----------------------+----------
+Feb20-Jun20 |        74          5 |        79 
+            |     93.67       6.33 |    100.00 
+------------+----------------------+----------
+Jul20-Nov20 |        65          3 |        68 
+            |     95.59       4.41 |    100.00 
+------------+----------------------+----------
+Dec20-Feb21 |        43          1 |        44 
+            |     97.73       2.27 |    100.00 
+------------+----------------------+----------
+Mar21-Nov21 |       123          7 |       130 
+            |     94.62       5.38 |    100.00 
+------------+----------------------+----------
+Dec21-Jul22 |        30          4 |        34 
+            |     88.24      11.76 |    100.00 
+------------+----------------------+----------
+      Total |       335         20 |       355 
+            |     94.37       5.63 |    100.00 
+
+          Pearson chi2(4) =   3.6169   Pr = 0.460
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+   Calendar |     critical_days
+     period |         0          1 |     Total
+------------+----------------------+----------
+Feb20-Jun20 |        77          2 |        79 
+            |     97.47       2.53 |    100.00 
+------------+----------------------+----------
+Jul20-Nov20 |        63          5 |        68 
+            |     92.65       7.35 |    100.00 
+------------+----------------------+----------
+Dec20-Feb21 |        40          4 |        44 
+            |     90.91       9.09 |    100.00 
+------------+----------------------+----------
+Mar21-Nov21 |       123          7 |       130 
+            |     94.62       5.38 |    100.00 
+------------+----------------------+----------
+Dec21-Jul22 |        33          1 |        34 
+            |     97.06       2.94 |    100.00 
+------------+----------------------+----------
+      Total |       336         19 |       355 
+            |     94.65       5.35 |    100.00 
+
+          Pearson chi2(4) =   3.3826   Pr = 0.496
+
++----------------+
+| Key            |
+|----------------|
+|   frequency    |
+| row percentage |
++----------------+
+
+   Calendar |   COVID-19 severity
+     period | No critic  Critical  |     Total
+------------+----------------------+----------
+Feb20-Jun20 |        72          7 |        79 
+            |     91.14       8.86 |    100.00 
+------------+----------------------+----------
+Jul20-Nov20 |        60          8 |        68 
+            |     88.24      11.76 |    100.00 
+------------+----------------------+----------
+Dec20-Feb21 |        39          5 |        44 
+            |     88.64      11.36 |    100.00 
+------------+----------------------+----------
+Mar21-Nov21 |       116         14 |       130 
+            |     89.23      10.77 |    100.00 
+------------+----------------------+----------
+Dec21-Jul22 |        29          5 |        34 
+            |     85.29      14.71 |    100.00 
+------------+----------------------+----------
+      Total |       316         39 |       355 
+            |     89.01      10.99 |    100.00 
+
+          Pearson chi2(4) =   0.9008   Pr = 0.924
+
+.         
+. save ./output/covid_critical_care.dta, replace 
+(note: file ./output/covid_critical_care.dta not found)
+file ./output/covid_critical_care.dta saved
+
+. log close
+      name:  <unnamed>
+       log:  /workspace/logs/covid_critical_care.log
+  log type:  text
+ closed on:  19 Aug 2022, 15:28:24
+-------------------------------------------------------------------------------
