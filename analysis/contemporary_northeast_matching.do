@@ -76,5 +76,5 @@ replace stp = sum(stp)
 drop stp_old
 drop region
 
-export delimited using "./output/contemporary_northeast_matching", replace
+export delimited using "./output/contemporary_northeast_matching.csv", replace
 log close

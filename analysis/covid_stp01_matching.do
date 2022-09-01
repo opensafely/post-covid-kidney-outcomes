@@ -1,8 +1,8 @@
 cap log close
-log using ./logs/covid_northeast_matching, replace t
+log using ./logs/covid_stp01_matching, replace t
 clear
 
-import delimited ./output/input_covid_northeast_matching.csv, delimiter(comma) varnames(1) case(preserve) 
+import delimited ./output/input_covid_stp01_matching.csv, delimiter(comma) varnames(1) case(preserve) 
 
 **Exclusions
 * Age <18
@@ -142,7 +142,6 @@ rename stp stp_old
 bysort stp_old: gen stp = 1 if _n==1
 replace stp = sum(stp)
 drop stp_old
-drop region
-export delimited using "./output/covid_northeast_matching.csv", replace
+export delimited using "./output/covid_stp01_matching.csv", replace
 
 log close

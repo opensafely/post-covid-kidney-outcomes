@@ -5,6 +5,7 @@
     #study_definition_contemporary_general_population_northeast
 
 #https://github.com/opensafely-core/matching#readme:
+import pandas as pd
 from osmatching import match
 
 match(
