@@ -20,6 +20,6 @@ match(
     },
     index_date_variable="covid_date",
     replace_match_index_date_with_case="no_offset",
-    output_suffix="_contemporary",
+    output_suffix="_contemporary_northeast",
     output_path="output",
 )
