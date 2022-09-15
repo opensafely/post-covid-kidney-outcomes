@@ -1,156 +1,131 @@
-
 version: "3.0"
 
 expectations:
-  population_size: 10000
+  population_size: 50000
 
 actions:
 
-# Match covid_all_for_matching to comparators in potential_historical_general_population and potential_contemporary_general_population
-# https://docs.opensafely.org/case-control-studies/
-
-# Extract data for covid_england
-  extract_covid_england:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_england
+# Extract data required for matching for covid (all STPs)
+  extract_covid_matching:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_matching
     outputs:
       highly_sensitive:
-        cohort: output/input_covid_england.csv
+        cohort: output/input_covid_matching.csv
 
-#Data management for covid_england
-  covid_england:
-    run: stata-mp:latest analysis/covid_england.do
-    needs: [extract_covid_england]
+#Data management for covid_matching
+  clean_covid_matching:
+    run: stata-mp:latest analysis/covid_matching.do
+    needs: [extract_covid_matching]
     outputs:
       highly_sensitive:
-        analysis_dataset: output/covid_england.dta
+        analysis_dataset: output/covid_matching.csv
       moderately_sensitive:
-        log: logs/covid_england.log
+        log: logs/covid_matching.log
 
-#Descriptive statitics for covid_england
-  covid_descriptive:
-    run: stata-mp:latest analysis/covid_descriptive.do
-    needs: [covid_england]
+# Extract data required for matching for contemporary (all STPs)
+  extract_contemporary_matching:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_contemporary_matching
     outputs:
       highly_sensitive:
-        analysis_dataset: output/covid_descriptive.dta
+        cohort: output/input_contemporary_matching.csv
+
+#Data management for contemporary_matching
+  clean_contemporary_matching:
+    run: stata-mp:latest analysis/contemporary_matching.do
+    needs: [extract_contemporary_matching]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/contemporary_matching.csv
       moderately_sensitive:
-        log: logs/covid_descriptive.log
+        log: logs/contemporary_matching.log
 
-# Extract data required for matching for covid_stp01
-  extract_covid_stp01_matching:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_stp01_matching
-    outputs:
-      highly_sensitive:
-        cohort: output/input_covid_stp01_matching.csv
-
-#Data management for covid_stp01_matching
-  clean_covid_stp01_matching:
-    run: stata-mp:latest analysis/covid_stp01_matching.do
-    needs: [extract_covid_stp01_matching]
-    outputs:
-      highly_sensitive:
-        analysis_dataset: output/covid_stp01_matching.csv
-      moderately_sensitive:
-        log: logs/covid_stp01_matching.log
-
-# Extract data required for matching for contemporary_stp01
-  extract_contemporary_stp01_matching:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_contemporary_stp01_matching
-    outputs:
-      highly_sensitive:
-        cohort: output/input_contemporary_stp01_matching.csv
-
-#Data management for contemporary_stp01_matching
-  clean_contemporary_stp01_matching:
-    run: stata-mp:latest analysis/contemporary_stp01_matching.do
-    needs: [extract_contemporary_stp01_matching]
-    outputs:
-      highly_sensitive:
-        analysis_dataset: output/contemporary_stp01_matching.csv
-      moderately_sensitive:
-        log: logs/contemporary_stp01_matching.log
-
-# Match covid_stp01_matching to contemporary_stp01_matching
-  match_contemporary_stp01:
-    run: python:latest python analysis/match_contemporary_stp01.py
-    needs: [extract_covid_stp01_matching, clean_covid_stp01_matching, extract_contemporary_stp01_matching, clean_contemporary_stp01_matching]
+ # Check STPs
+  check_stps:
+    run: stata-mp:latest analysis/check_stps.do
+    needs: [extract_covid_matching, extract_contemporary_matching]
     outputs:
       moderately_sensitive:
-        matching_report: output/matching_report_contemporary_stp01.txt
-      highly_sensitive:
-        matched_matches: output/matched_matches_contemporary_stp01.csv
+        log: logs/check_stps.log
 
-# Extract data required for matching for covid_northeast
-  extract_covid_northeast_matching:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_northeast_matching
+# Split covid_matching and contemporary_matching by STP
+  split_stps:
+    run: stata-mp:latest analysis/split_stps.do
+    needs: [extract_covid_matching, extract_contemporary_matching]
     outputs:
       highly_sensitive:
-        cohort: output/input_covid_northeast_matching.csv
-
-#Data management for covid_northeast_matching
-  clean_covid_northeast_matching:
-    run: stata-mp:latest analysis/covid_northeast_matching.do
-    needs: [extract_covid_northeast_matching]
-    outputs:
-      highly_sensitive:
-        analysis_dataset: output/covid_northeast_matching.csv
+        covid_stp5: output/input_covid_matching_stp5.csv
+        covid_stp6: output/input_covid_matching_stp6.csv
+        covid_stp7: output/input_covid_matching_stp7.csv
+        covid_stp8: output/input_covid_matching_stp8.csv
+        covid_stp9: output/input_covid_matching_stp9.csv
+        covid_stp10: output/input_covid_matching_stp10.csv
+        covid_stp12: output/input_covid_matching_stp12.csv
+        covid_stp13: output/input_covid_matching_stp13.csv
+        covid_stp14: output/input_covid_matching_stp14.csv
+        covid_stp15: output/input_covid_matching_stp15.csv
+        covid_stp16: output/input_covid_matching_stp16.csv
+        covid_stp17: output/input_covid_matching_stp17.csv
+        covid_stp20: output/input_covid_matching_stp20.csv
+        covid_stp21: output/input_covid_matching_stp21.csv
+        covid_stp22: output/input_covid_matching_stp22.csv
+        covid_stp23: output/input_covid_matching_stp23.csv
+        covid_stp24: output/input_covid_matching_stp24.csv
+        covid_stp25: output/input_covid_matching_stp25.csv
+        covid_stp26: output/input_covid_matching_stp26.csv
+        covid_stp27: output/input_covid_matching_stp27.csv
+        covid_stp29: output/input_covid_matching_stp29.csv
+        covid_stp33: output/input_covid_matching_stp33.csv
+        covid_stp35: output/input_covid_matching_stp35.csv
+        covid_stp36: output/input_covid_matching_stp36.csv
+        covid_stp37: output/input_covid_matching_stp37.csv
+        covid_stp40: output/input_covid_matching_stp40.csv
+        covid_stp41: output/input_covid_matching_stp41.csv
+        covid_stp42: output/input_covid_matching_stp42.csv
+        covid_stp43: output/input_covid_matching_stp43.csv
+        covid_stp44: output/input_covid_matching_stp44.csv
+        covid_stp49: output/input_covid_matching_stp49.csv
+        contemporary_stp5: output/input_contemporary_matching_stp5.csv
+        contemporary_stp6: output/input_contemporary_matching_stp6.csv
+        contemporary_stp7: output/input_contemporary_matching_stp7.csv
+        contemporary_stp8: output/input_contemporary_matching_stp8.csv
+        contemporary_stp9: output/input_contemporary_matching_stp9.csv
+        contemporary_stp10: output/input_contemporary_matching_stp10.csv
+        contemporary_stp12: output/input_contemporary_matching_stp12.csv
+        contemporary_stp13: output/input_contemporary_matching_stp13.csv
+        contemporary_stp14: output/input_contemporary_matching_stp14.csv
+        contemporary_stp15: output/input_contemporary_matching_stp15.csv
+        contemporary_stp16: output/input_contemporary_matching_stp16.csv
+        contemporary_stp17: output/input_contemporary_matching_stp17.csv
+        contemporary_stp20: output/input_contemporary_matching_stp20.csv
+        contemporary_stp21: output/input_contemporary_matching_stp21.csv
+        contemporary_stp22: output/input_contemporary_matching_stp22.csv
+        contemporary_stp23: output/input_contemporary_matching_stp23.csv
+        contemporary_stp24: output/input_contemporary_matching_stp24.csv
+        contemporary_stp25: output/input_contemporary_matching_stp25.csv
+        contemporary_stp26: output/input_contemporary_matching_stp26.csv
+        contemporary_stp27: output/input_contemporary_matching_stp27.csv
+        contemporary_stp29: output/input_contemporary_matching_stp29.csv
+        contemporary_stp33: output/input_contemporary_matching_stp33.csv
+        contemporary_stp35: output/input_contemporary_matching_stp35.csv
+        contemporary_stp36: output/input_contemporary_matching_stp36.csv
+        contemporary_stp37: output/input_contemporary_matching_stp37.csv
+        contemporary_stp40: output/input_contemporary_matching_stp40.csv
+        contemporary_stp41: output/input_contemporary_matching_stp41.csv
+        contemporary_stp42: output/input_contemporary_matching_stp42.csv
+        contemporary_stp43: output/input_contemporary_matching_stp43.csv
+        contemporary_stp44: output/input_contemporary_matching_stp44.csv
+        contemporary_stp49: output/input_contemporary_matching_stp49.csv
       moderately_sensitive:
-        log: logs/covid_northeast_matching.log
+        log: logs/split_stps.log
 
-# Extract data required for matching for contemporary_northeast
-  extract_contemporary_northeast_matching:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_contemporary_northeast_matching
-    outputs:
-      highly_sensitive:
-        cohort: output/input_contemporary_northeast_matching.csv
 
-#Data management for potential_contemporary_population_northeast
-  clean_contemporary_northeast_matching:
-    run: stata-mp:latest analysis/contemporary_northeast_matching.do
-    needs: [extract_contemporary_northeast_matching]
-    outputs:
-      highly_sensitive:
-        analysis_dataset: output/contemporary_northeast_matching.csv
-      moderately_sensitive:
-        log: logs/contemporary_northeast_matching.log
-
-# Match covid_northeast to potential_contemporary_population_northeast
-  match_contemporary_northeast:
-    run: python:latest python analysis/match_contemporary_northeast.py
-    needs: [extract_covid_northeast_matching, clean_covid_northeast_matching, extract_contemporary_northeast_matching, clean_contemporary_northeast_matching]
+# Match covid_matching_stp5 to contemporary_matching_stp5
+  match_contemporary_stp5:
+    run: python:latest python analysis/match_contemporary_stp5.py
+    needs: [extract_covid_matching, clean_covid_matching, extract_contemporary_matching, clean_contemporary_matching, split_stps]
     outputs:
       moderately_sensitive:
-        matching_report: output/matching_report_contemporary_northeast.txt
+        matching_report: output/matching_report_contemporary_stp5.txt
       highly_sensitive:
-        matched_matches: output/matched_matches_contemporary_northeast.csv
+        matched_matches: output/matched_matches_contemporary_stp5.csv
 
-
-# Extract data for covid_critical_care
-  extract_covid_critical_care:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_critical_care
-    outputs:
-      highly_sensitive:
-        cohort: output/input_covid_critical_care.csv
-
-  covid_critical_care_count:
-    run: stata-mp:latest analysis/covid_critical_care.do
-    needs: [extract_covid_critical_care]
-    outputs:
-      highly_sensitive:
-        analysis_dataset: output/covid_critical_care.dta
-      moderately_sensitive:
-        log: logs/covid_critical_care.log
-
-# Extract data for potential_contemporary_general_population
-  extract_potential_contemporary_general_population:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_potential_contemporary_general_population
-    outputs:
-      highly_sensitive:
-        cohort: output/input_potential_contemporary_general_population.csv
-
-# Extract data for potential_contemporary_general_population (North East region)
-  extract_potential_contemporary_general_population_northeast:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_potential_contemporary_general_population_northeast
-    outputs:
-      highly_sensitive:
-        cohort: output/input_potential_contemporary_general_population_northeast.csv
