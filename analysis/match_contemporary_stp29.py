@@ -1,16 +1,13 @@
 #https://5b5368c1.opensafely-docs.pages.dev/case-control-studies/
 #https://github.com/opensafely/documentation/pull/522
 
-#Individuals extracted from study_definition_covid_stp29 will be matched to individuals from 
-    #study_definition_contemporary_general_population_stp29
-
 #https://github.com/opensafely-core/matching#readme:
 import pandas as pd
 from osmatching import match
 
 match(
-    case_csv="covid_stp29_matching",
-    match_csv="contemporary_stp29_matching",
+    case_csv="input_covid_matching_stp29",
+    match_csv="input_contemporary_matching_stp29",
     matches_per_case=5,
     match_variables={
         "male": "category",
