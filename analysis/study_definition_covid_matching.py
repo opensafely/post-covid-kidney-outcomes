@@ -168,6 +168,12 @@ study = StudyDefinition(
         between = ["1970-01-01", "covid_diagnosis_date + 28 days"],
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
         ),
+    death_date=patients.with_death_recorded_in_primary_care(
+        between = ["2020-02-01", "2022-01-31"],
+        returning="date_of_death",
+        date_format= "YYYY-MM-DD",
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-01-31"}},
+    ),
     baseline_krt_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
         between = ["1970-01-01", "covid_diagnosis_date"],
@@ -402,10 +408,41 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
+    krt_outcome_primary_care=patients.with_these_clinical_events(
+        kidney_replacement_therapy_primary_care_codes,
+        between = ["2020-02-01", "2022-01-31"],
+        returning="date",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}}
+    ),
+    krt_outcome_icd_10=patients.admitted_to_hospital(
+        with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
+        returning="date_admitted",
+        date_format="YYYY-MM-DD",
+        between = ["2020-02-01", "2022-01-31"],
+        find_first_match_in_period=True,
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}}
+    ),
+    krt_outcome_opcs_4=patients.admitted_to_hospital(
+        with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
+        returning="date_admitted",
+        date_format="YYYY-MM-DD",
+        between = ["2020-02-01", "2022-01-31"],
+        find_first_match_in_period=True,
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}}
+    ),
+    krt_outcome_date=patients.minimum_of(
+        "krt_outcome_primary_care", "krt_outcome_icd_10", "krt_outcome_opcs_4",
+    ),
     has_follow_up=patients.registered_with_one_practice_between(
         "covid_diagnosis_date - 3 months", "covid_diagnosis_date",
         return_expectations={"incidence":0.95,
     }
+    ),
+    date_deregistered=patients.date_deregistered_from_all_supported_practices(
+        between= ["2020-02-01", "2022-01-31"],
+        date_format="YYYY-MM-DD",
     ),
 
 )

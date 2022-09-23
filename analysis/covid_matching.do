@@ -54,7 +54,6 @@ drop max_baseline_creatinine_feb2020
 gen covid_date = date(covid_diagnosis_date, "YMD")
 format covid_date %td
 drop if covid_date ==.
-drop covid_diagnosis_date
 drop sgss_positive_date
 drop primary_care_covid_date
 drop hospital_covid_date
@@ -136,6 +135,11 @@ label values imd imd
 label var imd "Index of Multiple Deprivation"
 noi di "DROPPING IF NO IMD" 
 drop if imd>=.
+
+**Drop disaggregated krt_outcome variables
+drop krt_outcome_primary_care
+drop krt_outcome_icd_10
+drop krt_outcome_opcs_4
 
 export delimited using "./output/covid_matching.csv", replace
 

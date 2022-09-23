@@ -106,12 +106,49 @@ study = StudyDefinition(
         ),
 
 #Exclusion variables
+    sgss_positive_date=patients.with_test_result_in_sgss(
+        pathogen="SARS-CoV-2",
+        test_result="positive",
+        returning="date",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        on_or_before="2022-01-31",
+        return_expectations={"incidence": 0.4, "date": {"earliest": "2020-02-01"}},
+    ),
+    
+    primary_care_covid_date=patients.with_these_clinical_events(
+        any_covid_primary_care_code,
+        returning="date",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        on_or_before="2022-01-31",
+        return_expectations={"incidence": 0.2, "date": {"earliest": "2020-02-01"}},
+    ),
+
+    hospital_covid_date=patients.admitted_to_hospital(
+        with_these_diagnoses=covid_codes,
+        returning="date_admitted",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        on_or_before="2022-01-31",
+        return_expectations={"incidence": 0.1, "date": {"earliest": "2020-02-01"}},
+    ),
+    
+    covid_diagnosis_date=patients.minimum_of(
+        "sgss_positive_date", "primary_care_covid_date", "hospital_covid_date",
+    ),
 
     deceased=patients.with_death_recorded_in_primary_care(
         returning="binary_flag",
         between = ["1970-01-01", "index_date"],
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
         ),
+    death_date=patients.with_death_recorded_in_primary_care(
+        between = ["index_date", "2022-01-31"],
+        returning="date_of_death",
+        date_format= "YYYY-MM-DD",
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-01-31"}},
+    ),
     baseline_krt_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
         between = ["1970-01-01", "index_date"],
@@ -139,8 +176,39 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
+    krt_outcome_primary_care=patients.with_these_clinical_events(
+        kidney_replacement_therapy_primary_care_codes,
+        between = ["index_date", "2022-01-31"],
+        returning="date",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}}
+    ),
+    krt_outcome_icd_10=patients.admitted_to_hospital(
+        with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
+        returning="date_admitted",
+        date_format="YYYY-MM-DD",
+        between = ["index_date", "2022-01-31"],
+        find_first_match_in_period=True,
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}}
+    ),
+    krt_outcome_opcs_4=patients.admitted_to_hospital(
+        with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
+        returning="date_admitted",
+        date_format="YYYY-MM-DD",
+        between = ["index_date", "2022-01-31"],
+        find_first_match_in_period=True,
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}}
+    ),
+    krt_outcome_date=patients.minimum_of(
+        "krt_outcome_primary_care", "krt_outcome_icd_10", "krt_outcome_opcs_4",
+    ),
     has_follow_up=patients.registered_with_one_practice_between(
-        "2019-10-31", "2022-01-31",
+        "2019-10-31", "index_date",
         return_expectations={"incidence":0.95},
+    ),
+    date_deregistered=patients.date_deregistered_from_all_supported_practices(
+        between= ["2020-02-01", "2022-01-31"],
+        date_format="YYYY-MM-DD",
     ),
 )

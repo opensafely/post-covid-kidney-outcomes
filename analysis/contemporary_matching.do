@@ -69,5 +69,13 @@ label var imd "Index of Multiple Deprivation"
 noi di "DROPPING IF NO IMD" 
 drop if imd>=.
 
+**Drop excess variables
+drop krt_outcome_primary_care
+drop krt_outcome_icd_10
+drop krt_outcome_opcs_4
+drop sgss_positive_date
+drop primary_care_covid_date
+drop hospital_covid_date
+
 export delimited using "./output/contemporary_matching.csv", replace
 log close

@@ -6,8 +6,8 @@ import pandas as pd
 from osmatching import match
 
 match(
-    case_csv="input_covid_matching_stp5",
-    match_csv="input_contemporary_matching_stp5",
+    case_csv="input_covid_matching_stp35",
+    match_csv="input_contemporary_matching_stp35",
     matches_per_case=5,
     match_variables={
         "male": "category",
@@ -15,6 +15,6 @@ match(
     },
     index_date_variable="covid_date",
     replace_match_index_date_with_case="no_offset",
-    output_suffix="_contemporary_stp5",
+    output_suffix="_contemporary_stp35",
     output_path="output",
 )
