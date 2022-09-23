@@ -12,7 +12,6 @@ match(
     match_variables={
         "male": "category",
         "year_of_birth": 0,
-        "imd": "category",
     },
     index_date_variable="covid_date",
     replace_match_index_date_with_case="no_offset",

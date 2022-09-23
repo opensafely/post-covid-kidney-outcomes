@@ -10,8 +10,6 @@ match(
     match_csv="input_contemporary_matching_stp5",
     matches_per_case=5,
     match_variables={
-        "male": "category",
-        "year_of_birth": 0,
         "imd": "category",
     },
     index_date_variable="covid_date",
