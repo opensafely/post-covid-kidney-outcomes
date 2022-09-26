@@ -11,7 +11,7 @@ match(
     matches_per_case=5,
     match_variables={
         "male": "category",
-        "year_of_birth": 0,
+        "year_of_birth": 5,
     },
     index_date_variable="covid_date",
     replace_match_index_date_with_case="no_offset",
@@ -21,6 +21,6 @@ match(
         "krt_outcome_date": "before",
         "covid_diagnosis_date": "before",
     },
-    output_suffix="_contemporary_stp35_noimd",
+    output_suffix="_contemporary_stp35_yearsex",
     output_path="output",
 )
