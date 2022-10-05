@@ -9,7 +9,7 @@ log using ./logs/split_stps_without_exclusions.log, replace t
 
 
 *(1)=========Split cases into separate stp files============
-import delimited ./output/covid_matching.csv, clear
+import delimited ./output/input_covid_matching.csv, clear
 
 *stps are coded E54000005-9, 10, 12-17, 20-27, 29, 33, 35-37, 40-44, 49
 *files need to be .csv format as this is what the matching program needs as input
@@ -30,7 +30,7 @@ foreach i of numlist 10 12/17 20/27 29 33 35/37 40/44 49 {
 }
 
 *(2)=========Split controls into separate stp files============
-import delimited ./output/contemporary_matching.csv, clear
+import delimited ./output/input_contemporary_matching.csv, clear
 
 	*stps are coded E54000005-9, 10, 12-17, 20-27, 29, 33, 35-37, 40-44, 49
 foreach i of numlist 5/9  {

@@ -35,7 +35,7 @@ end
 
 
 *(1)=========Create separate stps for cases============
-import delimited ./output/covid_matching.csv, clear
+import delimited ./output/input_covid_matching.csv, clear
 *tabulate before changes
 tab stp
 *call program
@@ -43,13 +43,13 @@ replaceSTPs
 *tabulate after changes
 tab stp, miss
 *export output
-export delimited using "./output/covid_matching.csv", replace
+export delimited using "./output/input_covid_matching.csv", replace
 
 
 
 
 *(2)=========Create separate stps for comparators============
-import delimited ./output/contemporary_matching.csv, clear
+import delimited ./output/input_contemporary_matching.csv, clear
 *tabulate before changes
 tab stp
 *call program
@@ -57,7 +57,7 @@ replaceSTPs
 *tabulate after changes
 tab stp
 *export output
-export delimited using "./output/contemporary_matching.csv", replace
+export delimited using "./output/input_contemporary_matching.csv", replace
 
 
 log close
