@@ -14,7 +14,7 @@ match(
         "year_of_birth": 0,
         "imd": "category",
     },
-    index_date_variable="covid_diagnosis_date",
+    index_date_variable="covid_diagnosis_date + 28 days",
     replace_match_index_date_with_case="no_offset",
     date_exclusion_variables={
         "death_date": "before",
