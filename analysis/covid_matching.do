@@ -125,15 +125,6 @@ drop deceased
 
 **Covariates
 * IMD
-rename imd imd_o
-egen imd = cut(imd_o), group(5) icodes
-replace imd = imd + 1
-drop imd_o
-recode imd 5=1 4=2 3=3 2=4 1=5 .=.
-label define imd 1 "1 least deprived" 2 "2" 3 "3" 4 "4" 5 "5 most deprived" 
-label values imd imd
-label var imd "Index of Multiple Deprivation"
-noi di "DROPPING IF NO IMD" 
 drop if imd>=.
 
 **Drop disaggregated krt_outcome variables

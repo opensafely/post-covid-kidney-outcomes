@@ -21,12 +21,6 @@ match(
         "krt_outcome_date": "before",
         "covid_diagnosis_date": "before",
     },
-    date_exclusion_variables={
-        "death_date": "before",
-        "date_deregistered": "before",
-        "krt_outcome_date": "before",
-        "covid_diagnosis_date": "before",
-    },
     output_suffix="_contemporary_stp35_noimd",
     output_path="output",
 )
