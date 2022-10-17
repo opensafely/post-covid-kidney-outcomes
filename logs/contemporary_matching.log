@@ -1,26 +1,27 @@
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  C:\Users\lsh1703468\Documents\repos\logs/contemporary_matching.log
+       log:  /workspace/logs/contemporary_matching.log
   log type:  text
- opened on:  11 Oct 2022, 23:08:59
+ opened on:  17 Oct 2022, 00:04:42
 
 . clear
 
 . 
-. import delimited ./output/input_contemporary_matching.csv, delimiter(comma) varnames(1) case(preserve) 
-(encoding automatically selected: ISO-8859-1)
+. import delimited ./output/input_contemporary_matching.csv, delimiter(comma) v
+> arnames(1) case(preserve) 
 (22 vars, 50,000 obs)
 
 . 
 . **Exclusions
 . * Age <18
 . drop if age <18
-(10,702 observations deleted)
+(10,632 observations deleted)
 
 . 
-. * Anyone not registered at one practice for 3 months before COVID-19 diagnosis
+. * Anyone not registered at one practice for 3 months before COVID-19 diagnosi
+> s
 . drop if has_follow_up==0
-(1,980 observations deleted)
+(1,986 observations deleted)
 
 . drop has_follow_up
 
@@ -32,12 +33,12 @@
 . drop baseline_krt_primary_care
 
 . drop if baseline_krt_icd_10==1
-(1,766 observations deleted)
+(1,760 observations deleted)
 
 . drop baseline_krt_icd_10
 
 . drop if baseline_krt_opcs_4==1
-(1,662 observations deleted)
+(1,713 observations deleted)
 
 . drop baseline_krt_opcs_4
 
@@ -56,53 +57,66 @@
 . label var male "Sex (0=F 1=M)"
 
 . 
-. replace baseline_creatinine_feb2020 = . if !inrange(baseline_creatinine_feb2020, 20, 3000)
-(14,159 real changes made, 14,159 to missing)
+. replace baseline_creatinine_feb2020 = . if !inrange(baseline_creatinine_feb20
+> 20, 20, 3000)
+(14,092 real changes made, 14,092 to missing)
 
 . gen mgdl_baseline_creatinine_feb2020 = baseline_creatinine_feb2020/88.4
-(14,159 missing values generated)
+(14,092 missing values generated)
 
 . gen min_baseline_creatinine_feb2020=.
-(32,045 missing values generated)
+(32,064 missing values generated)
 
-. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.7 if male==0
-(9,096 real changes made)
+. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 7 if male==0
+(9,288 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.9 if male==1
-(8,790 real changes made)
+. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 9 if male==1
+(8,684 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.329  if male==0
-(9,096 real changes made)
+. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
+> 329  if male==0
+(9,288 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.411  if male==1
-(8,790 real changes made)
+. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
+> 411  if male==1
+(8,684 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = 1 if min_baseline_creatinine_feb2020<1
-(11,400 real changes made)
+. replace min_baseline_creatinine_feb2020 = 1 if min_baseline_creatinine_feb202
+> 0<1
+(11,427 real changes made)
 
 . gen max_baseline_creatinine_feb2020=.
-(32,045 missing values generated)
+(32,064 missing values generated)
 
-. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.7 if male==0
-(9,096 real changes made)
+. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 7 if male==0
+(9,288 real changes made)
 
-. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.9 if male==1
-(8,790 real changes made)
+. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 9 if male==1
+(8,684 real changes made)
 
-. replace max_baseline_creatinine_feb2020 = max_baseline_creatinine_feb2020^-1.209
-(17,886 real changes made)
+. replace max_baseline_creatinine_feb2020 = max_baseline_creatinine_feb2020^-1.
+> 209
+(17,972 real changes made)
 
-. replace max_baseline_creatinine_feb2020 = 1 if max_baseline_creatinine_feb2020>1
-(20,645 real changes made)
+. replace max_baseline_creatinine_feb2020 = 1 if max_baseline_creatinine_feb202
+> 0>1
+(20,637 real changes made)
 
-. gen egfr_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020*max_baseline_creatinine_feb2020*141
-(14,159 missing values generated)
+. gen egfr_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020*max_ba
+> seline_creatinine_feb2020*141
+(14,092 missing values generated)
 
-. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*(0.993^age)
-(17,886 real changes made)
+. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*(
+> 0.993^age)
+(17,972 real changes made)
 
-. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*1.018 if male==0
-(9,096 real changes made)
+. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*1
+> .018 if male==0
+(9,288 real changes made)
 
 . drop if egfr_baseline_creatinine_feb2020 <15
 (0 observations deleted)
@@ -122,7 +136,7 @@
 . 
 . * Deceased
 . drop if deceased==1
-(3,241 observations deleted)
+(3,182 observations deleted)
 
 . drop deceased
 
@@ -148,11 +162,12 @@
 
 . 
 . export delimited using "./output/contemporary_matching.csv", replace
+(note: file ./output/contemporary_matching.csv not found)
 file ./output/contemporary_matching.csv saved
 
 . log close
       name:  <unnamed>
-       log:  C:\Users\lsh1703468\Documents\repos\logs/contemporary_matching.log
+       log:  /workspace/logs/contemporary_matching.log
   log type:  text
- closed on:  11 Oct 2022, 23:08:59
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ closed on:  17 Oct 2022, 00:04:43
+-------------------------------------------------------------------------------

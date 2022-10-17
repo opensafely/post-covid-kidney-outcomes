@@ -1,0 +1,709 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /workspace/logs/covid_community_matching.log
+  log type:  text
+ opened on:  17 Oct 2022, 00:04:44
+
+. clear
+
+. 
+. import delimited ./output/input_covid_community_matching.csv, delimiter(comma
+> ) varnames(1) case(preserve) 
+(47 vars, 50,000 obs)
+
+. 
+. **Exclusions
+. * Age <18
+. drop if age <18
+(10,777 observations deleted)
+
+. 
+. * Anyone not registered at one practice for 3 months before COVID-19 diagnosi
+> s
+. drop if has_follow_up==0
+(1,953 observations deleted)
+
+. drop has_follow_up
+
+. 
+. * Pre-existing kidney replacement therapy
+. drop if baseline_krt_primary_care==1
+(1,853 observations deleted)
+
+. drop baseline_krt_primary_care
+
+. drop if baseline_krt_icd_10==1
+(1,792 observations deleted)
+
+. drop baseline_krt_icd_10
+
+. drop if baseline_krt_opcs_4==1
+(1,675 observations deleted)
+
+. drop baseline_krt_opcs_4
+
+. 
+. * Baseline eGFR <15 as at February 2020
+. assert inlist(sex, "M", "F")
+
+. gen male = (sex=="M")
+
+. drop sex
+
+. label define sexLab 1 "Male" 0 "Female"
+
+. label values male sexLab
+
+. label var male "Sex (0=F 1=M)"
+
+. 
+. replace baseline_creatinine_feb2020 = . if !inrange(baseline_creatinine_feb20
+> 20, 20, 3000)
+(14,013 real changes made, 14,013 to missing)
+
+. gen mgdl_baseline_creatinine_feb2020 = baseline_creatinine_feb2020/88.4
+(14,013 missing values generated)
+
+. gen min_baseline_creatinine_feb2020=.
+(31,950 missing values generated)
+
+. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 7 if male==0
+(9,166 real changes made)
+
+. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 9 if male==1
+(8,771 real changes made)
+
+. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
+> 329  if male==0
+(9,166 real changes made)
+
+. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
+> 411  if male==1
+(8,771 real changes made)
+
+. replace min_baseline_creatinine_feb2020 = 1 if min_baseline_creatinine_feb202
+> 0<1
+(11,293 real changes made)
+
+. gen max_baseline_creatinine_feb2020=.
+(31,950 missing values generated)
+
+. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 7 if male==0
+(9,166 real changes made)
+
+. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 9 if male==1
+(8,771 real changes made)
+
+. replace max_baseline_creatinine_feb2020 = max_baseline_creatinine_feb2020^-1.
+> 209
+(17,937 real changes made)
+
+. replace max_baseline_creatinine_feb2020 = 1 if max_baseline_creatinine_feb202
+> 0>1
+(20,657 real changes made)
+
+. gen egfr_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020*max_ba
+> seline_creatinine_feb2020*141
+(14,013 missing values generated)
+
+. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*(
+> 0.993^age)
+(17,937 real changes made)
+
+. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*1
+> .018 if male==0
+(9,166 real changes made)
+
+. drop if egfr_baseline_creatinine_feb2020 <15
+(0 observations deleted)
+
+. drop baseline_creatinine_feb2020
+
+. drop mgdl_baseline_creatinine_feb2020
+
+. drop min_baseline_creatinine_feb2020
+
+. drop max_baseline_creatinine_feb2020
+
+. 
+. * Baseline eGFR <15 at time of COVID diagnosis using baseline creatinine upda
+> ted monthly
+. gen covid_date = date(covid_diagnosis_date, "YMD")
+(17,838 missing values generated)
+
+. format covid_date %td
+
+. drop if covid_date ==.
+(17,838 observations deleted)
+
+. drop sgss_positive_date
+
+. drop primary_care_covid_date
+
+. drop hospital_covid_date
+
+. drop sars_cov_2
+
+. 
+. foreach baseline_creatinine_monthly of varlist  baseline_creatinine_mar2020 /
+> //
+>                                                                              
+>                    baseline_creatinine_apr2020 ///
+>                                                                              
+>                    baseline_creatinine_may2020 ///
+>                                                                              
+>                    baseline_creatinine_jun2020 ///
+>                                                                              
+>                    baseline_creatinine_jul2020 ///
+>                                                                              
+>                    baseline_creatinine_aug2020 ///
+>                                                                              
+>                    baseline_creatinine_sep2020 ///
+>                                                                              
+>                    baseline_creatinine_oct2020 ///
+>                                                                              
+>                    baseline_creatinine_nov2020 ///
+>                                                                              
+>                    baseline_creatinine_dec2020 ///
+>                                                                              
+>                    baseline_creatinine_jan2021 ///
+>                                                                              
+>                    baseline_creatinine_feb2021 ///
+>                                                                              
+>                    baseline_creatinine_mar2021 ///
+>                                                                              
+>                    baseline_creatinine_apr2021 ///
+>                                                                              
+>                    baseline_creatinine_may2021 ///
+>                                                                              
+>                    baseline_creatinine_jun2021 ///
+>                                                                              
+>                    baseline_creatinine_jul2021 ///
+>                                                                              
+>                    baseline_creatinine_aug2021 ///
+>                                                                              
+>                    baseline_creatinine_sep2021 ///
+>                                                                              
+>                    baseline_creatinine_oct2021 ///
+>                                                                              
+>                    baseline_creatinine_nov2021 ///
+>                                                                              
+>                    baseline_creatinine_dec2021 ///
+>                                                                              
+>                    baseline_creatinine_jan2022 {
+  2. replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine
+> _monthly', 20, 3000)
+  3. gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.
+> 4
+  4. gen min_`baseline_creatinine_monthly'=.
+  5. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.7 if male==0
+  6. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.9 if male==1
+  7. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_month
+> ly'^-0.329 if male==0
+  8. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_month
+> ly'^-0.411 if male==1
+  9. replace min_`baseline_creatinine_monthly' = 1 if min_`baseline_creatinine_
+> monthly'<1
+ 10. gen max_`baseline_creatinine_monthly'=.
+ 11. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.7 if male==0
+ 12. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.9 if male==1
+ 13. replace max_`baseline_creatinine_monthly' = max_`baseline_creatinine_month
+> ly'^-1.209
+ 14. replace max_`baseline_creatinine_monthly' = 1 if max_`baseline_creatinine_
+> monthly'>1
+ 15. gen egfr_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'
+> *max_`baseline_creatinine_monthly'*141
+ 16. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_mon
+> thly'*(0.993^age)
+ 17. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_mon
+> thly'*1.018 if male==0
+ 18. drop `baseline_creatinine_monthly'
+ 19. drop mgdl_`baseline_creatinine_monthly'
+ 20. drop min_`baseline_creatinine_monthly'
+ 21. drop max_`baseline_creatinine_monthly'
+ 22. }
+(6,228 real changes made, 6,228 to missing)
+(6,228 missing values generated)
+(14,112 missing values generated)
+(4,020 real changes made)
+(3,864 real changes made)
+(4,020 real changes made)
+(3,864 real changes made)
+(5,020 real changes made)
+(14,112 missing values generated)
+(4,020 real changes made)
+(3,864 real changes made)
+(7,884 real changes made)
+(9,092 real changes made)
+(6,228 missing values generated)
+(7,884 real changes made)
+(4,020 real changes made)
+(6,249 real changes made, 6,249 to missing)
+(6,249 missing values generated)
+(14,112 missing values generated)
+(3,968 real changes made)
+(3,895 real changes made)
+(3,968 real changes made)
+(3,895 real changes made)
+(5,019 real changes made)
+(14,112 missing values generated)
+(3,968 real changes made)
+(3,895 real changes made)
+(7,863 real changes made)
+(9,093 real changes made)
+(6,249 missing values generated)
+(7,863 real changes made)
+(3,968 real changes made)
+(6,177 real changes made, 6,177 to missing)
+(6,177 missing values generated)
+(14,112 missing values generated)
+(3,991 real changes made)
+(3,944 real changes made)
+(3,991 real changes made)
+(3,944 real changes made)
+(5,066 real changes made)
+(14,112 missing values generated)
+(3,991 real changes made)
+(3,944 real changes made)
+(7,935 real changes made)
+(9,046 real changes made)
+(6,177 missing values generated)
+(7,935 real changes made)
+(3,991 real changes made)
+(6,208 real changes made, 6,208 to missing)
+(6,208 missing values generated)
+(14,112 missing values generated)
+(3,977 real changes made)
+(3,927 real changes made)
+(3,977 real changes made)
+(3,927 real changes made)
+(4,970 real changes made)
+(14,112 missing values generated)
+(3,977 real changes made)
+(3,927 real changes made)
+(7,904 real changes made)
+(9,142 real changes made)
+(6,208 missing values generated)
+(7,904 real changes made)
+(3,977 real changes made)
+(6,241 real changes made, 6,241 to missing)
+(6,241 missing values generated)
+(14,112 missing values generated)
+(4,018 real changes made)
+(3,853 real changes made)
+(4,018 real changes made)
+(3,853 real changes made)
+(4,970 real changes made)
+(14,112 missing values generated)
+(4,018 real changes made)
+(3,853 real changes made)
+(7,871 real changes made)
+(9,142 real changes made)
+(6,241 missing values generated)
+(7,871 real changes made)
+(4,018 real changes made)
+(6,260 real changes made, 6,260 to missing)
+(6,260 missing values generated)
+(14,112 missing values generated)
+(3,964 real changes made)
+(3,888 real changes made)
+(3,964 real changes made)
+(3,888 real changes made)
+(4,995 real changes made)
+(14,112 missing values generated)
+(3,964 real changes made)
+(3,888 real changes made)
+(7,852 real changes made)
+(9,117 real changes made)
+(6,260 missing values generated)
+(7,852 real changes made)
+(3,964 real changes made)
+(6,299 real changes made, 6,299 to missing)
+(6,299 missing values generated)
+(14,112 missing values generated)
+(3,983 real changes made)
+(3,830 real changes made)
+(3,983 real changes made)
+(3,830 real changes made)
+(4,934 real changes made)
+(14,112 missing values generated)
+(3,983 real changes made)
+(3,830 real changes made)
+(7,813 real changes made)
+(9,178 real changes made)
+(6,299 missing values generated)
+(7,813 real changes made)
+(3,983 real changes made)
+(6,226 real changes made, 6,226 to missing)
+(6,226 missing values generated)
+(14,112 missing values generated)
+(4,030 real changes made)
+(3,856 real changes made)
+(4,030 real changes made)
+(3,856 real changes made)
+(4,996 real changes made)
+(14,112 missing values generated)
+(4,030 real changes made)
+(3,856 real changes made)
+(7,886 real changes made)
+(9,116 real changes made)
+(6,226 missing values generated)
+(7,886 real changes made)
+(4,030 real changes made)
+(6,240 real changes made, 6,240 to missing)
+(6,240 missing values generated)
+(14,112 missing values generated)
+(4,001 real changes made)
+(3,871 real changes made)
+(4,001 real changes made)
+(3,871 real changes made)
+(5,041 real changes made)
+(14,112 missing values generated)
+(4,001 real changes made)
+(3,871 real changes made)
+(7,872 real changes made)
+(9,071 real changes made)
+(6,240 missing values generated)
+(7,872 real changes made)
+(4,001 real changes made)
+(6,127 real changes made, 6,127 to missing)
+(6,127 missing values generated)
+(14,112 missing values generated)
+(4,048 real changes made)
+(3,937 real changes made)
+(4,048 real changes made)
+(3,937 real changes made)
+(5,036 real changes made)
+(14,112 missing values generated)
+(4,048 real changes made)
+(3,937 real changes made)
+(7,985 real changes made)
+(9,076 real changes made)
+(6,127 missing values generated)
+(7,985 real changes made)
+(4,048 real changes made)
+(6,100 real changes made, 6,100 to missing)
+(6,100 missing values generated)
+(14,112 missing values generated)
+(4,026 real changes made)
+(3,986 real changes made)
+(4,026 real changes made)
+(3,986 real changes made)
+(5,026 real changes made)
+(14,112 missing values generated)
+(4,026 real changes made)
+(3,986 real changes made)
+(8,012 real changes made)
+(9,086 real changes made)
+(6,100 missing values generated)
+(8,012 real changes made)
+(4,026 real changes made)
+(6,155 real changes made, 6,155 to missing)
+(6,155 missing values generated)
+(14,112 missing values generated)
+(4,030 real changes made)
+(3,927 real changes made)
+(4,030 real changes made)
+(3,927 real changes made)
+(4,992 real changes made)
+(14,112 missing values generated)
+(4,030 real changes made)
+(3,927 real changes made)
+(7,957 real changes made)
+(9,120 real changes made)
+(6,155 missing values generated)
+(7,957 real changes made)
+(4,030 real changes made)
+(6,201 real changes made, 6,201 to missing)
+(6,201 missing values generated)
+(14,112 missing values generated)
+(4,006 real changes made)
+(3,905 real changes made)
+(4,006 real changes made)
+(3,905 real changes made)
+(4,947 real changes made)
+(14,112 missing values generated)
+(4,006 real changes made)
+(3,905 real changes made)
+(7,911 real changes made)
+(9,165 real changes made)
+(6,201 missing values generated)
+(7,911 real changes made)
+(4,006 real changes made)
+(6,262 real changes made, 6,262 to missing)
+(6,262 missing values generated)
+(14,112 missing values generated)
+(3,971 real changes made)
+(3,879 real changes made)
+(3,971 real changes made)
+(3,879 real changes made)
+(4,969 real changes made)
+(14,112 missing values generated)
+(3,971 real changes made)
+(3,879 real changes made)
+(7,850 real changes made)
+(9,143 real changes made)
+(6,262 missing values generated)
+(7,850 real changes made)
+(3,971 real changes made)
+(6,162 real changes made, 6,162 to missing)
+(6,162 missing values generated)
+(14,112 missing values generated)
+(4,050 real changes made)
+(3,900 real changes made)
+(4,050 real changes made)
+(3,900 real changes made)
+(5,019 real changes made)
+(14,112 missing values generated)
+(4,050 real changes made)
+(3,900 real changes made)
+(7,950 real changes made)
+(9,093 real changes made)
+(6,162 missing values generated)
+(7,950 real changes made)
+(4,050 real changes made)
+(6,165 real changes made, 6,165 to missing)
+(6,165 missing values generated)
+(14,112 missing values generated)
+(4,031 real changes made)
+(3,916 real changes made)
+(4,031 real changes made)
+(3,916 real changes made)
+(5,073 real changes made)
+(14,112 missing values generated)
+(4,031 real changes made)
+(3,916 real changes made)
+(7,947 real changes made)
+(9,039 real changes made)
+(6,165 missing values generated)
+(7,947 real changes made)
+(4,031 real changes made)
+(6,116 real changes made, 6,116 to missing)
+(6,116 missing values generated)
+(14,112 missing values generated)
+(4,013 real changes made)
+(3,983 real changes made)
+(4,013 real changes made)
+(3,983 real changes made)
+(5,030 real changes made)
+(14,112 missing values generated)
+(4,013 real changes made)
+(3,983 real changes made)
+(7,996 real changes made)
+(9,082 real changes made)
+(6,116 missing values generated)
+(7,996 real changes made)
+(4,013 real changes made)
+(6,238 real changes made, 6,238 to missing)
+(6,238 missing values generated)
+(14,112 missing values generated)
+(4,000 real changes made)
+(3,874 real changes made)
+(4,000 real changes made)
+(3,874 real changes made)
+(5,006 real changes made)
+(14,112 missing values generated)
+(4,000 real changes made)
+(3,874 real changes made)
+(7,874 real changes made)
+(9,106 real changes made)
+(6,238 missing values generated)
+(7,874 real changes made)
+(4,000 real changes made)
+(6,287 real changes made, 6,287 to missing)
+(6,287 missing values generated)
+(14,112 missing values generated)
+(3,941 real changes made)
+(3,884 real changes made)
+(3,941 real changes made)
+(3,884 real changes made)
+(4,895 real changes made)
+(14,112 missing values generated)
+(3,941 real changes made)
+(3,884 real changes made)
+(7,825 real changes made)
+(9,217 real changes made)
+(6,287 missing values generated)
+(7,825 real changes made)
+(3,941 real changes made)
+(6,161 real changes made, 6,161 to missing)
+(6,161 missing values generated)
+(14,112 missing values generated)
+(4,053 real changes made)
+(3,898 real changes made)
+(4,053 real changes made)
+(3,898 real changes made)
+(5,077 real changes made)
+(14,112 missing values generated)
+(4,053 real changes made)
+(3,898 real changes made)
+(7,951 real changes made)
+(9,035 real changes made)
+(6,161 missing values generated)
+(7,951 real changes made)
+(4,053 real changes made)
+(6,272 real changes made, 6,272 to missing)
+(6,272 missing values generated)
+(14,112 missing values generated)
+(3,938 real changes made)
+(3,902 real changes made)
+(3,938 real changes made)
+(3,902 real changes made)
+(4,959 real changes made)
+(14,112 missing values generated)
+(3,938 real changes made)
+(3,902 real changes made)
+(7,840 real changes made)
+(9,153 real changes made)
+(6,272 missing values generated)
+(7,840 real changes made)
+(3,938 real changes made)
+(6,095 real changes made, 6,095 to missing)
+(6,095 missing values generated)
+(14,112 missing values generated)
+(4,090 real changes made)
+(3,927 real changes made)
+(4,090 real changes made)
+(3,927 real changes made)
+(5,064 real changes made)
+(14,112 missing values generated)
+(4,090 real changes made)
+(3,927 real changes made)
+(8,017 real changes made)
+(9,048 real changes made)
+(6,095 missing values generated)
+(8,017 real changes made)
+(4,090 real changes made)
+(6,169 real changes made, 6,169 to missing)
+(6,169 missing values generated)
+(14,112 missing values generated)
+(4,041 real changes made)
+(3,902 real changes made)
+(4,041 real changes made)
+(3,902 real changes made)
+(5,038 real changes made)
+(14,112 missing values generated)
+(4,041 real changes made)
+(3,902 real changes made)
+(7,943 real changes made)
+(9,074 real changes made)
+(6,169 missing values generated)
+(7,943 real changes made)
+(4,041 real changes made)
+
+. 
+. gen covid_date_string=string(covid_date, "%td") 
+
+. gen covid_month=substr( covid_date_string ,3,7)
+
+. 
+. gen baseline_egfr=.
+(14,112 missing values generated)
+
+. local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep
+> 2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 
+> jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
+
+. foreach x of  local month_year  {
+  2. replace baseline_egfr=egfr_baseline_creatinine_`x' if  covid_month=="`x'"
+  3. drop if baseline_egfr <15
+  4. drop egfr_baseline_creatinine_`x'
+  5. }
+(368 real changes made)
+(0 observations deleted)
+(375 real changes made)
+(0 observations deleted)
+(385 real changes made)
+(0 observations deleted)
+(363 real changes made)
+(0 observations deleted)
+(379 real changes made)
+(0 observations deleted)
+(359 real changes made)
+(0 observations deleted)
+(360 real changes made)
+(0 observations deleted)
+(359 real changes made)
+(0 observations deleted)
+(349 real changes made)
+(0 observations deleted)
+(338 real changes made)
+(0 observations deleted)
+(318 real changes made)
+(0 observations deleted)
+(332 real changes made)
+(0 observations deleted)
+(284 real changes made)
+(0 observations deleted)
+(323 real changes made)
+(0 observations deleted)
+(286 real changes made)
+(0 observations deleted)
+(314 real changes made)
+(0 observations deleted)
+(289 real changes made)
+(0 observations deleted)
+(310 real changes made)
+(0 observations deleted)
+(300 real changes made)
+(0 observations deleted)
+(299 real changes made)
+(0 observations deleted)
+(297 real changes made)
+(0 observations deleted)
+(274 real changes made)
+(0 observations deleted)
+(282 real changes made)
+(0 observations deleted)
+(300 real changes made)
+(0 observations deleted)
+
+. drop baseline_egfr
+
+. drop covid_month
+
+. drop covid_date_string
+
+. drop age
+
+. 
+. * COVID-19 death
+. drop if deceased==1
+(1,389 observations deleted)
+
+. drop deceased
+
+. 
+. **Covariates
+. * IMD
+. drop if imd>=.
+(0 observations deleted)
+
+. 
+. **Drop disaggregated krt_outcome variables
+. drop krt_outcome_primary_care
+
+. drop krt_outcome_icd_10
+
+. drop krt_outcome_opcs_4
+
+. 
+. export delimited using "./output/covid_community_matching.csv", replace
+(note: file ./output/covid_community_matching.csv not found)
+file ./output/covid_community_matching.csv saved
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /workspace/logs/covid_community_matching.log
+  log type:  text
+ closed on:  17 Oct 2022, 00:04:46
+-------------------------------------------------------------------------------
