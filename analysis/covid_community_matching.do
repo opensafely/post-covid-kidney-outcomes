@@ -132,6 +132,11 @@ drop krt_outcome_primary_care
 drop krt_outcome_icd_10
 drop krt_outcome_opcs_4
 
+*Tabulate variables
+tab year_of_birth
+tab imd
+tab male
+
 export delimited using "./output/covid_community_matching.csv", replace
 
 log close
