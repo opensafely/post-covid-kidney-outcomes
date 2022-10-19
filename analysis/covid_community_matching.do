@@ -115,7 +115,6 @@ drop if baseline_egfr <15
 drop egfr_baseline_creatinine_`x'
 }
 drop baseline_egfr
-drop covid_month
 drop covid_date_string
 drop age
 
@@ -136,6 +135,7 @@ drop krt_outcome_opcs_4
 tab year_of_birth
 tab imd
 tab male
+bysort year_of_birth: tab covid_month
 
 export delimited using "./output/covid_community_matching.csv", replace
 

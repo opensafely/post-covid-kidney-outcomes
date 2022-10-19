@@ -1,14 +1,14 @@
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /workspace/logs/covid_community_matching.log
+       log:  C:\Users\lsh1703468\Documents\repos\logs/covid_community_matching.log
   log type:  text
- opened on:  17 Oct 2022, 00:04:44
+ opened on:  19 Oct 2022, 10:12:56
 
 . clear
 
 . 
-. import delimited ./output/input_covid_community_matching.csv, delimiter(comma
-> ) varnames(1) case(preserve) 
+. import delimited ./output/input_covid_community_matching.csv, delimiter(comma) varnames(1) case(preserve) 
+(encoding automatically selected: ISO-8859-2)
 (47 vars, 50,000 obs)
 
 . 
@@ -18,8 +18,7 @@
 (10,777 observations deleted)
 
 . 
-. * Anyone not registered at one practice for 3 months before COVID-19 diagnosi
-> s
+. * Anyone not registered at one practice for 3 months before COVID-19 diagnosis
 . drop if has_follow_up==0
 (1,953 observations deleted)
 
@@ -57,8 +56,7 @@
 . label var male "Sex (0=F 1=M)"
 
 . 
-. replace baseline_creatinine_feb2020 = . if !inrange(baseline_creatinine_feb20
-> 20, 20, 3000)
+. replace baseline_creatinine_feb2020 = . if !inrange(baseline_creatinine_feb2020, 20, 3000)
 (14,013 real changes made, 14,013 to missing)
 
 . gen mgdl_baseline_creatinine_feb2020 = baseline_creatinine_feb2020/88.4
@@ -67,55 +65,43 @@
 . gen min_baseline_creatinine_feb2020=.
 (31,950 missing values generated)
 
-. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
-> 7 if male==0
+. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.7 if male==0
 (9,166 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
-> 9 if male==1
+. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.9 if male==1
 (8,771 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
-> 329  if male==0
+. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.329  if male==0
 (9,166 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
-> 411  if male==1
+. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.411  if male==1
 (8,771 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = 1 if min_baseline_creatinine_feb202
-> 0<1
+. replace min_baseline_creatinine_feb2020 = 1 if min_baseline_creatinine_feb2020<1
 (11,293 real changes made)
 
 . gen max_baseline_creatinine_feb2020=.
 (31,950 missing values generated)
 
-. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
-> 7 if male==0
+. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.7 if male==0
 (9,166 real changes made)
 
-. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
-> 9 if male==1
+. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.9 if male==1
 (8,771 real changes made)
 
-. replace max_baseline_creatinine_feb2020 = max_baseline_creatinine_feb2020^-1.
-> 209
+. replace max_baseline_creatinine_feb2020 = max_baseline_creatinine_feb2020^-1.209
 (17,937 real changes made)
 
-. replace max_baseline_creatinine_feb2020 = 1 if max_baseline_creatinine_feb202
-> 0>1
+. replace max_baseline_creatinine_feb2020 = 1 if max_baseline_creatinine_feb2020>1
 (20,657 real changes made)
 
-. gen egfr_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020*max_ba
-> seline_creatinine_feb2020*141
+. gen egfr_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020*max_baseline_creatinine_feb2020*141
 (14,013 missing values generated)
 
-. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*(
-> 0.993^age)
+. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*(0.993^age)
 (17,937 real changes made)
 
-. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*1
-> .018 if male==0
+. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*1.018 if male==0
 (9,166 real changes made)
 
 . drop if egfr_baseline_creatinine_feb2020 <15
@@ -130,8 +116,7 @@
 . drop max_baseline_creatinine_feb2020
 
 . 
-. * Baseline eGFR <15 at time of COVID diagnosis using baseline creatinine upda
-> ted monthly
+. * Baseline eGFR <15 at time of COVID diagnosis using baseline creatinine updated monthly
 . gen covid_date = date(covid_diagnosis_date, "YMD")
 (17,838 missing values generated)
 
@@ -149,82 +134,45 @@
 . drop sars_cov_2
 
 . 
-. foreach baseline_creatinine_monthly of varlist  baseline_creatinine_mar2020 /
-> //
->                                                                              
->                    baseline_creatinine_apr2020 ///
->                                                                              
->                    baseline_creatinine_may2020 ///
->                                                                              
->                    baseline_creatinine_jun2020 ///
->                                                                              
->                    baseline_creatinine_jul2020 ///
->                                                                              
->                    baseline_creatinine_aug2020 ///
->                                                                              
->                    baseline_creatinine_sep2020 ///
->                                                                              
->                    baseline_creatinine_oct2020 ///
->                                                                              
->                    baseline_creatinine_nov2020 ///
->                                                                              
->                    baseline_creatinine_dec2020 ///
->                                                                              
->                    baseline_creatinine_jan2021 ///
->                                                                              
->                    baseline_creatinine_feb2021 ///
->                                                                              
->                    baseline_creatinine_mar2021 ///
->                                                                              
->                    baseline_creatinine_apr2021 ///
->                                                                              
->                    baseline_creatinine_may2021 ///
->                                                                              
->                    baseline_creatinine_jun2021 ///
->                                                                              
->                    baseline_creatinine_jul2021 ///
->                                                                              
->                    baseline_creatinine_aug2021 ///
->                                                                              
->                    baseline_creatinine_sep2021 ///
->                                                                              
->                    baseline_creatinine_oct2021 ///
->                                                                              
->                    baseline_creatinine_nov2021 ///
->                                                                              
->                    baseline_creatinine_dec2021 ///
->                                                                              
->                    baseline_creatinine_jan2022 {
-  2. replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine
-> _monthly', 20, 3000)
-  3. gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.
-> 4
+. foreach baseline_creatinine_monthly of varlist  baseline_creatinine_mar2020 ///
+>                                                                                                 baseline_creatinine_apr2020 ///
+>                                                                                                 baseline_creatinine_may2020 ///
+>                                                                                                 baseline_creatinine_jun2020 ///
+>                                                                                                 baseline_creatinine_jul2020 ///
+>                                                                                                 baseline_creatinine_aug2020 ///
+>                                                                                                 baseline_creatinine_sep2020 ///
+>                                                                                                 baseline_creatinine_oct2020 ///
+>                                                                                                 baseline_creatinine_nov2020 ///
+>                                                                                                 baseline_creatinine_dec2020 ///
+>                                                                                                 baseline_creatinine_jan2021 ///
+>                                                                                                 baseline_creatinine_feb2021 ///
+>                                                                                                 baseline_creatinine_mar2021 ///
+>                                                                                                 baseline_creatinine_apr2021 ///
+>                                                                                                 baseline_creatinine_may2021 ///
+>                                                                                                 baseline_creatinine_jun2021 ///
+>                                                                                                 baseline_creatinine_jul2021 ///
+>                                                                                                 baseline_creatinine_aug2021 ///
+>                                                                                                 baseline_creatinine_sep2021 ///
+>                                                                                                 baseline_creatinine_oct2021 ///
+>                                                                                                 baseline_creatinine_nov2021 ///
+>                                                                                                 baseline_creatinine_dec2021 ///
+>                                                                                                 baseline_creatinine_jan2022 {
+  2. replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine_monthly', 20, 3000)
+  3. gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.4
   4. gen min_`baseline_creatinine_monthly'=.
-  5. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
-> hly'/0.7 if male==0
-  6. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
-> hly'/0.9 if male==1
-  7. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_month
-> ly'^-0.329 if male==0
-  8. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_month
-> ly'^-0.411 if male==1
-  9. replace min_`baseline_creatinine_monthly' = 1 if min_`baseline_creatinine_
-> monthly'<1
+  5. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.7 if male==0
+  6. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.9 if male==1
+  7. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'^-0.329 if male==0
+  8. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'^-0.411 if male==1
+  9. replace min_`baseline_creatinine_monthly' = 1 if min_`baseline_creatinine_monthly'<1
  10. gen max_`baseline_creatinine_monthly'=.
- 11. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
-> hly'/0.7 if male==0
- 12. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
-> hly'/0.9 if male==1
- 13. replace max_`baseline_creatinine_monthly' = max_`baseline_creatinine_month
-> ly'^-1.209
- 14. replace max_`baseline_creatinine_monthly' = 1 if max_`baseline_creatinine_
-> monthly'>1
- 15. gen egfr_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'
-> *max_`baseline_creatinine_monthly'*141
- 16. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_mon
-> thly'*(0.993^age)
- 17. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_mon
-> thly'*1.018 if male==0
+ 11. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.7 if male==0
+ 12. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.9 if male==1
+ 13. replace max_`baseline_creatinine_monthly' = max_`baseline_creatinine_monthly'^-1.209
+ 14. replace max_`baseline_creatinine_monthly' = 1 if max_`baseline_creatinine_monthly'>1
+ 15. gen egfr_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'*max_`baseline_creatinine_monthly'*141
+ 16. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_monthly'*(0.993^age)
+ 17. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_monthly'*1.018 if male==0
  18. drop `baseline_creatinine_monthly'
  19. drop mgdl_`baseline_creatinine_monthly'
  20. drop min_`baseline_creatinine_monthly'
@@ -608,9 +556,7 @@
 . gen baseline_egfr=.
 (14,112 missing values generated)
 
-. local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep
-> 2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 
-> jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
+. local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
 
 . foreach x of  local month_year  {
   2. replace baseline_egfr=egfr_baseline_creatinine_`x' if  covid_month=="`x'"
@@ -668,8 +614,6 @@
 
 . drop baseline_egfr
 
-. drop covid_month
-
 . drop covid_date_string
 
 . drop age
@@ -696,14 +640,1619 @@
 . drop krt_outcome_opcs_4
 
 . 
-. export delimited using "./output/covid_community_matching.csv", replace
-(note: file ./output/covid_community_matching.csv not found)
-file ./output/covid_community_matching.csv saved
+end of do-file
 
-. 
-. log close
-      name:  <unnamed>
-       log:  /workspace/logs/covid_community_matching.log
-  log type:  text
- closed on:  17 Oct 2022, 00:04:46
--------------------------------------------------------------------------------
+. bysort year_of_birth tab covid_month
+: required
+r(100);
+
+. bysort year_of_birth: tab covid_month
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1950
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          6        2.44        2.44
+    apr2021 |          6        2.44        4.88
+    aug2020 |         10        4.07        8.94
+    aug2021 |          6        2.44       11.38
+    dec2020 |         11        4.47       15.85
+    dec2021 |          8        3.25       19.11
+    feb2020 |         13        5.28       24.39
+    feb2021 |          6        2.44       26.83
+    jan2021 |         10        4.07       30.89
+    jan2022 |         11        4.47       35.37
+    jul2020 |         17        6.91       42.28
+    jul2021 |         11        4.47       46.75
+    jun2020 |         12        4.88       51.63
+    jun2021 |          5        2.03       53.66
+    mar2020 |         13        5.28       58.94
+    mar2021 |         14        5.69       64.63
+    may2020 |         14        5.69       70.33
+    may2021 |          5        2.03       72.36
+    nov2020 |         14        5.69       78.05
+    nov2021 |          6        2.44       80.49
+    oct2020 |         14        5.69       86.18
+    oct2021 |          8        3.25       89.43
+    sep2020 |         15        6.10       95.53
+    sep2021 |         11        4.47      100.00
+------------+-----------------------------------
+      Total |        246      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1951
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         12        4.41        4.41
+    apr2021 |         13        4.78        9.19
+    aug2020 |          9        3.31       12.50
+    aug2021 |         14        5.15       17.65
+    dec2020 |         11        4.04       21.69
+    dec2021 |         19        6.99       28.68
+    feb2020 |         14        5.15       33.82
+    feb2021 |         10        3.68       37.50
+    jan2021 |         15        5.51       43.01
+    jan2022 |          4        1.47       44.49
+    jul2020 |         17        6.25       50.74
+    jul2021 |          5        1.84       52.57
+    jun2020 |         15        5.51       58.09
+    jun2021 |          6        2.21       60.29
+    mar2020 |         10        3.68       63.97
+    mar2021 |          9        3.31       67.28
+    may2020 |         11        4.04       71.32
+    may2021 |          5        1.84       73.16
+    nov2020 |         16        5.88       79.04
+    nov2021 |         14        5.15       84.19
+    oct2020 |         12        4.41       88.60
+    oct2021 |         14        5.15       93.75
+    sep2020 |          6        2.21       95.96
+    sep2021 |         11        4.04      100.00
+------------+-----------------------------------
+      Total |        272      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1952
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          9        4.04        4.04
+    apr2021 |          7        3.14        7.17
+    aug2020 |          6        2.69        9.87
+    aug2021 |         10        4.48       14.35
+    dec2020 |         11        4.93       19.28
+    dec2021 |          6        2.69       21.97
+    feb2020 |          9        4.04       26.01
+    feb2021 |          5        2.24       28.25
+    jan2021 |          9        4.04       32.29
+    jan2022 |          8        3.59       35.87
+    jul2020 |          9        4.04       39.91
+    jul2021 |         14        6.28       46.19
+    jun2020 |         15        6.73       52.91
+    jun2021 |          7        3.14       56.05
+    mar2020 |         10        4.48       60.54
+    mar2021 |          7        3.14       63.68
+    may2020 |         10        4.48       68.16
+    may2021 |          8        3.59       71.75
+    nov2020 |          9        4.04       75.78
+    nov2021 |          8        3.59       79.37
+    oct2020 |         13        5.83       85.20
+    oct2021 |         10        4.48       89.69
+    sep2020 |         12        5.38       95.07
+    sep2021 |         11        4.93      100.00
+------------+-----------------------------------
+      Total |        223      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1953
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         13        4.58        4.58
+    apr2021 |         10        3.52        8.10
+    aug2020 |         18        6.34       14.44
+    aug2021 |         13        4.58       19.01
+    dec2020 |         20        7.04       26.06
+    dec2021 |          5        1.76       27.82
+    feb2020 |         14        4.93       32.75
+    feb2021 |         10        3.52       36.27
+    jan2021 |         12        4.23       40.49
+    jan2022 |          6        2.11       42.61
+    jul2020 |         14        4.93       47.54
+    jul2021 |         13        4.58       52.11
+    jun2020 |         13        4.58       56.69
+    jun2021 |          8        2.82       59.51
+    mar2020 |         18        6.34       65.85
+    mar2021 |          9        3.17       69.01
+    may2020 |         11        3.87       72.89
+    may2021 |         10        3.52       76.41
+    nov2020 |         10        3.52       79.93
+    nov2021 |          5        1.76       81.69
+    oct2020 |         20        7.04       88.73
+    oct2021 |         10        3.52       92.25
+    sep2020 |         10        3.52       95.77
+    sep2021 |         12        4.23      100.00
+------------+-----------------------------------
+      Total |        284      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1954
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         10        3.94        3.94
+    apr2021 |          9        3.54        7.48
+    aug2020 |         18        7.09       14.57
+    aug2021 |          6        2.36       16.93
+    dec2020 |         15        5.91       22.83
+    dec2021 |          6        2.36       25.20
+    feb2020 |         17        6.69       31.89
+    feb2021 |          9        3.54       35.43
+    jan2021 |          5        1.97       37.40
+    jan2022 |          4        1.57       38.98
+    jul2020 |         14        5.51       44.49
+    jul2021 |         15        5.91       50.39
+    jun2020 |          6        2.36       52.76
+    jun2021 |         10        3.94       56.69
+    mar2020 |          7        2.76       59.45
+    mar2021 |          5        1.97       61.42
+    may2020 |         11        4.33       65.75
+    may2021 |          8        3.15       68.90
+    nov2020 |         14        5.51       74.41
+    nov2021 |         13        5.12       79.53
+    oct2020 |         14        5.51       85.04
+    oct2021 |         14        5.51       90.55
+    sep2020 |         13        5.12       95.67
+    sep2021 |         11        4.33      100.00
+------------+-----------------------------------
+      Total |        254      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1955
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         12        5.19        5.19
+    apr2021 |          6        2.60        7.79
+    aug2020 |         10        4.33       12.12
+    aug2021 |          7        3.03       15.15
+    dec2020 |         12        5.19       20.35
+    dec2021 |          6        2.60       22.94
+    feb2020 |         10        4.33       27.27
+    feb2021 |         11        4.76       32.03
+    jan2021 |         10        4.33       36.36
+    jan2022 |          8        3.46       39.83
+    jul2020 |         11        4.76       44.59
+    jul2021 |          4        1.73       46.32
+    jun2020 |          7        3.03       49.35
+    jun2021 |          9        3.90       53.25
+    mar2020 |         17        7.36       60.61
+    mar2021 |          9        3.90       64.50
+    may2020 |         12        5.19       69.70
+    may2021 |         13        5.63       75.32
+    nov2020 |          6        2.60       77.92
+    nov2021 |          9        3.90       81.82
+    oct2020 |         13        5.63       87.45
+    oct2021 |          9        3.90       91.34
+    sep2020 |          9        3.90       95.24
+    sep2021 |         11        4.76      100.00
+------------+-----------------------------------
+      Total |        231      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1956
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          8        3.20        3.20
+    apr2021 |         10        4.00        7.20
+    aug2020 |          8        3.20       10.40
+    aug2021 |          4        1.60       12.00
+    dec2020 |          6        2.40       14.40
+    dec2021 |         14        5.60       20.00
+    feb2020 |          6        2.40       22.40
+    feb2021 |         11        4.40       26.80
+    jan2021 |         10        4.00       30.80
+    jan2022 |         10        4.00       34.80
+    jul2020 |         11        4.40       39.20
+    jul2021 |          8        3.20       42.40
+    jun2020 |         16        6.40       48.80
+    jun2021 |         13        5.20       54.00
+    mar2020 |         14        5.60       59.60
+    mar2021 |         13        5.20       64.80
+    may2020 |          9        3.60       68.40
+    may2021 |         15        6.00       74.40
+    nov2020 |         10        4.00       78.40
+    nov2021 |         10        4.00       82.40
+    oct2020 |         11        4.40       86.80
+    oct2021 |         12        4.80       91.60
+    sep2020 |          8        3.20       94.80
+    sep2021 |         13        5.20      100.00
+------------+-----------------------------------
+      Total |        250      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1957
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          9        3.52        3.52
+    apr2021 |         10        3.91        7.42
+    aug2020 |         13        5.08       12.50
+    aug2021 |          9        3.52       16.02
+    dec2020 |         13        5.08       21.09
+    dec2021 |         11        4.30       25.39
+    feb2020 |         12        4.69       30.08
+    feb2021 |          6        2.34       32.42
+    jan2021 |         14        5.47       37.89
+    jan2022 |         12        4.69       42.58
+    jul2020 |         13        5.08       47.66
+    jul2021 |         11        4.30       51.95
+    jun2020 |         15        5.86       57.81
+    jun2021 |          6        2.34       60.16
+    mar2020 |          8        3.13       63.28
+    mar2021 |         11        4.30       67.58
+    may2020 |         18        7.03       74.61
+    may2021 |          9        3.52       78.13
+    nov2020 |          6        2.34       80.47
+    nov2021 |          8        3.13       83.59
+    oct2020 |         13        5.08       88.67
+    oct2021 |         10        3.91       92.58
+    sep2020 |         12        4.69       97.27
+    sep2021 |          7        2.73      100.00
+------------+-----------------------------------
+      Total |        256      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1958
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         15        6.17        6.17
+    apr2021 |         12        4.94       11.11
+    aug2020 |         17        7.00       18.11
+    aug2021 |          7        2.88       20.99
+    dec2020 |         14        5.76       26.75
+    dec2021 |          9        3.70       30.45
+    feb2020 |         11        4.53       34.98
+    feb2021 |         15        6.17       41.15
+    jan2021 |          9        3.70       44.86
+    jan2022 |          8        3.29       48.15
+    jul2020 |         12        4.94       53.09
+    jul2021 |          9        3.70       56.79
+    jun2020 |         18        7.41       64.20
+    jun2021 |         15        6.17       70.37
+    mar2020 |         12        4.94       75.31
+    mar2021 |          4        1.65       76.95
+    may2020 |         10        4.12       81.07
+    may2021 |          5        2.06       83.13
+    nov2020 |          9        3.70       86.83
+    nov2021 |          4        1.65       88.48
+    oct2020 |          4        1.65       90.12
+    oct2021 |          7        2.88       93.00
+    sep2020 |         10        4.12       97.12
+    sep2021 |          7        2.88      100.00
+------------+-----------------------------------
+      Total |        243      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1959
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         14        5.74        5.74
+    apr2021 |         10        4.10        9.84
+    aug2020 |         14        5.74       15.57
+    aug2021 |          7        2.87       18.44
+    dec2020 |         16        6.56       25.00
+    dec2021 |         10        4.10       29.10
+    feb2020 |         11        4.51       33.61
+    feb2021 |          5        2.05       35.66
+    jan2021 |         14        5.74       41.39
+    jan2022 |          8        3.28       44.67
+    jul2020 |          8        3.28       47.95
+    jul2021 |         12        4.92       52.87
+    jun2020 |          7        2.87       55.74
+    jun2021 |         11        4.51       60.25
+    mar2020 |         12        4.92       65.16
+    mar2021 |         13        5.33       70.49
+    may2020 |          9        3.69       74.18
+    may2021 |         11        4.51       78.69
+    nov2020 |          7        2.87       81.56
+    nov2021 |         11        4.51       86.07
+    oct2020 |         11        4.51       90.57
+    oct2021 |          9        3.69       94.26
+    sep2020 |          7        2.87       97.13
+    sep2021 |          7        2.87      100.00
+------------+-----------------------------------
+      Total |        244      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1960
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         12        4.41        4.41
+    apr2021 |         11        4.04        8.46
+    aug2020 |         15        5.51       13.97
+    aug2021 |         10        3.68       17.65
+    dec2020 |         16        5.88       23.53
+    dec2021 |         12        4.41       27.94
+    feb2020 |         13        4.78       32.72
+    feb2021 |          6        2.21       34.93
+    jan2021 |          9        3.31       38.24
+    jan2022 |          5        1.84       40.07
+    jul2020 |         12        4.41       44.49
+    jul2021 |         13        4.78       49.26
+    jun2020 |         13        4.78       54.04
+    jun2021 |          9        3.31       57.35
+    mar2020 |         16        5.88       63.24
+    mar2021 |          9        3.31       66.54
+    may2020 |         19        6.99       73.53
+    may2021 |         12        4.41       77.94
+    nov2020 |         16        5.88       83.82
+    nov2021 |          4        1.47       85.29
+    oct2020 |         16        5.88       91.18
+    oct2021 |          7        2.57       93.75
+    sep2020 |          8        2.94       96.69
+    sep2021 |          9        3.31      100.00
+------------+-----------------------------------
+      Total |        272      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1961
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         13        4.83        4.83
+    apr2021 |          5        1.86        6.69
+    aug2020 |         12        4.46       11.15
+    aug2021 |          6        2.23       13.38
+    dec2020 |         13        4.83       18.22
+    dec2021 |         15        5.58       23.79
+    feb2020 |         12        4.46       28.25
+    feb2021 |         14        5.20       33.46
+    jan2021 |         11        4.09       37.55
+    jan2022 |          9        3.35       40.89
+    jul2020 |         10        3.72       44.61
+    jul2021 |          7        2.60       47.21
+    jun2020 |         13        4.83       52.04
+    jun2021 |          6        2.23       54.28
+    mar2020 |         13        4.83       59.11
+    mar2021 |         11        4.09       63.20
+    may2020 |         12        4.46       67.66
+    may2021 |         16        5.95       73.61
+    nov2020 |         11        4.09       77.70
+    nov2021 |          9        3.35       81.04
+    oct2020 |         14        5.20       86.25
+    oct2021 |          8        2.97       89.22
+    sep2020 |         13        4.83       94.05
+    sep2021 |         16        5.95      100.00
+------------+-----------------------------------
+      Total |        269      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1962
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         11        4.47        4.47
+    apr2021 |         14        5.69       10.16
+    aug2020 |         11        4.47       14.63
+    aug2021 |         11        4.47       19.11
+    dec2020 |          6        2.44       21.54
+    dec2021 |          5        2.03       23.58
+    feb2020 |          8        3.25       26.83
+    feb2021 |         12        4.88       31.71
+    jan2021 |         12        4.88       36.59
+    jan2022 |         17        6.91       43.50
+    jul2020 |         11        4.47       47.97
+    jul2021 |          8        3.25       51.22
+    jun2020 |         12        4.88       56.10
+    jun2021 |          3        1.22       57.32
+    mar2020 |         14        5.69       63.01
+    mar2021 |         10        4.07       67.07
+    may2020 |         22        8.94       76.02
+    may2021 |          8        3.25       79.27
+    nov2020 |         12        4.88       84.15
+    nov2021 |          8        3.25       87.40
+    oct2020 |         12        4.88       92.28
+    oct2021 |          7        2.85       95.12
+    sep2020 |          7        2.85       97.97
+    sep2021 |          5        2.03      100.00
+------------+-----------------------------------
+      Total |        246      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1963
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         22        8.24        8.24
+    apr2021 |         18        6.74       14.98
+    aug2020 |          8        3.00       17.98
+    aug2021 |          8        3.00       20.97
+    dec2020 |         10        3.75       24.72
+    dec2021 |          9        3.37       28.09
+    feb2020 |          7        2.62       30.71
+    feb2021 |          7        2.62       33.33
+    jan2021 |          6        2.25       35.58
+    jan2022 |         10        3.75       39.33
+    jul2020 |         15        5.62       44.94
+    jul2021 |         12        4.49       49.44
+    jun2020 |         11        4.12       53.56
+    jun2021 |         11        4.12       57.68
+    mar2020 |         14        5.24       62.92
+    mar2021 |          9        3.37       66.29
+    may2020 |         15        5.62       71.91
+    may2021 |         13        4.87       76.78
+    nov2020 |         10        3.75       80.52
+    nov2021 |          5        1.87       82.40
+    oct2020 |          6        2.25       84.64
+    oct2021 |          9        3.37       88.01
+    sep2020 |         15        5.62       93.63
+    sep2021 |         17        6.37      100.00
+------------+-----------------------------------
+      Total |        267      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1964
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         16        6.18        6.18
+    apr2021 |         16        6.18       12.36
+    aug2020 |          8        3.09       15.44
+    aug2021 |          8        3.09       18.53
+    dec2020 |         13        5.02       23.55
+    dec2021 |          7        2.70       26.25
+    feb2020 |         13        5.02       31.27
+    feb2021 |          8        3.09       34.36
+    jan2021 |          9        3.47       37.84
+    jan2022 |         14        5.41       43.24
+    jul2020 |          8        3.09       46.33
+    jul2021 |         10        3.86       50.19
+    jun2020 |         13        5.02       55.21
+    jun2021 |          7        2.70       57.92
+    mar2020 |         13        5.02       62.93
+    mar2021 |         13        5.02       67.95
+    may2020 |         10        3.86       71.81
+    may2021 |          7        2.70       74.52
+    nov2020 |          5        1.93       76.45
+    nov2021 |          9        3.47       79.92
+    oct2020 |         13        5.02       84.94
+    oct2021 |         12        4.63       89.58
+    sep2020 |         19        7.34       96.91
+    sep2021 |          8        3.09      100.00
+------------+-----------------------------------
+      Total |        259      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1965
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          9        3.64        3.64
+    apr2021 |         10        4.05        7.69
+    aug2020 |         15        6.07       13.77
+    aug2021 |          8        3.24       17.00
+    dec2020 |         13        5.26       22.27
+    dec2021 |          5        2.02       24.29
+    feb2020 |         16        6.48       30.77
+    feb2021 |          5        2.02       32.79
+    jan2021 |          8        3.24       36.03
+    jan2022 |          7        2.83       38.87
+    jul2020 |         16        6.48       45.34
+    jul2021 |          9        3.64       48.99
+    jun2020 |         16        6.48       55.47
+    jun2021 |         13        5.26       60.73
+    mar2020 |          9        3.64       64.37
+    mar2021 |          8        3.24       67.61
+    may2020 |         14        5.67       73.28
+    may2021 |         14        5.67       78.95
+    nov2020 |         13        5.26       84.21
+    nov2021 |          6        2.43       86.64
+    oct2020 |          6        2.43       89.07
+    oct2021 |          6        2.43       91.50
+    sep2020 |         10        4.05       95.55
+    sep2021 |         11        4.45      100.00
+------------+-----------------------------------
+      Total |        247      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1966
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         15        5.81        5.81
+    apr2021 |          7        2.71        8.53
+    aug2020 |         11        4.26       12.79
+    aug2021 |         10        3.88       16.67
+    dec2020 |         13        5.04       21.71
+    dec2021 |          7        2.71       24.42
+    feb2020 |          9        3.49       27.91
+    feb2021 |          8        3.10       31.01
+    jan2021 |         10        3.88       34.88
+    jan2022 |         14        5.43       40.31
+    jul2020 |          7        2.71       43.02
+    jul2021 |         11        4.26       47.29
+    jun2020 |         16        6.20       53.49
+    jun2021 |         15        5.81       59.30
+    mar2020 |          4        1.55       60.85
+    mar2021 |         12        4.65       65.50
+    may2020 |         14        5.43       70.93
+    may2021 |         14        5.43       76.36
+    nov2020 |          8        3.10       79.46
+    nov2021 |          9        3.49       82.95
+    oct2020 |         14        5.43       88.37
+    oct2021 |          8        3.10       91.47
+    sep2020 |         13        5.04       96.51
+    sep2021 |          9        3.49      100.00
+------------+-----------------------------------
+      Total |        258      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1967
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         16        5.28        5.28
+    apr2021 |          8        2.64        7.92
+    aug2020 |         20        6.60       14.52
+    aug2021 |         11        3.63       18.15
+    dec2020 |         10        3.30       21.45
+    dec2021 |         10        3.30       24.75
+    feb2020 |         11        3.63       28.38
+    feb2021 |          6        1.98       30.36
+    jan2021 |         16        5.28       35.64
+    jan2022 |          7        2.31       37.95
+    jul2020 |         15        4.95       42.90
+    jul2021 |         11        3.63       46.53
+    jun2020 |         19        6.27       52.81
+    jun2021 |         13        4.29       57.10
+    mar2020 |         14        4.62       61.72
+    mar2021 |         12        3.96       65.68
+    may2020 |         12        3.96       69.64
+    may2021 |         13        4.29       73.93
+    nov2020 |         14        4.62       78.55
+    nov2021 |          6        1.98       80.53
+    oct2020 |         17        5.61       86.14
+    oct2021 |         14        4.62       90.76
+    sep2020 |         12        3.96       94.72
+    sep2021 |         16        5.28      100.00
+------------+-----------------------------------
+      Total |        303      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1968
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         10        4.10        4.10
+    apr2021 |          5        2.05        6.15
+    aug2020 |          8        3.28        9.43
+    aug2021 |          8        3.28       12.70
+    dec2020 |         15        6.15       18.85
+    dec2021 |          6        2.46       21.31
+    feb2020 |         17        6.97       28.28
+    feb2021 |          5        2.05       30.33
+    jan2021 |         12        4.92       35.25
+    jan2022 |         10        4.10       39.34
+    jul2020 |         12        4.92       44.26
+    jul2021 |          8        3.28       47.54
+    jun2020 |         17        6.97       54.51
+    jun2021 |          8        3.28       57.79
+    mar2020 |         15        6.15       63.93
+    mar2021 |         14        5.74       69.67
+    may2020 |         11        4.51       74.18
+    may2021 |          9        3.69       77.87
+    nov2020 |         12        4.92       82.79
+    nov2021 |          8        3.28       86.07
+    oct2020 |          8        3.28       89.34
+    oct2021 |          7        2.87       92.21
+    sep2020 |         11        4.51       96.72
+    sep2021 |          8        3.28      100.00
+------------+-----------------------------------
+      Total |        244      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1969
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         13        5.02        5.02
+    apr2021 |         10        3.86        8.88
+    aug2020 |         13        5.02       13.90
+    aug2021 |         12        4.63       18.53
+    dec2020 |         13        5.02       23.55
+    dec2021 |          9        3.47       27.03
+    feb2020 |         14        5.41       32.43
+    feb2021 |         10        3.86       36.29
+    jan2021 |          5        1.93       38.22
+    jan2022 |         15        5.79       44.02
+    jul2020 |          8        3.09       47.10
+    jul2021 |         10        3.86       50.97
+    jun2020 |          5        1.93       52.90
+    jun2021 |         11        4.25       57.14
+    mar2020 |         13        5.02       62.16
+    mar2021 |         12        4.63       66.80
+    may2020 |         11        4.25       71.04
+    may2021 |         14        5.41       76.45
+    nov2020 |         13        5.02       81.47
+    nov2021 |          9        3.47       84.94
+    oct2020 |          8        3.09       88.03
+    oct2021 |          4        1.54       89.58
+    sep2020 |         16        6.18       95.75
+    sep2021 |         11        4.25      100.00
+------------+-----------------------------------
+      Total |        259      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1970
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          7        2.97        2.97
+    apr2021 |          5        2.12        5.08
+    aug2020 |         12        5.08       10.17
+    aug2021 |         14        5.93       16.10
+    dec2020 |          8        3.39       19.49
+    dec2021 |          7        2.97       22.46
+    feb2020 |         13        5.51       27.97
+    feb2021 |         12        5.08       33.05
+    jan2021 |         15        6.36       39.41
+    jan2022 |          7        2.97       42.37
+    jul2020 |         14        5.93       48.31
+    jul2021 |          6        2.54       50.85
+    jun2020 |         11        4.66       55.51
+    jun2021 |          7        2.97       58.47
+    mar2020 |         11        4.66       63.14
+    mar2021 |          7        2.97       66.10
+    may2020 |          9        3.81       69.92
+    may2021 |          6        2.54       72.46
+    nov2020 |         20        8.47       80.93
+    nov2021 |          9        3.81       84.75
+    oct2020 |         10        4.24       88.98
+    oct2021 |         12        5.08       94.07
+    sep2020 |          8        3.39       97.46
+    sep2021 |          6        2.54      100.00
+------------+-----------------------------------
+      Total |        236      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1971
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         10        4.57        4.57
+    apr2021 |          9        4.11        8.68
+    aug2020 |          8        3.65       12.33
+    aug2021 |          5        2.28       14.61
+    dec2020 |          9        4.11       18.72
+    dec2021 |         11        5.02       23.74
+    feb2020 |          7        3.20       26.94
+    feb2021 |         10        4.57       31.51
+    jan2021 |         10        4.57       36.07
+    jan2022 |          9        4.11       40.18
+    jul2020 |          6        2.74       42.92
+    jul2021 |          9        4.11       47.03
+    jun2020 |          8        3.65       50.68
+    jun2021 |         10        4.57       55.25
+    mar2020 |          8        3.65       58.90
+    mar2021 |         19        8.68       67.58
+    may2020 |         13        5.94       73.52
+    may2021 |          8        3.65       77.17
+    nov2020 |          8        3.65       80.82
+    nov2021 |          7        3.20       84.02
+    oct2020 |          8        3.65       87.67
+    oct2021 |         12        5.48       93.15
+    sep2020 |         11        5.02       98.17
+    sep2021 |          4        1.83      100.00
+------------+-----------------------------------
+      Total |        219      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1972
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          7        3.11        3.11
+    apr2021 |          7        3.11        6.22
+    aug2020 |          7        3.11        9.33
+    aug2021 |         14        6.22       15.56
+    dec2020 |          6        2.67       18.22
+    dec2021 |          3        1.33       19.56
+    feb2020 |         14        6.22       25.78
+    feb2021 |          6        2.67       28.44
+    jan2021 |         16        7.11       35.56
+    jan2022 |         12        5.33       40.89
+    jul2020 |         13        5.78       46.67
+    jul2021 |          7        3.11       49.78
+    jun2020 |          7        3.11       52.89
+    jun2021 |          7        3.11       56.00
+    mar2020 |         10        4.44       60.44
+    mar2021 |          7        3.11       63.56
+    may2020 |          9        4.00       67.56
+    may2021 |          7        3.11       70.67
+    nov2020 |         13        5.78       76.44
+    nov2021 |         11        4.89       81.33
+    oct2020 |         16        7.11       88.44
+    oct2021 |         10        4.44       92.89
+    sep2020 |          8        3.56       96.44
+    sep2021 |          8        3.56      100.00
+------------+-----------------------------------
+      Total |        225      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1973
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          9        3.66        3.66
+    apr2021 |          8        3.25        6.91
+    aug2020 |          5        2.03        8.94
+    aug2021 |          4        1.63       10.57
+    dec2020 |         12        4.88       15.45
+    dec2021 |          9        3.66       19.11
+    feb2020 |          8        3.25       22.36
+    feb2021 |          9        3.66       26.02
+    jan2021 |         15        6.10       32.11
+    jan2022 |          6        2.44       34.55
+    jul2020 |         14        5.69       40.24
+    jul2021 |         10        4.07       44.31
+    jun2020 |         11        4.47       48.78
+    jun2021 |         10        4.07       52.85
+    mar2020 |          8        3.25       56.10
+    mar2021 |         13        5.28       61.38
+    may2020 |         11        4.47       65.85
+    may2021 |         14        5.69       71.54
+    nov2020 |         12        4.88       76.42
+    nov2021 |          8        3.25       79.67
+    oct2020 |         10        4.07       83.74
+    oct2021 |         12        4.88       88.62
+    sep2020 |         16        6.50       95.12
+    sep2021 |         12        4.88      100.00
+------------+-----------------------------------
+      Total |        246      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1974
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         16        6.20        6.20
+    apr2021 |         10        3.88       10.08
+    aug2020 |         10        3.88       13.95
+    aug2021 |         12        4.65       18.60
+    dec2020 |         15        5.81       24.42
+    dec2021 |          7        2.71       27.13
+    feb2020 |         16        6.20       33.33
+    feb2021 |          9        3.49       36.82
+    jan2021 |         10        3.88       40.70
+    jan2022 |          6        2.33       43.02
+    jul2020 |          7        2.71       45.74
+    jul2021 |         10        3.88       49.61
+    jun2020 |         11        4.26       53.88
+    jun2021 |          8        3.10       56.98
+    mar2020 |         11        4.26       61.24
+    mar2021 |          9        3.49       64.73
+    may2020 |         12        4.65       69.38
+    may2021 |          9        3.49       72.87
+    nov2020 |         15        5.81       78.68
+    nov2021 |          6        2.33       81.01
+    oct2020 |         11        4.26       85.27
+    oct2021 |         13        5.04       90.31
+    sep2020 |         13        5.04       95.35
+    sep2021 |         12        4.65      100.00
+------------+-----------------------------------
+      Total |        258      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1975
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          7        2.88        2.88
+    apr2021 |         10        4.12        7.00
+    aug2020 |         12        4.94       11.93
+    aug2021 |          7        2.88       14.81
+    dec2020 |         10        4.12       18.93
+    dec2021 |          7        2.88       21.81
+    feb2020 |         10        4.12       25.93
+    feb2021 |         10        4.12       30.04
+    jan2021 |         12        4.94       34.98
+    jan2022 |          6        2.47       37.45
+    jul2020 |         12        4.94       42.39
+    jul2021 |         13        5.35       47.74
+    jun2020 |         16        6.58       54.32
+    jun2021 |         14        5.76       60.08
+    mar2020 |         13        5.35       65.43
+    mar2021 |          9        3.70       69.14
+    may2020 |         14        5.76       74.90
+    may2021 |          4        1.65       76.54
+    nov2020 |         16        6.58       83.13
+    nov2021 |          7        2.88       86.01
+    oct2020 |          8        3.29       89.30
+    oct2021 |         10        4.12       93.42
+    sep2020 |         10        4.12       97.53
+    sep2021 |          6        2.47      100.00
+------------+-----------------------------------
+      Total |        243      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1976
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         12        4.15        4.15
+    apr2021 |         13        4.50        8.65
+    aug2020 |         12        4.15       12.80
+    aug2021 |         11        3.81       16.61
+    dec2020 |          8        2.77       19.38
+    dec2021 |         12        4.15       23.53
+    feb2020 |         10        3.46       26.99
+    feb2021 |         16        5.54       32.53
+    jan2021 |         11        3.81       36.33
+    jan2022 |         13        4.50       40.83
+    jul2020 |          6        2.08       42.91
+    jul2021 |          7        2.42       45.33
+    jun2020 |         13        4.50       49.83
+    jun2021 |         16        5.54       55.36
+    mar2020 |         13        4.50       59.86
+    mar2021 |         17        5.88       65.74
+    may2020 |         15        5.19       70.93
+    may2021 |         10        3.46       74.39
+    nov2020 |         12        4.15       78.55
+    nov2021 |         18        6.23       84.78
+    oct2020 |         15        5.19       89.97
+    oct2021 |         10        3.46       93.43
+    sep2020 |          9        3.11       96.54
+    sep2021 |         10        3.46      100.00
+------------+-----------------------------------
+      Total |        289      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1977
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         12        4.94        4.94
+    apr2021 |          7        2.88        7.82
+    aug2020 |         16        6.58       14.40
+    aug2021 |          9        3.70       18.11
+    dec2020 |          8        3.29       21.40
+    dec2021 |         11        4.53       25.93
+    feb2020 |         14        5.76       31.69
+    feb2021 |         12        4.94       36.63
+    jan2021 |          8        3.29       39.92
+    jan2022 |          9        3.70       43.62
+    jul2020 |         10        4.12       47.74
+    jul2021 |         16        6.58       54.32
+    jun2020 |         13        5.35       59.67
+    jun2021 |          8        3.29       62.96
+    mar2020 |         12        4.94       67.90
+    mar2021 |         12        4.94       72.84
+    may2020 |         10        4.12       76.95
+    may2021 |          9        3.70       80.66
+    nov2020 |          6        2.47       83.13
+    nov2021 |         13        5.35       88.48
+    oct2020 |          8        3.29       91.77
+    oct2021 |          5        2.06       93.83
+    sep2020 |          9        3.70       97.53
+    sep2021 |          6        2.47      100.00
+------------+-----------------------------------
+      Total |        243      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1978
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         10        4.02        4.02
+    apr2021 |          7        2.81        6.83
+    aug2020 |         12        4.82       11.65
+    aug2021 |         15        6.02       17.67
+    dec2020 |          6        2.41       20.08
+    dec2021 |         15        6.02       26.10
+    feb2020 |         13        5.22       31.33
+    feb2021 |         12        4.82       36.14
+    jan2021 |          7        2.81       38.96
+    jan2022 |         12        4.82       43.78
+    jul2020 |         10        4.02       47.79
+    jul2021 |          7        2.81       50.60
+    jun2020 |         13        5.22       55.82
+    jun2021 |         12        4.82       60.64
+    mar2020 |         14        5.62       66.27
+    mar2021 |         12        4.82       71.08
+    may2020 |         11        4.42       75.50
+    may2021 |          5        2.01       77.51
+    nov2020 |          9        3.61       81.12
+    nov2021 |          9        3.61       84.74
+    oct2020 |          9        3.61       88.35
+    oct2021 |          6        2.41       90.76
+    sep2020 |         10        4.02       94.78
+    sep2021 |         13        5.22      100.00
+------------+-----------------------------------
+      Total |        249      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1979
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         15        5.73        5.73
+    apr2021 |         16        6.11       11.83
+    aug2020 |         13        4.96       16.79
+    aug2021 |          7        2.67       19.47
+    dec2020 |         10        3.82       23.28
+    dec2021 |          7        2.67       25.95
+    feb2020 |          9        3.44       29.39
+    feb2021 |          9        3.44       32.82
+    jan2021 |         15        5.73       38.55
+    jan2022 |          8        3.05       41.60
+    jul2020 |         17        6.49       48.09
+    jul2021 |         11        4.20       52.29
+    jun2020 |         10        3.82       56.11
+    jun2021 |         10        3.82       59.92
+    mar2020 |         17        6.49       66.41
+    mar2021 |          9        3.44       69.85
+    may2020 |         11        4.20       74.05
+    may2021 |          9        3.44       77.48
+    nov2020 |         11        4.20       81.68
+    nov2021 |          4        1.53       83.21
+    oct2020 |          6        2.29       85.50
+    oct2021 |         15        5.73       91.22
+    sep2020 |         13        4.96       96.18
+    sep2021 |         10        3.82      100.00
+------------+-----------------------------------
+      Total |        262      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1980
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          8        3.39        3.39
+    apr2021 |          8        3.39        6.78
+    aug2020 |         15        6.36       13.14
+    aug2021 |         10        4.24       17.37
+    dec2020 |          7        2.97       20.34
+    dec2021 |          6        2.54       22.88
+    feb2020 |          7        2.97       25.85
+    feb2021 |         15        6.36       32.20
+    jan2021 |          5        2.12       34.32
+    jan2022 |          8        3.39       37.71
+    jul2020 |         15        6.36       44.07
+    jul2021 |          8        3.39       47.46
+    jun2020 |          9        3.81       51.27
+    jun2021 |          7        2.97       54.24
+    mar2020 |          9        3.81       58.05
+    mar2021 |         13        5.51       63.56
+    may2020 |         12        5.08       68.64
+    may2021 |         11        4.66       73.31
+    nov2020 |          6        2.54       75.85
+    nov2021 |          9        3.81       79.66
+    oct2020 |         23        9.75       89.41
+    oct2021 |          9        3.81       93.22
+    sep2020 |          9        3.81       97.03
+    sep2021 |          7        2.97      100.00
+------------+-----------------------------------
+      Total |        236      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1981
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         13        4.83        4.83
+    apr2021 |          8        2.97        7.81
+    aug2020 |         17        6.32       14.13
+    aug2021 |         13        4.83       18.96
+    dec2020 |          8        2.97       21.93
+    dec2021 |          9        3.35       25.28
+    feb2020 |          9        3.35       28.62
+    feb2021 |          8        2.97       31.60
+    jan2021 |         11        4.09       35.69
+    jan2022 |          7        2.60       38.29
+    jul2020 |         10        3.72       42.01
+    jul2021 |          5        1.86       43.87
+    jun2020 |         16        5.95       49.81
+    jun2021 |          7        2.60       52.42
+    mar2020 |         20        7.43       59.85
+    mar2021 |          8        2.97       62.83
+    may2020 |          7        2.60       65.43
+    may2021 |          9        3.35       68.77
+    nov2020 |         13        4.83       73.61
+    nov2021 |         15        5.58       79.18
+    oct2020 |         19        7.06       86.25
+    oct2021 |         11        4.09       90.33
+    sep2020 |         13        4.83       95.17
+    sep2021 |         13        4.83      100.00
+------------+-----------------------------------
+      Total |        269      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1982
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         14        5.20        5.20
+    apr2021 |          6        2.23        7.43
+    aug2020 |         12        4.46       11.90
+    aug2021 |         14        5.20       17.10
+    dec2020 |         15        5.58       22.68
+    dec2021 |          6        2.23       24.91
+    feb2020 |         14        5.20       30.11
+    feb2021 |          4        1.49       31.60
+    jan2021 |          6        2.23       33.83
+    jan2022 |          9        3.35       37.17
+    jul2020 |         14        5.20       42.38
+    jul2021 |          5        1.86       44.24
+    jun2020 |         16        5.95       50.19
+    jun2021 |         13        4.83       55.02
+    mar2020 |         16        5.95       60.97
+    mar2021 |         15        5.58       66.54
+    may2020 |         16        5.95       72.49
+    may2021 |         12        4.46       76.95
+    nov2020 |         16        5.95       82.90
+    nov2021 |          8        2.97       85.87
+    oct2020 |         13        4.83       90.71
+    oct2021 |          6        2.23       92.94
+    sep2020 |         10        3.72       96.65
+    sep2021 |          9        3.35      100.00
+------------+-----------------------------------
+      Total |        269      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1983
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         11        4.66        4.66
+    apr2021 |          9        3.81        8.47
+    aug2020 |          9        3.81       12.29
+    aug2021 |          7        2.97       15.25
+    dec2020 |         12        5.08       20.34
+    dec2021 |          5        2.12       22.46
+    feb2020 |          9        3.81       26.27
+    feb2021 |         12        5.08       31.36
+    jan2021 |         11        4.66       36.02
+    jan2022 |         11        4.66       40.68
+    jul2020 |          6        2.54       43.22
+    jul2021 |          5        2.12       45.34
+    jun2020 |         17        7.20       52.54
+    jun2021 |         15        6.36       58.90
+    mar2020 |          8        3.39       62.29
+    mar2021 |          9        3.81       66.10
+    may2020 |         14        5.93       72.03
+    may2021 |         12        5.08       77.12
+    nov2020 |          7        2.97       80.08
+    nov2021 |          8        3.39       83.47
+    oct2020 |         12        5.08       88.56
+    oct2021 |          8        3.39       91.95
+    sep2020 |         10        4.24       96.19
+    sep2021 |          9        3.81      100.00
+------------+-----------------------------------
+      Total |        236      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1984
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         10        3.83        3.83
+    apr2021 |          7        2.68        6.51
+    aug2020 |         16        6.13       12.64
+    aug2021 |         17        6.51       19.16
+    dec2020 |          8        3.07       22.22
+    dec2021 |          9        3.45       25.67
+    feb2020 |         20        7.66       33.33
+    feb2021 |         12        4.60       37.93
+    jan2021 |          8        3.07       41.00
+    jan2022 |         10        3.83       44.83
+    jul2020 |          8        3.07       47.89
+    jul2021 |         10        3.83       51.72
+    jun2020 |         14        5.36       57.09
+    jun2021 |          8        3.07       60.15
+    mar2020 |         11        4.21       64.37
+    mar2021 |         11        4.21       68.58
+    may2020 |         11        4.21       72.80
+    may2021 |          6        2.30       75.10
+    nov2020 |         11        4.21       79.31
+    nov2021 |          9        3.45       82.76
+    oct2020 |         17        6.51       89.27
+    oct2021 |          7        2.68       91.95
+    sep2020 |          9        3.45       95.40
+    sep2021 |         12        4.60      100.00
+------------+-----------------------------------
+      Total |        261      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1985
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         19        6.83        6.83
+    apr2021 |          7        2.52        9.35
+    aug2020 |         10        3.60       12.95
+    aug2021 |          7        2.52       15.47
+    dec2020 |         10        3.60       19.06
+    dec2021 |         11        3.96       23.02
+    feb2020 |         12        4.32       27.34
+    feb2021 |         11        3.96       31.29
+    jan2021 |         14        5.04       36.33
+    jan2022 |          8        2.88       39.21
+    jul2020 |         10        3.60       42.81
+    jul2021 |         13        4.68       47.48
+    jun2020 |         13        4.68       52.16
+    jun2021 |         13        4.68       56.83
+    mar2020 |         11        3.96       60.79
+    mar2021 |         12        4.32       65.11
+    may2020 |         23        8.27       73.38
+    may2021 |         11        3.96       77.34
+    nov2020 |         11        3.96       81.29
+    nov2021 |         11        3.96       85.25
+    oct2020 |         11        3.96       89.21
+    oct2021 |         10        3.60       92.81
+    sep2020 |          9        3.24       96.04
+    sep2021 |         11        3.96      100.00
+------------+-----------------------------------
+      Total |        278      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1986
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          8        3.36        3.36
+    apr2021 |          9        3.78        7.14
+    aug2020 |         13        5.46       12.61
+    aug2021 |          8        3.36       15.97
+    dec2020 |          5        2.10       18.07
+    dec2021 |          9        3.78       21.85
+    feb2020 |         13        5.46       27.31
+    feb2021 |         12        5.04       32.35
+    jan2021 |         11        4.62       36.97
+    jan2022 |         11        4.62       41.60
+    jul2020 |          7        2.94       44.54
+    jul2021 |         12        5.04       49.58
+    jun2020 |          6        2.52       52.10
+    jun2021 |          5        2.10       54.20
+    mar2020 |         12        5.04       59.24
+    mar2021 |         10        4.20       63.45
+    may2020 |         16        6.72       70.17
+    may2021 |          9        3.78       73.95
+    nov2020 |         10        4.20       78.15
+    nov2021 |         13        5.46       83.61
+    oct2020 |          9        3.78       87.39
+    oct2021 |          6        2.52       89.92
+    sep2020 |         13        5.46       95.38
+    sep2021 |         11        4.62      100.00
+------------+-----------------------------------
+      Total |        238      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1987
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         15        5.51        5.51
+    apr2021 |         13        4.78       10.29
+    aug2020 |          9        3.31       13.60
+    aug2021 |         12        4.41       18.01
+    dec2020 |         10        3.68       21.69
+    dec2021 |         14        5.15       26.84
+    feb2020 |         12        4.41       31.25
+    feb2021 |          4        1.47       32.72
+    jan2021 |         17        6.25       38.97
+    jan2022 |         12        4.41       43.38
+    jul2020 |         12        4.41       47.79
+    jul2021 |          8        2.94       50.74
+    jun2020 |         18        6.62       57.35
+    jun2021 |         11        4.04       61.40
+    mar2020 |         12        4.41       65.81
+    mar2021 |          4        1.47       67.28
+    may2020 |         13        4.78       72.06
+    may2021 |          8        2.94       75.00
+    nov2020 |          6        2.21       77.21
+    nov2021 |         10        3.68       80.88
+    oct2020 |         11        4.04       84.93
+    oct2021 |         18        6.62       91.54
+    sep2020 |         13        4.78       96.32
+    sep2021 |         10        3.68      100.00
+------------+-----------------------------------
+      Total |        272      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1988
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          6        2.41        2.41
+    apr2021 |         11        4.42        6.83
+    aug2020 |         16        6.43       13.25
+    aug2021 |          9        3.61       16.87
+    dec2020 |         12        4.82       21.69
+    dec2021 |          6        2.41       24.10
+    feb2020 |         11        4.42       28.51
+    feb2021 |         12        4.82       33.33
+    jan2021 |         11        4.42       37.75
+    jan2022 |         14        5.62       43.37
+    jul2020 |         11        4.42       47.79
+    jul2021 |          9        3.61       51.41
+    jun2020 |          9        3.61       55.02
+    jun2021 |         12        4.82       59.84
+    mar2020 |         13        5.22       65.06
+    mar2021 |         12        4.82       69.88
+    may2020 |          6        2.41       72.29
+    may2021 |         11        4.42       76.71
+    nov2020 |          7        2.81       79.52
+    nov2021 |          7        2.81       82.33
+    oct2020 |         13        5.22       87.55
+    oct2021 |          6        2.41       89.96
+    sep2020 |         16        6.43       96.39
+    sep2021 |          9        3.61      100.00
+------------+-----------------------------------
+      Total |        249      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1989
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         10        3.73        3.73
+    apr2021 |         12        4.48        8.21
+    aug2020 |         15        5.60       13.81
+    aug2021 |         13        4.85       18.66
+    dec2020 |         10        3.73       22.39
+    dec2021 |          5        1.87       24.25
+    feb2020 |          5        1.87       26.12
+    feb2021 |          9        3.36       29.48
+    jan2021 |         15        5.60       35.07
+    jan2022 |          3        1.12       36.19
+    jul2020 |         11        4.10       40.30
+    jul2021 |          6        2.24       42.54
+    jun2020 |         10        3.73       46.27
+    jun2021 |          7        2.61       48.88
+    mar2020 |         15        5.60       54.48
+    mar2021 |         12        4.48       58.96
+    may2020 |         13        4.85       63.81
+    may2021 |         13        4.85       68.66
+    nov2020 |         14        5.22       73.88
+    nov2021 |         15        5.60       79.48
+    oct2020 |         12        4.48       83.96
+    oct2021 |         15        5.60       89.55
+    sep2020 |         12        4.48       94.03
+    sep2021 |         16        5.97      100.00
+------------+-----------------------------------
+      Total |        268      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1990
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         17        6.25        6.25
+    apr2021 |         10        3.68        9.93
+    aug2020 |         13        4.78       14.71
+    aug2021 |         14        5.15       19.85
+    dec2020 |         10        3.68       23.53
+    dec2021 |         11        4.04       27.57
+    feb2020 |         11        4.04       31.62
+    feb2021 |         10        3.68       35.29
+    jan2021 |         11        4.04       39.34
+    jan2022 |         12        4.41       43.75
+    jul2020 |         12        4.41       48.16
+    jul2021 |          8        2.94       51.10
+    jun2020 |         10        3.68       54.78
+    jun2021 |         10        3.68       58.46
+    mar2020 |         11        4.04       62.50
+    mar2021 |         15        5.51       68.01
+    may2020 |         13        4.78       72.79
+    may2021 |          9        3.31       76.10
+    nov2020 |          9        3.31       79.41
+    nov2021 |          9        3.31       82.72
+    oct2020 |         12        4.41       87.13
+    oct2021 |         12        4.41       91.54
+    sep2020 |         11        4.04       95.59
+    sep2021 |         12        4.41      100.00
+------------+-----------------------------------
+      Total |        272      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1991
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         17        7.20        7.20
+    apr2021 |         11        4.66       11.86
+    aug2020 |          7        2.97       14.83
+    aug2021 |          7        2.97       17.80
+    dec2020 |         13        5.51       23.31
+    dec2021 |         14        5.93       29.24
+    feb2020 |          8        3.39       32.63
+    feb2021 |          8        3.39       36.02
+    jan2021 |          8        3.39       39.41
+    jan2022 |          8        3.39       42.80
+    jul2020 |          7        2.97       45.76
+    jul2021 |         10        4.24       50.00
+    jun2020 |         12        5.08       55.08
+    jun2021 |          9        3.81       58.90
+    mar2020 |         16        6.78       65.68
+    mar2021 |          6        2.54       68.22
+    may2020 |         10        4.24       72.46
+    may2021 |         13        5.51       77.97
+    nov2020 |          9        3.81       81.78
+    nov2021 |          5        2.12       83.90
+    oct2020 |          7        2.97       86.86
+    oct2021 |          7        2.97       89.83
+    sep2020 |         14        5.93       95.76
+    sep2021 |         10        4.24      100.00
+------------+-----------------------------------
+      Total |        236      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1992
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         14        5.51        5.51
+    apr2021 |          9        3.54        9.06
+    aug2020 |          7        2.76       11.81
+    aug2021 |         13        5.12       16.93
+    dec2020 |         10        3.94       20.87
+    dec2021 |         11        4.33       25.20
+    feb2020 |         12        4.72       29.92
+    feb2021 |         10        3.94       33.86
+    jan2021 |          7        2.76       36.61
+    jan2022 |          5        1.97       38.58
+    jul2020 |         11        4.33       42.91
+    jul2021 |         13        5.12       48.03
+    jun2020 |         11        4.33       52.36
+    jun2021 |          8        3.15       55.51
+    mar2020 |         12        4.72       60.24
+    mar2021 |         11        4.33       64.57
+    may2020 |          8        3.15       67.72
+    may2021 |         13        5.12       72.83
+    nov2020 |         12        4.72       77.56
+    nov2021 |         15        5.91       83.46
+    oct2020 |         10        3.94       87.40
+    oct2021 |         11        4.33       91.73
+    sep2020 |         11        4.33       96.06
+    sep2021 |         10        3.94      100.00
+------------+-----------------------------------
+      Total |        254      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1993
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         13        4.91        4.91
+    apr2021 |         10        3.77        8.68
+    aug2020 |          7        2.64       11.32
+    aug2021 |         10        3.77       15.09
+    dec2020 |         11        4.15       19.25
+    dec2021 |          6        2.26       21.51
+    feb2020 |         12        4.53       26.04
+    feb2021 |         13        4.91       30.94
+    jan2021 |         17        6.42       37.36
+    jan2022 |         10        3.77       41.13
+    jul2020 |         10        3.77       44.91
+    jul2021 |         10        3.77       48.68
+    jun2020 |         11        4.15       52.83
+    jun2021 |         12        4.53       57.36
+    mar2020 |         16        6.04       63.40
+    mar2021 |         13        4.91       68.30
+    may2020 |         12        4.53       72.83
+    may2021 |         12        4.53       77.36
+    nov2020 |         11        4.15       81.51
+    nov2021 |         11        4.15       85.66
+    oct2020 |         12        4.53       90.19
+    oct2021 |          7        2.64       92.83
+    sep2020 |          6        2.26       95.09
+    sep2021 |         13        4.91      100.00
+------------+-----------------------------------
+      Total |        265      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1994
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         11        4.60        4.60
+    apr2021 |          8        3.35        7.95
+    aug2020 |          9        3.77       11.72
+    aug2021 |          5        2.09       13.81
+    dec2020 |          9        3.77       17.57
+    dec2021 |          7        2.93       20.50
+    feb2020 |         10        4.18       24.69
+    feb2021 |         14        5.86       30.54
+    jan2021 |          9        3.77       34.31
+    jan2022 |          4        1.67       35.98
+    jul2020 |         14        5.86       41.84
+    jul2021 |         11        4.60       46.44
+    jun2020 |         15        6.28       52.72
+    jun2021 |         13        5.44       58.16
+    mar2020 |         14        5.86       64.02
+    mar2021 |          8        3.35       67.36
+    may2020 |          8        3.35       70.71
+    may2021 |          3        1.26       71.97
+    nov2020 |          8        3.35       75.31
+    nov2021 |          8        3.35       78.66
+    oct2020 |         14        5.86       84.52
+    oct2021 |         12        5.02       89.54
+    sep2020 |         14        5.86       95.40
+    sep2021 |         11        4.60      100.00
+------------+-----------------------------------
+      Total |        239      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1995
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         19        7.22        7.22
+    apr2021 |          9        3.42       10.65
+    aug2020 |          8        3.04       13.69
+    aug2021 |         12        4.56       18.25
+    dec2020 |         13        4.94       23.19
+    dec2021 |          9        3.42       26.62
+    feb2020 |         18        6.84       33.46
+    feb2021 |          7        2.66       36.12
+    jan2021 |          8        3.04       39.16
+    jan2022 |          7        2.66       41.83
+    jul2020 |         15        5.70       47.53
+    jul2021 |          8        3.04       50.57
+    jun2020 |          9        3.42       53.99
+    jun2021 |         14        5.32       59.32
+    mar2020 |         11        4.18       63.50
+    mar2021 |          5        1.90       65.40
+    may2020 |         17        6.46       71.86
+    may2021 |         14        5.32       77.19
+    nov2020 |          7        2.66       79.85
+    nov2021 |         11        4.18       84.03
+    oct2020 |         12        4.56       88.59
+    oct2021 |          9        3.42       92.02
+    sep2020 |         10        3.80       95.82
+    sep2021 |         11        4.18      100.00
+------------+-----------------------------------
+      Total |        263      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1996
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         15        6.10        6.10
+    apr2021 |         11        4.47       10.57
+    aug2020 |         10        4.07       14.63
+    aug2021 |         10        4.07       18.70
+    dec2020 |         13        5.28       23.98
+    dec2021 |          8        3.25       27.24
+    feb2020 |          6        2.44       29.67
+    feb2021 |          8        3.25       32.93
+    jan2021 |         12        4.88       37.80
+    jan2022 |         10        4.07       41.87
+    jul2020 |         11        4.47       46.34
+    jul2021 |         13        5.28       51.63
+    jun2020 |          7        2.85       54.47
+    jun2021 |          9        3.66       58.13
+    mar2020 |         11        4.47       62.60
+    mar2021 |         11        4.47       67.07
+    may2020 |         11        4.47       71.54
+    may2021 |          9        3.66       75.20
+    nov2020 |         13        5.28       80.49
+    nov2021 |         11        4.47       84.96
+    oct2020 |         15        6.10       91.06
+    oct2021 |         10        4.07       95.12
+    sep2020 |          6        2.44       97.56
+    sep2021 |          6        2.44      100.00
+------------+-----------------------------------
+      Total |        246      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1997
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         14        5.15        5.15
+    apr2021 |          8        2.94        8.09
+    aug2020 |         14        5.15       13.24
+    aug2021 |         10        3.68       16.91
+    dec2020 |         10        3.68       20.59
+    dec2021 |          5        1.84       22.43
+    feb2020 |         16        5.88       28.31
+    feb2021 |         11        4.04       32.35
+    jan2021 |         12        4.41       36.76
+    jan2022 |         13        4.78       41.54
+    jul2020 |         12        4.41       45.96
+    jul2021 |         13        4.78       50.74
+    jun2020 |         15        5.51       56.25
+    jun2021 |         14        5.15       61.40
+    mar2020 |         14        5.15       66.54
+    mar2021 |          7        2.57       69.12
+    may2020 |         12        4.41       73.53
+    may2021 |          7        2.57       76.10
+    nov2020 |         18        6.62       82.72
+    nov2021 |         11        4.04       86.76
+    oct2020 |         13        4.78       91.54
+    oct2021 |          5        1.84       93.38
+    sep2020 |          9        3.31       96.69
+    sep2021 |          9        3.31      100.00
+------------+-----------------------------------
+      Total |        272      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1998
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |         11        4.26        4.26
+    apr2021 |         15        5.81       10.08
+    aug2020 |         13        5.04       15.12
+    aug2021 |          9        3.49       18.60
+    dec2020 |          8        3.10       21.71
+    dec2021 |          7        2.71       24.42
+    feb2020 |         10        3.88       28.29
+    feb2021 |         11        4.26       32.56
+    jan2021 |         16        6.20       38.76
+    jan2022 |          8        3.10       41.86
+    jul2020 |         11        4.26       46.12
+    jul2021 |          9        3.49       49.61
+    jun2020 |         12        4.65       54.26
+    jun2021 |          6        2.33       56.59
+    mar2020 |         12        4.65       61.24
+    mar2021 |          8        3.10       64.34
+    may2020 |         15        5.81       70.16
+    may2021 |         11        4.26       74.42
+    nov2020 |          6        2.33       76.74
+    nov2021 |         12        4.65       81.40
+    oct2020 |          4        1.55       82.95
+    oct2021 |         11        4.26       87.21
+    sep2020 |         14        5.43       92.64
+    sep2021 |         19        7.36      100.00
+------------+-----------------------------------
+      Total |        258      100.00
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> year_of_birth = 1999
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |          9        3.67        3.67
+    apr2021 |          9        3.67        7.35
+    aug2020 |         12        4.90       12.24
+    aug2021 |          7        2.86       15.10
+    dec2020 |         12        4.90       20.00
+    dec2021 |          6        2.45       22.45
+    feb2020 |         14        5.71       28.16
+    feb2021 |         12        4.90       33.06
+    jan2021 |          8        3.27       36.33
+    jan2022 |         13        5.31       41.63
+    jul2020 |         10        4.08       45.71
+    jul2021 |         15        6.12       51.84
+    jun2020 |          8        3.27       55.10
+    jun2021 |         10        4.08       59.18
+    mar2020 |          7        2.86       62.04
+    mar2021 |         10        4.08       66.12
+    may2020 |          7        2.86       68.98
+    may2021 |         15        6.12       75.10
+    nov2020 |          9        3.67       78.78
+    nov2021 |          9        3.67       82.45
+    oct2020 |          9        3.67       86.12
+    oct2021 |         11        4.49       90.61
+    sep2020 |         17        6.94       97.55
+    sep2021 |          6        2.45      100.00
+------------+-----------------------------------
+      Total |        245      100.00
+
+
+. bysort year_of_birth: hist covid_month
+hist may not be combined with by
+r(190);
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD2c6c_000000.tmp"
+
+. cap log close

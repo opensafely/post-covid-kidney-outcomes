@@ -68,5 +68,22 @@ drop sgss_positive_date
 drop primary_care_covid_date
 drop hospital_covid_date
 
+*Tabulate variables
+tab year_of_birth
+tab imd
+tab male
+
+gen covid_date = date(covid_diagnosis_date, "YMD")
+format covid_date %td
+gen covid_date_string=string(covid_date, "%td") 
+gen covid_month=substr( covid_date_string ,3,7)
+bysort year_of_birth: tab covid_month
+
+gen death_date1 = date(death_date, "YMD")
+format death_date1 %td
+gen death_date_string=string(death_date1, "%td")
+gen death_month=substr( death_date_string ,3,7)
+bysort year_of_birth: tab death_month
+
 export delimited using "./output/contemporary_matching.csv", replace
 log close
