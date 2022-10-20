@@ -56,7 +56,7 @@ study = StudyDefinition(
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        on_or_before="2022-01-31",
+        on_or_before="2021-05-31",
         return_expectations={"incidence": 0.4, "date": {"earliest": "2020-02-01"}},
     ),
     
@@ -65,7 +65,7 @@ study = StudyDefinition(
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        on_or_before="2022-01-31",
+        on_or_before="2021-05-31",
         return_expectations={"incidence": 0.2, "date": {"earliest": "2020-02-01"}},
     ),
 
@@ -74,7 +74,7 @@ study = StudyDefinition(
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        on_or_before="2022-01-31",
+        on_or_before="2021-05-31",
         return_expectations={"incidence": 0.1, "date": {"earliest": "2020-02-01"}},
     ),
     
@@ -172,13 +172,13 @@ study = StudyDefinition(
     deceased=patients.with_death_recorded_in_primary_care(
         returning="binary_flag",
         between = ["1970-01-01", "covid_diagnosis_date + 28 days"],
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-08-31"}},
         ),
     death_date=patients.with_death_recorded_in_primary_care(
-        between = ["2020-02-01", "2022-01-31"],
+        between = ["2020-02-01", "2022-08-31"],
         returning="date_of_death",
         date_format= "YYYY-MM-DD",
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-01-31"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-08-31"}},
     ),
     baseline_krt_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
@@ -447,7 +447,7 @@ study = StudyDefinition(
     }
     ),
     date_deregistered=patients.date_deregistered_from_all_supported_practices(
-        between= ["2020-02-01", "2022-01-31"],
+        between= ["2020-02-01", "2022-08-31"],
         date_format="YYYY-MM-DD",
     ),
 
