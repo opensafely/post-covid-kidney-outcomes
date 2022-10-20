@@ -1,0 +1,250 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /workspace/logs/historical_matching.log
+  log type:  text
+ opened on:  20 Oct 2022, 16:08:51
+
+. clear
+
+. 
+. import delimited ./output/input_historical_matching.csv, delimiter(comma) var
+> names(1) case(preserve) 
+(18 vars, 50,000 obs)
+
+. 
+. **Exclusions
+. * Age <18
+. drop if age <18
+(10,493 observations deleted)
+
+. 
+. * Anyone not registered at one practice for 3 months before
+. drop if has_follow_up==0
+(1,985 observations deleted)
+
+. drop has_follow_up
+
+. 
+. * Pre-existing kidney replacement therapy
+. drop if baseline_krt_primary_care==1
+(1,877 observations deleted)
+
+. drop baseline_krt_primary_care
+
+. drop if baseline_krt_icd_10==1
+(1,777 observations deleted)
+
+. drop baseline_krt_icd_10
+
+. drop if baseline_krt_opcs_4==1
+(1,676 observations deleted)
+
+. drop baseline_krt_opcs_4
+
+. 
+. * Baseline eGFR <15 as at February 2017
+. assert inlist(sex, "M", "F")
+
+. gen male = (sex=="M")
+
+. drop sex
+
+. label define sexLab 1 "Male" 0 "Female"
+
+. label values male sexLab
+
+. label var male "Sex (0=F 1=M)"
+
+. 
+. replace baseline_creatinine_feb2017 = . if !inrange(baseline_creatinine_feb20
+> 17, 20, 3000)
+(14,136 real changes made, 14,136 to missing)
+
+. gen mgdl_baseline_creatinine_feb2017 = baseline_creatinine_feb2017/88.4
+(14,136 missing values generated)
+
+. gen min_baseline_creatinine_feb2017=.
+(32,192 missing values generated)
+
+. replace min_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
+> 7 if male==0
+(9,100 real changes made)
+
+. replace min_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
+> 9 if male==1
+(8,956 real changes made)
+
+. replace min_baseline_creatinine_feb2017 = min_baseline_creatinine_feb2017^-0.
+> 329  if male==0
+(9,100 real changes made)
+
+. replace min_baseline_creatinine_feb2017 = min_baseline_creatinine_feb2017^-0.
+> 411  if male==1
+(8,956 real changes made)
+
+. replace min_baseline_creatinine_feb2017 = 1 if min_baseline_creatinine_feb201
+> 7<1
+(11,416 real changes made)
+
+. gen max_baseline_creatinine_feb2017=.
+(32,192 missing values generated)
+
+. replace max_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
+> 7 if male==0
+(9,100 real changes made)
+
+. replace max_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
+> 9 if male==1
+(8,956 real changes made)
+
+. replace max_baseline_creatinine_feb2017 = max_baseline_creatinine_feb2017^-1.
+> 209
+(18,056 real changes made)
+
+. replace max_baseline_creatinine_feb2017 = 1 if max_baseline_creatinine_feb201
+> 7>1
+(20,776 real changes made)
+
+. gen egfr_baseline_creatinine_feb2017 = min_baseline_creatinine_feb2017*max_ba
+> seline_creatinine_feb2017*141
+(14,136 missing values generated)
+
+. replace egfr_baseline_creatinine_feb2017 = egfr_baseline_creatinine_feb2017*(
+> 0.993^age)
+(18,056 real changes made)
+
+. replace egfr_baseline_creatinine_feb2017 = egfr_baseline_creatinine_feb2017*1
+> .018 if male==0
+(9,100 real changes made)
+
+. drop if egfr_baseline_creatinine_feb2017 <15
+(0 observations deleted)
+
+. drop baseline_creatinine_feb2017
+
+. drop mgdl_baseline_creatinine_feb2017
+
+. drop min_baseline_creatinine_feb2017
+
+. drop max_baseline_creatinine_feb2017
+
+. drop egfr_baseline_creatinine_feb2017
+
+. drop age
+
+. 
+. * Deceased
+. drop if deceased==1
+(3,248 observations deleted)
+
+. drop deceased
+
+. 
+. **Covariates
+. * IMD
+. drop if imd>=.
+(0 observations deleted)
+
+. 
+. **Drop excess variables
+. drop krt_outcome_primary_care
+
+. drop krt_outcome_icd_10
+
+. drop krt_outcome_opcs_4
+
+. 
+. *Tabulate variables
+. tab year_of_birth
+
+year_of_bir |
+         th |      Freq.     Percent        Cum.
+------------+-----------------------------------
+       1950 |        604        2.09        2.09
+       1951 |        599        2.07        4.16
+       1952 |        530        1.83        5.99
+       1953 |        601        2.08        8.06
+       1954 |        587        2.03       10.09
+       1955 |        593        2.05       12.14
+       1956 |        550        1.90       14.04
+       1957 |        568        1.96       16.00
+       1958 |        562        1.94       17.94
+       1959 |        572        1.98       19.92
+       1960 |        589        2.03       21.96
+       1961 |        624        2.16       24.11
+       1962 |        595        2.06       26.17
+       1963 |        558        1.93       28.10
+       1964 |        584        2.02       30.11
+       1965 |        595        2.06       32.17
+       1966 |        570        1.97       34.14
+       1967 |        534        1.84       35.98
+       1968 |        590        2.04       38.02
+       1969 |        582        2.01       40.03
+       1970 |        589        2.03       42.07
+       1971 |        600        2.07       44.14
+       1972 |        589        2.03       46.18
+       1973 |        522        1.80       47.98
+       1974 |        572        1.98       49.96
+       1975 |        586        2.02       51.98
+       1976 |        604        2.09       54.07
+       1977 |        542        1.87       55.94
+       1978 |        582        2.01       57.95
+       1979 |        610        2.11       60.06
+       1980 |        564        1.95       62.01
+       1981 |        577        1.99       64.00
+       1982 |        572        1.98       65.98
+       1983 |        637        2.20       68.18
+       1984 |        562        1.94       70.12
+       1985 |        585        2.02       72.14
+       1986 |        613        2.12       74.26
+       1987 |        566        1.96       76.21
+       1988 |        596        2.06       78.27
+       1989 |        568        1.96       80.23
+       1990 |        547        1.89       82.12
+       1991 |        556        1.92       84.05
+       1992 |        556        1.92       85.97
+       1993 |        572        1.98       87.94
+       1994 |        597        2.06       90.00
+       1995 |        576        1.99       91.99
+       1996 |        580        2.00       94.00
+       1997 |        574        1.98       95.98
+       1998 |        563        1.95       97.93
+       1999 |        597        2.06       99.99
+       2000 |          3        0.01      100.00
+------------+-----------------------------------
+      Total |     28,944      100.00
+
+. tab imd
+
+        imd |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      1,445        4.99        4.99
+          1 |      5,437       18.78       23.78
+          2 |      5,451       18.83       42.61
+          3 |      5,572       19.25       61.86
+          4 |      5,606       19.37       81.23
+          5 |      5,433       18.77      100.00
+------------+-----------------------------------
+      Total |     28,944      100.00
+
+. tab male
+
+   Sex (0=F |
+       1=M) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+     Female |     14,689       50.75       50.75
+       Male |     14,255       49.25      100.00
+------------+-----------------------------------
+      Total |     28,944      100.00
+
+. 
+. export delimited using "./output/historical_matching.csv", replace
+(note: file ./output/historical_matching.csv not found)
+file ./output/historical_matching.csv saved
+
+. log close
+      name:  <unnamed>
+       log:  /workspace/logs/historical_matching.log
+  log type:  text
+ closed on:  20 Oct 2022, 16:08:52
+-------------------------------------------------------------------------------

@@ -162,3 +162,102 @@ actions:
         matched_matches_stp35_may2021: output/matched_matches_contemporary_stp35_may2021.csv
         matched_cases_stp35_may2021: output/matched_cases_contemporary_stp35_may2021.csv
         matched_all_stp35_may2021: output/matched_combined_contemporary_stp35_may2021.csv
+
+#Extract data required for matching for historical (all STPs)
+  extract_historical_matching:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_historical_matching
+    outputs:
+      highly_sensitive:
+        cohort: output/input_historical_matching.csv
+
+#Data management for historical_matching
+  clean_historical_matching:
+    run: stata-mp:latest analysis/historical_matching.do
+    needs: [extract_historical_matching]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/historical_matching.csv
+      moderately_sensitive:
+        log: logs/historical_matching.log
+
+# Split covid_matching and contemporary_matching by STP
+  split_stps_historical:
+    run: stata-mp:latest analysis/split_stps_historical.do
+    needs: [extract_covid_matching, clean_covid_matching, extract_historical_matching, clean_historical_matching]
+    outputs:
+      highly_sensitive:
+        covid_stp5: output/input_covid_matching_stp5.csv
+        covid_stp6: output/input_covid_matching_stp6.csv
+        covid_stp7: output/input_covid_matching_stp7.csv
+        covid_stp8: output/input_covid_matching_stp8.csv
+        covid_stp9: output/input_covid_matching_stp9.csv
+        covid_stp10: output/input_covid_matching_stp10.csv
+        covid_stp12: output/input_covid_matching_stp12.csv
+        covid_stp13: output/input_covid_matching_stp13.csv
+        covid_stp14: output/input_covid_matching_stp14.csv
+        covid_stp15: output/input_covid_matching_stp15.csv
+        covid_stp16: output/input_covid_matching_stp16.csv
+        covid_stp17: output/input_covid_matching_stp17.csv
+        covid_stp20: output/input_covid_matching_stp20.csv
+        covid_stp21: output/input_covid_matching_stp21.csv
+        covid_stp22: output/input_covid_matching_stp22.csv
+        covid_stp23: output/input_covid_matching_stp23.csv
+        covid_stp24: output/input_covid_matching_stp24.csv
+        covid_stp25: output/input_covid_matching_stp25.csv
+        covid_stp26: output/input_covid_matching_stp26.csv
+        covid_stp27: output/input_covid_matching_stp27.csv
+        covid_stp29: output/input_covid_matching_stp29.csv
+        covid_stp33: output/input_covid_matching_stp33.csv
+        covid_stp35: output/input_covid_matching_stp35.csv
+        covid_stp36: output/input_covid_matching_stp36.csv
+        covid_stp37: output/input_covid_matching_stp37.csv
+        covid_stp40: output/input_covid_matching_stp40.csv
+        covid_stp41: output/input_covid_matching_stp41.csv
+        covid_stp42: output/input_covid_matching_stp42.csv
+        covid_stp43: output/input_covid_matching_stp43.csv
+        covid_stp44: output/input_covid_matching_stp44.csv
+        covid_stp49: output/input_covid_matching_stp49.csv
+        historical_stp5: output/input_historical_matching_stp5.csv
+        historical_stp6: output/input_historical_matching_stp6.csv
+        historical_stp7: output/input_historical_matching_stp7.csv
+        historical_stp8: output/input_historical_matching_stp8.csv
+        historical_stp9: output/input_historical_matching_stp9.csv
+        historical_stp10: output/input_historical_matching_stp10.csv
+        historical_stp12: output/input_historical_matching_stp12.csv
+        historical_stp13: output/input_historical_matching_stp13.csv
+        historical_stp14: output/input_historical_matching_stp14.csv
+        historical_stp15: output/input_historical_matching_stp15.csv
+        historical_stp16: output/input_historical_matching_stp16.csv
+        historical_stp17: output/input_historical_matching_stp17.csv
+        historical_stp20: output/input_historical_matching_stp20.csv
+        historical_stp21: output/input_historical_matching_stp21.csv
+        historical_stp22: output/input_historical_matching_stp22.csv
+        historical_stp23: output/input_historical_matching_stp23.csv
+        historical_stp24: output/input_historical_matching_stp24.csv
+        historical_stp25: output/input_historical_matching_stp25.csv
+        historical_stp26: output/input_historical_matching_stp26.csv
+        historical_stp27: output/input_historical_matching_stp27.csv
+        historical_stp29: output/input_historical_matching_stp29.csv
+        historical_stp33: output/input_historical_matching_stp33.csv
+        historical_stp35: output/input_historical_matching_stp35.csv
+        historical_stp36: output/input_historical_matching_stp36.csv
+        historical_stp37: output/input_historical_matching_stp37.csv
+        historical_stp40: output/input_historical_matching_stp40.csv
+        historical_stp41: output/input_historical_matching_stp41.csv
+        historical_stp42: output/input_historical_matching_stp42.csv
+        historical_stp43: output/input_historical_matching_stp43.csv
+        historical_stp44: output/input_historical_matching_stp44.csv
+        historical_stp49: output/input_historical_matching_stp49.csv
+      moderately_sensitive:
+        log: logs/split_stps_historical.log
+
+  match_historical_stp35:
+    run: python:latest python analysis/match_historical_stp35.py
+    needs: [extract_covid_matching, clean_covid_matching, extract_historical_matching, clean_historical_matching, split_stps_historical]
+    outputs:
+      moderately_sensitive:
+        matching_report_stp35: output/matching_report_historical_stp35.txt
+      highly_sensitive:
+        matched_matches_stp35: output/matched_matches_historical_stp35.csv
+        matched_cases_stp35: output/matched_cases_historical_stp35.csv
+        matched_all_stp35: output/matched_combined_historical_stp35.csv
