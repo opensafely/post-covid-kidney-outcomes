@@ -1,0 +1,238 @@
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/00b_dummyData_create_multiple_stps_2017.log
+  log type:  text
+ opened on:  21 Oct 2022, 23:04:17
+
+. 
+. *program for replacing stps that is called below
+. program drop _all
+
+. program replaceSTPs
+  1.         local low=0
+  2.         *divide total dataset by number of stps (=31)
+.         local increase=int(_N/31)
+  3.         *replace stps 5-9
+.         foreach i of numlist 5/9 {
+  4.                 local high=`low'+`increase'
+  5.                 replace stp="E5400000`i'" if _n>`low'& _n<`high'
+  6.                 local low=`low'+ `increase'
+  7.         }
+  8.         count
+  9.         *replace all other stps
+.         *reset lower limit to take account that 5/9 have been done already
+.         local low=`increase'*5 
+ 10.         foreach i of numlist 10 12/17 20/27 29 33 35/37 40/44 49 {
+ 11.                 local high=`low'+`increase'
+ 12.                 replace stp="E540000`i'" if _n>`low'& _n<`high'
+ 13.                 local low=`low'+ `increase'
+ 14.         }
+ 15.         count
+ 16.         *tidy up remainder
+.         replace stp="E54000005" if stp=="STP1"
+ 17. end
+
+. 
+. 
+. *(1)=========Create separate stps for cases============
+. import delimited ./output/covid_matching.csv, clear
+(encoding automatically selected: ISO-8859-1)
+(11 vars, 12,785 obs)
+
+. *tabulate before changes
+. tab stp
+
+        stp |      Freq.     Percent        Cum.
+------------+-----------------------------------
+       STP1 |     12,785      100.00      100.00
+------------+-----------------------------------
+      Total |     12,785      100.00
+
+. *call program
+. replaceSTPs
+variable stp was str4 now str9
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+  12,785
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+(411 real changes made)
+  12,785
+(44 real changes made)
+
+. *tabulate after changes
+. tab stp, miss
+
+        stp |      Freq.     Percent        Cum.
+------------+-----------------------------------
+  E54000005 |        455        3.56        3.56
+  E54000006 |        411        3.21        6.77
+  E54000007 |        411        3.21        9.99
+  E54000008 |        411        3.21       13.20
+  E54000009 |        411        3.21       16.42
+  E54000010 |        411        3.21       19.63
+  E54000012 |        411        3.21       22.85
+  E54000013 |        411        3.21       26.06
+  E54000014 |        411        3.21       29.28
+  E54000015 |        411        3.21       32.49
+  E54000016 |        411        3.21       35.71
+  E54000017 |        411        3.21       38.92
+  E54000020 |        411        3.21       42.14
+  E54000021 |        411        3.21       45.35
+  E54000022 |        411        3.21       48.56
+  E54000023 |        411        3.21       51.78
+  E54000024 |        411        3.21       54.99
+  E54000025 |        411        3.21       58.21
+  E54000026 |        411        3.21       61.42
+  E54000027 |        411        3.21       64.64
+  E54000029 |        411        3.21       67.85
+  E54000033 |        411        3.21       71.07
+  E54000035 |        411        3.21       74.28
+  E54000036 |        411        3.21       77.50
+  E54000037 |        411        3.21       80.71
+  E54000040 |        411        3.21       83.93
+  E54000041 |        411        3.21       87.14
+  E54000042 |        411        3.21       90.36
+  E54000043 |        411        3.21       93.57
+  E54000044 |        411        3.21       96.79
+  E54000049 |        411        3.21      100.00
+------------+-----------------------------------
+      Total |     12,785      100.00
+
+. *export output
+. export delimited using "./output/covid_matching.csv", replace
+file ./output/covid_matching.csv saved
+
+. 
+. 
+. 
+. 
+. *(2)=========Create separate stps for comparators============
+. import delimited ./output/2017_matching.csv, clear
+(encoding automatically selected: ISO-8859-1)
+(8 vars, 28,851 obs)
+
+. *tabulate before changes
+. tab stp
+
+        stp |      Freq.     Percent        Cum.
+------------+-----------------------------------
+       STP1 |     28,851      100.00      100.00
+------------+-----------------------------------
+      Total |     28,851      100.00
+
+. *call program
+. replaceSTPs
+variable stp was str4 now str9
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+  28,851
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+(929 real changes made)
+  28,851
+(52 real changes made)
+
+. *tabulate after changes
+. tab stp
+
+        stp |      Freq.     Percent        Cum.
+------------+-----------------------------------
+  E54000005 |        981        3.40        3.40
+  E54000006 |        929        3.22        6.62
+  E54000007 |        929        3.22        9.84
+  E54000008 |        929        3.22       13.06
+  E54000009 |        929        3.22       16.28
+  E54000010 |        929        3.22       19.50
+  E54000012 |        929        3.22       22.72
+  E54000013 |        929        3.22       25.94
+  E54000014 |        929        3.22       29.16
+  E54000015 |        929        3.22       32.38
+  E54000016 |        929        3.22       35.60
+  E54000017 |        929        3.22       38.82
+  E54000020 |        929        3.22       42.04
+  E54000021 |        929        3.22       45.26
+  E54000022 |        929        3.22       48.48
+  E54000023 |        929        3.22       51.70
+  E54000024 |        929        3.22       54.92
+  E54000025 |        929        3.22       58.14
+  E54000026 |        929        3.22       61.36
+  E54000027 |        929        3.22       64.58
+  E54000029 |        929        3.22       67.80
+  E54000033 |        929        3.22       71.02
+  E54000035 |        929        3.22       74.24
+  E54000036 |        929        3.22       77.46
+  E54000037 |        929        3.22       80.68
+  E54000040 |        929        3.22       83.90
+  E54000041 |        929        3.22       87.12
+  E54000042 |        929        3.22       90.34
+  E54000043 |        929        3.22       93.56
+  E54000044 |        929        3.22       96.78
+  E54000049 |        929        3.22      100.00
+------------+-----------------------------------
+      Total |     28,851      100.00
+
+. *export output
+. export delimited using "./output/2017_matching.csv", replace
+file ./output/2017_matching.csv saved
+
+. 
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/00b_dummyData_create_multiple_stps_2017.log
+  log type:  text
+ closed on:  21 Oct 2022, 23:04:19
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

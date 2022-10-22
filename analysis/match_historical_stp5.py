@@ -21,6 +21,6 @@ match(
         "date_deregistered": "before",
         "krt_outcome_date": "before",
     },
-    output_suffix="_historical_stp5",
+    output_suffix="_hist_stp5",
     output_path="output",
 )
