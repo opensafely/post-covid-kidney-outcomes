@@ -5,7 +5,7 @@ pwd
 
 * Open a log file
 cap log close
-log using ./logs/00b_dummyData_create_multiple_stps_2017.log, replace t
+log using ./logs/dummy_only_create_multiple_stps_2017.log, replace t
 
 *program for replacing stps that is called below
 program drop _all

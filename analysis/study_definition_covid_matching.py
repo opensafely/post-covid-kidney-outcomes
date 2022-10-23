@@ -48,6 +48,61 @@ study = StudyDefinition(
         """,
     ),
 
+#Matching variables
+    age=patients.age_as_of(
+       "2020-02-01",
+        return_expectations={
+            "rate": "universal",
+            "int": {"distribution": "population_ages"},
+        },
+    ),
+    sex=patients.sex(
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"M": 0.49, "F": 0.51}},
+        }
+    ),
+    imd=patients.categorised_as(
+        {
+            "0": "DEFAULT",
+            "1": """index_of_multiple_deprivation >=1 AND index_of_multiple_deprivation < 32844*1/5""",
+            "2": """index_of_multiple_deprivation >= 32844*1/5 AND index_of_multiple_deprivation < 32844*2/5""",
+            "3": """index_of_multiple_deprivation >= 32844*2/5 AND index_of_multiple_deprivation < 32844*3/5""",
+            "4": """index_of_multiple_deprivation >= 32844*3/5 AND index_of_multiple_deprivation < 32844*4/5""",
+            "5": """index_of_multiple_deprivation >= 32844*4/5 AND index_of_multiple_deprivation < 32844""",
+        },
+        index_of_multiple_deprivation=patients.address_as_of(
+            "2020-02-01",
+            returning="index_of_multiple_deprivation",
+            round_to_nearest=100,
+        ),
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {
+                    "0": 0.05,
+                    "1": 0.19,
+                    "2": 0.19,
+                    "3": 0.19,
+                    "4": 0.19,
+                    "5": 0.19,
+                }
+            },
+        },
+    ),
+    stp=patients.registered_practice_as_of(
+        "2020-02-01",
+        returning="stp_code",
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {
+                    "STP1": 1.0,
+                    }
+                },
+            },
+        ),
+
 #Exposure - SARS-CoV-2 infection
 
     sgss_positive_date=patients.with_test_result_in_sgss(
@@ -56,7 +111,7 @@ study = StudyDefinition(
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        on_or_before="2022-01-31",
+        on_or_before="2022-09-30",
         return_expectations={"incidence": 0.4, "date": {"earliest": "2020-02-01"}},
     ),
     
@@ -65,7 +120,7 @@ study = StudyDefinition(
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        on_or_before="2022-01-31",
+        on_or_before="2022-09-30",
         return_expectations={"incidence": 0.2, "date": {"earliest": "2020-02-01"}},
     ),
 
@@ -74,7 +129,7 @@ study = StudyDefinition(
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        on_or_before="2022-01-31",
+        on_or_before="2022-09-30",
         return_expectations={"incidence": 0.1, "date": {"earliest": "2020-02-01"}},
     ),
     
@@ -103,82 +158,18 @@ study = StudyDefinition(
         },
     ),
 
-#Matching variables
-
-    year_of_birth=patients.date_of_birth(
-        date_format= "YYYY", 
-        return_expectations={
-            "date": {"earliest": "1950-01-01", "latest": "2000-01-01"},
-            "rate": "uniform",
-            "incidence": 1,
-        },
-    ),
-    age=patients.age_as_of(
-        "covid_diagnosis_date",
-        return_expectations={
-            "rate": "universal",
-            "int": {"distribution": "population_ages"},
-        },
-    ),
-    sex=patients.sex(
-        return_expectations={
-            "rate": "universal",
-            "category": {"ratios": {"M": 0.49, "F": 0.51}},
-        }
-    ),
-    imd=patients.categorised_as(
-        {
-            "0": "DEFAULT",
-            "1": """index_of_multiple_deprivation >=1 AND index_of_multiple_deprivation < 32844*1/5""",
-            "2": """index_of_multiple_deprivation >= 32844*1/5 AND index_of_multiple_deprivation < 32844*2/5""",
-            "3": """index_of_multiple_deprivation >= 32844*2/5 AND index_of_multiple_deprivation < 32844*3/5""",
-            "4": """index_of_multiple_deprivation >= 32844*3/5 AND index_of_multiple_deprivation < 32844*4/5""",
-            "5": """index_of_multiple_deprivation >= 32844*4/5 AND index_of_multiple_deprivation < 32844""",
-        },
-        index_of_multiple_deprivation=patients.address_as_of(
-            "covid_diagnosis_date",
-            returning="index_of_multiple_deprivation",
-            round_to_nearest=100,
-        ),
-        return_expectations={
-            "rate": "universal",
-            "category": {
-                "ratios": {
-                    "0": 0.05,
-                    "1": 0.19,
-                    "2": 0.19,
-                    "3": 0.19,
-                    "4": 0.19,
-                    "5": 0.19,
-                }
-            },
-        },
-    ),
-    stp=patients.registered_practice_as_of(
-        "covid_diagnosis_date",
-        returning="stp_code",
-        return_expectations={
-            "rate": "universal",
-            "category": {
-                "ratios": {
-                    "STP1": 1.0,
-                    }
-                },
-            },
-        ),
-
 #Exclusion variables
 
     deceased=patients.with_death_recorded_in_primary_care(
         returning="binary_flag",
         between = ["1970-01-01", "covid_diagnosis_date + 28 days"],
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-09-30"}},
         ),
     death_date=patients.with_death_recorded_in_primary_care(
-        between = ["2020-02-01", "2022-01-31"],
+        between = ["2020-02-01", "2022-09-30"],
         returning="date_of_death",
         date_format= "YYYY-MM-DD",
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-01-31"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-09-30"}},
     ),
     baseline_krt_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
@@ -414,29 +405,101 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
+    baseline_creatinine_feb2022=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2020-08-01","2022-01-31"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    baseline_creatinine_mar2022=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2020-09-01","2022-02-28"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    baseline_creatinine_apr2022=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2020-10-01","2022-03-31"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    baseline_creatinine_may2022=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2020-11-01","2022-04-30"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    baseline_creatinine_jun2022=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2020-12-01","2022-05-31"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    baseline_creatinine_jul2022=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2021-01-01","2022-06-30"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    baseline_creatinine_aug2022=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2021-02-01","2022-07-31"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    baseline_creatinine_sep2022=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2021-03-01","2022-08-31"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
     krt_outcome_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
-        between = ["2020-02-01", "2022-08-31"],
+        between = ["2020-02-01", "2022-09-30"],
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-08-31"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-09-30"}}
     ),
     krt_outcome_icd_10=patients.admitted_to_hospital(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between = ["2020-02-01", "2022-08-31"],
+        between = ["2020-02-01", "2022-09-30"],
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-08-31"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-09-30"}}
     ),
     krt_outcome_opcs_4=patients.admitted_to_hospital(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between = ["2020-02-01", "2022-08-31"],
+        between = ["2020-02-01", "2022-09-30"],
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-08-31"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-09-30"}}
     ),
     krt_outcome_date=patients.minimum_of(
         "krt_outcome_primary_care", "krt_outcome_icd_10", "krt_outcome_opcs_4",
@@ -447,7 +510,7 @@ study = StudyDefinition(
     }
     ),
     date_deregistered=patients.date_deregistered_from_all_supported_practices(
-        between= ["2020-02-01", "2022-01-31"],
+        between= ["2020-02-01", "2022-09-30"],
         date_format="YYYY-MM-DD",
     ),
 

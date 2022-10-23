@@ -81,7 +81,15 @@ foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_mar2020 ///
 												baseline_creatinine_oct2021 ///
 												baseline_creatinine_nov2021 ///
 												baseline_creatinine_dec2021 ///
-												baseline_creatinine_jan2022 {
+												baseline_creatinine_jan2022 ///
+												baseline_creatinine_feb2022 ///
+												baseline_creatinine_mar2022 ///
+												baseline_creatinine_apr2022 ///
+												baseline_creatinine_may2022 ///
+												baseline_creatinine_jun2022 ///
+												baseline_creatinine_jul2022 ///
+												baseline_creatinine_aug2022 ///
+												baseline_creatinine_sep2022 {
 replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine_monthly', 20, 3000)
 gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.4
 gen min_`baseline_creatinine_monthly'=.
@@ -108,7 +116,7 @@ gen covid_date_string=string(covid_date, "%td")
 gen covid_month=substr( covid_date_string ,3,7)
 
 gen baseline_egfr=.
-local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
+local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022"
 foreach x of  local month_year  {
 replace baseline_egfr=egfr_baseline_creatinine_`x' if  covid_month=="`x'"
 drop if baseline_egfr <15
@@ -116,7 +124,6 @@ drop egfr_baseline_creatinine_`x'
 }
 drop baseline_egfr
 drop covid_date_string
-drop age
 
 * COVID-19 death
 drop if deceased==1
@@ -132,10 +139,10 @@ drop krt_outcome_icd_10
 drop krt_outcome_opcs_4
 
 *Tabulate variables
-tab year_of_birth
+tab age
 tab imd
 tab male
-bysort year_of_birth: tab covid_month
+tab covid_month
 
 export delimited using "./output/covid_matching.csv", replace
 

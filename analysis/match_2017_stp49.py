@@ -1,17 +1,13 @@
-#https://5b5368c1.opensafely-docs.pages.dev/case-control-studies/
-#https://github.com/opensafely/documentation/pull/522
-
-#https://github.com/opensafely-core/matching#readme:
 import pandas as pd
 from osmatching import match
 
 match(
-    case_csv="input_covid_matching_stp10",
-    match_csv="input_2017_matching_stp10",
+    case_csv="input_covid_matching_stp49",
+    match_csv="input_2017_matching_stp49",
     matches_per_case=5,
     match_variables={
         "male": "category",
-        "year_of_birth": 0,
+        "age": 0,
         "imd": "category",
     },
     index_date_variable="covid_date",
@@ -21,6 +17,6 @@ match(
         "date_deregistered": "before",
         "krt_outcome_date": "before",
     },
-    output_suffix="_2017_stp10",
+    output_suffix="_2017_stp49",
     output_path="output",
 )

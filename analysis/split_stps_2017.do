@@ -16,7 +16,7 @@ import delimited ./output/covid_matching.csv, clear
 foreach i of numlist 5/9 {
 	preserve
 		capture noisily keep if stp=="E5400000`i'"
-		capture noisily export delimited using "./output/input_covid_matching_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_2017_matching_stp`i'.csv", replace
 		count
 	restore
 }
@@ -24,7 +24,7 @@ foreach i of numlist 5/9 {
 foreach i of numlist 10 12/17 20/27 29 33 35/37 40/44 49 {
 	preserve
 		capture noisily keep if stp=="E540000`i'"
-		capture noisily export delimited using "./output/input_covid_matching_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_2017_matching_stp`i'.csv", replace
 		count
 	restore
 }

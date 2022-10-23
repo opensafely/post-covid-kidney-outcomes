@@ -50,7 +50,6 @@ drop mgdl_baseline_creatinine_feb2017
 drop min_baseline_creatinine_feb2017
 drop max_baseline_creatinine_feb2017
 drop egfr_baseline_creatinine_feb2017
-drop age
 
 * Deceased
 drop if deceased==1
@@ -66,7 +65,7 @@ drop krt_outcome_icd_10
 drop krt_outcome_opcs_4
 
 *Tabulate variables
-tab year_of_birth
+tab age
 tab imd
 tab male
 
