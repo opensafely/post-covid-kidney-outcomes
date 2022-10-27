@@ -6,145 +6,21 @@ expectations:
 actions:
 
 # Extract data required for matching for covid (all STPs)
-  extract_covid_2017_matching:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_2017_matching
+  extract_covid_matching:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_matching
     outputs:
       highly_sensitive:
-        cohort: output/input_covid_2017_matching.csv
+        cohort: output/input_covid_matching.csv
 
-#Data management for covid_2017_matching
-  clean_covid_2017_matching:
-    run: stata-mp:latest analysis/covid_2017_matching.do
-    needs: [extract_covid_2017_matching]
+#Data management for covid_matching for matching with 2017 general population
+  clean_covid_matching_2017:
+    run: stata-mp:latest analysis/covid_matching_2017.do
+    needs: [extract_covid_matching]
     outputs:
       highly_sensitive:
-        analysis_dataset: output/covid_2017_matching.csv
+        analysis_dataset: output/covid_matching_2017.csv
       moderately_sensitive:
-        log: logs/covid_2017_matching.log
-
- # Check STPs
-  check_stps:
-    run: stata-mp:latest analysis/check_stps.do
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching]
-    outputs:
-      moderately_sensitive:
-        log: logs/check_stps.log
-
-# Extract data required for matching for covid (all STPs)
-  extract_covid_2017_matching_may2021:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_2017_matching_may2021
-    outputs:
-      highly_sensitive:
-        cohort: output/input_covid_2017_matching_may2021.csv
-
-#Data management for covid_2017_matching
-  clean_covid_2017_matching_may2021:
-    run: stata-mp:latest analysis/covid_2017_matching_may2021.do
-    needs: [extract_covid_2017_matching_may2021]
-    outputs:
-      highly_sensitive:
-        analysis_dataset: output/covid_2017_matching_may2021.csv
-      moderately_sensitive:
-        log: logs/covid_2017_matching_may2021.log
-
-# Extract data required for matching for 2017 (all STPs)
-  extract_2017_matching_may2021:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_2017_matching_may2021
-    outputs:
-      highly_sensitive:
-        cohort: output/input_2017_matching_may2021.csv
-
-#Data management for 2017_matching
-  clean_2017_matching_may2021:
-    run: stata-mp:latest analysis/2017_matching_may2021.do
-    needs: [extract_2017_matching_may2021]
-    outputs:
-      highly_sensitive:
-        analysis_dataset: output/2017_matching_may2021.csv
-      moderately_sensitive:
-        log: logs/2017_matching_may2021.log
-
-# Split covid_2017_matching and 2017_matching by STP
-  split_stps_may2021:
-    run: stata-mp:latest analysis/split_stps_may2021.do
-    needs: [extract_covid_2017_matching_may2021, clean_covid_2017_matching_may2021, extract_2017_matching_may2021, clean_2017_matching_may2021]
-    outputs:
-      highly_sensitive:
-        covid_stp5_may2021: output/input_covid_2017_matching_stp5_may2021.csv
-        covid_stp6_may2021: output/input_covid_2017_matching_stp6_may2021.csv
-        covid_stp7_may2021: output/input_covid_2017_matching_stp7_may2021.csv
-        covid_stp8_may2021: output/input_covid_2017_matching_stp8_may2021.csv
-        covid_stp9_may2021: output/input_covid_2017_matching_stp9_may2021.csv
-        covid_stp10_may2021: output/input_covid_2017_matching_stp10_may2021.csv
-        covid_stp12_may2021: output/input_covid_2017_matching_stp12_may2021.csv
-        covid_stp13_may2021: output/input_covid_2017_matching_stp13_may2021.csv
-        covid_stp14_may2021: output/input_covid_2017_matching_stp14_may2021.csv
-        covid_stp15_may2021: output/input_covid_2017_matching_stp15_may2021.csv
-        covid_stp16_may2021: output/input_covid_2017_matching_stp16_may2021.csv
-        covid_stp17_may2021: output/input_covid_2017_matching_stp17_may2021.csv
-        covid_stp20_may2021: output/input_covid_2017_matching_stp20_may2021.csv
-        covid_stp21_may2021: output/input_covid_2017_matching_stp21_may2021.csv
-        covid_stp22_may2021: output/input_covid_2017_matching_stp22_may2021.csv
-        covid_stp23_may2021: output/input_covid_2017_matching_stp23_may2021.csv
-        covid_stp24_may2021: output/input_covid_2017_matching_stp24_may2021.csv
-        covid_stp25_may2021: output/input_covid_2017_matching_stp25_may2021.csv
-        covid_stp26_may2021: output/input_covid_2017_matching_stp26_may2021.csv
-        covid_stp27_may2021: output/input_covid_2017_matching_stp27_may2021.csv
-        covid_stp29_may2021: output/input_covid_2017_matching_stp29_may2021.csv
-        covid_stp33_may2021: output/input_covid_2017_matching_stp33_may2021.csv
-        covid_stp35_may2021: output/input_covid_2017_matching_stp35_may2021.csv
-        covid_stp36_may2021: output/input_covid_2017_matching_stp36_may2021.csv
-        covid_stp37_may2021: output/input_covid_2017_matching_stp37_may2021.csv
-        covid_stp40_may2021: output/input_covid_2017_matching_stp40_may2021.csv
-        covid_stp41_may2021: output/input_covid_2017_matching_stp41_may2021.csv
-        covid_stp42_may2021: output/input_covid_2017_matching_stp42_may2021.csv
-        covid_stp43_may2021: output/input_covid_2017_matching_stp43_may2021.csv
-        covid_stp44_may2021: output/input_covid_2017_matching_stp44_may2021.csv
-        covid_stp49_may2021: output/input_covid_2017_matching_stp49_may2021.csv
-        2017_stp5_may2021: output/input_2017_matching_stp5_may2021.csv
-        2017_stp6_may2021: output/input_2017_matching_stp6_may2021.csv
-        2017_stp7_may2021: output/input_2017_matching_stp7_may2021.csv
-        2017_stp8_may2021: output/input_2017_matching_stp8_may2021.csv
-        2017_stp9_may2021: output/input_2017_matching_stp9_may2021.csv
-        2017_stp10_may2021: output/input_2017_matching_stp10_may2021.csv
-        2017_stp12_may2021: output/input_2017_matching_stp12_may2021.csv
-        2017_stp13_may2021: output/input_2017_matching_stp13_may2021.csv
-        2017_stp14_may2021: output/input_2017_matching_stp14_may2021.csv
-        2017_stp15_may2021: output/input_2017_matching_stp15_may2021.csv
-        2017_stp16_may2021: output/input_2017_matching_stp16_may2021.csv
-        2017_stp17_may2021: output/input_2017_matching_stp17_may2021.csv
-        2017_stp20_may2021: output/input_2017_matching_stp20_may2021.csv
-        2017_stp21_may2021: output/input_2017_matching_stp21_may2021.csv
-        2017_stp22_may2021: output/input_2017_matching_stp22_may2021.csv
-        2017_stp23_may2021: output/input_2017_matching_stp23_may2021.csv
-        2017_stp24_may2021: output/input_2017_matching_stp24_may2021.csv
-        2017_stp25_may2021: output/input_2017_matching_stp25_may2021.csv
-        2017_stp26_may2021: output/input_2017_matching_stp26_may2021.csv
-        2017_stp27_may2021: output/input_2017_matching_stp27_may2021.csv
-        2017_stp29_may2021: output/input_2017_matching_stp29_may2021.csv
-        2017_stp33_may2021: output/input_2017_matching_stp33_may2021.csv
-        2017_stp35_may2021: output/input_2017_matching_stp35_may2021.csv
-        2017_stp36_may2021: output/input_2017_matching_stp36_may2021.csv
-        2017_stp37_may2021: output/input_2017_matching_stp37_may2021.csv
-        2017_stp40_may2021: output/input_2017_matching_stp40_may2021.csv
-        2017_stp41_may2021: output/input_2017_matching_stp41_may2021.csv
-        2017_stp42_may2021: output/input_2017_matching_stp42_may2021.csv
-        2017_stp43_may2021: output/input_2017_matching_stp43_may2021.csv
-        2017_stp44_may2021: output/input_2017_matching_stp44_may2021.csv
-        2017_stp49_may2021: output/input_2017_matching_stp49_may2021.csv
-      moderately_sensitive:
-        log: logs/split_stps_may2021.log
-
-  match_2017_stp35_may2021:
-    run: python:latest python analysis/match_2017_stp35_may2021.py
-    needs: [extract_covid_2017_matching_may2021, clean_covid_2017_matching_may2021, extract_2017_matching_may2021, clean_2017_matching_may2021, split_stps_may2021]
-    outputs:
-      moderately_sensitive:
-        matching_report_stp35_may2021: output/matching_report_2017_stp35_may2021.txt
-      highly_sensitive:
-        matched_matches_stp35_may2021: output/matched_matches_2017_stp35_may2021.csv
-        matched_cases_stp35_may2021: output/matched_cases_2017_stp35_may2021.csv
-        matched_all_stp35_may2021: output/matched_combined_2017_stp35_may2021.csv
+        log: logs/covid_matching_2017.log
 
 #Extract data required for matching for 2017 (all STPs)
   extract_2017_matching:
@@ -163,43 +39,43 @@ actions:
       moderately_sensitive:
         log: logs/2017_matching.log
 
-# Split covid_2017_matching and 2017_matching by STP
+# Split covid_matching_2017 and 2017_matching by STP
   split_stps_2017:
     run: stata-mp:latest analysis/split_stps_2017.do
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching]
     outputs:
       highly_sensitive:
-        covid_stp5: output/input_covid_2017_matching_stp5.csv
-        covid_stp6: output/input_covid_2017_matching_stp6.csv
-        covid_stp7: output/input_covid_2017_matching_stp7.csv
-        covid_stp8: output/input_covid_2017_matching_stp8.csv
-        covid_stp9: output/input_covid_2017_matching_stp9.csv
-        covid_stp10: output/input_covid_2017_matching_stp10.csv
-        covid_stp12: output/input_covid_2017_matching_stp12.csv
-        covid_stp13: output/input_covid_2017_matching_stp13.csv
-        covid_stp14: output/input_covid_2017_matching_stp14.csv
-        covid_stp15: output/input_covid_2017_matching_stp15.csv
-        covid_stp16: output/input_covid_2017_matching_stp16.csv
-        covid_stp17: output/input_covid_2017_matching_stp17.csv
-        covid_stp20: output/input_covid_2017_matching_stp20.csv
-        covid_stp21: output/input_covid_2017_matching_stp21.csv
-        covid_stp22: output/input_covid_2017_matching_stp22.csv
-        covid_stp23: output/input_covid_2017_matching_stp23.csv
-        covid_stp24: output/input_covid_2017_matching_stp24.csv
-        covid_stp25: output/input_covid_2017_matching_stp25.csv
-        covid_stp26: output/input_covid_2017_matching_stp26.csv
-        covid_stp27: output/input_covid_2017_matching_stp27.csv
-        covid_stp29: output/input_covid_2017_matching_stp29.csv
-        covid_stp33: output/input_covid_2017_matching_stp33.csv
-        covid_stp35: output/input_covid_2017_matching_stp35.csv
-        covid_stp36: output/input_covid_2017_matching_stp36.csv
-        covid_stp37: output/input_covid_2017_matching_stp37.csv
-        covid_stp40: output/input_covid_2017_matching_stp40.csv
-        covid_stp41: output/input_covid_2017_matching_stp41.csv
-        covid_stp42: output/input_covid_2017_matching_stp42.csv
-        covid_stp43: output/input_covid_2017_matching_stp43.csv
-        covid_stp44: output/input_covid_2017_matching_stp44.csv
-        covid_stp49: output/input_covid_2017_matching_stp49.csv
+        covid_stp5: output/input_covid_matching_2017_stp5.csv
+        covid_stp6: output/input_covid_matching_2017_stp6.csv
+        covid_stp7: output/input_covid_matching_2017_stp7.csv
+        covid_stp8: output/input_covid_matching_2017_stp8.csv
+        covid_stp9: output/input_covid_matching_2017_stp9.csv
+        covid_stp10: output/input_covid_matching_2017_stp10.csv
+        covid_stp12: output/input_covid_matching_2017_stp12.csv
+        covid_stp13: output/input_covid_matching_2017_stp13.csv
+        covid_stp14: output/input_covid_matching_2017_stp14.csv
+        covid_stp15: output/input_covid_matching_2017_stp15.csv
+        covid_stp16: output/input_covid_matching_2017_stp16.csv
+        covid_stp17: output/input_covid_matching_2017_stp17.csv
+        covid_stp20: output/input_covid_matching_2017_stp20.csv
+        covid_stp21: output/input_covid_matching_2017_stp21.csv
+        covid_stp22: output/input_covid_matching_2017_stp22.csv
+        covid_stp23: output/input_covid_matching_2017_stp23.csv
+        covid_stp24: output/input_covid_matching_2017_stp24.csv
+        covid_stp25: output/input_covid_matching_2017_stp25.csv
+        covid_stp26: output/input_covid_matching_2017_stp26.csv
+        covid_stp27: output/input_covid_matching_2017_stp27.csv
+        covid_stp29: output/input_covid_matching_2017_stp29.csv
+        covid_stp33: output/input_covid_matching_2017_stp33.csv
+        covid_stp35: output/input_covid_matching_2017_stp35.csv
+        covid_stp36: output/input_covid_matching_2017_stp36.csv
+        covid_stp37: output/input_covid_matching_2017_stp37.csv
+        covid_stp40: output/input_covid_matching_2017_stp40.csv
+        covid_stp41: output/input_covid_matching_2017_stp41.csv
+        covid_stp42: output/input_covid_matching_2017_stp42.csv
+        covid_stp43: output/input_covid_matching_2017_stp43.csv
+        covid_stp44: output/input_covid_matching_2017_stp44.csv
+        covid_stp49: output/input_covid_matching_2017_stp49.csv
         2017_stp5: output/input_2017_matching_stp5.csv
         2017_stp6: output/input_2017_matching_stp6.csv
         2017_stp7: output/input_2017_matching_stp7.csv
@@ -236,7 +112,7 @@ actions:
 
   match_2017_stp5:
     run: python:latest python analysis/match_2017_stp5.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp5: output/matching_report_2017_stp5.txt
@@ -247,7 +123,7 @@ actions:
 
   match_2017_stp6:
     run: python:latest python analysis/match_2017_stp6.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp6: output/matching_report_2017_stp6.txt
@@ -258,7 +134,7 @@ actions:
 
   match_2017_stp7:
     run: python:latest python analysis/match_2017_stp7.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp7: output/matching_report_2017_stp7.txt
@@ -269,7 +145,7 @@ actions:
 
   match_2017_stp8:
     run: python:latest python analysis/match_2017_stp8.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp8: output/matching_report_2017_stp8.txt
@@ -280,7 +156,7 @@ actions:
 
   match_2017_stp9:
     run: python:latest python analysis/match_2017_stp9.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp9: output/matching_report_2017_stp9.txt
@@ -291,7 +167,7 @@ actions:
 
   match_2017_stp10:
     run: python:latest python analysis/match_2017_stp10.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp10: output/matching_report_2017_stp10.txt
@@ -302,7 +178,7 @@ actions:
 
   match_2017_stp12:
     run: python:latest python analysis/match_2017_stp12.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp12: output/matching_report_2017_stp12.txt
@@ -313,7 +189,7 @@ actions:
 
   match_2017_stp13:
     run: python:latest python analysis/match_2017_stp13.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp13: output/matching_report_2017_stp13.txt
@@ -324,7 +200,7 @@ actions:
 
   match_2017_stp14:
     run: python:latest python analysis/match_2017_stp14.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp14: output/matching_report_2017_stp14.txt
@@ -335,7 +211,7 @@ actions:
 
   match_2017_stp15:
     run: python:latest python analysis/match_2017_stp15.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp15: output/matching_report_2017_stp15.txt
@@ -346,7 +222,7 @@ actions:
 
   match_2017_stp16:
     run: python:latest python analysis/match_2017_stp16.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp16: output/matching_report_2017_stp16.txt
@@ -357,7 +233,7 @@ actions:
 
   match_2017_stp17:
     run: python:latest python analysis/match_2017_stp17.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp17: output/matching_report_2017_stp17.txt
@@ -368,7 +244,7 @@ actions:
 
   match_2017_stp20:
     run: python:latest python analysis/match_2017_stp20.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp20: output/matching_report_2017_stp20.txt
@@ -379,7 +255,7 @@ actions:
 
   match_2017_stp21:
     run: python:latest python analysis/match_2017_stp21.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp21: output/matching_report_2017_stp21.txt
@@ -390,7 +266,7 @@ actions:
 
   match_2017_stp22:
     run: python:latest python analysis/match_2017_stp22.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp22: output/matching_report_2017_stp22.txt
@@ -401,7 +277,7 @@ actions:
 
   match_2017_stp23:
     run: python:latest python analysis/match_2017_stp23.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp23: output/matching_report_2017_stp23.txt
@@ -412,7 +288,7 @@ actions:
 
   match_2017_stp24:
     run: python:latest python analysis/match_2017_stp24.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp24: output/matching_report_2017_stp24.txt
@@ -423,7 +299,7 @@ actions:
 
   match_2017_stp25:
     run: python:latest python analysis/match_2017_stp25.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp25: output/matching_report_2017_stp25.txt
@@ -434,7 +310,7 @@ actions:
 
   match_2017_stp26:
     run: python:latest python analysis/match_2017_stp26.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp26: output/matching_report_2017_stp26.txt
@@ -445,7 +321,7 @@ actions:
 
   match_2017_stp27:
     run: python:latest python analysis/match_2017_stp27.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp27: output/matching_report_2017_stp27.txt
@@ -456,7 +332,7 @@ actions:
 
   match_2017_stp29:
     run: python:latest python analysis/match_2017_stp29.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp29: output/matching_report_2017_stp29.txt
@@ -467,7 +343,7 @@ actions:
 
   match_2017_stp33:
     run: python:latest python analysis/match_2017_stp33.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp33: output/matching_report_2017_stp33.txt
@@ -478,7 +354,7 @@ actions:
 
   match_2017_stp35:
     run: python:latest python analysis/match_2017_stp35.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp35: output/matching_report_2017_stp35.txt
@@ -489,7 +365,7 @@ actions:
 
   match_2017_stp36:
     run: python:latest python analysis/match_2017_stp36.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp36: output/matching_report_2017_stp36.txt
@@ -500,7 +376,7 @@ actions:
 
   match_2017_stp37:
     run: python:latest python analysis/match_2017_stp37.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp37: output/matching_report_2017_stp37.txt
@@ -511,7 +387,7 @@ actions:
 
   match_2017_stp40:
     run: python:latest python analysis/match_2017_stp40.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp40: output/matching_report_2017_stp40.txt
@@ -522,7 +398,7 @@ actions:
 
   match_2017_stp41:
     run: python:latest python analysis/match_2017_stp41.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp41: output/matching_report_2017_stp41.txt
@@ -533,7 +409,7 @@ actions:
 
   match_2017_stp42:
     run: python:latest python analysis/match_2017_stp42.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp42: output/matching_report_2017_stp42.txt
@@ -544,7 +420,7 @@ actions:
 
   match_2017_stp43:
     run: python:latest python analysis/match_2017_stp43.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp43: output/matching_report_2017_stp43.txt
@@ -555,7 +431,7 @@ actions:
 
   match_2017_stp44:
     run: python:latest python analysis/match_2017_stp44.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp44: output/matching_report_2017_stp44.txt
@@ -566,7 +442,7 @@ actions:
 
   match_2017_stp49:
     run: python:latest python analysis/match_2017_stp49.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2017_matching, clean_2017_matching, split_stps_2017]
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017]
     outputs:
       moderately_sensitive:
         matching_report_stp49: output/matching_report_2017_stp49.txt
@@ -590,7 +466,6 @@ actions:
       moderately_sensitive:
         log: logs/combine_stps_covid_2017.log
 
-
   combine_stps_matches_2017:
     run: stata-mp:latest analysis/combine_stps_matches_2017.do
     needs: [match_2017_stp5, match_2017_stp6, match_2017_stp7, match_2017_stp8, match_2017_stp9,
@@ -605,6 +480,16 @@ actions:
         matched_matches_combined: output/input_combined_stps_matches_2017.csv
       moderately_sensitive:
         log: logs/combine_stps_matches_2017.log
+
+#Data management for covid_matching for matching with 2020 general population
+  clean_covid_matching_2020:
+    run: stata-mp:latest analysis/covid_matching_2020.do
+    needs: [extract_covid_matching]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/covid_matching_2020.csv
+      moderately_sensitive:
+        log: logs/covid_matching_2020.log
 
 #Extract data required for matching for 2020 (all STPs)
   extract_2020_matching:
@@ -623,43 +508,43 @@ actions:
       moderately_sensitive:
         log: logs/2020_matching.log
 
-# Split covid_2017_matching and 2020_matching by STP
+# Split covid_matching and 2020_matching by STP
   split_stps_2020:
     run: stata-mp:latest analysis/split_stps_2020.do
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching]
     outputs:
       highly_sensitive:
-        covid_stp5: output/input_covid_2020_matching_stp5.csv
-        covid_stp6: output/input_covid_2020_matching_stp6.csv
-        covid_stp7: output/input_covid_2020_matching_stp7.csv
-        covid_stp8: output/input_covid_2020_matching_stp8.csv
-        covid_stp9: output/input_covid_2020_matching_stp9.csv
-        covid_stp10: output/input_covid_2020_matching_stp10.csv
-        covid_stp12: output/input_covid_2020_matching_stp12.csv
-        covid_stp13: output/input_covid_2020_matching_stp13.csv
-        covid_stp14: output/input_covid_2020_matching_stp14.csv
-        covid_stp15: output/input_covid_2020_matching_stp15.csv
-        covid_stp16: output/input_covid_2020_matching_stp16.csv
-        covid_stp17: output/input_covid_2020_matching_stp17.csv
-        covid_stp20: output/input_covid_2020_matching_stp20.csv
-        covid_stp21: output/input_covid_2020_matching_stp21.csv
-        covid_stp22: output/input_covid_2020_matching_stp22.csv
-        covid_stp23: output/input_covid_2020_matching_stp23.csv
-        covid_stp24: output/input_covid_2020_matching_stp24.csv
-        covid_stp25: output/input_covid_2020_matching_stp25.csv
-        covid_stp26: output/input_covid_2020_matching_stp26.csv
-        covid_stp27: output/input_covid_2020_matching_stp27.csv
-        covid_stp29: output/input_covid_2020_matching_stp29.csv
-        covid_stp33: output/input_covid_2020_matching_stp33.csv
-        covid_stp35: output/input_covid_2020_matching_stp35.csv
-        covid_stp36: output/input_covid_2020_matching_stp36.csv
-        covid_stp37: output/input_covid_2020_matching_stp37.csv
-        covid_stp40: output/input_covid_2020_matching_stp40.csv
-        covid_stp41: output/input_covid_2020_matching_stp41.csv
-        covid_stp42: output/input_covid_2020_matching_stp42.csv
-        covid_stp43: output/input_covid_2020_matching_stp43.csv
-        covid_stp44: output/input_covid_2020_matching_stp44.csv
-        covid_stp49: output/input_covid_2020_matching_stp49.csv
+        covid_stp5: output/input_covid_matching_2020_stp5.csv
+        covid_stp6: output/input_covid_matching_2020_stp6.csv
+        covid_stp7: output/input_covid_matching_2020_stp7.csv
+        covid_stp8: output/input_covid_matching_2020_stp8.csv
+        covid_stp9: output/input_covid_matching_2020_stp9.csv
+        covid_stp10: output/input_covid_matching_2020_stp10.csv
+        covid_stp12: output/input_covid_matching_2020_stp12.csv
+        covid_stp13: output/input_covid_matching_2020_stp13.csv
+        covid_stp14: output/input_covid_matching_2020_stp14.csv
+        covid_stp15: output/input_covid_matching_2020_stp15.csv
+        covid_stp16: output/input_covid_matching_2020_stp16.csv
+        covid_stp17: output/input_covid_matching_2020_stp17.csv
+        covid_stp20: output/input_covid_matching_2020_stp20.csv
+        covid_stp21: output/input_covid_matching_2020_stp21.csv
+        covid_stp22: output/input_covid_matching_2020_stp22.csv
+        covid_stp23: output/input_covid_matching_2020_stp23.csv
+        covid_stp24: output/input_covid_matching_2020_stp24.csv
+        covid_stp25: output/input_covid_matching_2020_stp25.csv
+        covid_stp26: output/input_covid_matching_2020_stp26.csv
+        covid_stp27: output/input_covid_matching_2020_stp27.csv
+        covid_stp29: output/input_covid_matching_2020_stp29.csv
+        covid_stp33: output/input_covid_matching_2020_stp33.csv
+        covid_stp35: output/input_covid_matching_2020_stp35.csv
+        covid_stp36: output/input_covid_matching_2020_stp36.csv
+        covid_stp37: output/input_covid_matching_2020_stp37.csv
+        covid_stp40: output/input_covid_matching_2020_stp40.csv
+        covid_stp41: output/input_covid_matching_2020_stp41.csv
+        covid_stp42: output/input_covid_matching_2020_stp42.csv
+        covid_stp43: output/input_covid_matching_2020_stp43.csv
+        covid_stp44: output/input_covid_matching_2020_stp44.csv
+        covid_stp49: output/input_covid_matching_2020_stp49.csv
         2020_stp5: output/input_2020_matching_stp5.csv
         2020_stp6: output/input_2020_matching_stp6.csv
         2020_stp7: output/input_2020_matching_stp7.csv
@@ -696,7 +581,7 @@ actions:
 
   match_2020_stp5:
     run: python:latest python analysis/match_2020_stp5.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp5: output/matching_report_2020_stp5.txt
@@ -707,7 +592,7 @@ actions:
 
   match_2020_stp6:
     run: python:latest python analysis/match_2020_stp6.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp6: output/matching_report_2020_stp6.txt
@@ -718,7 +603,7 @@ actions:
 
   match_2020_stp7:
     run: python:latest python analysis/match_2020_stp7.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp7: output/matching_report_2020_stp7.txt
@@ -729,7 +614,7 @@ actions:
 
   match_2020_stp8:
     run: python:latest python analysis/match_2020_stp8.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp8: output/matching_report_2020_stp8.txt
@@ -740,7 +625,7 @@ actions:
 
   match_2020_stp9:
     run: python:latest python analysis/match_2020_stp9.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp9: output/matching_report_2020_stp9.txt
@@ -751,7 +636,7 @@ actions:
 
   match_2020_stp10:
     run: python:latest python analysis/match_2020_stp10.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp10: output/matching_report_2020_stp10.txt
@@ -762,7 +647,7 @@ actions:
 
   match_2020_stp12:
     run: python:latest python analysis/match_2020_stp12.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp12: output/matching_report_2020_stp12.txt
@@ -773,7 +658,7 @@ actions:
 
   match_2020_stp13:
     run: python:latest python analysis/match_2020_stp13.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp13: output/matching_report_2020_stp13.txt
@@ -784,7 +669,7 @@ actions:
 
   match_2020_stp14:
     run: python:latest python analysis/match_2020_stp14.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp14: output/matching_report_2020_stp14.txt
@@ -795,7 +680,7 @@ actions:
 
   match_2020_stp15:
     run: python:latest python analysis/match_2020_stp15.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp15: output/matching_report_2020_stp15.txt
@@ -806,7 +691,7 @@ actions:
 
   match_2020_stp16:
     run: python:latest python analysis/match_2020_stp16.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp16: output/matching_report_2020_stp16.txt
@@ -817,7 +702,7 @@ actions:
 
   match_2020_stp17:
     run: python:latest python analysis/match_2020_stp17.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp17: output/matching_report_2020_stp17.txt
@@ -828,7 +713,7 @@ actions:
 
   match_2020_stp20:
     run: python:latest python analysis/match_2020_stp20.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp20: output/matching_report_2020_stp20.txt
@@ -839,7 +724,7 @@ actions:
 
   match_2020_stp21:
     run: python:latest python analysis/match_2020_stp21.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp21: output/matching_report_2020_stp21.txt
@@ -850,7 +735,7 @@ actions:
 
   match_2020_stp22:
     run: python:latest python analysis/match_2020_stp22.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp22: output/matching_report_2020_stp22.txt
@@ -861,7 +746,7 @@ actions:
 
   match_2020_stp23:
     run: python:latest python analysis/match_2020_stp23.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp23: output/matching_report_2020_stp23.txt
@@ -872,7 +757,7 @@ actions:
 
   match_2020_stp24:
     run: python:latest python analysis/match_2020_stp24.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp24: output/matching_report_2020_stp24.txt
@@ -883,7 +768,7 @@ actions:
 
   match_2020_stp25:
     run: python:latest python analysis/match_2020_stp25.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp25: output/matching_report_2020_stp25.txt
@@ -894,7 +779,7 @@ actions:
 
   match_2020_stp26:
     run: python:latest python analysis/match_2020_stp26.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp26: output/matching_report_2020_stp26.txt
@@ -905,7 +790,7 @@ actions:
 
   match_2020_stp27:
     run: python:latest python analysis/match_2020_stp27.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp27: output/matching_report_2020_stp27.txt
@@ -916,7 +801,7 @@ actions:
 
   match_2020_stp29:
     run: python:latest python analysis/match_2020_stp29.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp29: output/matching_report_2020_stp29.txt
@@ -927,7 +812,7 @@ actions:
 
   match_2020_stp33:
     run: python:latest python analysis/match_2020_stp33.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp33: output/matching_report_2020_stp33.txt
@@ -938,7 +823,7 @@ actions:
 
   match_2020_stp35:
     run: python:latest python analysis/match_2020_stp35.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp35: output/matching_report_2020_stp35.txt
@@ -949,7 +834,7 @@ actions:
 
   match_2020_stp36:
     run: python:latest python analysis/match_2020_stp36.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp36: output/matching_report_2020_stp36.txt
@@ -960,7 +845,7 @@ actions:
 
   match_2020_stp37:
     run: python:latest python analysis/match_2020_stp37.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp37: output/matching_report_2020_stp37.txt
@@ -971,7 +856,7 @@ actions:
 
   match_2020_stp40:
     run: python:latest python analysis/match_2020_stp40.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp40: output/matching_report_2020_stp40.txt
@@ -982,7 +867,7 @@ actions:
 
   match_2020_stp41:
     run: python:latest python analysis/match_2020_stp41.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp41: output/matching_report_2020_stp41.txt
@@ -993,7 +878,7 @@ actions:
 
   match_2020_stp42:
     run: python:latest python analysis/match_2020_stp42.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp42: output/matching_report_2020_stp42.txt
@@ -1004,7 +889,7 @@ actions:
 
   match_2020_stp43:
     run: python:latest python analysis/match_2020_stp43.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp43: output/matching_report_2020_stp43.txt
@@ -1015,7 +900,7 @@ actions:
 
   match_2020_stp44:
     run: python:latest python analysis/match_2020_stp44.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp44: output/matching_report_2020_stp44.txt
@@ -1026,7 +911,7 @@ actions:
 
   match_2020_stp49:
     run: python:latest python analysis/match_2020_stp49.py
-    needs: [extract_covid_2017_matching, clean_covid_2017_matching, extract_2020_matching, clean_2020_matching, split_stps_2020]
+    needs: [extract_covid_matching, clean_covid_matching_2020, extract_2020_matching, clean_2020_matching, split_stps_2020]
     outputs:
       moderately_sensitive:
         matching_report_stp49: output/matching_report_2020_stp49.txt
@@ -1065,3 +950,31 @@ actions:
         matched_matches_combined: output/input_combined_stps_matches_2020.csv
       moderately_sensitive:
         log: logs/combine_stps_matches_2020.log
+
+  extract_covid_2017_additional:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_2017_additional 
+    needs: [combine_stps_covid_2017]
+    outputs:
+      highly_sensitive:
+        cohort: output/input_covid_2017_additional.csv
+
+  extract_covid_2020_additional:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_2020_additional 
+    needs: [combine_stps_covid_2020]
+    outputs:
+      highly_sensitive:
+        cohort: output/input_covid_2020_additional.csv
+
+  extract_2017_additional:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_2017_additional 
+    needs: [combine_stps_matches_2017]
+    outputs:
+      highly_sensitive:
+        cohort: output/input_2017_additional.csv
+
+  extract_2020_additional:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_2020_additional 
+    needs: [combine_stps_matches_2020]
+    outputs:
+      highly_sensitive:
+        cohort: output/input_2020_additional.csv

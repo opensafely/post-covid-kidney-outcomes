@@ -2,13 +2,12 @@ import pandas as pd
 from osmatching import match
 
 match(
-    case_csv="input_covid_matching_stp44",
+    case_csv="input_covid_matching_2017_stp44",
     match_csv="input_2017_matching_stp44",
     matches_per_case=5,
     match_variables={
         "male": "category",
         "age": 0,
-        "imd": "category",
     },
     index_date_variable="covid_date",
     replace_match_index_date_with_case="3_years_earlier",

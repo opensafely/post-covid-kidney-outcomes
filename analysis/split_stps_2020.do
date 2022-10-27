@@ -9,14 +9,14 @@ log using ./logs/split_stps_2020.log, replace t
 
 
 *(1)=========Split cases into separate stp files============
-import delimited ./output/covid_matching.csv, clear
+import delimited ./output/covid_matching_2020.csv, clear
 
 *stps are coded E54000005-9, 10, 12-17, 20-27, 29, 33, 35-37, 40-44, 49
 *files need to be .csv format as this is what the matching program needs as input
 foreach i of numlist 5/9 {
 	preserve
 		capture noisily keep if stp=="E5400000`i'"
-		capture noisily export delimited using "./output/input_covid_2020_matching_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_matching_2020_stp`i'.csv", replace
 		count
 	restore
 }
@@ -24,7 +24,7 @@ foreach i of numlist 5/9 {
 foreach i of numlist 10 12/17 20/27 29 33 35/37 40/44 49 {
 	preserve
 		capture noisily keep if stp=="E540000`i'"
-		capture noisily export delimited using "./output/input_covid_2020_matching_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_matching_2020_stp`i'.csv", replace
 		count
 	restore
 }

@@ -25,8 +25,8 @@ from cohortextractor import (
 )
 
 from codelists import *
-from matching_variables import generate_matching_variables
-matching_variables = generate_matching_variables(index_date_variable="index_date")
+from variables_matching import generate_matching
+variables_matching = generate_matching(index_date_variable="index_date")
 
 study = StudyDefinition(
     default_expectations={
@@ -50,7 +50,7 @@ study = StudyDefinition(
 
     index_date="2017-02-01",
 
-    **matching_variables,
+    **variables_matching,
 
 #Exclusion variables
     deceased=patients.with_death_recorded_in_primary_care(
