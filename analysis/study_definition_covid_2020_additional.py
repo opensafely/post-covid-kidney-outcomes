@@ -9,7 +9,7 @@ from cohortextractor import (
 
 from codelists import *
 
-COVID = "output/input_combined_stps_covid_2017.csv"
+COVID = "output/input_combined_stps_covid_2020.csv"
 
 from variables_covid import generate_covid
 variables_covid= generate_covid(index_date_variable="case_index_date")
