@@ -1,0 +1,328 @@
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/merge_2017.log
+  log type:  text
+ opened on:  28 Oct 2022, 01:07:39
+
+. 
+. 
+. 
+. 
+. *(0)=========Get total cases and potential matches figure for flowchart - extra bit of work in this file is to drop comparators without the necessary follow-up or who died before case index date============
+. /*Has follow-up needs checked as there is nowhere previously where it is checked against the matched cases case index date, plus the death_date variable for controls so far is only related to the
+> *index date, not the case_index_date*/
+. *case
+. capture noisily import delimited ./output/input_covid_matching.csv, clear
+(encoding automatically selected: ISO-8859-9)
+(53 vars, 50,000 obs)
+
+. di "***********************FLOWCHART 1. NUMBER OF POTENTIAL CASES AND CONTROLS********************:"
+***********************FLOWCHART 1. NUMBER OF POTENTIAL CASES AND CONTROLS********************:
+
+. di "**Potential COVID-19 cases extracted from OpenSAFELY:**"
+**Potential COVID-19 cases extracted from OpenSAFELY:**
+
+. safecount
+  50,000
+
+. 
+. *comparator
+. capture noisily import delimited ./output/input_2017_matching.csv, clear
+(encoding automatically selected: ISO-8859-1)
+(17 vars, 50,000 obs)
+
+. di "**Potential historical comparators extracted from OpenSAFELY:**"
+**Potential historical comparators extracted from OpenSAFELY:**
+
+. safecount
+  50,000
+
+. 
+. capture noisily import delimited ./output/covid_matching_2017.csv, clear
+(encoding automatically selected: ISO-8859-2)
+(11 vars, 16,097 obs)
+
+. di "*Potential COVID-19 cases after data management:*"
+*Potential COVID-19 cases after data management:*
+
+. safecount
+  16,097
+
+. 
+. capture noisily import delimited ./output/2017_matching.csv, clear
+(encoding automatically selected: ISO-8859-1)
+(8 vars, 28,822 obs)
+
+. di "Potential historical comparators after data management"
+Potential historical comparators after data management
+
+. safecount
+  28,822
+
+. 
+. 
+. *(1)=========Get all the (case and comparator related) variables from the matched cases and matched controls files============
+. *case
+. capture noisily import delimited ./output/input_combined_stps_covid_2017.csv, clear
+(encoding automatically selected: ISO-8859-1)
+(14 vars, 14,271 obs)
+
+. *drop age & covid_diagnosis_date
+. keep patient_id death_date date_deregistered imd stp krt_outcome_date male covid_date covid_month set_id case match_counts
+
+. tempfile cases_match_info
+
+. *for dummy data, should do nothing in the real data
+. duplicates drop patient_id, force
+
+Duplicates in terms of patient_id
+
+(0 observations are duplicates)
+
+. save `cases_match_info', replace
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000001.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000001.tmp saved as .dta format
+
+. *NUMBER OF MATCHED CASES
+. count
+  14,271
+
+. 
+. 
+. *comparator
+. capture noisily import delimited ./output/input_combined_stps_matches_2017.csv, clear
+(encoding automatically selected: ISO-8859-1)
+(11 vars, 11,714 obs)
+
+. *drop age
+. keep patient_id death_date date_deregistered imd stp krt_outcome_date male set_id case covid_date
+
+. tempfile comp_match_info
+
+. *for dummy data, should do nothing in the real data
+. duplicates drop patient_id, force
+
+Duplicates in terms of patient_id
+
+(0 observations are duplicates)
+
+. save `comp_match_info', replace
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000002.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000002.tmp saved as .dta format
+
+. *NUMBER OF MATCHED CONTROLS BEFORE DROPPING THOSE DUE TO FOLLOW-UP ISSUES RELATED TO CASE_INDEX_DATE (SEE BELOW)
+. count
+  11,714
+
+. 
+. 
+. *(2)=========Add the case and comparator information from above to the files with the rest of the information============
+. *import (matched) cases with variables and merge with match variables
+. capture noisily import delimited ./output/input_covid_2017_additional.csv, clear
+(encoding automatically selected: ISO-8859-1)
+(70 vars, 14,271 obs)
+
+. merge 1:1 patient_id using `cases_match_info'
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            14,271  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge==3
+(0 observations deleted)
+
+. drop _merge
+
+. tempfile cases_with_vars_and_match_info
+
+. save `cases_with_vars_and_match_info', replace
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000003.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000003.tmp saved as .dta format
+
+. di "***********************FLOWCHART 2. NUMBER OF MATCHED CASES AND MATCHED COMPARATORS BEFORE DROPPING CONTROLS INELIGIBLE DUE TO HAS_FOLLOW_UP AND DEATH_DATE VARS********************:"
+***********************FLOWCHART 2. NUMBER OF MATCHED CASES AND MATCHED COMPARATORS BEFORE DROPPING CONTROLS INELIGIBLE DUE TO HAS_FOLLOW_UP AND DEATH_DATE VARS********************:
+
+. di "**Matched cases:**"
+**Matched cases:**
+
+. safecount
+  14,271
+
+. 
+. 
+. capture noisily import delimited ./output/input_2017_additional.csv, clear
+(encoding automatically selected: ISO-8859-1)
+(63 vars, 11,714 obs)
+
+. merge 1:1 patient_id using `comp_match_info'
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            11,714  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge==3
+(0 observations deleted)
+
+. drop _merge
+
+. tempfile comp_with_vars_and_match_info
+
+. save `comp_with_vars_and_match_info', replace
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000004.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000004.tmp saved as .dta format
+
+. di "**Matched comparators:**"
+**Matched comparators:**
+
+. safecount
+  11,714
+
+. 
+. 
+. *NOTE: Flowchart re: who was dropped here due date exclusions can be obtained from the STP matching logs (if needed)
+. */
+. 
+. *(3)=========Append case and comparator files together, drop controls with required has follow up and tidy up, then check number as expected============
+. append using `cases_with_vars_and_match_info', force
+
+. order patient_id set_id match_count case
+
+. gsort set_id -case
+
+. *drop any comparators that don't have sufficient follow upon
+. count if case==0
+  11,714
+
+. drop if case==0
+(11,714 observations deleted)
+
+. *drop any comparators who have has_died as 1
+. count if case==0
+  0
+
+. drop if case==0
+(0 observations deleted)
+
+. 
+. *redo match_count variable after having done this
+. generate match_countsNew=.
+(14,271 missing values generated)
+
+. order patient_id set_id match_counts match_countsNew case
+
+. by set_id: replace match_countsNew=_N-1
+(14,271 real changes made)
+
+. replace match_countsNew=. if case==0
+(0 real changes made)
+
+. drop match_counts
+
+. rename match_countsNew match_counts
+
+. 
+. *count then drop cases with no matches
+. count if match_counts==0
+  14,271
+
+. drop if match_counts==0
+(14,271 observations deleted)
+
+. tab case
+no observations
+
+. tab match_counts
+no observations
+
+. di "***********************FLOWCHART 1. NUMBER OF MATCHED CASES AND MATCHED COMPARATORS: COMBINED FILE, AFTER DROPPING INELGIIBLE CONTROLS (AS ABOVE) AND CASES WITH MATCH_COUNTS==0********************:"
+***********************FLOWCHART 1. NUMBER OF MATCHED CASES AND MATCHED COMPARATORS: COMBINED FILE, AFTER DROPPING INELGIIBLE CONTROLS (AS ABOVE) AND CASES WITH MATCH_COUNTS==0********************:
+
+. safecount
+  0
+
+. tab case
+no observations
+
+. *save a list of final cases for analysis unmatched cases in next bit
+. preserve
+
+.         keep if case==1
+(0 observations deleted)
+
+.         keep patient_id
+
+.         tempfile final_matchedCases_list
+
+.         save `final_matchedCases_list', replace
+(dataset contains 0 observations)
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000006.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000006.tmp saved as .dta format
+
+. restore
+
+. 
+. 
+. 
+. *(4)=========Create a file of unmatched cases for descriptive analysis============
+. *import list of all cases (pre-matching)
+. preserve
+
+.         capture noisily import delimited ./output/input_covid_matching.csv, clear
+(encoding automatically selected: ISO-8859-9)
+(53 vars, 50,000 obs)
+
+.         *for dummy data, should do nothing in the real data
+.         duplicates drop patient_id, force
+
+Duplicates in terms of patient_id
+
+(0 observations are duplicates)
+
+.         tempfile origCaseList
+
+.         save `origCaseList', replace
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000008.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000008.tmp saved as .dta format
+
+.         use `final_matchedCases_list', clear
+
+.         merge 1:1 patient_id using `origCaseList'
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        50,000
+        from master                         0  (_merge==1)
+        from using                     50,000  (_merge==2)
+
+    Matched                                 0  (_merge==3)
+    -----------------------------------------
+
+.         *want to keep the ones not matched as they were in the original extract file but not in the list of matches
+.         keep if _merge==2
+(0 observations deleted)
+
+.         safecount
+  50,000
+
+.         *save file for descriptive analysis
+.         save output/covid_unmatched_2017.dta, replace
+(file output/covid_unmatched_2017.dta not found)
+file output/covid_unmatched_2017.dta saved
+
+.         di "***********************FLOWCHART 4. NUMBER OF UMATCHED CASES FROM UNMATCHED CASES FILE (TO CONFIRM IT ALIGNS WITH THE ABOVE FLOWCHART POINTS)********************:"
+***********************FLOWCHART 4. NUMBER OF UMATCHED CASES FROM UNMATCHED CASES FILE (TO CONFIRM IT ALIGNS WITH THE ABOVE FLOWCHART POINTS)********************:
+
+.         safecount
+  50,000
+
+. restore
+
+. 
+end of do-file
+
+. browse
+
