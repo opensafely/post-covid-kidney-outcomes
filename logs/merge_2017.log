@@ -1,15 +1,17 @@
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/merge_2017.log
   log type:  text
- opened on:  28 Oct 2022, 01:07:39
+ opened on:  28 Oct 2022, 16:27:29
 
 . 
 . 
 . 
 . 
-. *(0)=========Get total cases and potential matches figure for flowchart - extra bit of work in this file is to drop comparators without the necessary follow-up or who died before case index date============
-. /*Has follow-up needs checked as there is nowhere previously where it is checked against the matched cases case index date, plus the death_date variable for controls so far is only related to the
+. *(0)=========Get total cases and potential matches figure for flowchart - extra bit of work in this file is to drop comparators without the necessar
+> y follow-up or who died before case index date============
+. /*Has follow-up needs checked as there is nowhere previously where it is checked against the matched cases case index date, plus the death_date vari
+> able for controls so far is only related to the
 > *index date, not the case_index_date*/
 . *case
 . capture noisily import delimited ./output/input_covid_matching.csv, clear
@@ -62,7 +64,7 @@ Potential historical comparators after data management
 . 
 . 
 . *(1)=========Get all the (case and comparator related) variables from the matched cases and matched controls files============
-. *case
+. *COVID-19
 . capture noisily import delimited ./output/input_combined_stps_covid_2017.csv, clear
 (encoding automatically selected: ISO-8859-1)
 (14 vars, 14,271 obs)
@@ -70,7 +72,7 @@ Potential historical comparators after data management
 . *drop age & covid_diagnosis_date
 . keep patient_id death_date date_deregistered imd stp krt_outcome_date male covid_date covid_month set_id case match_counts
 
-. tempfile cases_match_info
+. tempfile covid_2017_matched
 
 . *for dummy data, should do nothing in the real data
 . duplicates drop patient_id, force
@@ -79,17 +81,16 @@ Duplicates in terms of patient_id
 
 (0 observations are duplicates)
 
-. save `cases_match_info', replace
+. save `covid_2017_matched', replace
 (file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000001.tmp not found)
 file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000001.tmp saved as .dta format
 
-. *NUMBER OF MATCHED CASES
+. *Number of matched COVID-19 cases
 . count
   14,271
 
 . 
-. 
-. *comparator
+. *Historical comparators
 . capture noisily import delimited ./output/input_combined_stps_matches_2017.csv, clear
 (encoding automatically selected: ISO-8859-1)
 (11 vars, 11,714 obs)
@@ -97,7 +98,7 @@ file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000001.tmp saved as .dta forma
 . *drop age
 . keep patient_id death_date date_deregistered imd stp krt_outcome_date male set_id case covid_date
 
-. tempfile comp_match_info
+. tempfile 2017_matched
 
 . *for dummy data, should do nothing in the real data
 . duplicates drop patient_id, force
@@ -106,23 +107,23 @@ Duplicates in terms of patient_id
 
 (0 observations are duplicates)
 
-. save `comp_match_info', replace
+. save `2017_matched', replace
 (file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000002.tmp not found)
 file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000002.tmp saved as .dta format
 
-. *NUMBER OF MATCHED CONTROLS BEFORE DROPPING THOSE DUE TO FOLLOW-UP ISSUES RELATED TO CASE_INDEX_DATE (SEE BELOW)
+. *Number of matched historical comparators
 . count
   11,714
 
 . 
 . 
 . *(2)=========Add the case and comparator information from above to the files with the rest of the information============
-. *import (matched) cases with variables and merge with match variables
+. *import matched COVID-19 cases with additional variables and merge with extraction file
 . capture noisily import delimited ./output/input_covid_2017_additional.csv, clear
 (encoding automatically selected: ISO-8859-1)
-(70 vars, 14,271 obs)
+(71 vars, 14,271 obs)
 
-. merge 1:1 patient_id using `cases_match_info'
+. merge 1:1 patient_id using `covid_2017_matched'
 
     Result                      Number of obs
     -----------------------------------------
@@ -135,17 +136,17 @@ file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000002.tmp saved as .dta forma
 
 . drop _merge
 
-. tempfile cases_with_vars_and_match_info
+. tempfile covid_2017_complete
 
-. save `cases_with_vars_and_match_info', replace
+. save `covid_2017_complete', replace
 (file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000003.tmp not found)
 file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000003.tmp saved as .dta format
 
-. di "***********************FLOWCHART 2. NUMBER OF MATCHED CASES AND MATCHED COMPARATORS BEFORE DROPPING CONTROLS INELIGIBLE DUE TO HAS_FOLLOW_UP AND DEATH_DATE VARS********************:"
-***********************FLOWCHART 2. NUMBER OF MATCHED CASES AND MATCHED COMPARATORS BEFORE DROPPING CONTROLS INELIGIBLE DUE TO HAS_FOLLOW_UP AND DEATH_DATE VARS********************:
+. di "***********************FLOWCHART 2. Number of matched COVID-19 cases and historical comparators****************************************:"
+***********************FLOWCHART 2. Number of matched COVID-19 cases and historical comparators****************************************:
 
-. di "**Matched cases:**"
-**Matched cases:**
+. di "**Matched COVID-19:**"
+**Matched COVID-19:**
 
 . safecount
   14,271
@@ -154,9 +155,9 @@ file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000003.tmp saved as .dta forma
 . 
 . capture noisily import delimited ./output/input_2017_additional.csv, clear
 (encoding automatically selected: ISO-8859-1)
-(63 vars, 11,714 obs)
+(64 vars, 11,714 obs)
 
-. merge 1:1 patient_id using `comp_match_info'
+. merge 1:1 patient_id using `2017_matched'
 
     Result                      Number of obs
     -----------------------------------------
@@ -169,9 +170,9 @@ file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000003.tmp saved as .dta forma
 
 . drop _merge
 
-. tempfile comp_with_vars_and_match_info
+. tempfile 2017_complete
 
-. save `comp_with_vars_and_match_info', replace
+. save `2017_complete', replace
 (file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000004.tmp not found)
 file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000004.tmp saved as .dta format
 
@@ -186,8 +187,8 @@ file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000004.tmp saved as .dta forma
 . *NOTE: Flowchart re: who was dropped here due date exclusions can be obtained from the STP matching logs (if needed)
 . */
 . 
-. *(3)=========Append case and comparator files together, drop controls with required has follow up and tidy up, then check number as expected============
-. append using `cases_with_vars_and_match_info', force
+. *(3)=========Append case and comparator files together============
+. append using `covid_2017_complete', force
 
 . order patient_id set_id match_count case
 
@@ -197,68 +198,33 @@ file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000004.tmp saved as .dta forma
 . count if case==0
   11,714
 
-. drop if case==0
-(11,714 observations deleted)
-
-. *drop any comparators who have has_died as 1
-. count if case==0
-  0
-
-. drop if case==0
-(0 observations deleted)
-
 . 
-. *redo match_count variable after having done this
-. generate match_countsNew=.
-(14,271 missing values generated)
-
-. order patient_id set_id match_counts match_countsNew case
-
-. by set_id: replace match_countsNew=_N-1
-(14,271 real changes made)
-
-. replace match_countsNew=. if case==0
-(0 real changes made)
-
-. drop match_counts
-
-. rename match_countsNew match_counts
-
-. 
-. *count then drop cases with no matches
-. count if match_counts==0
-  14,271
-
-. drop if match_counts==0
-(14,271 observations deleted)
-
-. tab case
-no observations
-
-. tab match_counts
-no observations
-
-. di "***********************FLOWCHART 1. NUMBER OF MATCHED CASES AND MATCHED COMPARATORS: COMBINED FILE, AFTER DROPPING INELGIIBLE CONTROLS (AS ABOVE) AND CASES WITH MATCH_COUNTS==0********************:"
-***********************FLOWCHART 1. NUMBER OF MATCHED CASES AND MATCHED COMPARATORS: COMBINED FILE, AFTER DROPPING INELGIIBLE CONTROLS (AS ABOVE) AND CASES WITH MATCH_COUNTS==0********************:
+. di "***********************FLOWCHART 1. NUMBER OF MATCHED CASES AND MATCHED COMPARATORS: COMBINED FILE********************:"
+***********************FLOWCHART 1. NUMBER OF MATCHED CASES AND MATCHED COMPARATORS: COMBINED FILE********************:
 
 . safecount
-  0
+  25,985
 
 . tab case
-no observations
+
+       case |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |     11,714       45.08       45.08
+          1 |     14,271       54.92      100.00
+------------+-----------------------------------
+      Total |     25,985      100.00
 
 . *save a list of final cases for analysis unmatched cases in next bit
 . preserve
 
 .         keep if case==1
-(0 observations deleted)
+(11,714 observations deleted)
 
 .         keep patient_id
 
-.         tempfile final_matchedCases_list
+.         tempfile covid_2017_matched_list
 
-.         save `final_matchedCases_list', replace
-(dataset contains 0 observations)
+.         save `covid_2017_matched_list', replace
 (file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000006.tmp not found)
 file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000006.tmp saved as .dta format
 
@@ -282,47 +248,441 @@ Duplicates in terms of patient_id
 
 (0 observations are duplicates)
 
-.         tempfile origCaseList
+.         tempfile covid_prematching
 
-.         save `origCaseList', replace
+.         save `covid_prematching', replace
 (file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000008.tmp not found)
 file C:\Users\LSH170~1\AppData\Local\Temp\ST_3670_000008.tmp saved as .dta format
 
-.         use `final_matchedCases_list', clear
+.         use `covid_2017_matched_list', clear
 
-.         merge 1:1 patient_id using `origCaseList'
+.         merge 1:1 patient_id using `covid_prematching'
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                        50,000
-        from master                         0  (_merge==1)
-        from using                     50,000  (_merge==2)
+    Not matched                        61,357
+        from master                    12,814  (_merge==1)
+        from using                     48,543  (_merge==2)
 
-    Matched                                 0  (_merge==3)
+    Matched                             1,457  (_merge==3)
     -----------------------------------------
 
 .         *want to keep the ones not matched as they were in the original extract file but not in the list of matches
 .         keep if _merge==2
-(0 observations deleted)
+(14,271 observations deleted)
 
 .         safecount
-  50,000
+  48,543
 
 .         *save file for descriptive analysis
 .         save output/covid_unmatched_2017.dta, replace
-(file output/covid_unmatched_2017.dta not found)
 file output/covid_unmatched_2017.dta saved
 
-.         di "***********************FLOWCHART 4. NUMBER OF UMATCHED CASES FROM UNMATCHED CASES FILE (TO CONFIRM IT ALIGNS WITH THE ABOVE FLOWCHART POINTS)********************:"
-***********************FLOWCHART 4. NUMBER OF UMATCHED CASES FROM UNMATCHED CASES FILE (TO CONFIRM IT ALIGNS WITH THE ABOVE FLOWCHART POINTS)********************:
+.         di "***********************FLOWCHART 4. NUMBER OF UMATCHED CASES FROM UNMATCHED CASES FILE (TO CONFIRM IT ALIGNS WITH THE ABOVE FLOWCHART PO
+> INTS)********************:"
+***********************FLOWCHART 4. NUMBER OF UMATCHED CASES FROM UNMATCHED CASES FILE (TO CONFIRM IT ALIGNS WITH THE ABOVE FLOWCHART POINTS)*********
+> ***********:
 
 .         safecount
-  50,000
+  48,543
 
 . restore
 
 . 
+. 
+. 
+. 
+. 
+. *(5)=========VARIABLE CLEANING============
+. 
+. *label case variables
+. label define case 0 "Comparator (historical)" ///
+>                                   1 "COVID-19"
+
+. label values case case
+
+. safetab case 
+
+                   case |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+Comparator (historical) |     11,714       45.08       45.08
+               COVID-19 |     14,271       54.92      100.00
+------------------------+-----------------------------------
+                  Total |     25,985      100.00
+
+. 
+. *(a)===Ethnicity (5 category)====
+. * Ethnicity (5 category)
+. replace ethnicity = . if ethnicity==.
+(0 real changes made)
+
+. label define ethnicity  1 "White"                                       ///
+>                                                 2 "Mixed"                                       ///
+>                                                 3 "Asian or Asian British"      ///
+>                                                 4 "Black"                                       ///
+>                                                 5 "Other"                                       
+
+.                                                 
+. label values ethnicity ethnicity
+
+. safetab ethnicity
+
+             ethnicity |      Freq.     Percent        Cum.
+-----------------------+-----------------------------------
+                 White |     15,578       79.93       79.93
+Asian or Asian British |      1,963       10.07       90.00
+                 Other |      1,949       10.00      100.00
+-----------------------+-----------------------------------
+                 Total |     19,490      100.00
+
+. 
+.  *re-order ethnicity
+.  gen eth5=1 if ethnicity==1
+(10,407 missing values generated)
+
+.  replace eth5=2 if ethnicity==3
+(1,963 real changes made)
+
+.  replace eth5=3 if ethnicity==4
+(0 real changes made)
+
+.  replace eth5=4 if ethnicity==2
+(0 real changes made)
+
+.  replace eth5=5 if ethnicity==5
+(1,949 real changes made)
+
+.  replace eth5=. if ethnicity==.
+(0 real changes made)
+
+. 
+.  label define eth5                      1 "White"                                       ///
+>                                                         2 "South Asian"                         ///                                             
+>                                                         3 "Black"                                       ///
+>                                                         4 "Mixed"                                       ///
+>                                                         5 "Other"                                       
+
+.                                         
+. label values eth5 eth5
+
+. safetab eth5, m
+
+       eth5 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+      White |     15,578       59.95       59.95
+South Asian |      1,963        7.55       67.50
+      Other |      1,949        7.50       75.00
+          . |      6,495       25.00      100.00
+------------+-----------------------------------
+      Total |     25,985      100.00
+
+. 
+. *create an ethnicity for table 1 (includes unknown)
+. *ETHNICITY
+. *create an ethnicity variable with missing shown as "Unknown" just for this analysis
+. generate eth5Table1=eth5
+(6,495 missing values generated)
+
+. replace eth5Table1=6 if eth5Table1==.
+(6,495 real changes made)
+
+. label define eth5Table1                         1 "White"                                       ///
+>                                                                         2 "South Asian"                         ///                                 
+>             
+>                                                                         3 "Black"                                       ///
+>                                                                         4 "Mixed"                                       ///
+>                                                                         5 "Other"                                       ///
+>                                                                         6 "Unknown"
+
+.                                         
+. label values eth5Table1 eth5Table1
+
+. safetab eth5Table1, m
+
+ eth5Table1 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+      White |     15,578       59.95       59.95
+South Asian |      1,963        7.55       67.50
+      Other |      1,949        7.50       75.00
+    Unknown |      6,495       25.00      100.00
+------------+-----------------------------------
+      Total |     25,985      100.00
+
+. 
+. 
+. *(b)===STP====
+. *For ease of future analysis(?) am going to recode these as numerical ordered at this stage, also drop if STP is missing
+. rename stp stp_old
+
+. bysort stp_old: gen stp = 1 if _n==1
+(25,954 missing values generated)
+
+. replace stp = sum(stp)
+(25,984 real changes made)
+
+. drop stp_old
+
+. 
+. 
+. 
+. *(c)===IMD===
+. * Reverse the order (so high is more deprived)
+. tab imd
+
+        imd |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      1,302        5.01        5.01
+          1 |      4,913       18.91       23.92
+          2 |      4,862       18.71       42.63
+          3 |      4,979       19.16       61.79
+          4 |      4,990       19.20       80.99
+          5 |      4,939       19.01      100.00
+------------+-----------------------------------
+      Total |     25,985      100.00
+
+. recode imd 5 = 1 4 = 2 3 = 3 2 = 4 1 = 5 .u = .u
+(19704 changes made to imd)
+
+. 
+. label define imd 1 "1 Least deprived" 2 "2" 3 "3" 4 "4" 5 "5 Most deprived" .u "Unknown"
+
+. label values imd imd
+
+. *check after reordering
+. tab imd
+
+             imd |      Freq.     Percent        Cum.
+-----------------+-----------------------------------
+               0 |      1,302        5.01        5.01
+1 Least deprived |      4,939       19.01       24.02
+               2 |      4,990       19.20       43.22
+               3 |      4,979       19.16       62.38
+               4 |      4,862       18.71       81.09
+ 5 Most deprived |      4,913       18.91      100.00
+-----------------+-----------------------------------
+           Total |     25,985      100.00
+
+. 
+. 
+. 
+. 
+. ***Need to calculate age from year of birth**
+. 
+. **Age**
+. gen index_date = date(case_index_date, "YMD")
+
+. gen index_year = yofd(index_date)
+
+. gen age = index_year - year_of_birth
+
+. recode  age                     min/39.9999=1   ///
+>                                                 40/49.9999=2    ///
+>                                                 50/59.9999=3    ///
+>                                                 60/69.9999=4    ///
+>                                                 70/79.9999=5    ///                                     
+>                                                 80/max=6,               ///
+>                                                 gen(agegroup) 
+(25985 differences between age and agegroup)
+
+. 
+. label define agegroup   1 "18-39"               ///
+>                                                 2 "40-49"               ///
+>                                                 3 "50-59"               ///
+>                                                 4 "60-69"               ///
+>                                                 5 "70-79"               ///
+>                                                 6 "80+"
+
+. label values agegroup agegroup
+
+. 
+. 
+. * Check there are no missing ages
+. assert age<.
+
+. assert agegroup<.
+
+. 
+. * Create restricted cubic splines for age
+. mkspline age = age, cubic nknots(4)
+
+. 
+. **BMI**
+. 
+. replace body_mass_index = . if !inrange(body_mass_index, 15, 50)
+(2,622 real changes made, 2,622 to missing)
+
+. gen     bmicat = .
+(25,985 missing values generated)
+
+. recode  bmicat . = 1 if body_mass_index<18.5
+(1586 changes made to bmicat)
+
+. recode  bmicat . = 2 if body_mass_index<25
+(5712 changes made to bmicat)
+
+. recode  bmicat . = 3 if body_mass_index<30
+(6071 changes made to bmicat)
+
+. recode  bmicat . = 4 if body_mass_index<35
+(5268 changes made to bmicat)
+
+. recode  bmicat . = 5 if body_mass_index<40
+(3133 changes made to bmicat)
+
+. recode  bmicat . = 6 if body_mass_index<.
+(1593 changes made to bmicat)
+
+. replace bmicat = . if body_mass_index>=.
+(0 real changes made)
+
+. 
+. label define bmicat 1 "Underweight (<18.5)"     ///
+>                                         2 "Normal (18.5-24.9)"          ///
+>                                         3 "Overweight (25-29.9)"        ///
+>                                         4 "Obese I (30-34.9)"           ///
+>                                         5 "Obese II (35-39.9)"          ///
+>                                         6 "Obese III (40+)"                     
+
+.                                         
+. label values bmicat bmicat
+
+. 
+. recode bmicat 1/3 . = 1 4=2 5=3 6=4, gen(obese4cat)
+(24399 differences between bmicat and obese4cat)
+
+. 
+. label define obese4cat  1 "No record of obesity"        ///
+>                                                 2 "Obese I (30-34.9)"           ///
+>                                                 3 "Obese II (35-39.9)"          ///
+>                                                 4 "Obese III (40+)"             
+
+. label values obese4cat obese4cat
+
+. order obese4cat, after(bmicat)
+
+. 
+. gen obese4cat_withmiss = obese4cat
+
+. replace obese4cat_withmiss =. if bmicat ==.
+(2,622 real changes made, 2,622 to missing)
+
+. 
+. *(e)===Rural-urban===
+. *label the urban rural categories
+. replace rural_urban=. if rural_urban<1|rural_urban>8
+(0 real changes made)
+
+. label define rural_urban 1 "urban major conurbation" ///
+>                                                           2 "urban minor conurbation" ///
+>                                                           3 "urban city and town" ///
+>                                                           4 "urban city and town in a sparse setting" ///
+>                                                           5 "rural town and fringe" ///
+>                                                           6 "rural town and fringe in a sparse setting" ///
+>                                                           7 "rural village and dispersed" ///
+>                                                           8 "rural village and dispersed in a sparse setting"
+
+. label values rural_urban rural_urban
+
+. safetab rural_urban, miss
+
+                            rural_urban |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+                urban major conurbation |      2,556        9.84        9.84
+                urban minor conurbation |      2,541        9.78       19.62
+                    urban city and town |      2,581        9.93       29.55
+urban city and town in a sparse setting |      2,611       10.05       39.60
+                  rural town and fringe |      2,556        9.84       49.43
+rural town and fringe in a sparse setti |      2,632       10.13       59.56
+            rural village and dispersed |      5,214       20.07       79.63
+rural village and dispersed in a sparse |      5,294       20.37      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     25,985      100.00
+
+. 
+. *generate a binary rural urban (with missing assigned to urban)
+. generate rural_urbanBroad=.
+(25,985 missing values generated)
+
+. replace rural_urbanBroad=1 if rural_urban<=4|rural_urban==.
+(10,289 real changes made)
+
+. replace rural_urbanBroad=0 if rural_urban>4 & rural_urban!=.
+(15,696 real changes made)
+
+. label define rural_urbanBroad 0 "Rural" 1 "Urban"
+
+. label values rural_urbanBroad rural_urbanBroad
+
+. safetab rural_urbanBroad rural_urban, miss
+
+rural_urba |                                       rural_urban
+    nBroad | urban maj  urban min  urban cit  urban cit  rural tow  rural tow  rural vil  rural vil |     Total
+-----------+----------------------------------------------------------------------------------------+----------
+     Rural |         0          0          0          0      2,556      2,632      5,214      5,294 |    15,696 
+     Urban |     2,556      2,541      2,581      2,611          0          0          0          0 |    10,289 
+-----------+----------------------------------------------------------------------------------------+----------
+     Total |     2,556      2,541      2,581      2,611      2,556      2,632      5,214      5,294 |    25,985 
+
+. label var rural_urbanBroad "Rural-Urban"
+
+. 
 end of do-file
 
-. browse
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD3670_000000.tmp"
+
+. gen sex = 1 if male == "Male"
+(13,303 missing values generated)
+
+. replace sex = 0 if male == "Female"
+(13,303 real changes made)
+
+. label define sex 0"Female" 1"Male"
+
+. label values sex sex
+
+. safetab sex
+
+        sex |      Freq.     Percent        Cum.
+------------+-----------------------------------
+     Female |     13,303       51.19       51.19
+       Male |     12,682       48.81      100.00
+------------+-----------------------------------
+      Total |     25,985      100.00
+
+. safecount
+  25,985
+
+. 
+end of do-file
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD3670_000000.tmp"
+
+. drop male
+
+. 
+end of do-file
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD3670_000000.tmp"
+
+. * Smoking
+. gen ever_smoked = 1 if smoking_status=="S"
+(22,827 missing values generated)
+
+. replace ever_smoked = 1 if smoking_status=="E"
+(553 real changes made)
+
+. replace ever_smoked = 0 if smoking_status=="N"
+(988 real changes made)
+
+. replace ever_smoked = . if smoking_status=="M"
+(0 real changes made)
+
+. label define smoking_label 1 "Current/former smoker" 0 "Non-smoker"
+
+. label values ever_smoked smoking_label
+
+. label var ever_smoked "Smoking status"
+
+. 
+end of do-file
 

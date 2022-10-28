@@ -80,8 +80,26 @@ def generate_covariates(index_date_variable):
             "incidence": 0.75,
         },
     ),
-    ## may consider also using patients.with_ethnicity_from_sus?
-
+    rural_urban=patients.address_as_of(
+        "index_date",
+        returning="rural_urban_classification",
+        return_expectations={
+            "rate": "universal",
+            "category": 
+                {"ratios": {
+                    "1": 0.1,
+                    "2": 0.1,
+                    "3": 0.1,
+                    "4": 0.1,
+                    "5": 0.1,
+                    "6": 0.1,
+                    "7": 0.2,
+                    "8": 0.2,
+                }
+            },
+        },
+    ),
+    
     #Clinical covariates
     atrial_fibrillation_or_flutter=patients.with_these_clinical_events(
         atrial_fibrillation_or_flutter_codes,
