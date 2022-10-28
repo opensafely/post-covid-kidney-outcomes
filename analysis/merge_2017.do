@@ -229,15 +229,15 @@ recode 	age 			min/39.9999=1 	///
 						40/49.9999=2 	///
 						50/59.9999=3 	///
 						60/69.9999=4 	///
-						70/79.9999=5						
+						70/79.9999=5	///					
 						80/max=6, 		///
 						gen(agegroup) 
 
-label define agegroup 	1 "18-<40" 		///
-						2 "40-<50" 		///
-						3 "50-<60" 		///
-						4 "60-<70" 		///
-						5 "70-<80"		///
+label define agegroup 	1 "18-39" 		///
+						2 "40-49" 		///
+						3 "50-59" 		///
+						4 "60-69" 		///
+						5 "70-79"		///
 						6 "80+"
 label values agegroup agegroup
 
@@ -246,22 +246,18 @@ label values agegroup agegroup
 assert age<.
 assert agegroup<.
 
-* Create restricted cubic splines fir age
+* Create restricted cubic splines for age
 mkspline age = age, cubic nknots(4)
 
-*(e)===Rural-urban===
-*label the urban rural categories
-replace rural_urban=. if rural_urban<1|rural_urban>8
-label define rural_urban 1 "urban major conurbation" ///
-							  2 "urban minor conurbation" ///
-							  3 "urban city and town" ///
-							  4 "urban city and town in a sparse setting" ///
-							  5 "rural town and fringe" ///
-							  6 "rural town and fringe in a sparse setting" ///
-							  7 "rural village and dispersed" ///
-							  8 "rural village and dispersed in a sparse setting"
-label values rural_urban rural_urban
-safetab rural_urban, miss
+*Sex
+gen sex = 1 if male == "Male"
+replace sex = 0 if male == "Female"
+label define sex 0"Female" 1"Male"
+label values sex sex
+safetab sex
+safecount
+drop male
+
 
 **BMI**
 
@@ -296,6 +292,28 @@ order obese4cat, after(bmicat)
 gen obese4cat_withmiss = obese4cat
 replace obese4cat_withmiss =. if bmicat ==.
 
+* Smoking
+gen ever_smoked = 1 if smoking_status=="S"
+replace ever_smoked = 1 if smoking_status=="E"
+replace ever_smoked = 0 if smoking_status=="N"
+replace ever_smoked = . if smoking_status=="M"
+label define smoking_label 1 "Current/former smoker" 0 "Non-smoker"
+label values ever_smoked smoking_label
+label var ever_smoked "Smoking status"
+
+*(e)===Rural-urban===
+*label the urban rural categories
+replace rural_urban=. if rural_urban<1|rural_urban>8
+label define rural_urban 1 "urban major conurbation" ///
+							  2 "urban minor conurbation" ///
+							  3 "urban city and town" ///
+							  4 "urban city and town in a sparse setting" ///
+							  5 "rural town and fringe" ///
+							  6 "rural town and fringe in a sparse setting" ///
+							  7 "rural village and dispersed" ///
+							  8 "rural village and dispersed in a sparse setting"
+label values rural_urban rural_urban
+safetab rural_urban, miss
 
 *generate a binary rural urban (with missing assigned to urban)
 generate rural_urbanBroad=.
@@ -305,6 +323,96 @@ label define rural_urbanBroad 0 "Rural" 1 "Urban"
 label values rural_urbanBroad rural_urbanBroad
 safetab rural_urbanBroad rural_urban, miss
 label var rural_urbanBroad "Rural-Urban"
+
+*Baseline eGFR
+format index_date %td
+foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_mar2017 ///
+												baseline_creatinine_apr2017 ///
+												baseline_creatinine_may2017 ///
+												baseline_creatinine_jun2017 ///
+												baseline_creatinine_jul2017 ///
+												baseline_creatinine_aug2017 ///
+												baseline_creatinine_sep2017 ///
+												baseline_creatinine_oct2017 ///
+												baseline_creatinine_nov2017 ///
+												baseline_creatinine_dec2017 ///
+												baseline_creatinine_jan2018 ///
+												baseline_creatinine_feb2018 ///
+												baseline_creatinine_mar2018 ///
+												baseline_creatinine_apr2018 ///
+												baseline_creatinine_may2018 ///
+												baseline_creatinine_jun2018 ///
+												baseline_creatinine_jul2018 ///
+												baseline_creatinine_aug2018 ///
+												baseline_creatinine_sep2018 ///
+												baseline_creatinine_oct2018 ///
+												baseline_creatinine_nov2018 ///
+												baseline_creatinine_dec2018 ///
+												baseline_creatinine_jan2019 ///
+												baseline_creatinine_feb2019 ///
+												baseline_creatinine_mar2019 ///
+												baseline_creatinine_apr2019 ///
+												baseline_creatinine_may2019 ///
+												baseline_creatinine_jun2019 ///
+												baseline_creatinine_jul2019 ///
+												baseline_creatinine_aug2019 ///
+												baseline_creatinine_sep2019 ///
+												baseline_creatinine_mar2020 ///
+												baseline_creatinine_apr2020 ///
+												baseline_creatinine_may2020 ///
+												baseline_creatinine_jun2020 ///
+												baseline_creatinine_jul2020 ///
+												baseline_creatinine_aug2020 ///
+												baseline_creatinine_sep2020 ///
+												baseline_creatinine_oct2020 ///
+												baseline_creatinine_nov2020 ///
+												baseline_creatinine_dec2020 ///
+												baseline_creatinine_jan2021 ///
+												baseline_creatinine_feb2021 ///
+												baseline_creatinine_mar2021 ///
+												baseline_creatinine_apr2021 ///
+												baseline_creatinine_may2021 ///
+												baseline_creatinine_jun2021 ///
+												baseline_creatinine_jul2021 ///
+												baseline_creatinine_aug2021 ///
+												baseline_creatinine_sep2021 ///
+												baseline_creatinine_oct2021 ///
+												baseline_creatinine_nov2021 ///
+												baseline_creatinine_dec2021 ///
+												baseline_creatinine_jan2022 {
+replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine_monthly', 20, 3000)
+gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.4
+gen min_`baseline_creatinine_monthly'=.
+replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.7 if male==0
+replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.9 if male==1
+replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'^-0.329 if male==0
+replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'^-0.411 if male==1
+replace min_`baseline_creatinine_monthly' = 1 if min_`baseline_creatinine_monthly'<1
+gen max_`baseline_creatinine_monthly'=.
+replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.7 if male==0
+replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.9 if male==1
+replace max_`baseline_creatinine_monthly' = max_`baseline_creatinine_monthly'^-1.209
+replace max_`baseline_creatinine_monthly' = 1 if max_`baseline_creatinine_monthly'>1
+gen egfr_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'*max_`baseline_creatinine_monthly'*141
+replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_monthly'*(0.993^age)
+replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_monthly'*1.018 if male==0
+drop `baseline_creatinine_monthly'
+drop mgdl_`baseline_creatinine_monthly'
+drop min_`baseline_creatinine_monthly'
+drop max_`baseline_creatinine_monthly'
+}
+
+gen covid_date_string=string(covid_date, "%td") 
+gen covid_month=substr( covid_date_string ,3,7)
+
+gen baseline_egfr=.
+local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022"
+foreach x of  local month_year  {
+replace baseline_egfr=egfr_baseline_creatinine_`x' if  covid_month=="`x'"
+drop if baseline_egfr <15
+drop egfr_baseline_creatinine_`x'
+}
+label var baseline_egfr "Baseline eGFR at COVID diagnosis"
 
 
 *(f) Recode all dates from the strings 
@@ -319,19 +427,6 @@ foreach var of varlist case_index_date - first_known_covid19 {
 	capture noisily format `var' %td 
 
 }
-
-
-*(g) Sex
-gen sex = 1 if male == "M"
-replace sex = 0 if sexOrig == "F"
-replace sex =. if sexOrig=="I"
-replace sex =. if sexOrig=="U"
-label define sex 0"Female" 1"Male"
-label values sex sex
-safetab sex
-safecount
-drop sexOrig
-
 
 *(h)Flag comparators who have a known covid date that is within the follow up period
 generate compBecameCaseDurFUP1=0 if case==0

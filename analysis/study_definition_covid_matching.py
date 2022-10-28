@@ -189,7 +189,7 @@ study = StudyDefinition(
         between = ["1970-01-01", "covid_diagnosis_date"],
         return_expectations={"incidence": 0.05},
     ),
-    baseline_creatinine_feb2020=patients.mean_recorded_value(
+    creatinine_feb2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2018-08-01","2020-01-31"],
@@ -198,7 +198,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_mar2020=patients.mean_recorded_value(
+    creatinine_mar2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2018-09-01","2020-02-29"],
@@ -207,7 +207,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_apr2020=patients.mean_recorded_value(
+    creatinine_apr2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2018-10-01","2020-03-31"],
@@ -216,7 +216,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_may2020=patients.mean_recorded_value(
+    creatinine_may2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2018-11-01","2020-04-30"],
@@ -225,7 +225,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jun2020=patients.mean_recorded_value(
+    creatinine_jun2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2018-12-01","2020-05-31"],
@@ -234,7 +234,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jul2020=patients.mean_recorded_value(
+    creatinine_jul2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-01-01","2020-06-30"],
@@ -243,7 +243,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_aug2020=patients.mean_recorded_value(
+    creatinine_aug2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-02-01","2020-07-31"],
@@ -252,7 +252,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_sep2020=patients.mean_recorded_value(
+    creatinine_sep2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-03-01","2020-08-31"],
@@ -261,7 +261,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_oct2020=patients.mean_recorded_value(
+    creatinine_oct2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-04-01","2020-09-30"],
@@ -270,7 +270,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_nov2020=patients.mean_recorded_value(
+    creatinine_nov2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-05-01","2020-10-31"],
@@ -279,7 +279,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_dec2020=patients.mean_recorded_value(
+    creatinine_dec2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-06-01","2020-11-30"],
@@ -288,7 +288,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jan2021=patients.mean_recorded_value(
+    creatinine_jan2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-07-01","2020-12-31"],
@@ -297,7 +297,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_feb2021=patients.mean_recorded_value(
+    creatinine_feb2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-08-01","2021-01-31"],
@@ -306,7 +306,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_mar2021=patients.mean_recorded_value(
+    creatinine_mar2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-09-01","2021-02-28"],
@@ -315,7 +315,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_apr2021=patients.mean_recorded_value(
+    creatinine_apr2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-10-01","2021-03-31"],
@@ -324,7 +324,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_may2021=patients.mean_recorded_value(
+    creatinine_may2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-11-01","2021-04-30"],
@@ -333,7 +333,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jun2021=patients.mean_recorded_value(
+    creatinine_jun2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2019-12-01","2021-05-31"],
@@ -342,7 +342,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jul2021=patients.mean_recorded_value(
+    creatinine_jul2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-01-01","2021-06-30"],
@@ -351,7 +351,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_aug2021=patients.mean_recorded_value(
+    creatinine_aug2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-02-01","2021-07-31"],
@@ -360,7 +360,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_sep2021=patients.mean_recorded_value(
+    creatinine_sep2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-03-01","2021-08-31"],
@@ -369,7 +369,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_oct2021=patients.mean_recorded_value(
+    creatinine_oct2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-04-01","2021-09-30"],
@@ -378,7 +378,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_nov2021=patients.mean_recorded_value(
+    creatinine_nov2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-05-01","2021-10-31"],
@@ -387,7 +387,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_dec2021=patients.mean_recorded_value(
+    creatinine_dec2021=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-06-01","2021-11-30"],
@@ -396,7 +396,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jan2022=patients.mean_recorded_value(
+    creatinine_jan2022=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-07-01","2021-12-31"],
@@ -405,7 +405,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_feb2022=patients.mean_recorded_value(
+    creatinine_feb2022=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-08-01","2022-01-31"],
@@ -414,7 +414,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_mar2022=patients.mean_recorded_value(
+    creatinine_mar2022=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-09-01","2022-02-28"],
@@ -423,7 +423,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_apr2022=patients.mean_recorded_value(
+    creatinine_apr2022=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-10-01","2022-03-31"],
@@ -432,7 +432,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_may2022=patients.mean_recorded_value(
+    creatinine_may2022=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-11-01","2022-04-30"],
@@ -441,7 +441,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jun2022=patients.mean_recorded_value(
+    creatinine_jun2022=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2020-12-01","2022-05-31"],
@@ -450,7 +450,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jul2022=patients.mean_recorded_value(
+    creatinine_jul2022=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-01-01","2022-06-30"],
@@ -459,7 +459,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_aug2022=patients.mean_recorded_value(
+    creatinine_aug2022=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-02-01","2022-07-31"],
@@ -468,7 +468,7 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_sep2022=patients.mean_recorded_value(
+    creatinine_sep2022=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2021-03-01","2022-08-31"],

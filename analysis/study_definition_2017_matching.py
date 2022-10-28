@@ -130,7 +130,7 @@ study = StudyDefinition(
         between = ["1970-01-01", "index_date"],
         return_expectations={"incidence": 0.05},
     ),
-    baseline_creatinine_feb2017=patients.mean_recorded_value(
+    creatinine_feb2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2015-08-01","2017-01-31"],
