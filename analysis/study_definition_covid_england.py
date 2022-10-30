@@ -165,7 +165,6 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-
     baseline_creatinine_mar2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,

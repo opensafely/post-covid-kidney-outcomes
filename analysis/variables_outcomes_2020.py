@@ -301,11 +301,5 @@ def generate_outcomes_2020(index_date_variable):
         find_first_match_in_period=True,    
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-03-01", "latest": "2022-09-30"}},
     ),
-    death_date_gp=patients.with_death_recorded_in_primary_care(
-        between = ["case_index_date + 28 days", "2022-09-30"],
-        returning="date_of_death",
-        date_format= "YYYY-MM-DD",
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-03-01", "latest": "2022-09-30"}},
-    ),
     )
     return variables_outcomes_2020
