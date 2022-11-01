@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  /workspace/logs/2020_matching.log
   log type:  text
- opened on:  27 Oct 2022, 12:04:13
+ opened on:   1 Nov 2022, 14:16:33
 
 . clear
 
@@ -15,30 +15,30 @@
 . **Exclusions
 . * Age <18
 . drop if age <18
-(10,637 observations deleted)
+(10,540 observations deleted)
 
 . 
 . * Anyone not registered at one practice for 3 months before COVID-19 diagnosi
 > s
 . drop if has_follow_up==0
-(1,977 observations deleted)
+(1,955 observations deleted)
 
 . drop has_follow_up
 
 . 
 . * Pre-existing kidney replacement therapy
 . drop if baseline_krt_primary_care==1
-(1,904 observations deleted)
+(1,861 observations deleted)
 
 . drop baseline_krt_primary_care
 
 . drop if baseline_krt_icd_10==1
-(1,781 observations deleted)
+(1,800 observations deleted)
 
 . drop baseline_krt_icd_10
 
 . drop if baseline_krt_opcs_4==1
-(1,682 observations deleted)
+(1,743 observations deleted)
 
 . drop baseline_krt_opcs_4
 
@@ -57,84 +57,72 @@
 . label var male "Sex (0=F 1=M)"
 
 . 
-. replace baseline_creatinine_feb2020 = . if !inrange(baseline_creatinine_feb20
-> 20, 20, 3000)
-(14,115 real changes made, 14,115 to missing)
+. replace creatinine_feb2020 = . if !inrange(creatinine_feb2020, 20, 3000)
+(14,131 real changes made, 14,131 to missing)
 
-. gen mgdl_baseline_creatinine_feb2020 = baseline_creatinine_feb2020/88.4
-(14,115 missing values generated)
+. gen mgdl_creatinine_feb2020 = creatinine_feb2020/88.4
+(14,131 missing values generated)
 
-. gen min_baseline_creatinine_feb2020=.
-(32,019 missing values generated)
+. gen min_creatinine_feb2020=.
+(32,101 missing values generated)
 
-. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
-> 7 if male==0
-(9,089 real changes made)
+. replace min_creatinine_feb2020 = mgdl_creatinine_feb2020/0.7 if male==0
+(9,059 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
-> 9 if male==1
-(8,815 real changes made)
+. replace min_creatinine_feb2020 = mgdl_creatinine_feb2020/0.9 if male==1
+(8,911 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
-> 329  if male==0
-(9,089 real changes made)
+. replace min_creatinine_feb2020 = min_creatinine_feb2020^-0.329  if male==0
+(9,059 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
-> 411  if male==1
-(8,815 real changes made)
+. replace min_creatinine_feb2020 = min_creatinine_feb2020^-0.411  if male==1
+(8,911 real changes made)
 
-. replace min_baseline_creatinine_feb2020 = 1 if min_baseline_creatinine_feb202
-> 0<1
-(11,433 real changes made)
+. replace min_creatinine_feb2020 = 1 if min_creatinine_feb2020<1
+(11,383 real changes made)
 
-. gen max_baseline_creatinine_feb2020=.
-(32,019 missing values generated)
+. gen max_creatinine_feb2020=.
+(32,101 missing values generated)
 
-. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
-> 7 if male==0
-(9,089 real changes made)
+. replace max_creatinine_feb2020 = mgdl_creatinine_feb2020/0.7 if male==0
+(9,059 real changes made)
 
-. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
-> 9 if male==1
-(8,815 real changes made)
+. replace max_creatinine_feb2020 = mgdl_creatinine_feb2020/0.9 if male==1
+(8,911 real changes made)
 
-. replace max_baseline_creatinine_feb2020 = max_baseline_creatinine_feb2020^-1.
-> 209
-(17,904 real changes made)
+. replace max_creatinine_feb2020 = max_creatinine_feb2020^-1.209
+(17,970 real changes made)
 
-. replace max_baseline_creatinine_feb2020 = 1 if max_baseline_creatinine_feb202
-> 0>1
-(20,586 real changes made)
+. replace max_creatinine_feb2020 = 1 if max_creatinine_feb2020>1
+(20,718 real changes made)
 
-. gen egfr_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020*max_ba
-> seline_creatinine_feb2020*141
-(14,115 missing values generated)
+. gen egfr_creatinine_feb2020 = min_creatinine_feb2020*max_creatinine_feb2020*1
+> 41
+(14,131 missing values generated)
 
-. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*(
-> 0.993^age)
-(17,904 real changes made)
+. replace egfr_creatinine_feb2020 = egfr_creatinine_feb2020*(0.993^age)
+(17,970 real changes made)
 
-. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*1
-> .018 if male==0
-(9,089 real changes made)
+. replace egfr_creatinine_feb2020 = egfr_creatinine_feb2020*1.018 if male==0
+(9,059 real changes made)
 
-. drop if egfr_baseline_creatinine_feb2020 <15
+. drop if egfr_creatinine_feb2020 <15
 (0 observations deleted)
 
-. drop baseline_creatinine_feb2020
+. drop creatinine_feb2020
 
-. drop mgdl_baseline_creatinine_feb2020
+. drop mgdl_creatinine_feb2020
 
-. drop min_baseline_creatinine_feb2020
+. drop min_creatinine_feb2020
 
-. drop max_baseline_creatinine_feb2020
+. drop max_creatinine_feb2020
 
-. drop egfr_baseline_creatinine_feb2020
+. drop egfr_creatinine_feb2020
 
 . 
 . * Deceased
 . drop if deceased==1
-(3,149 observations deleted)
+(3,218 observations deleted)
 
 . drop deceased
 
@@ -164,222 +152,222 @@
 
         age |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-         18 |        408        1.41        1.41
-         19 |        397        1.38        2.79
-         20 |        447        1.55        4.34
-         21 |        481        1.67        6.00
-         22 |        480        1.66        7.67
-         23 |        437        1.51        9.18
-         24 |        488        1.69       10.87
-         25 |        448        1.55       12.42
-         26 |        519        1.80       14.22
-         27 |        483        1.67       15.89
-         28 |        473        1.64       17.53
-         29 |        531        1.84       19.37
-         30 |        483        1.67       21.04
-         31 |        509        1.76       22.81
-         32 |        514        1.78       24.59
-         33 |        496        1.72       26.30
-         34 |        501        1.74       28.04
-         35 |        529        1.83       29.87
-         36 |        490        1.70       31.57
-         37 |        483        1.67       33.24
-         38 |        489        1.69       34.94
-         39 |        471        1.63       36.57
-         40 |        400        1.39       37.95
-         41 |        380        1.32       39.27
-         42 |        454        1.57       40.84
-         43 |        423        1.47       42.31
-         44 |        421        1.46       43.77
-         45 |        502        1.74       45.50
-         46 |        492        1.70       47.21
-         47 |        484        1.68       48.88
-         48 |        509        1.76       50.65
-         49 |        497        1.72       52.37
-         50 |        525        1.82       54.19
-         51 |        491        1.70       55.89
-         52 |        470        1.63       57.52
-         53 |        534        1.85       59.37
-         54 |        518        1.79       61.16
-         55 |        509        1.76       62.92
-         56 |        473        1.64       64.56
-         57 |        494        1.71       66.27
-         58 |        484        1.68       67.95
-         59 |        478        1.66       69.61
-         60 |        433        1.50       71.10
-         61 |        378        1.31       72.41
-         62 |        428        1.48       73.90
-         63 |        456        1.58       75.48
-         64 |        405        1.40       76.88
-         65 |        389        1.35       78.23
-         66 |        388        1.34       79.57
-         67 |        395        1.37       80.94
-         68 |        393        1.36       82.30
-         69 |        368        1.27       83.57
-         70 |        377        1.31       84.88
-         71 |        358        1.24       86.12
-         72 |        354        1.23       87.35
-         73 |        359        1.24       88.59
-         74 |        344        1.19       89.78
-         75 |        250        0.87       90.65
-         76 |        245        0.85       91.50
-         77 |        238        0.82       92.32
-         78 |        250        0.87       93.19
-         79 |        211        0.73       93.92
-         80 |        184        0.64       94.55
-         81 |        167        0.58       95.13
-         82 |        165        0.57       95.70
-         83 |        184        0.64       96.34
-         84 |        193        0.67       97.01
-         85 |        122        0.42       97.43
-         86 |        129        0.45       97.88
-         87 |        114        0.39       98.28
-         88 |        118        0.41       98.68
-         89 |         97        0.34       99.02
-         90 |         46        0.16       99.18
-         91 |         45        0.16       99.33
-         92 |         34        0.12       99.45
-         93 |         33        0.11       99.57
-         94 |         44        0.15       99.72
-         95 |         12        0.04       99.76
-         96 |         14        0.05       99.81
-         97 |         16        0.06       99.86
-         98 |         10        0.03       99.90
-         99 |         13        0.05       99.94
-        101 |          3        0.01       99.95
-        102 |          2        0.01       99.96
-        103 |          4        0.01       99.98
+         18 |        409        1.42        1.42
+         19 |        406        1.41        2.82
+         20 |        481        1.67        4.49
+         21 |        421        1.46        5.94
+         22 |        480        1.66        7.61
+         23 |        434        1.50        9.11
+         24 |        453        1.57       10.68
+         25 |        507        1.76       12.43
+         26 |        488        1.69       14.12
+         27 |        485        1.68       15.80
+         28 |        513        1.78       17.58
+         29 |        461        1.60       19.17
+         30 |        495        1.71       20.89
+         31 |        464        1.61       22.49
+         32 |        480        1.66       24.16
+         33 |        535        1.85       26.01
+         34 |        493        1.71       27.72
+         35 |        500        1.73       29.45
+         36 |        527        1.82       31.27
+         37 |        504        1.74       33.02
+         38 |        475        1.64       34.66
+         39 |        446        1.54       36.20
+         40 |        410        1.42       37.62
+         41 |        384        1.33       38.95
+         42 |        438        1.52       40.47
+         43 |        443        1.53       42.00
+         44 |        463        1.60       43.61
+         45 |        489        1.69       45.30
+         46 |        485        1.68       46.98
+         47 |        483        1.67       48.65
+         48 |        488        1.69       50.34
+         49 |        515        1.78       52.12
+         50 |        519        1.80       53.92
+         51 |        519        1.80       55.72
+         52 |        544        1.88       57.60
+         53 |        544        1.88       59.48
+         54 |        538        1.86       61.35
+         55 |        472        1.63       62.98
+         56 |        486        1.68       64.66
+         57 |        481        1.67       66.33
+         58 |        475        1.64       67.97
+         59 |        460        1.59       69.57
+         60 |        441        1.53       71.09
+         61 |        397        1.37       72.47
+         62 |        373        1.29       73.76
+         63 |        400        1.38       75.14
+         64 |        383        1.33       76.47
+         65 |        355        1.23       77.70
+         66 |        408        1.41       79.11
+         67 |        389        1.35       80.46
+         68 |        375        1.30       81.76
+         69 |        355        1.23       82.99
+         70 |        360        1.25       84.23
+         71 |        362        1.25       85.49
+         72 |        338        1.17       86.66
+         73 |        364        1.26       87.92
+         74 |        379        1.31       89.23
+         75 |        242        0.84       90.07
+         76 |        250        0.87       90.93
+         77 |        275        0.95       91.88
+         78 |        230        0.80       92.68
+         79 |        241        0.83       93.52
+         80 |        177        0.61       94.13
+         81 |        172        0.60       94.72
+         82 |        186        0.64       95.37
+         83 |        192        0.66       96.03
+         84 |        197        0.68       96.71
+         85 |        117        0.41       97.12
+         86 |        120        0.42       97.53
+         87 |        133        0.46       98.00
+         88 |        143        0.50       98.49
+         89 |        110        0.38       98.87
+         90 |         42        0.15       99.02
+         91 |         46        0.16       99.18
+         92 |         51        0.18       99.35
+         93 |         48        0.17       99.52
+         94 |         56        0.19       99.71
+         95 |         19        0.07       99.78
+         96 |          8        0.03       99.81
+         97 |          7        0.02       99.83
+         98 |         15        0.05       99.88
+         99 |         16        0.06       99.94
+        100 |          3        0.01       99.95
+        101 |          5        0.02       99.97
+        104 |          2        0.01       99.97
         105 |          1        0.00       99.98
         106 |          1        0.00       99.98
         107 |          3        0.01       99.99
-        108 |          1        0.00      100.00
+        108 |          2        0.01      100.00
         109 |          1        0.00      100.00
 ------------+-----------------------------------
-      Total |     28,870      100.00
+      Total |     28,883      100.00
 
 . tab imd
 
         imd |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          0 |      1,465        5.07        5.07
-          1 |      5,560       19.26       24.33
-          2 |      5,518       19.11       43.45
-          3 |      5,383       18.65       62.09
-          4 |      5,456       18.90       80.99
-          5 |      5,488       19.01      100.00
+          0 |      1,448        5.01        5.01
+          1 |      5,540       19.18       24.19
+          2 |      5,362       18.56       42.76
+          3 |      5,391       18.66       61.42
+          4 |      5,527       19.14       80.56
+          5 |      5,615       19.44      100.00
 ------------+-----------------------------------
-      Total |     28,870      100.00
+      Total |     28,883      100.00
 
 . tab male
 
    Sex (0=F |
        1=M) |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-     Female |     14,654       50.76       50.76
-       Male |     14,216       49.24      100.00
+     Female |     14,640       50.69       50.69
+       Male |     14,243       49.31      100.00
 ------------+-----------------------------------
-      Total |     28,870      100.00
+      Total |     28,883      100.00
 
 . 
 . gen covid_date = date(covid_diagnosis_date, "YMD")
-(12,794 missing values generated)
+(12,894 missing values generated)
 
 . format covid_date %td
 
 . gen covid_date_string=string(covid_date, "%td") 
 
 . gen covid_month=substr( covid_date_string ,3,7)
-(12,794 missing values generated)
+(12,894 missing values generated)
 
 . tab covid_month
 
 covid_month |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-    apr2020 |        579        3.60        3.60
-    apr2021 |        502        3.12        6.72
-    apr2022 |        417        2.59        9.32
-    aug2020 |        607        3.78       13.09
-    aug2021 |        509        3.17       16.26
-    aug2022 |        446        2.77       19.03
-    dec2020 |        541        3.37       22.40
-    dec2021 |        438        2.72       25.12
-    feb2020 |        585        3.64       28.76
-    feb2021 |        483        3.00       31.77
-    feb2022 |        396        2.46       34.23
-    jan2021 |        539        3.35       37.58
-    jan2022 |        456        2.84       40.42
-    jul2020 |        614        3.82       44.24
-    jul2021 |        472        2.94       47.18
-    jul2022 |        424        2.64       49.81
-    jun2020 |        575        3.58       53.39
-    jun2021 |        469        2.92       56.31
-    jun2022 |        400        2.49       58.80
-    mar2020 |        615        3.83       62.62
-    mar2021 |        559        3.48       66.10
-    mar2022 |        430        2.67       68.77
-    may2020 |        621        3.86       72.64
-    may2021 |        530        3.30       75.93
-    may2022 |        440        2.74       78.67
-    nov2020 |        503        3.13       81.80
-    nov2021 |        467        2.90       84.70
-    oct2020 |        538        3.35       88.05
-    oct2021 |        478        2.97       91.02
-    sep2020 |        550        3.42       94.45
-    sep2021 |        480        2.99       97.43
-    sep2022 |        413        2.57      100.00
+    apr2020 |        578        3.61        3.61
+    apr2021 |        524        3.28        6.89
+    apr2022 |        410        2.56        9.46
+    aug2020 |        594        3.72       13.17
+    aug2021 |        476        2.98       16.15
+    aug2022 |        400        2.50       18.65
+    dec2020 |        533        3.33       21.98
+    dec2021 |        433        2.71       24.69
+    feb2020 |        537        3.36       28.05
+    feb2021 |        485        3.03       31.08
+    feb2022 |        382        2.39       33.47
+    jan2021 |        523        3.27       36.74
+    jan2022 |        445        2.78       39.53
+    jul2020 |        565        3.53       43.06
+    jul2021 |        522        3.26       46.33
+    jul2022 |        420        2.63       48.95
+    jun2020 |        529        3.31       52.26
+    jun2021 |        533        3.33       55.59
+    jun2022 |        413        2.58       58.18
+    mar2020 |        614        3.84       62.02
+    mar2021 |        565        3.53       65.55
+    mar2022 |        491        3.07       68.62
+    may2020 |        620        3.88       72.50
+    may2021 |        506        3.16       75.66
+    may2022 |        465        2.91       78.57
+    nov2020 |        545        3.41       81.98
+    nov2021 |        470        2.94       84.92
+    oct2020 |        565        3.53       88.45
+    oct2021 |        499        3.12       91.58
+    sep2020 |        542        3.39       94.97
+    sep2021 |        433        2.71       97.67
+    sep2022 |        372        2.33      100.00
 ------------+-----------------------------------
-      Total |     16,076      100.00
+      Total |     15,989      100.00
 
 . 
 . 
 . gen death_date1 = date(death_date, "YMD")
-(26,063 missing values generated)
+(25,999 missing values generated)
 
 . format death_date1 %td
 
 . gen death_date_string=string(death_date1, "%td")
 
 . gen death_month=substr( death_date_string ,3,7)
-(26,063 missing values generated)
+(25,999 missing values generated)
 
 . tab death_month
 
 death_month |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-    apr2020 |         94        3.35        3.35
-    apr2021 |         91        3.24        6.59
-    apr2022 |         82        2.92        9.51
-    aug2020 |         66        2.35       11.86
-    aug2021 |         86        3.06       14.93
-    aug2022 |        112        3.99       18.92
-    dec2020 |         99        3.53       22.44
-    dec2021 |         81        2.89       25.33
-    feb2020 |         83        2.96       28.29
-    feb2021 |         81        2.89       31.17
-    feb2022 |         81        2.89       34.06
-    jan2021 |         74        2.64       36.69
-    jan2022 |        109        3.88       40.58
-    jul2020 |         89        3.17       43.75
-    jul2021 |         92        3.28       47.03
-    jul2022 |         98        3.49       50.52
-    jun2020 |         83        2.96       53.47
-    jun2021 |         86        3.06       56.54
-    jun2022 |         95        3.38       59.92
-    mar2020 |         82        2.92       62.84
-    mar2021 |        101        3.60       66.44
-    mar2022 |         71        2.53       68.97
-    may2020 |         81        2.89       71.86
-    may2021 |         82        2.92       74.78
-    may2022 |         81        2.89       77.66
-    nov2020 |         84        2.99       80.66
-    nov2021 |         93        3.31       83.97
-    oct2020 |         89        3.17       87.14
-    oct2021 |         96        3.42       90.56
-    sep2020 |         93        3.31       93.87
-    sep2021 |         77        2.74       96.62
-    sep2022 |         95        3.38      100.00
+    apr2020 |         81        2.81        2.81
+    apr2021 |         78        2.70        5.51
+    apr2022 |         84        2.91        8.43
+    aug2020 |         93        3.22       11.65
+    aug2021 |        104        3.61       15.26
+    aug2022 |         98        3.40       18.65
+    dec2020 |         83        2.88       21.53
+    dec2021 |        104        3.61       25.14
+    feb2020 |         85        2.95       28.09
+    feb2021 |         76        2.64       30.72
+    feb2022 |         76        2.64       33.36
+    jan2021 |         86        2.98       36.34
+    jan2022 |        103        3.57       39.91
+    jul2020 |         92        3.19       43.10
+    jul2021 |         88        3.05       46.15
+    jul2022 |        111        3.85       50.00
+    jun2020 |         88        3.05       53.05
+    jun2021 |         76        2.64       55.69
+    jun2022 |         80        2.77       58.46
+    mar2020 |         93        3.22       61.69
+    mar2021 |        107        3.71       65.40
+    mar2022 |        109        3.78       69.17
+    may2020 |         96        3.33       72.50
+    may2021 |         84        2.91       75.42
+    may2022 |        102        3.54       78.95
+    nov2020 |         78        2.70       81.66
+    nov2021 |         82        2.84       84.50
+    oct2020 |         91        3.16       87.66
+    oct2021 |         85        2.95       90.60
+    sep2020 |         85        2.95       93.55
+    sep2021 |         93        3.22       96.78
+    sep2022 |         93        3.22      100.00
 ------------+-----------------------------------
-      Total |      2,807      100.00
+      Total |      2,884      100.00
 
 . 
 . 
@@ -391,5 +379,5 @@ file ./output/2020_matching.csv saved
       name:  <unnamed>
        log:  /workspace/logs/2020_matching.log
   log type:  text
- closed on:  27 Oct 2022, 12:04:14
+ closed on:   1 Nov 2022, 14:16:35
 -------------------------------------------------------------------------------

@@ -66,7 +66,8 @@ foreach creatinine_monthly of varlist 	creatinine_mar2020 ///
 										creatinine_jul2020 ///
 										creatinine_aug2020 ///
 										creatinine_sep2020 ///
-										creatinine_oct2020 ///												creatinine_nov2020 ///
+										creatinine_oct2020 ///												
+										creatinine_nov2020 ///
 										creatinine_dec2020 ///
 										creatinine_jan2021 ///
 										creatinine_feb2021 ///

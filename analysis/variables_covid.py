@@ -12,7 +12,6 @@ def generate_covid(index_date_variable):
         return_expectations={"incidence": 0.1, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
     ),
     covid_critical_care=patients.admitted_to_hospital(
-        with_these_diagnoses=covid_codes,
         with_these_procedures=critical_care_codes,
         returning="binary_flag",
         between = ["case_index_date", "case_index_date + 28 days"],
@@ -45,7 +44,7 @@ def generate_covid(index_date_variable):
         returning="binary_flag",
         between = ["case_index_date", "case_index_date + 28 days"],
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
-        ),
+    ),
     covid_vax_1_date = patients.with_tpp_vaccination_record(
         target_disease_matches = "SARS-2 CORONAVIRUS",
         returning = "date",
@@ -85,7 +84,6 @@ def generate_covid(index_date_variable):
         }
         },
     ),
-
     covid_vax_4_date = patients.with_tpp_vaccination_record(
         target_disease_matches = "SARS-2 CORONAVIRUS",    
         returning = "date",

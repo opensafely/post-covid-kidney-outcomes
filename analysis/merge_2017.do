@@ -2,307 +2,125 @@ sysdir set PLUS ./analysis/adofiles
 sysdir set PERSONAL ./analysis/adofiles
 pwd
 
-* Open a log file
 cap log close
 log using ./logs/merge_2017.log, replace t
 
-*(0)=========Get total cases and potential matches figure for flowchart - extra bit of work in this file is to drop comparators without the necessary follow-up or who died before case index date============
-/*Has follow-up needs checked as there is nowhere previously where it is checked against the matched cases case index date, plus the death_date variable for controls so far is only related to the
-*index date, not the case_index_date*/
-*case
+** Analysis cohort selection
 capture noisily import delimited ./output/input_covid_matching.csv, clear
-di "***********************FLOWCHART 1. NUMBER OF POTENTIAL CASES AND CONTROLS********************:"
-di "**Potential COVID-19 cases extracted from OpenSAFELY:**"
+di "Potential COVID-19 cases extracted from OpenSAFELY:"
 safecount
-
-*comparator
 capture noisily import delimited ./output/input_2017_matching.csv, clear
-di "**Potential historical comparators extracted from OpenSAFELY:**"
+di "Potential historical comparators extracted from OpenSAFELY:"
 safecount
-
 capture noisily import delimited ./output/covid_matching_2017.csv, clear
-di "*Potential COVID-19 cases after data management:*"
+di "Potential COVID-19 cases after application of exclusion criteria:"
 safecount
-
 capture noisily import delimited ./output/2017_matching.csv, clear
-di "Potential historical comparators after data management"
+di "Potential historical comparators after application of exclusion criteria:"
 safecount
-
-
-*(1)=========Get all the (case and comparator related) variables from the matched cases and matched controls files============
-*COVID-19
+* Import COVID-19 dataset comprising individuals matched with historical comparators (limited matching variables only)
 capture noisily import delimited ./output/input_combined_stps_covid_2017.csv, clear
-*drop age & covid_diagnosis_date
+* Drop age & covid_diagnosis_date
 keep patient_id death_date date_deregistered imd stp krt_outcome_date male covid_date covid_month set_id case match_counts
 tempfile covid_2017_matched
-*for dummy data, should do nothing in the real data
+* For dummy data, should do nothing in the real data
 duplicates drop patient_id, force
 save `covid_2017_matched', replace
-*Number of matched COVID-19 cases
+* Number of matched COVID-19 cases
 count
-
-*Historical comparators
+* Import matched historical comparators (limited matching variables only)
 capture noisily import delimited ./output/input_combined_stps_matches_2017.csv, clear
-*drop age
+* Drop age
 keep patient_id death_date date_deregistered imd stp krt_outcome_date male set_id case covid_date
 tempfile 2017_matched
-*for dummy data, should do nothing in the real data
+* For dummy data, should do nothing in the real data
 duplicates drop patient_id, force
 save `2017_matched', replace
-*Number of matched historical comparators
+* Number of matched historical comparators
 count
-
-
-*(2)=========Add the case and comparator information from above to the files with the rest of the information============
-*import matched COVID-19 cases with additional variables and merge with extraction file
+* Merge limited COVID-19 dataset with additional variables
 capture noisily import delimited ./output/input_covid_2017_additional.csv, clear
 merge 1:1 patient_id using `covid_2017_matched'
 keep if _merge==3
 drop _merge
 tempfile covid_2017_complete
 save `covid_2017_complete', replace
-di "***********************FLOWCHART 2. Number of matched COVID-19 cases and historical comparators****************************************:"
-di "**Matched COVID-19:**"
+di "Matched COVID-19 cases:"
 safecount
-
-
+* Merge limited historical comparator dataset with additional variables
 capture noisily import delimited ./output/input_2017_additional.csv, clear
 merge 1:1 patient_id using `2017_matched'
 keep if _merge==3
 drop _merge
 tempfile 2017_complete
 save `2017_complete', replace
-di "**Matched comparators:**"
+di "Matched historical comparators:"
 safecount
-
-
-*NOTE: Flowchart re: who was dropped here due date exclusions can be obtained from the STP matching logs (if needed)
-*/
-
-*(3)=========Append case and comparator files together============
+* Append matched COVID-19 cases and historical comparators
 append using `covid_2017_complete', force
 order patient_id set_id match_count case
 gsort set_id -case
-*drop any comparators that don't have sufficient follow upon
 count if case==0
-
-di "***********************FLOWCHART 1. NUMBER OF MATCHED CASES AND MATCHED COMPARATORS: COMBINED FILE********************:"
+di "Matched COVID-19 cases and historical comparators:"
 safecount
 tab case
-*save a list of final cases for analysis unmatched cases in next bit
+* Save list of matched COVID-19 cases
 preserve
 	keep if case==1
 	keep patient_id
 	tempfile covid_2017_matched_list
 	save `covid_2017_matched_list', replace
 restore
-
-
-
-*(4)=========Create a file of unmatched cases for descriptive analysis============
-*import list of all cases (pre-matching)
+* Generate list of unmatched COVID-19 cases
 preserve
 	capture noisily import delimited ./output/input_covid_matching.csv, clear
-	*for dummy data, should do nothing in the real data
+	* For dummy data, should do nothing in the real data
 	duplicates drop patient_id, force
 	tempfile covid_prematching
 	save `covid_prematching', replace
 	use `covid_2017_matched_list', clear
 	merge 1:1 patient_id using `covid_prematching'
-	*want to keep the ones not matched as they were in the original extract file but not in the list of matches
 	keep if _merge==2
 	safecount
-	*save file for descriptive analysis
 	save output/covid_unmatched_2017.dta, replace
-	di "***********************FLOWCHART 4. NUMBER OF UMATCHED CASES FROM UNMATCHED CASES FILE (TO CONFIRM IT ALIGNS WITH THE ABOVE FLOWCHART POINTS)********************:"
+	di "Unmatched COVID-19 cases:"
 	safecount
 restore
 
-
-
-
-
-*(5)=========VARIABLE CLEANING============
-
-*label case variables
-label define case 0 "Comparator (historical)" ///
-				  1 "COVID-19"
-label values case case
-safetab case 
-
-*(a)===Ethnicity (5 category)====
-* Ethnicity (5 category)
-replace ethnicity = . if ethnicity==.
-label define ethnicity 	1 "White"  					///
-						2 "Mixed" 					///
-						3 "Asian or Asian British"	///
-						4 "Black"  					///
-						5 "Other"					
-						
-label values ethnicity ethnicity
-safetab ethnicity
-
- *re-order ethnicity
- gen eth5=1 if ethnicity==1
- replace eth5=2 if ethnicity==3
- replace eth5=3 if ethnicity==4
- replace eth5=4 if ethnicity==2
- replace eth5=5 if ethnicity==5
- replace eth5=. if ethnicity==.
-
- label define eth5 			1 "White"  					///
-							2 "South Asian"				///						
-							3 "Black"  					///
-							4 "Mixed"					///
-							5 "Other"					
-					
-label values eth5 eth5
-safetab eth5, m
-
-*create an ethnicity for table 1 (includes unknown)
-*ETHNICITY
-*create an ethnicity variable with missing shown as "Unknown" just for this analysis
-generate eth5Table1=eth5
-replace eth5Table1=6 if eth5Table1==.
-label define eth5Table1 			1 "White"  					///
-									2 "South Asian"				///						
-									3 "Black"  					///
-									4 "Mixed"					///
-									5 "Other"					///
-									6 "Unknown"
-					
-label values eth5Table1 eth5Table1
-safetab eth5Table1, m
-
-
-*(b)===STP====
-*For ease of future analysis(?) am going to recode these as numerical ordered at this stage, also drop if STP is missing
-rename stp stp_old
-bysort stp_old: gen stp = 1 if _n==1
-replace stp = sum(stp)
-drop stp_old
-
-
-
-*(c)===IMD===
-* Reverse the order (so high is more deprived)
-tab imd
-recode imd 5 = 1 4 = 2 3 = 3 2 = 4 1 = 5 .u = .u
-
-label define imd 1 "1 Least deprived" 2 "2" 3 "3" 4 "4" 5 "5 Most deprived" .u "Unknown"
-label values imd imd
-*check after reordering
-tab imd
-
-
-
-
-***Need to calculate age from year of birth**
-
-**Age**
+** Exclusions
+* Exclusions due to deregistration and kidney replacement therapy will be checked (should already have been applied from previous steps in workflow)
 gen index_date = date(case_index_date, "YMD")
+format index_date %td
+
+* Deregistered before index_date
+gen deregistered_date = date(date_deregistered, "YMD")
+format deregistered_date %td
+drop date_deregistered 
+drop if deregistered_date < index_date
+
+* Kidney replacement therapy before index_date
+gen krt_outcome = date(krt_outcome_date, "YMD")
+format krt_outcome %td
+drop krt_outcome_date
+rename krt_outcome krt_outcome_date
+drop if krt_outcome_date < index_date
+
+* Death before index_date + 28 days (i.e. only include people who survived 28 days after index_date)
+gen death_date1 = date(death_date, "YMD")
+format death_date1 %td
+drop death_date
+rename death_date1 death_date
+gen index_date_28 = index_date + 28
+format index_date_28 %td
+drop if death_date < index_date_28
+
+* eGFR <15 before index_date - should apply to matched historical comparators only
 gen index_year = yofd(index_date)
 gen age = index_year - year_of_birth
-recode 	age 			min/39.9999=1 	///
-						40/49.9999=2 	///
-						50/59.9999=3 	///
-						60/69.9999=4 	///
-						70/79.9999=5	///					
-						80/max=6, 		///
-						gen(agegroup) 
-
-label define agegroup 	1 "18-39" 		///
-						2 "40-49" 		///
-						3 "50-59" 		///
-						4 "60-69" 		///
-						5 "70-79"		///
-						6 "80+"
-label values agegroup agegroup
-
-
-* Check there are no missing ages
-assert age<.
-assert agegroup<.
-
-* Create restricted cubic splines for age
-mkspline age = age, cubic nknots(4)
-
-*Sex
 gen sex = 1 if male == "Male"
 replace sex = 0 if male == "Female"
 label define sex 0"Female" 1"Male"
 label values sex sex
-safetab sex
-safecount
-
-
-**BMI**
-
-replace body_mass_index = . if !inrange(body_mass_index, 15, 50)
-gen 	bmicat = .
-recode  bmicat . = 1 if body_mass_index<18.5
-recode  bmicat . = 2 if body_mass_index<25
-recode  bmicat . = 3 if body_mass_index<30
-recode  bmicat . = 4 if body_mass_index<35
-recode  bmicat . = 5 if body_mass_index<40
-recode  bmicat . = 6 if body_mass_index<.
-replace bmicat = . if body_mass_index>=.
-
-label define bmicat 1 "Underweight (<18.5)" 	///
-					2 "Normal (18.5-24.9)"		///
-					3 "Overweight (25-29.9)"	///
-					4 "Obese I (30-34.9)"		///
-					5 "Obese II (35-39.9)"		///
-					6 "Obese III (40+)"			
-					
-label values bmicat bmicat
-
-recode bmicat 1/3 . = 1 4=2 5=3 6=4, gen(obese4cat)
-
-label define obese4cat 	1 "No record of obesity" 	///
-						2 "Obese I (30-34.9)"		///
-						3 "Obese II (35-39.9)"		///
-						4 "Obese III (40+)"		
-label values obese4cat obese4cat
-order obese4cat, after(bmicat)
-
-gen obese4cat_withmiss = obese4cat
-replace obese4cat_withmiss =. if bmicat ==.
-
-* Smoking
-gen ever_smoked = 1 if smoking_status=="S"
-replace ever_smoked = 1 if smoking_status=="E"
-replace ever_smoked = 0 if smoking_status=="N"
-replace ever_smoked = . if smoking_status=="M"
-label define smoking_label 1 "Current/former smoker" 0 "Non-smoker"
-label values ever_smoked smoking_label
-label var ever_smoked "Smoking status"
-
-*(e)===Rural-urban===
-*label the urban rural categories
-replace rural_urban=. if rural_urban<1|rural_urban>8
-label define rural_urban 1 "urban major conurbation" ///
-							  2 "urban minor conurbation" ///
-							  3 "urban city and town" ///
-							  4 "urban city and town in a sparse setting" ///
-							  5 "rural town and fringe" ///
-							  6 "rural town and fringe in a sparse setting" ///
-							  7 "rural village and dispersed" ///
-							  8 "rural village and dispersed in a sparse setting"
-label values rural_urban rural_urban
-safetab rural_urban, miss
-
-*generate a binary rural urban (with missing assigned to urban)
-generate rural_urbanBroad=.
-replace rural_urbanBroad=1 if rural_urban<=4|rural_urban==.
-replace rural_urbanBroad=0 if rural_urban>4 & rural_urban!=.
-label define rural_urbanBroad 0 "Rural" 1 "Urban"
-label values rural_urbanBroad rural_urbanBroad
-safetab rural_urbanBroad rural_urban, miss
-label var rural_urbanBroad "Rural-Urban"
-
-*Baseline eGFR
-format index_date %td
 foreach creatinine_monthly of varlist 	creatinine_feb2017 ///
 										creatinine_mar2017 ///
 										creatinine_apr2017 ///
@@ -392,10 +210,8 @@ drop mgdl_`creatinine_monthly'
 drop min_`creatinine_monthly'
 drop max_`creatinine_monthly'
 }
-
 gen index_date_string=string(index_date, "%td") 
 gen index_month=substr(index_date_string ,3,7)
-
 gen baseline_egfr=.
 local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 oct2019 nov2019 dec2019 jan2020 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022"
 foreach x of local month_year  {
@@ -404,20 +220,324 @@ drop if baseline_egfr <15
 }
 label var baseline_egfr "Baseline eGFR"
 
+* Drop COVID-19 cases without any matched historical comparators after further application of exclusion criteria
+generate match_counts1=.
+order patient_id set_id match_counts match_counts1
+by set_id: replace match_counts1=_N-1
+replace match_counts1=. if case==0
+drop match_counts
+rename match_counts1 match_counts
+count if match_counts==0
+drop if match_counts==0
+safetab case
+tab match_counts
+
+** Exposure
+label define case 0 "Comparator (historical)" ///
+				  1 "COVID-19"
+label values case case
+safetab case 
+
+* COVID-19 severity
+gen covid_severity = case
+replace covid_severity = 2 if covid_hospitalised==1
+replace covid_severity = 3 if covid_critical_care==1
+replace covid_severity = 3 if covid_critical_days==1
+label define covid_severity_label	0 "Historical comparator"		///
+									1 "Non-hospitalised SARS-CoV-2" ///
+									2 "Hospitalised COVID-19"		///
+									3 "Critical care COVID-19"
+label values covid_severity covid_severity_label
+label var covid_severity "SARS-CoV-2 severity"
+drop covid_critical_care
+drop covid_critical_days
+safetab covid_severity, m
+
+* COVID-19 acute kidney injury
+gen covid_aki = case
+replace covid_aki = 2 if covid_hospitalised==1
+replace covid_aki = 3 if covid_acute_kidney_injury==1
+label define covid_aki	0 "Historical comparator" 			///
+						1 "Non-hospitalised SARS-CoV-2"		///
+						2 "No AKI hospitalised COVID-19"	///
+						3 "AKI hospitalised COVID-19"
+label values covid_aki covid_aki
+label var covid_aki "COVID-19 acute kidney injury"
+drop covid_acute_kidney_injury
+safetab covid_aki, m
+
+* COVID-19 kidney replacement therapy
+gen covid_krt_combined = covid_krt_icd_10
+replace covid_krt_combined = covid_krt_opcs_4 if covid_krt_icd_10==0
+gen covid_krt = case
+replace covid_krt = 2 if covid_hospitalised==1
+replace covid_krt = 3 if covid_krt_combined==1
+label define covid_krt	0 "Historical comparator" 			///
+						1 "Non-hospitalised SARS-CoV-2"		///
+						2 "No KRT hospitalised COVID-19"	///
+						3 "KRT hospitalised COVID-19"
+label values covid_krt covid_krt
+label var covid_krt "COVID-19 kidney replacement therapy"
+drop covid_krt_icd_10
+drop covid_krt_opcs_4
+safetab covid_krt, m
+
+* COVID-19 vaccination status
+gen covidvax1date = date(covid_vax_1_date, "YMD")
+format covidvax1date %td
+gen covidvax2date = date(covid_vax_2_date, "YMD")
+format covidvax2date %td
+gen covidvax3date = date(covid_vax_3_date, "YMD")
+format covidvax3date %td
+gen covidvax4date = date(covid_vax_4_date, "YMD")
+format covidvax4date %td
+gen covid_vax = case
+replace covid_vax = 5 if covidvax4date!=.
+replace covid_vax = 4 if covid_vax==1 &covidvax3date!=.
+replace covid_vax = 3 if covid_vax==1 &covidvax2date!=.
+replace covid_vax = 2 if covid_vax==1 &covidvax1date!=.
+drop covidvax1date
+drop covidvax2date
+drop covidvax3date
+drop covidvax4date
+label define covid_vax	0 "Historical comparator"				///
+						1 "SARS-CoV-2 pre-vaccination"			///
+						2 "SARS-CoV-2 1 vaccine dose"		///
+						3 "SARS-CoV-2 2 vaccine doses"	///
+						4 "SARS-CoV-2 3 vaccine doses"	///
+						5 "SARS-CoV-2 4 vaccine doses"
+label values covid_vax covid_vax
+label var covid_vax "Vaccination status"
+safetab covid_vax, m
+
+* Calendar period
+gen calendar_period = 1 if covid_month=="feb2020"
+replace calendar_period = 1 if covid_month=="mar2020"
+replace calendar_period = 1 if covid_month=="apr2020"
+replace calendar_period = 1 if covid_month=="may2020"
+replace calendar_period = 1 if covid_month=="jun2020"
+replace calendar_period = 2 if covid_month=="jul2020"
+replace calendar_period = 2 if covid_month=="aug2020"
+replace calendar_period = 3 if covid_month=="sep2020"
+replace calendar_period = 3 if covid_month=="oct2020"
+replace calendar_period = 3 if covid_month=="nov2020"
+replace calendar_period = 4 if covid_month=="dec2020"
+replace calendar_period = 4 if covid_month=="jan2021"
+replace calendar_period = 4 if covid_month=="feb2021"
+replace calendar_period = 5 if covid_month=="mar2021"
+replace calendar_period = 5 if covid_month=="apr2021"
+replace calendar_period = 5 if covid_month=="may2021"
+replace calendar_period = 5 if covid_month=="jun2021"
+replace calendar_period = 5 if covid_month=="jul2021"
+replace calendar_period = 5 if covid_month=="aug2021"
+replace calendar_period = 5 if covid_month=="sep2021"
+replace calendar_period = 5 if covid_month=="oct2021"
+replace calendar_period = 5 if covid_month=="nov2021"
+replace calendar_period = 6 if covid_month=="dec2021"
+replace calendar_period = 6 if covid_month=="jan2022"
+replace calendar_period = 6 if covid_month=="feb2022"
+replace calendar_period = 7 if covid_month=="mar2022"
+replace calendar_period = 7 if covid_month=="apr2022"
+replace calendar_period = 7 if covid_month=="may2022"
+replace calendar_period = 7 if covid_month=="jun2022"
+replace calendar_period = 7 if covid_month=="jul2022"
+replace calendar_period = 7 if covid_month=="aug2022"
+replace calendar_period = 7 if covid_month=="sep2022"
+replace calendar_period = 0 if case==0
+label define calendar_period	0 "Historical comparator"		///
+								1 "Feb 20 - Jun 20 SARS-CoV-2"	///
+								2 "Jul 20 - Aug 20 SARS-CoV-2"	///
+								3 "Sep 20 - Nov 20 SARS-CoV-2"	///
+								4 "Dec 20 - Feb 21 SARS-CoV-2"	///
+								5 "Mar 21 - Nov 21 SARS-CoV-2"	///
+								6 "Dec 21 - Feb 22 SARS-CoV-2"	///
+								7 "Mar 22 - Sep 22 SARS-CoV-2"
+label values calendar_period calendar_period
+label var calendar_period "Calendar period"
+safetab calendar_period, m
+
+** Covariates
+* Age
+recode 	age 			min/39.9999=1 	///
+						40/49.9999=2 	///
+						50/59.9999=3 	///
+						60/69.9999=4 	///
+						70/79.9999=5	///					
+						80/max=6, 		///
+						gen(agegroup) 
+
+label define agegroup 	1 "18-39" 		///
+						2 "40-49" 		///
+						3 "50-59" 		///
+						4 "60-69" 		///
+						5 "70-79"		///
+						6 "80+"
+label values agegroup agegroup
+* Check there are no missing ages
+assert age<.
+assert agegroup<.
+* Create restricted cubic splines for age
+mkspline age = age, cubic nknots(4)
+
+* Sex
+safetab sex
+safecount
+
+* Ethnicity
+* 1 = White ethnicities (white British, white Irish, with other)
+* 2 = Mixed ethnicities (white & black Caribbean, white & black African, white & Asian, other mixed ethnicities)
+* 3 = South Asian ethnicities (Indian, Pakistani, Bangladeshi, other South Asian)
+* 4 = Black ethnicities (black Caribbean, black African, other black)
+* 5 = Other ethnicities (Chinese, all other ethnicities)
+* . = Unknown ethnicity
+replace ethnicity = . if ethnicity==.
+replace ethnicity=6 if ethnicity==2
+replace ethnicity=2 if ethnicity==3
+replace ethnicity=3 if ethnicity==4
+replace ethnicity=4 if ethnicity==6
+label define ethnicity 	1 "White"  		///
+						2 "South Asian"	///						
+						3 "Black"  		///
+						4 "Mixed"		///
+						5 "Other"								
+label values ethnicity ethnicity
+safetab ethnicity, m
+* Ethnicity (including unknown ethnicity)
+gen ethnicity1 = ethnicity
+replace ethnicity1=6 if ethnicity1==.
+label define ethnicity1	1 "White"  					///
+						2 "South Asian"				///						
+						3 "Black"  					///
+						4 "Mixed"					///
+						5 "Other"					///
+						6 "Unknown"	
+label values ethnicity1 ethnicity1
+safetab ethnicity1, m
+
+* Region
+rename region region_string
+assert inlist(region_string, 								///
+					"East Midlands", 						///
+					"East",  								///
+					"London", 								///
+					"North East", 							///
+					"North West", 							///
+					"South East", 							///
+					"South West",							///
+					"West Midlands", 						///
+					"Yorkshire and The Humber") 
+gen     region = 1 if region_string=="East Midlands"
+replace region = 2 if region_string=="East"
+replace region = 3 if region_string=="London"
+replace region = 4 if region_string=="North East"
+replace region = 5 if region_string=="North West"
+replace region = 6 if region_string=="South East"
+replace region = 7 if region_string=="South West"
+replace region = 8 if region_string=="West Midlands"
+replace region = 9 if region_string=="Yorkshire and The Humber"
+
+label define region 	1 "East Midlands" 					///
+						2 "East"   							///
+						3 "London" 							///
+						4 "North East" 						///
+						5 "North West" 						///
+						6 "South East" 						///
+						7 "South West"						///
+						8 "West Midlands" 					///
+						9 "Yorkshire and The Humber"
+label values region region
+label var region "Region"
+safetab region
+
+* STP
+rename stp stp_old
+bysort stp_old: gen stp = 1 if _n==1
+replace stp = sum(stp)
+drop stp_old
+
+* Rural/urban
+replace rural_urban=. if rural_urban<1|rural_urban>8
+label define rural_urban 1 "Urban major conurbation" 						///
+						 2 "Urban minor conurbation" 						///
+						 3 "Urban city and town" 							///
+						 4 "Urban city and town in a sparse setting" 		///
+						 5 "Rural town and fringe" 							///
+						 6 "Rural town and fringe in a sparse setting" 		///
+						 7 "Rural village and dispersed" 					///
+						 8 "Rural village and dispersed in a sparse setting"
+label values rural_urban rural_urban
+safetab rural_urban, m
+* Urbanicity (binary)
+* Urban = 1-4 + missing, Rural = 5-8
+generate urbanicity=.
+replace urbanicity=1 if rural_urban<=4|rural_urban==.
+replace urbanicity=0 if rural_urban>4 & rural_urban!=.
+label define urbanicity 0 "Rural" 1 "Urban"
+label values urbanicity urbanicity
+safetab urbanicity rural_urban, m
+label var urbanicity "Urbanicity"
+
+* Index of multiple deprivation
+* Ordered 1-5 from most deprived to least deprived
+label define imd 1 "1 Most deprived" 2 "2" 3 "3" 4 "4" 5 "5 Least deprived" .u "Unknown"
+label values imd imd
+safetab imd
+
+* BMI
+replace body_mass_index = . if !inrange(body_mass_index, 15, 50)
+gen 	bmicat = .
+recode  bmicat . = 1 if body_mass_index<18.5
+recode  bmicat . = 2 if body_mass_index<25
+recode  bmicat . = 3 if body_mass_index<30
+recode  bmicat . = 4 if body_mass_index<35
+recode  bmicat . = 5 if body_mass_index<40
+recode  bmicat . = 6 if body_mass_index<.
+replace bmicat = . if body_mass_index>=.
+label define bmicat 1 "Underweight (<18.5)" 	///
+					2 "Normal (18.5-24.9)"		///
+					3 "Overweight (25-29.9)"	///
+					4 "Obese I (30-34.9)"		///
+					5 "Obese II (35-39.9)"		///
+					6 "Obese III (40+)"				
+label values bmicat bmicat
+* Obesity
+recode bmicat 1/3 . = 1 4=2 5=3 6=4, gen(obese4cat)
+label define obese4cat 	1 "No record of obesity" 	///
+						2 "Obese I (30-34.9)"		///
+						3 "Obese II (35-39.9)"		///
+						4 "Obese III (40+)"		
+label values obese4cat obese4cat
+order obese4cat, after(bmicat)
+gen obese4cat_withmiss = obese4cat
+replace obese4cat_withmiss =. if bmicat ==.
+
+* Smoking
+gen ever_smoked = 1 if smoking_status=="S"
+replace ever_smoked = 1 if smoking_status=="E"
+replace ever_smoked = 0 if smoking_status=="N"
+replace ever_smoked = . if smoking_status=="M"
+label define smoking_label 1 "Current/former smoker" 0 "Non-smoker"
+label values ever_smoked smoking_label
+label var ever_smoked "Smoking status"
+
 * Baseline eGFR groups
+* All baseline eGFR <15 should already by excluded
 egen baseline_egfr_cat = cut(baseline_egfr), at(0, 15, 30, 45, 60, 75, 90, 105, 5000)
 recode baseline_egfr_cat 0=1 15=2 30=3 45=4 60=5 75=6 90=7 105=8
 label define egfr_group 1 "<15" 2 "15-29" 3 "30-44" 4 "45-59" 5 "60-74" 6 "75-89" 7 "90-104" 8 "≥105"
 label values baseline_egfr_cat egfr_group
 label var baseline_egfr_cat "Baseline eGFR range"
-* NB - only baseline eGFR >15 should be included
+safetab baseline_egfr_cat, m
 
 * Baseline CKD stage
+* No CKD = eGFR >59, CKD 3A = eGFR 45-59, CKD 3B = eGFR 30-44, CKD 4 = eGFR 15-29, CKD 5 = eGFR <15
+* CKD 5 should already be excluded
 gen ckd_stage = baseline_egfr_cat
 recode ckd_stage 6/8=5 .=6
 label define ckd_stage 1 "CKD 5" 2 "CKD 4" 3 "CKD 3B" 4 "CKD 3A" 5 "No CKD" 6 "No baseline eGFR measurement"
 label values ckd_stage ckd_stage
 label var ckd_stage "Baseline CKD stage"
+safetab ckd_stage, m
 
 * eGFR <15 (earliest month)
 replace index_date = index_date + 28
@@ -431,19 +551,11 @@ format egfr_below15_outcome_date %td
 * ESRD date
 gen esrd_date = egfr_below15_outcome_date
 format esrd_date %td
-gen krt_outcome = date(krt_outcome_date, "YMD")
-replace esrd_date = krt_outcome if esrd_date==.
+replace esrd_date = krt_outcome_date if esrd_date==.
 
 * Exit date
-gen death_date1 = date(death_date, "YMD")
-format death_date1 %td
-drop death_date
-rename death_date1 death_date
 gen exit_date = esrd_date
 format exit_date %td
-gen deregistered_date = date(date_deregistered, "YMD")
-format deregistered_date %td
-drop date_deregistered
 gen deregistered_days = (deregistered_date - index_date)
 drop if deregistered_days<0
 gen end_date = date("2022-09-30", "YMD") if case==1
