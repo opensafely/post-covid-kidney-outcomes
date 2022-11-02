@@ -3,7 +3,7 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 
 cap log close
-log using ./logs/merge_2017.log, replace t
+log using ./logs/analysis_2017.log, replace t
 
 ** Analysis cohort selection
 capture noisily import delimited ./output/input_covid_matching.csv, clear
