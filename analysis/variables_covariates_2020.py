@@ -1,66 +1,25 @@
-#Study defintion for people with COVID-19 to be matched to contemporary and historical comparators
-
-#Matching variables:
-# - age
-# - sex
-# - stp
-# - imd
-# - covid_diagnosis_date + 28 days
-
-#Exclusion variables:
-# - ESRD before covid_diagnosis_date
-# - deceased before covid_diagnosis_date
-
-#Note:
-# - Variables will be extracted at covid_diagnosis_date
-# - Matching and follow-up will commence at 28 days after covid_diagnosis_date
-
-from cohortextractor import (
-    StudyDefinition,
-    Measure,
-    patients,
-    codelist,
-    combine_codelists,
-    filter_codes_by_category,
-    codelist_from_csv,
-)
-
+#https://github.com/opensafely/post-covid-outcomes-research/blob/main/analysis/common_variables.py
+from cohortextractor import filter_codes_by_category, patients, combine_codelists
 from codelists import *
+from datetime import datetime, timedelta
 
-study = StudyDefinition(
-    default_expectations={
-        "date": {"earliest": "1980-01-01", "latest": "today"},
-        "rate": "uniform",
-        "incidence": 0.7, 
-    },
-
-    population=patients.satisfying(
-        """
-        has_follow_up
-        AND (age >=18)
-        AND (sex = "M" OR sex = "F")
-        AND imd > 0
-        AND NOT sars_cov_2 = "0"
-        AND NOT deceased = "1"
-        AND NOT baseline_krt_primary_care = "1"
-        AND NOT baseline_krt_icd_10 = "1"
-        AND NOT baseline_krt_opcs_4 = "1"
-        """,
-    ),
-
-#Matching variables
-    age=patients.age_as_of(
-       "2020-02-01",
+def generate_covariates_2020(index_date_variable):
+    variables_covariates_2020 = dict(
+    practice_id=patients.registered_practice_as_of(
+        "case_index_date",
+        returning="pseudo_id",
         return_expectations={
-            "rate": "universal",
-            "int": {"distribution": "population_ages"},
+            "int": {"distribution": "normal", "mean": 25, "stddev": 5},
+            "incidence": 0.5,
         },
     ),
-    sex=patients.sex(
+    year_of_birth=patients.date_of_birth(
+        date_format= "YYYY", 
         return_expectations={
-            "rate": "universal",
-            "category": {"ratios": {"M": 0.49, "F": 0.51}},
-        }
+            "date": {"earliest": "1950-01-01", "latest": "2000-01-01"},
+            "rate": "uniform",
+            "incidence": 1,
+        },
     ),
     imd=patients.categorised_as(
         {
@@ -72,7 +31,7 @@ study = StudyDefinition(
             "5": """index_of_multiple_deprivation >= 32844*4/5 AND index_of_multiple_deprivation < 32844""",
         },
         index_of_multiple_deprivation=patients.address_as_of(
-            "2020-02-01",
+            "case_index_date",
             returning="index_of_multiple_deprivation",
             round_to_nearest=100,
         ),
@@ -90,105 +49,58 @@ study = StudyDefinition(
             },
         },
     ),
-    stp=patients.registered_practice_as_of(
-        "2020-02-01",
-        returning="stp_code",
+    region=patients.registered_practice_as_of(
+        "case_index_date",
+        returning="nuts1_region_name",
         return_expectations={
             "rate": "universal",
             "category": {
                 "ratios": {
-                    "STP1": 1.0,
-                    }
+                    "North East": 0.1,
+                    "North West": 0.1,
+                    "Yorkshire and The Humber": 0.1,
+                    "East Midlands": 0.1,
+                    "West Midlands": 0.1,
+                    "East": 0.1,
+                    "London": 0.2,
+                    "South East": 0.1,
+                    "South West": 0.1,
                 },
             },
-        ),
-
-#Exposure - SARS-CoV-2 infection
-
-    sgss_positive_date=patients.with_test_result_in_sgss(
-        pathogen="SARS-CoV-2",
-        test_result="positive",
-        returning="date",
-        date_format="YYYY-MM-DD",
-        find_first_match_in_period=True,
-        on_or_before="2022-09-30",
-        return_expectations={"incidence": 0.4, "date": {"earliest": "2020-02-01"}},
-    ),
-    
-    primary_care_covid_date=patients.with_these_clinical_events(
-        any_covid_primary_care_code,
-        returning="date",
-        date_format="YYYY-MM-DD",
-        find_first_match_in_period=True,
-        on_or_before="2022-09-30",
-        return_expectations={"incidence": 0.2, "date": {"earliest": "2020-02-01"}},
-    ),
-
-    hospital_covid_date=patients.admitted_to_hospital(
-        with_these_diagnoses=covid_codes,
-        returning="date_admitted",
-        date_format="YYYY-MM-DD",
-        find_first_match_in_period=True,
-        on_or_before="2022-09-30",
-        return_expectations={"incidence": 0.1, "date": {"earliest": "2020-02-01"}},
-    ),
-    
-    covid_diagnosis_date=patients.minimum_of(
-        "sgss_positive_date", "primary_care_covid_date", "hospital_covid_date",
-    ),
-
-    sars_cov_2=patients.categorised_as(
-        {
-        "0": "DEFAULT",
-        "SARS-COV-2": 
-            """
-            primary_care_covid_date
-            OR sgss_positive_date
-            OR hospital_covid_date
-            """,
         },
+    ),
+
+    ethnicity=patients.with_these_clinical_events(
+        ethnicity_codes,
+        returning="category",
+        find_last_match_in_period=True,
+        include_date_of_match=True,
+        return_expectations={
+            "category": {"ratios": {"1": 0.8, "2": 0.05, "3": 0.05, "4": 0.05, "5": 0.05}},
+            "incidence": 0.75,
+        },
+    ),
+    rural_urban=patients.address_as_of(
+        "index_date",
+        returning="rural_urban_classification",
         return_expectations={
             "rate": "universal",
-            "category": {
-                "ratios": {
-                    "SARS-COV-2": 0.7,
-                    "0": 0.3,
+            "category": 
+                {"ratios": {
+                    "1": 0.1,
+                    "2": 0.1,
+                    "3": 0.1,
+                    "4": 0.1,
+                    "5": 0.1,
+                    "6": 0.1,
+                    "7": 0.2,
+                    "8": 0.2,
                 }
             },
         },
     ),
-
-#Exclusion variables
-
-    deceased=patients.with_death_recorded_in_primary_care(
-        returning="binary_flag",
-        between = ["1970-01-01", "covid_diagnosis_date + 28 days"],
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-09-30"}},
-        ),
-    death_date=patients.with_death_recorded_in_primary_care(
-        between = ["2020-02-01", "2022-09-30"],
-        returning="date_of_death",
-        date_format= "YYYY-MM-DD",
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-09-30"}},
-    ),
-    baseline_krt_primary_care=patients.with_these_clinical_events(
-        kidney_replacement_therapy_primary_care_codes,
-        between = ["1970-01-01", "covid_diagnosis_date"],
-        returning="binary_flag",
-        return_expectations = {"incidence": 0.05},
-    ),
-    baseline_krt_icd_10=patients.admitted_to_hospital(
-        with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
-        returning="binary_flag",
-        between = ["1970-01-01", "covid_diagnosis_date"],
-        return_expectations={"incidence": 0.05},
-    ),
-    baseline_krt_opcs_4=patients.admitted_to_hospital(
-        with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
-        returning="binary_flag",
-        between = ["1970-01-01", "covid_diagnosis_date"],
-        return_expectations={"incidence": 0.05},
-    ),
+    
+    #Clinical covariates
     baseline_creatinine_feb2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
@@ -477,41 +389,126 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
-    krt_outcome_primary_care=patients.with_these_clinical_events(
-        kidney_replacement_therapy_primary_care_codes,
-        between = ["2020-02-01", "2022-09-30"],
-        returning="date",
+    atrial_fibrillation_or_flutter=patients.with_these_clinical_events(
+        atrial_fibrillation_or_flutter_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.05},
+    ),
+    chronic_liver_disease=patients.with_these_clinical_events(
+        chronic_liver_disease_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.02},
+    ),
+    diabetes=patients.with_these_clinical_events(
+        diabetes_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.2},
+    ),
+    haematological_cancer=patients.with_these_clinical_events(
+        haematological_cancer_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.01},
+    ),
+    heart_failure=patients.with_these_clinical_events(
+        heart_failure_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.04},
+    ),
+    hiv=patients.with_these_clinical_events(
+        hiv_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.02},
+    ),
+    hypertension=patients.with_these_clinical_events(
+        hypertension_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.2},
+    ),
+    non_haematological_cancer=patients.with_these_clinical_events(
+        non_haematological_cancer_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.02},
+    ),
+    myocardial_infarction=patients.with_these_clinical_events(
+        myocardial_infarction_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.1},
+    ),
+    peripheral_vascular_disease=patients.with_these_clinical_events(
+        peripheral_vascular_disease_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.02},
+    ),
+    rheumatoid_arthritis=patients.with_these_clinical_events(
+        rheumatoid_arthritis_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.05},
+    ),
+    stroke=patients.with_these_clinical_events(
+        stroke_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.02},
+    ),
+    systemic_lupus_erythematosus=patients.with_these_clinical_events(
+        systemic_lupus_erythematosus_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.02},
+    ),
+    smoking_status=patients.categorised_as(
+         {
+            "S": "most_recent_smoking_code = 'S'",
+            "E": """
+                 most_recent_smoking_code = 'E' OR (
+                   most_recent_smoking_code = 'N' AND ever_smoked
+                 )
+            """,
+            "N": "most_recent_smoking_code = 'N' AND NOT ever_smoked",
+            "M": "DEFAULT",
+         },
+        return_expectations={
+             "category": {"ratios": {"S": 0.6, "E": 0.1, "N": 0.2, "M": 0.1}}
+         },
+        most_recent_smoking_code=patients.with_these_clinical_events(
+             smoking_codes,
+             find_last_match_in_period=True,
+             on_or_before="case_index_date",
+             returning="category",
+         ),
+        ever_smoked=patients.with_these_clinical_events(
+             filter_codes_by_category(smoking_codes, include=["S", "E"]),
+             on_or_before="case_index_date",
+         ),
+     ),
+    #These need to be done differently
+    body_mass_index=patients.most_recent_bmi(
+        on_or_before="case_index_date",
+        minimum_age_at_measurement=18,
+        include_measurement_date=True,
         date_format="YYYY-MM-DD",
-        find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-09-30"}}
+        return_expectations={
+            "date": {"earliest": "2015-01-01", "latest": "2022-09-30"},
+            "float": {"distribution": "normal", "mean": 28, "stddev": 8, "min": 18, "max": 45},
+            "incidence": 0.95,
+        }
     ),
-    krt_outcome_icd_10=patients.admitted_to_hospital(
-        with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
-        returning="date_admitted",
-        date_format="YYYY-MM-DD",
-        between = ["2020-02-01", "2022-09-30"],
-        find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-09-30"}}
+    immunosuppression=patients.with_these_clinical_events(
+        immunosuppression_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.05},
     ),
-    krt_outcome_opcs_4=patients.admitted_to_hospital(
-        with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
-        returning="date_admitted",
-        date_format="YYYY-MM-DD",
-        between = ["2020-02-01", "2022-09-30"],
-        find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-09-30"}}
-    ),
-    krt_outcome_date=patients.minimum_of(
-        "krt_outcome_primary_care", "krt_outcome_icd_10", "krt_outcome_opcs_4",
-    ),
-    has_follow_up=patients.registered_with_one_practice_between(
-        "covid_diagnosis_date - 3 months", "covid_diagnosis_date",
-        return_expectations={"incidence":0.95,
-    }
-    ),
-    date_deregistered=patients.date_deregistered_from_all_supported_practices(
-        between= ["2020-02-01", "2022-09-30"],
-        date_format="YYYY-MM-DD",
-    ),
-
-)
+    )
+    return variables_covariates_2020

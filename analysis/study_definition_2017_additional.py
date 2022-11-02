@@ -11,15 +11,15 @@ from codelists import *
 
 MATCHES = "output/input_combined_stps_matches_2017.csv"
 
-from variables_covariates import generate_covariates
-variables_covariates= generate_covariates(index_date_variable="case_index_date")
+from variables_covariates_2017 import generate_covariates_2017
+variables_covariates_2017= generate_covariates_2017(index_date_variable="case_index_date")
 
 from variables_outcomes_2017 import generate_outcomes_2017
 variables_outcomes_2017= generate_outcomes_2017(index_date_variable="case_index_date")
 
 study = StudyDefinition(
     default_expectations={
-        "date": {"earliest": "1900-01-01", "latest": "today"},
+        "date": {"earliest": "1900-01-01", "latest": "2019-09-30"},
         "rate": "uniform",
         "incidence" : 0.2
     },
@@ -31,6 +31,6 @@ study = StudyDefinition(
         returning="covid_date", 
         returning_type="date"), 
 
-    **variables_covariates,  
+    **variables_covariates_2017,  
     **variables_outcomes_2017,  
 ) 

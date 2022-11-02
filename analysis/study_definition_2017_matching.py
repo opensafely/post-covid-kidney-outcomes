@@ -28,7 +28,7 @@ from codelists import *
 
 study = StudyDefinition(
     default_expectations={
-        "date": {"earliest": "1980-01-01", "latest": "2020-01-31"},
+        "date": {"earliest": "1980-01-01", "latest": "2019-09-30"},
         "rate": "uniform",
         "incidence": 0.7, 
     },
@@ -107,10 +107,10 @@ study = StudyDefinition(
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2017-02-01", "latest": "2022-01-31"}},
         ),
     death_date=patients.with_death_recorded_in_primary_care(
-        between = ["index_date", "2020-01-31"],
+        between = ["index_date", "2019-09-30"],
         returning="date_of_death",
         date_format= "YYYY-MM-DD",
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2017-02-01", "latest": "2019-09-30"}},
     ),
     baseline_krt_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
@@ -130,7 +130,7 @@ study = StudyDefinition(
         between = ["1970-01-01", "index_date"],
         return_expectations={"incidence": 0.05},
     ),
-    creatinine_feb2017=patients.mean_recorded_value(
+    baseline_creatinine_feb2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2015-08-01","2017-01-31"],
@@ -141,27 +141,27 @@ study = StudyDefinition(
     ),
     krt_outcome_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
-        between = ["index_date", "2020-01-31"],
+        between = ["index_date", "2019-09-30"],
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2019-09-30"}}
     ),
     krt_outcome_icd_10=patients.admitted_to_hospital(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between = ["index_date", "2020-01-31"],
+        between = ["index_date", "2019-09-30"],
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2019-09-30"}}
     ),
     krt_outcome_opcs_4=patients.admitted_to_hospital(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between = ["index_date", "2020-01-31"],
+        between = ["index_date", "2019-09-30"],
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2019-09-30"}}
     ),
     krt_outcome_date=patients.minimum_of(
         "krt_outcome_primary_care", "krt_outcome_icd_10", "krt_outcome_opcs_4",
@@ -171,7 +171,7 @@ study = StudyDefinition(
         return_expectations={"incidence":0.95},
     ),
     date_deregistered=patients.date_deregistered_from_all_supported_practices(
-        between= ["2017-02-01", "2020-01-31"],
+        between= ["2017-02-01", "2019-09-30"],
         date_format="YYYY-MM-DD",
     ),
 )

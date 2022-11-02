@@ -11,8 +11,8 @@ from codelists import *
 
 MATCHES = "output/input_combined_stps_matches_2020.csv"
 
-from variables_covariates import generate_covariates
-variables_covariates= generate_covariates(index_date_variable="case_index_date")
+from variables_covariates_2020 import generate_covariates_2020
+variables_covariates_2020= generate_covariates_2020(index_date_variable="case_index_date")
 
 from variables_outcomes_2020 import generate_outcomes_2020
 variables_outcomes_2020= generate_outcomes_2020(index_date_variable="case_index_date")
@@ -31,6 +31,6 @@ study = StudyDefinition(
         returning="covid_date", 
         returning_type="date"), 
 
-    **variables_covariates,  
+    **variables_covariates_2020,  
     **variables_outcomes_2020,  
 ) 
