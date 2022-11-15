@@ -412,6 +412,7 @@ label values ethnicity1 ethnicity1
 safetab ethnicity1, m
 
 * Region
+* Need to clarify why region is missing for some people
 rename region region_string
 assert inlist(region_string, 								///
 					"East Midlands", 						///
@@ -422,7 +423,8 @@ assert inlist(region_string, 								///
 					"South East", 							///
 					"South West",							///
 					"West Midlands", 						///
-					"Yorkshire and The Humber") 
+					"Yorkshire and The Humber"				///
+					"") 
 gen region = 1 if region_string=="East Midlands"
 replace region = 2 if region_string=="East"
 replace region = 3 if region_string=="London"
@@ -432,6 +434,7 @@ replace region = 6 if region_string=="South East"
 replace region = 7 if region_string=="South West"
 replace region = 8 if region_string=="West Midlands"
 replace region = 9 if region_string=="Yorkshire and The Humber"
+replace region = 10 if region_string==""
 
 label define region 	1 "East Midlands" 					///
 						2 "East"   							///
@@ -441,10 +444,12 @@ label define region 	1 "East Midlands" 					///
 						6 "South East" 						///
 						7 "South West"						///
 						8 "West Midlands" 					///
-						9 "Yorkshire and The Humber"
+						9 "Yorkshire and The Humber"		///
+						10 "Missing"
 label values region region
 label var region "Region"
 safetab region
+drop if region==10
 
 * STP
 rename stp stp_old
