@@ -354,6 +354,8 @@ safetab calendar_period, m
 
 ** Covariates
 * Age
+safetab age
+safecount
 recode 	age 			min/39.9999=1 	///
 						40/49.9999=2 	///
 						50/59.9999=3 	///
@@ -414,17 +416,6 @@ safetab ethnicity1, m
 * Region
 * Need to clarify why region is missing for some people
 rename region region_string
-assert inlist(region_string, 								///
-					"East Midlands", 						///
-					"East",  								///
-					"London", 								///
-					"North East", 							///
-					"North West", 							///
-					"South East", 							///
-					"South West",							///
-					"West Midlands", 						///
-					"Yorkshire and The Humber"				///
-					"") 
 gen region = 1 if region_string=="East Midlands"
 replace region = 2 if region_string=="East"
 replace region = 3 if region_string=="London"
