@@ -440,7 +440,6 @@ label define region 	1 "East Midlands" 					///
 label values region region
 label var region "Region"
 safetab region
-tab region stp
 drop if region==10
 
 * STP
