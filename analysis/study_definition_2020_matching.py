@@ -39,6 +39,7 @@ study = StudyDefinition(
         AND (age >=18)
         AND (sex = "M" OR sex = "F")
         AND imd > 0
+        AND NOT stp = ""
         AND NOT deceased = "1"
         AND NOT baseline_krt_primary_care = "1"
         AND NOT baseline_krt_icd_10 = "1"
