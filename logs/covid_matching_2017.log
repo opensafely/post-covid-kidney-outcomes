@@ -2,43 +2,43 @@
       name:  <unnamed>
        log:  /workspace/logs/covid_matching_2017.log
   log type:  text
- opened on:   2 Nov 2022, 12:22:35
+ opened on:  21 Nov 2022, 21:58:10
 
 . clear
 
 . 
 . import delimited ./output/input_covid_matching.csv, delimiter(comma) varnames
 > (1) case(preserve) 
-(53 vars, 50,000 obs)
+(52 vars, 50,000 obs)
 
 . 
 . **Exclusions
 . * Age <18
 . drop if age <18
-(10,489 observations deleted)
+(10,598 observations deleted)
 
 . 
 . * Anyone not registered at one practice for 3 months before COVID-19 diagnosi
 > s
 . drop if has_follow_up==0
-(1,989 observations deleted)
+(1,979 observations deleted)
 
 . drop has_follow_up
 
 . 
 . * Pre-existing kidney replacement therapy
 . drop if baseline_krt_primary_care==1
-(1,878 observations deleted)
+(1,904 observations deleted)
 
 . drop baseline_krt_primary_care
 
 . drop if baseline_krt_icd_10==1
-(1,777 observations deleted)
+(1,753 observations deleted)
 
 . drop baseline_krt_icd_10
 
 . drop if baseline_krt_opcs_4==1
-(1,706 observations deleted)
+(1,702 observations deleted)
 
 . drop baseline_krt_opcs_4
 
@@ -59,64 +59,64 @@
 . 
 . replace baseline_creatinine_feb2020 = . if !inrange(baseline_creatinine_feb20
 > 20, 20, 3000)
-(14,143 real changes made, 14,143 to missing)
+(14,030 real changes made, 14,030 to missing)
 
 . gen mgdl_baseline_creatinine_feb2020 = baseline_creatinine_feb2020/88.4
-(14,143 missing values generated)
+(14,030 missing values generated)
 
 . gen min_baseline_creatinine_feb2020=.
-(32,161 missing values generated)
+(32,064 missing values generated)
 
 . replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
 > 7 if male==0
-(9,156 real changes made)
+(9,285 real changes made)
 
 . replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
 > 9 if male==1
-(8,862 real changes made)
+(8,749 real changes made)
 
 . replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
 > 329  if male==0
-(9,156 real changes made)
+(9,285 real changes made)
 
 . replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
 > 411  if male==1
-(8,862 real changes made)
+(8,749 real changes made)
 
 . replace min_baseline_creatinine_feb2020 = 1 if min_baseline_creatinine_feb202
 > 0<1
-(11,384 real changes made)
+(11,424 real changes made)
 
 . gen max_baseline_creatinine_feb2020=.
-(32,161 missing values generated)
+(32,064 missing values generated)
 
 . replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
 > 7 if male==0
-(9,156 real changes made)
+(9,285 real changes made)
 
 . replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
 > 9 if male==1
-(8,862 real changes made)
+(8,749 real changes made)
 
 . replace max_baseline_creatinine_feb2020 = max_baseline_creatinine_feb2020^-1.
 > 209
-(18,018 real changes made)
+(18,034 real changes made)
 
 . replace max_baseline_creatinine_feb2020 = 1 if max_baseline_creatinine_feb202
 > 0>1
-(20,777 real changes made)
+(20,640 real changes made)
 
 . gen egfr_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020*max_ba
 > seline_creatinine_feb2020*141
-(14,143 missing values generated)
+(14,030 missing values generated)
 
 . replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*(
 > 0.993^age)
-(18,018 real changes made)
+(18,034 real changes made)
 
 . replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*1
 > .018 if male==0
-(9,156 real changes made)
+(9,285 real changes made)
 
 . drop if egfr_baseline_creatinine_feb2020 <15
 (0 observations deleted)
@@ -133,12 +133,12 @@
 . * Baseline eGFR <15 at time of COVID diagnosis using baseline creatinine upda
 > ted monthly
 . gen covid_date = date(covid_diagnosis_date, "YMD")
-(14,376 missing values generated)
+(14,605 missing values generated)
 
 . format covid_date %td
 
 . drop if covid_date ==.
-(14,376 observations deleted)
+(14,605 observations deleted)
 
 . drop sgss_positive_date
 
@@ -247,502 +247,502 @@
  20. drop min_`baseline_creatinine_monthly'
  21. drop max_`baseline_creatinine_monthly'
  22. }
-(7,793 real changes made, 7,793 to missing)
-(7,793 missing values generated)
-(17,785 missing values generated)
-(5,058 real changes made)
-(4,934 real changes made)
-(5,058 real changes made)
-(4,934 real changes made)
-(6,311 real changes made)
-(17,785 missing values generated)
-(5,058 real changes made)
-(4,934 real changes made)
-(9,992 real changes made)
-(11,474 real changes made)
-(7,793 missing values generated)
-(9,992 real changes made)
-(5,058 real changes made)
-(7,831 real changes made, 7,831 to missing)
-(7,831 missing values generated)
-(17,785 missing values generated)
-(5,084 real changes made)
-(4,870 real changes made)
-(5,084 real changes made)
-(4,870 real changes made)
-(6,313 real changes made)
-(17,785 missing values generated)
-(5,084 real changes made)
-(4,870 real changes made)
-(9,954 real changes made)
-(11,472 real changes made)
-(7,831 missing values generated)
-(9,954 real changes made)
-(5,084 real changes made)
-(7,863 real changes made, 7,863 to missing)
-(7,863 missing values generated)
-(17,785 missing values generated)
-(5,046 real changes made)
+(7,673 real changes made, 7,673 to missing)
+(7,673 missing values generated)
+(17,459 missing values generated)
+(5,010 real changes made)
+(4,776 real changes made)
+(5,010 real changes made)
+(4,776 real changes made)
+(6,149 real changes made)
+(17,459 missing values generated)
+(5,010 real changes made)
+(4,776 real changes made)
+(9,786 real changes made)
+(11,310 real changes made)
+(7,673 missing values generated)
+(9,786 real changes made)
+(5,010 real changes made)
+(7,629 real changes made, 7,629 to missing)
+(7,629 missing values generated)
+(17,459 missing values generated)
+(4,944 real changes made)
+(4,886 real changes made)
+(4,944 real changes made)
+(4,886 real changes made)
+(6,188 real changes made)
+(17,459 missing values generated)
+(4,944 real changes made)
+(4,886 real changes made)
+(9,830 real changes made)
+(11,271 real changes made)
+(7,629 missing values generated)
+(9,830 real changes made)
+(4,944 real changes made)
+(7,580 real changes made, 7,580 to missing)
+(7,580 missing values generated)
+(17,459 missing values generated)
+(5,039 real changes made)
+(4,840 real changes made)
+(5,039 real changes made)
+(4,840 real changes made)
+(6,193 real changes made)
+(17,459 missing values generated)
+(5,039 real changes made)
+(4,840 real changes made)
+(9,879 real changes made)
+(11,266 real changes made)
+(7,580 missing values generated)
+(9,879 real changes made)
+(5,039 real changes made)
+(7,622 real changes made, 7,622 to missing)
+(7,622 missing values generated)
+(17,459 missing values generated)
+(5,011 real changes made)
+(4,826 real changes made)
+(5,011 real changes made)
+(4,826 real changes made)
+(6,277 real changes made)
+(17,459 missing values generated)
+(5,011 real changes made)
+(4,826 real changes made)
+(9,837 real changes made)
+(11,182 real changes made)
+(7,622 missing values generated)
+(9,837 real changes made)
+(5,011 real changes made)
+(7,737 real changes made, 7,737 to missing)
+(7,737 missing values generated)
+(17,459 missing values generated)
+(4,946 real changes made)
+(4,776 real changes made)
+(4,946 real changes made)
+(4,776 real changes made)
+(6,159 real changes made)
+(17,459 missing values generated)
+(4,946 real changes made)
+(4,776 real changes made)
+(9,722 real changes made)
+(11,300 real changes made)
+(7,737 missing values generated)
+(9,722 real changes made)
+(4,946 real changes made)
+(7,643 real changes made, 7,643 to missing)
+(7,643 missing values generated)
+(17,459 missing values generated)
+(4,997 real changes made)
+(4,819 real changes made)
+(4,997 real changes made)
+(4,819 real changes made)
+(6,168 real changes made)
+(17,459 missing values generated)
+(4,997 real changes made)
+(4,819 real changes made)
+(9,816 real changes made)
+(11,291 real changes made)
+(7,643 missing values generated)
+(9,816 real changes made)
+(4,997 real changes made)
+(7,774 real changes made, 7,774 to missing)
+(7,774 missing values generated)
+(17,459 missing values generated)
+(4,922 real changes made)
+(4,763 real changes made)
+(4,922 real changes made)
+(4,763 real changes made)
+(6,128 real changes made)
+(17,459 missing values generated)
+(4,922 real changes made)
+(4,763 real changes made)
+(9,685 real changes made)
+(11,331 real changes made)
+(7,774 missing values generated)
+(9,685 real changes made)
+(4,922 real changes made)
+(7,721 real changes made, 7,721 to missing)
+(7,721 missing values generated)
+(17,459 missing values generated)
+(4,979 real changes made)
+(4,759 real changes made)
+(4,979 real changes made)
+(4,759 real changes made)
+(6,168 real changes made)
+(17,459 missing values generated)
+(4,979 real changes made)
+(4,759 real changes made)
+(9,738 real changes made)
+(11,291 real changes made)
+(7,721 missing values generated)
+(9,738 real changes made)
+(4,979 real changes made)
+(7,665 real changes made, 7,665 to missing)
+(7,665 missing values generated)
+(17,459 missing values generated)
+(5,066 real changes made)
+(4,728 real changes made)
+(5,066 real changes made)
+(4,728 real changes made)
+(6,291 real changes made)
+(17,459 missing values generated)
+(5,066 real changes made)
+(4,728 real changes made)
+(9,794 real changes made)
+(11,168 real changes made)
+(7,665 missing values generated)
+(9,794 real changes made)
+(5,066 real changes made)
+(7,690 real changes made, 7,690 to missing)
+(7,690 missing values generated)
+(17,459 missing values generated)
+(4,893 real changes made)
 (4,876 real changes made)
-(5,046 real changes made)
+(4,893 real changes made)
 (4,876 real changes made)
-(6,237 real changes made)
-(17,785 missing values generated)
-(5,046 real changes made)
+(6,164 real changes made)
+(17,459 missing values generated)
+(4,893 real changes made)
 (4,876 real changes made)
-(9,922 real changes made)
-(11,548 real changes made)
-(7,863 missing values generated)
-(9,922 real changes made)
-(5,046 real changes made)
-(7,960 real changes made, 7,960 to missing)
-(7,960 missing values generated)
-(17,785 missing values generated)
-(5,030 real changes made)
-(4,795 real changes made)
-(5,030 real changes made)
-(4,795 real changes made)
-(6,317 real changes made)
-(17,785 missing values generated)
-(5,030 real changes made)
-(4,795 real changes made)
-(9,825 real changes made)
-(11,468 real changes made)
-(7,960 missing values generated)
-(9,825 real changes made)
-(5,030 real changes made)
-(7,815 real changes made, 7,815 to missing)
-(7,815 missing values generated)
-(17,785 missing values generated)
-(5,101 real changes made)
-(4,869 real changes made)
-(5,101 real changes made)
-(4,869 real changes made)
-(6,335 real changes made)
-(17,785 missing values generated)
-(5,101 real changes made)
-(4,869 real changes made)
-(9,970 real changes made)
-(11,450 real changes made)
-(7,815 missing values generated)
-(9,970 real changes made)
-(5,101 real changes made)
-(7,844 real changes made, 7,844 to missing)
-(7,844 missing values generated)
-(17,785 missing values generated)
-(5,073 real changes made)
-(4,868 real changes made)
-(5,073 real changes made)
-(4,868 real changes made)
-(6,288 real changes made)
-(17,785 missing values generated)
-(5,073 real changes made)
-(4,868 real changes made)
-(9,941 real changes made)
-(11,497 real changes made)
-(7,844 missing values generated)
-(9,941 real changes made)
-(5,073 real changes made)
-(7,874 real changes made, 7,874 to missing)
-(7,874 missing values generated)
-(17,785 missing values generated)
-(5,063 real changes made)
-(4,848 real changes made)
-(5,063 real changes made)
-(4,848 real changes made)
-(6,247 real changes made)
-(17,785 missing values generated)
-(5,063 real changes made)
-(4,848 real changes made)
-(9,911 real changes made)
-(11,538 real changes made)
-(7,874 missing values generated)
-(9,911 real changes made)
-(5,063 real changes made)
-(7,772 real changes made, 7,772 to missing)
-(7,772 missing values generated)
-(17,785 missing values generated)
-(5,099 real changes made)
-(4,914 real changes made)
-(5,099 real changes made)
-(4,914 real changes made)
-(6,344 real changes made)
-(17,785 missing values generated)
-(5,099 real changes made)
-(4,914 real changes made)
-(10,013 real changes made)
-(11,441 real changes made)
-(7,772 missing values generated)
-(10,013 real changes made)
-(5,099 real changes made)
+(9,769 real changes made)
+(11,295 real changes made)
+(7,690 missing values generated)
+(9,769 real changes made)
+(4,893 real changes made)
+(7,602 real changes made, 7,602 to missing)
+(7,602 missing values generated)
+(17,459 missing values generated)
+(5,064 real changes made)
+(4,793 real changes made)
+(5,064 real changes made)
+(4,793 real changes made)
+(6,244 real changes made)
+(17,459 missing values generated)
+(5,064 real changes made)
+(4,793 real changes made)
+(9,857 real changes made)
+(11,215 real changes made)
+(7,602 missing values generated)
+(9,857 real changes made)
+(5,064 real changes made)
 (7,727 real changes made, 7,727 to missing)
 (7,727 missing values generated)
-(17,785 missing values generated)
-(5,107 real changes made)
-(4,951 real changes made)
-(5,107 real changes made)
-(4,951 real changes made)
-(6,384 real changes made)
-(17,785 missing values generated)
-(5,107 real changes made)
-(4,951 real changes made)
-(10,058 real changes made)
-(11,401 real changes made)
+(17,459 missing values generated)
+(4,948 real changes made)
+(4,784 real changes made)
+(4,948 real changes made)
+(4,784 real changes made)
+(6,110 real changes made)
+(17,459 missing values generated)
+(4,948 real changes made)
+(4,784 real changes made)
+(9,732 real changes made)
+(11,349 real changes made)
 (7,727 missing values generated)
-(10,058 real changes made)
-(5,107 real changes made)
-(7,840 real changes made, 7,840 to missing)
-(7,840 missing values generated)
-(17,785 missing values generated)
-(5,117 real changes made)
-(4,828 real changes made)
-(5,117 real changes made)
-(4,828 real changes made)
-(6,349 real changes made)
-(17,785 missing values generated)
-(5,117 real changes made)
-(4,828 real changes made)
-(9,945 real changes made)
-(11,436 real changes made)
-(7,840 missing values generated)
-(9,945 real changes made)
-(5,117 real changes made)
-(7,847 real changes made, 7,847 to missing)
-(7,847 missing values generated)
-(17,785 missing values generated)
-(5,039 real changes made)
-(4,899 real changes made)
-(5,039 real changes made)
-(4,899 real changes made)
-(6,308 real changes made)
-(17,785 missing values generated)
-(5,039 real changes made)
-(4,899 real changes made)
-(9,938 real changes made)
-(11,477 real changes made)
-(7,847 missing values generated)
-(9,938 real changes made)
-(5,039 real changes made)
-(7,849 real changes made, 7,849 to missing)
-(7,849 missing values generated)
-(17,785 missing values generated)
-(5,096 real changes made)
-(4,840 real changes made)
-(5,096 real changes made)
-(4,840 real changes made)
-(6,284 real changes made)
-(17,785 missing values generated)
-(5,096 real changes made)
-(4,840 real changes made)
-(9,936 real changes made)
-(11,501 real changes made)
-(7,849 missing values generated)
-(9,936 real changes made)
-(5,096 real changes made)
-(7,714 real changes made, 7,714 to missing)
-(7,714 missing values generated)
-(17,785 missing values generated)
-(5,084 real changes made)
-(4,987 real changes made)
-(5,084 real changes made)
-(4,987 real changes made)
-(6,377 real changes made)
-(17,785 missing values generated)
-(5,084 real changes made)
-(4,987 real changes made)
-(10,071 real changes made)
-(11,408 real changes made)
-(7,714 missing values generated)
-(10,071 real changes made)
-(5,084 real changes made)
-(7,698 real changes made, 7,698 to missing)
-(7,698 missing values generated)
-(17,785 missing values generated)
-(5,197 real changes made)
-(4,890 real changes made)
-(5,197 real changes made)
-(4,890 real changes made)
-(6,394 real changes made)
-(17,785 missing values generated)
-(5,197 real changes made)
-(4,890 real changes made)
-(10,087 real changes made)
-(11,391 real changes made)
-(7,698 missing values generated)
-(10,087 real changes made)
-(5,197 real changes made)
-(7,891 real changes made, 7,891 to missing)
-(7,891 missing values generated)
-(17,785 missing values generated)
-(5,100 real changes made)
-(4,794 real changes made)
-(5,100 real changes made)
-(4,794 real changes made)
-(6,350 real changes made)
-(17,785 missing values generated)
-(5,100 real changes made)
-(4,794 real changes made)
-(9,894 real changes made)
-(11,435 real changes made)
-(7,891 missing values generated)
-(9,894 real changes made)
-(5,100 real changes made)
-(7,763 real changes made, 7,763 to missing)
-(7,763 missing values generated)
-(17,785 missing values generated)
-(5,110 real changes made)
-(4,912 real changes made)
-(5,110 real changes made)
-(4,912 real changes made)
-(6,325 real changes made)
-(17,785 missing values generated)
-(5,110 real changes made)
-(4,912 real changes made)
-(10,022 real changes made)
-(11,460 real changes made)
-(7,763 missing values generated)
-(10,022 real changes made)
-(5,110 real changes made)
+(9,732 real changes made)
+(4,948 real changes made)
+(7,605 real changes made, 7,605 to missing)
+(7,605 missing values generated)
+(17,459 missing values generated)
+(5,020 real changes made)
+(4,834 real changes made)
+(5,020 real changes made)
+(4,834 real changes made)
+(6,278 real changes made)
+(17,459 missing values generated)
+(5,020 real changes made)
+(4,834 real changes made)
+(9,854 real changes made)
+(11,181 real changes made)
+(7,605 missing values generated)
+(9,854 real changes made)
+(5,020 real changes made)
+(7,706 real changes made, 7,706 to missing)
+(7,706 missing values generated)
+(17,459 missing values generated)
+(5,033 real changes made)
+(4,720 real changes made)
+(5,033 real changes made)
+(4,720 real changes made)
+(6,184 real changes made)
+(17,459 missing values generated)
+(5,033 real changes made)
+(4,720 real changes made)
+(9,753 real changes made)
+(11,275 real changes made)
+(7,706 missing values generated)
+(9,753 real changes made)
+(5,033 real changes made)
+(7,609 real changes made, 7,609 to missing)
+(7,609 missing values generated)
+(17,459 missing values generated)
+(5,027 real changes made)
+(4,823 real changes made)
+(5,027 real changes made)
+(4,823 real changes made)
+(6,156 real changes made)
+(17,459 missing values generated)
+(5,027 real changes made)
+(4,823 real changes made)
+(9,850 real changes made)
+(11,303 real changes made)
+(7,609 missing values generated)
+(9,850 real changes made)
+(5,027 real changes made)
+(7,718 real changes made, 7,718 to missing)
+(7,718 missing values generated)
+(17,459 missing values generated)
+(4,930 real changes made)
+(4,811 real changes made)
+(4,930 real changes made)
+(4,811 real changes made)
+(6,090 real changes made)
+(17,459 missing values generated)
+(4,930 real changes made)
+(4,811 real changes made)
+(9,741 real changes made)
+(11,369 real changes made)
+(7,718 missing values generated)
+(9,741 real changes made)
+(4,930 real changes made)
+(7,712 real changes made, 7,712 to missing)
+(7,712 missing values generated)
+(17,459 missing values generated)
+(4,950 real changes made)
+(4,797 real changes made)
+(4,950 real changes made)
+(4,797 real changes made)
+(6,144 real changes made)
+(17,459 missing values generated)
+(4,950 real changes made)
+(4,797 real changes made)
+(9,747 real changes made)
+(11,315 real changes made)
+(7,712 missing values generated)
+(9,747 real changes made)
+(4,950 real changes made)
+(7,733 real changes made, 7,733 to missing)
+(7,733 missing values generated)
+(17,459 missing values generated)
+(4,981 real changes made)
+(4,745 real changes made)
+(4,981 real changes made)
+(4,745 real changes made)
+(6,141 real changes made)
+(17,459 missing values generated)
+(4,981 real changes made)
+(4,745 real changes made)
+(9,726 real changes made)
+(11,318 real changes made)
+(7,733 missing values generated)
+(9,726 real changes made)
+(4,981 real changes made)
+(7,691 real changes made, 7,691 to missing)
+(7,691 missing values generated)
+(17,459 missing values generated)
+(4,960 real changes made)
+(4,808 real changes made)
+(4,960 real changes made)
+(4,808 real changes made)
+(6,263 real changes made)
+(17,459 missing values generated)
+(4,960 real changes made)
+(4,808 real changes made)
+(9,768 real changes made)
+(11,196 real changes made)
+(7,691 missing values generated)
+(9,768 real changes made)
+(4,960 real changes made)
 (7,750 real changes made, 7,750 to missing)
 (7,750 missing values generated)
-(17,785 missing values generated)
-(5,171 real changes made)
-(4,864 real changes made)
-(5,171 real changes made)
-(4,864 real changes made)
-(6,421 real changes made)
-(17,785 missing values generated)
-(5,171 real changes made)
-(4,864 real changes made)
-(10,035 real changes made)
-(11,364 real changes made)
+(17,459 missing values generated)
+(4,924 real changes made)
+(4,785 real changes made)
+(4,924 real changes made)
+(4,785 real changes made)
+(6,243 real changes made)
+(17,459 missing values generated)
+(4,924 real changes made)
+(4,785 real changes made)
+(9,709 real changes made)
+(11,216 real changes made)
 (7,750 missing values generated)
-(10,035 real changes made)
-(5,171 real changes made)
-(7,867 real changes made, 7,867 to missing)
-(7,867 missing values generated)
-(17,785 missing values generated)
-(5,043 real changes made)
-(4,875 real changes made)
-(5,043 real changes made)
-(4,875 real changes made)
-(6,334 real changes made)
-(17,785 missing values generated)
-(5,043 real changes made)
-(4,875 real changes made)
-(9,918 real changes made)
-(11,451 real changes made)
-(7,867 missing values generated)
-(9,918 real changes made)
-(5,043 real changes made)
-(7,786 real changes made, 7,786 to missing)
-(7,786 missing values generated)
-(17,785 missing values generated)
-(5,111 real changes made)
-(4,888 real changes made)
-(5,111 real changes made)
-(4,888 real changes made)
-(6,410 real changes made)
-(17,785 missing values generated)
-(5,111 real changes made)
-(4,888 real changes made)
-(9,999 real changes made)
-(11,375 real changes made)
-(7,786 missing values generated)
-(9,999 real changes made)
-(5,111 real changes made)
-(7,764 real changes made, 7,764 to missing)
-(7,764 missing values generated)
-(17,785 missing values generated)
-(5,091 real changes made)
-(4,930 real changes made)
-(5,091 real changes made)
-(4,930 real changes made)
-(6,283 real changes made)
-(17,785 missing values generated)
-(5,091 real changes made)
-(4,930 real changes made)
-(10,021 real changes made)
-(11,502 real changes made)
-(7,764 missing values generated)
-(10,021 real changes made)
-(5,091 real changes made)
-(7,851 real changes made, 7,851 to missing)
-(7,851 missing values generated)
-(17,785 missing values generated)
-(5,046 real changes made)
-(4,888 real changes made)
-(5,046 real changes made)
-(4,888 real changes made)
-(6,317 real changes made)
-(17,785 missing values generated)
-(5,046 real changes made)
-(4,888 real changes made)
-(9,934 real changes made)
-(11,468 real changes made)
-(7,851 missing values generated)
-(9,934 real changes made)
-(5,046 real changes made)
-(7,842 real changes made, 7,842 to missing)
-(7,842 missing values generated)
-(17,785 missing values generated)
-(5,017 real changes made)
-(4,926 real changes made)
-(5,017 real changes made)
-(4,926 real changes made)
-(6,257 real changes made)
-(17,785 missing values generated)
-(5,017 real changes made)
-(4,926 real changes made)
-(9,943 real changes made)
-(11,528 real changes made)
-(7,842 missing values generated)
-(9,943 real changes made)
-(5,017 real changes made)
-(7,801 real changes made, 7,801 to missing)
-(7,801 missing values generated)
-(17,785 missing values generated)
-(5,078 real changes made)
-(4,906 real changes made)
-(5,078 real changes made)
-(4,906 real changes made)
-(6,263 real changes made)
-(17,785 missing values generated)
-(5,078 real changes made)
-(4,906 real changes made)
-(9,984 real changes made)
-(11,522 real changes made)
-(7,801 missing values generated)
-(9,984 real changes made)
-(5,078 real changes made)
-(7,835 real changes made, 7,835 to missing)
-(7,835 missing values generated)
-(17,785 missing values generated)
-(5,094 real changes made)
-(4,856 real changes made)
-(5,094 real changes made)
-(4,856 real changes made)
-(6,364 real changes made)
-(17,785 missing values generated)
-(5,094 real changes made)
-(4,856 real changes made)
-(9,950 real changes made)
-(11,421 real changes made)
-(7,835 missing values generated)
-(9,950 real changes made)
-(5,094 real changes made)
-(7,740 real changes made, 7,740 to missing)
-(7,740 missing values generated)
-(17,785 missing values generated)
-(5,137 real changes made)
-(4,908 real changes made)
-(5,137 real changes made)
-(4,908 real changes made)
-(6,414 real changes made)
-(17,785 missing values generated)
-(5,137 real changes made)
-(4,908 real changes made)
-(10,045 real changes made)
-(11,371 real changes made)
-(7,740 missing values generated)
-(10,045 real changes made)
-(5,137 real changes made)
-(7,773 real changes made, 7,773 to missing)
-(7,773 missing values generated)
-(17,785 missing values generated)
-(5,130 real changes made)
-(4,882 real changes made)
-(5,130 real changes made)
-(4,882 real changes made)
-(6,405 real changes made)
-(17,785 missing values generated)
-(5,130 real changes made)
-(4,882 real changes made)
-(10,012 real changes made)
-(11,380 real changes made)
-(7,773 missing values generated)
-(10,012 real changes made)
-(5,130 real changes made)
-(7,780 real changes made, 7,780 to missing)
-(7,780 missing values generated)
-(17,785 missing values generated)
-(5,107 real changes made)
-(4,898 real changes made)
-(5,107 real changes made)
-(4,898 real changes made)
-(6,361 real changes made)
-(17,785 missing values generated)
-(5,107 real changes made)
-(4,898 real changes made)
-(10,005 real changes made)
-(11,424 real changes made)
-(7,780 missing values generated)
-(10,005 real changes made)
-(5,107 real changes made)
-(7,802 real changes made, 7,802 to missing)
-(7,802 missing values generated)
-(17,785 missing values generated)
-(5,086 real changes made)
-(4,897 real changes made)
-(5,086 real changes made)
-(4,897 real changes made)
-(6,308 real changes made)
-(17,785 missing values generated)
-(5,086 real changes made)
-(4,897 real changes made)
-(9,983 real changes made)
-(11,477 real changes made)
-(7,802 missing values generated)
-(9,983 real changes made)
-(5,086 real changes made)
-(7,893 real changes made, 7,893 to missing)
-(7,893 missing values generated)
-(17,785 missing values generated)
-(5,057 real changes made)
-(4,835 real changes made)
-(5,057 real changes made)
-(4,835 real changes made)
-(6,282 real changes made)
-(17,785 missing values generated)
-(5,057 real changes made)
-(4,835 real changes made)
-(9,892 real changes made)
-(11,503 real changes made)
-(7,893 missing values generated)
-(9,892 real changes made)
-(5,057 real changes made)
-(7,781 real changes made, 7,781 to missing)
-(7,781 missing values generated)
-(17,785 missing values generated)
-(5,086 real changes made)
+(9,709 real changes made)
+(4,924 real changes made)
+(7,753 real changes made, 7,753 to missing)
+(7,753 missing values generated)
+(17,459 missing values generated)
+(4,881 real changes made)
+(4,825 real changes made)
+(4,881 real changes made)
+(4,825 real changes made)
+(6,119 real changes made)
+(17,459 missing values generated)
+(4,881 real changes made)
+(4,825 real changes made)
+(9,706 real changes made)
+(11,340 real changes made)
+(7,753 missing values generated)
+(9,706 real changes made)
+(4,881 real changes made)
+(7,710 real changes made, 7,710 to missing)
+(7,710 missing values generated)
+(17,459 missing values generated)
 (4,918 real changes made)
-(5,086 real changes made)
+(4,831 real changes made)
 (4,918 real changes made)
-(6,401 real changes made)
-(17,785 missing values generated)
-(5,086 real changes made)
+(4,831 real changes made)
+(6,174 real changes made)
+(17,459 missing values generated)
 (4,918 real changes made)
-(10,004 real changes made)
-(11,384 real changes made)
-(7,781 missing values generated)
-(10,004 real changes made)
-(5,086 real changes made)
-(7,797 real changes made, 7,797 to missing)
-(7,797 missing values generated)
-(17,785 missing values generated)
-(5,057 real changes made)
-(4,931 real changes made)
-(5,057 real changes made)
-(4,931 real changes made)
-(6,303 real changes made)
-(17,785 missing values generated)
-(5,057 real changes made)
-(4,931 real changes made)
-(9,988 real changes made)
-(11,482 real changes made)
-(7,797 missing values generated)
-(9,988 real changes made)
-(5,057 real changes made)
+(4,831 real changes made)
+(9,749 real changes made)
+(11,285 real changes made)
+(7,710 missing values generated)
+(9,749 real changes made)
+(4,918 real changes made)
+(7,621 real changes made, 7,621 to missing)
+(7,621 missing values generated)
+(17,459 missing values generated)
+(5,002 real changes made)
+(4,836 real changes made)
+(5,002 real changes made)
+(4,836 real changes made)
+(6,168 real changes made)
+(17,459 missing values generated)
+(5,002 real changes made)
+(4,836 real changes made)
+(9,838 real changes made)
+(11,291 real changes made)
+(7,621 missing values generated)
+(9,838 real changes made)
+(5,002 real changes made)
+(7,672 real changes made, 7,672 to missing)
+(7,672 missing values generated)
+(17,459 missing values generated)
+(5,026 real changes made)
+(4,761 real changes made)
+(5,026 real changes made)
+(4,761 real changes made)
+(6,104 real changes made)
+(17,459 missing values generated)
+(5,026 real changes made)
+(4,761 real changes made)
+(9,787 real changes made)
+(11,355 real changes made)
+(7,672 missing values generated)
+(9,787 real changes made)
+(5,026 real changes made)
+(7,695 real changes made, 7,695 to missing)
+(7,695 missing values generated)
+(17,459 missing values generated)
+(4,962 real changes made)
+(4,802 real changes made)
+(4,962 real changes made)
+(4,802 real changes made)
+(6,132 real changes made)
+(17,459 missing values generated)
+(4,962 real changes made)
+(4,802 real changes made)
+(9,764 real changes made)
+(11,327 real changes made)
+(7,695 missing values generated)
+(9,764 real changes made)
+(4,962 real changes made)
+(7,649 real changes made, 7,649 to missing)
+(7,649 missing values generated)
+(17,459 missing values generated)
+(5,027 real changes made)
+(4,783 real changes made)
+(5,027 real changes made)
+(4,783 real changes made)
+(6,233 real changes made)
+(17,459 missing values generated)
+(5,027 real changes made)
+(4,783 real changes made)
+(9,810 real changes made)
+(11,226 real changes made)
+(7,649 missing values generated)
+(9,810 real changes made)
+(5,027 real changes made)
+(7,683 real changes made, 7,683 to missing)
+(7,683 missing values generated)
+(17,459 missing values generated)
+(5,001 real changes made)
+(4,775 real changes made)
+(5,001 real changes made)
+(4,775 real changes made)
+(6,144 real changes made)
+(17,459 missing values generated)
+(5,001 real changes made)
+(4,775 real changes made)
+(9,776 real changes made)
+(11,315 real changes made)
+(7,683 missing values generated)
+(9,776 real changes made)
+(5,001 real changes made)
+(7,651 real changes made, 7,651 to missing)
+(7,651 missing values generated)
+(17,459 missing values generated)
+(5,008 real changes made)
+(4,800 real changes made)
+(5,008 real changes made)
+(4,800 real changes made)
+(6,232 real changes made)
+(17,459 missing values generated)
+(5,008 real changes made)
+(4,800 real changes made)
+(9,808 real changes made)
+(11,227 real changes made)
+(7,651 missing values generated)
+(9,808 real changes made)
+(5,008 real changes made)
+(7,774 real changes made, 7,774 to missing)
+(7,774 missing values generated)
+(17,459 missing values generated)
+(4,944 real changes made)
+(4,741 real changes made)
+(4,944 real changes made)
+(4,741 real changes made)
+(6,141 real changes made)
+(17,459 missing values generated)
+(4,944 real changes made)
+(4,741 real changes made)
+(9,685 real changes made)
+(11,318 real changes made)
+(7,774 missing values generated)
+(9,685 real changes made)
+(4,944 real changes made)
+(7,691 real changes made, 7,691 to missing)
+(7,691 missing values generated)
+(17,459 missing values generated)
+(4,941 real changes made)
+(4,827 real changes made)
+(4,941 real changes made)
+(4,827 real changes made)
+(6,295 real changes made)
+(17,459 missing values generated)
+(4,941 real changes made)
+(4,827 real changes made)
+(9,768 real changes made)
+(11,164 real changes made)
+(7,691 missing values generated)
+(9,768 real changes made)
+(4,941 real changes made)
+(7,704 real changes made, 7,704 to missing)
+(7,704 missing values generated)
+(17,459 missing values generated)
+(4,991 real changes made)
+(4,764 real changes made)
+(4,991 real changes made)
+(4,764 real changes made)
+(6,186 real changes made)
+(17,459 missing values generated)
+(4,991 real changes made)
+(4,764 real changes made)
+(9,755 real changes made)
+(11,273 real changes made)
+(7,704 missing values generated)
+(9,755 real changes made)
+(4,991 real changes made)
 
 . 
 . gen covid_date_string=string(covid_date, "%td") 
@@ -751,7 +751,7 @@
 
 . 
 . gen baseline_egfr=.
-(17,785 missing values generated)
+(17,459 missing values generated)
 
 . local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep
 > 2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 
@@ -763,69 +763,69 @@
   3. drop if baseline_egfr <15
   4. drop egfr_baseline_creatinine_`x'
   5. }
-(340 real changes made)
+(350 real changes made)
 (0 observations deleted)
-(391 real changes made)
-(0 observations deleted)
-(378 real changes made)
-(0 observations deleted)
-(373 real changes made)
-(0 observations deleted)
-(359 real changes made)
+(353 real changes made)
 (0 observations deleted)
 (342 real changes made)
 (0 observations deleted)
-(382 real changes made)
-(0 observations deleted)
-(325 real changes made)
-(0 observations deleted)
-(344 real changes made)
-(0 observations deleted)
-(341 real changes made)
+(377 real changes made)
 (0 observations deleted)
 (327 real changes made)
 (0 observations deleted)
-(330 real changes made)
+(346 real changes made)
 (0 observations deleted)
-(295 real changes made)
+(341 real changes made)
 (0 observations deleted)
-(342 real changes made)
+(349 real changes made)
 (0 observations deleted)
-(316 real changes made)
+(332 real changes made)
 (0 observations deleted)
-(339 real changes made)
+(324 real changes made)
 (0 observations deleted)
-(318 real changes made)
+(361 real changes made)
 (0 observations deleted)
-(329 real changes made)
+(325 real changes made)
+(0 observations deleted)
+(273 real changes made)
 (0 observations deleted)
 (311 real changes made)
 (0 observations deleted)
-(296 real changes made)
-(0 observations deleted)
-(298 real changes made)
-(0 observations deleted)
-(276 real changes made)
-(0 observations deleted)
-(310 real changes made)
+(337 real changes made)
 (0 observations deleted)
 (300 real changes made)
 (0 observations deleted)
-(248 real changes made)
+(291 real changes made)
 (0 observations deleted)
-(267 real changes made)
+(302 real changes made)
 (0 observations deleted)
-(270 real changes made)
+(294 real changes made)
 (0 observations deleted)
-(257 real changes made)
+(295 real changes made)
 (0 observations deleted)
-(243 real changes made)
+(280 real changes made)
 (0 observations deleted)
-(261 real changes made)
+(289 real changes made)
 (0 observations deleted)
-(284 real changes made)
+(280 real changes made)
 (0 observations deleted)
-(257 real changes made)
+(276 real changes made)
+(0 observations deleted)
+(251 real changes made)
+(0 observations deleted)
+(299 real changes made)
+(0 observations deleted)
+(272 real changes made)
+(0 observations deleted)
+(260 real changes made)
+(0 observations deleted)
+(245 real changes made)
+(0 observations deleted)
+(234 real changes made)
+(0 observations deleted)
+(258 real changes made)
+(0 observations deleted)
+(200 real changes made)
 (0 observations deleted)
 
 . drop baseline_egfr
@@ -835,15 +835,9 @@
 . 
 . * COVID-19 death
 . drop if deceased==1
-(1,808 observations deleted)
+(1,786 observations deleted)
 
 . drop deceased
-
-. 
-. **Covariates
-. * IMD
-. drop if imd>=.
-(0 observations deleted)
 
 . 
 . **Drop disaggregated krt_outcome variables
@@ -859,158 +853,142 @@
 
         age |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-         18 |        214        1.34        1.34
-         19 |        205        1.28        2.62
-         20 |        267        1.67        4.29
-         21 |        278        1.74        6.03
-         22 |        267        1.67        7.70
-         23 |        280        1.75        9.46
-         24 |        275        1.72       11.18
-         25 |        269        1.68       12.86
-         26 |        282        1.77       14.63
-         27 |        294        1.84       16.47
-         28 |        276        1.73       18.19
-         29 |        276        1.73       19.92
-         30 |        279        1.75       21.67
-         31 |        297        1.86       23.53
-         32 |        278        1.74       25.27
-         33 |        265        1.66       26.93
-         34 |        274        1.71       28.64
-         35 |        290        1.82       30.46
-         36 |        265        1.66       32.11
-         37 |        257        1.61       33.72
-         38 |        245        1.53       35.26
-         39 |        275        1.72       36.98
-         40 |        269        1.68       38.66
-         41 |        255        1.60       40.26
-         42 |        247        1.55       41.80
-         43 |        246        1.54       43.34
-         44 |        224        1.40       44.75
-         45 |        283        1.77       46.52
-         46 |        319        2.00       48.51
-         47 |        288        1.80       50.32
-         48 |        265        1.66       51.97
-         49 |        288        1.80       53.78
-         50 |        293        1.83       55.61
-         51 |        258        1.61       57.23
-         52 |        294        1.84       59.07
-         53 |        289        1.81       60.88
-         54 |        263        1.65       62.52
-         55 |        259        1.62       64.14
-         56 |        239        1.50       65.64
-         57 |        277        1.73       67.37
-         58 |        249        1.56       68.93
-         59 |        273        1.71       70.64
-         60 |        223        1.40       72.03
-         61 |        227        1.42       73.46
-         62 |        202        1.26       74.72
-         63 |        189        1.18       75.90
-         64 |        221        1.38       77.29
-         65 |        217        1.36       78.64
-         66 |        199        1.25       79.89
-         67 |        179        1.12       81.01
-         68 |        208        1.30       82.31
-         69 |        218        1.36       83.68
-         70 |        200        1.25       84.93
-         71 |        188        1.18       86.11
-         72 |        175        1.10       87.20
-         73 |        193        1.21       88.41
-         74 |        203        1.27       89.68
-         75 |        116        0.73       90.40
-         76 |        118        0.74       91.14
-         77 |        139        0.87       92.01
-         78 |        146        0.91       92.93
-         79 |        153        0.96       93.88
-         80 |         99        0.62       94.50
-         81 |        101        0.63       95.14
-         82 |         95        0.59       95.73
-         83 |        111        0.69       96.43
-         84 |        108        0.68       97.10
-         85 |         61        0.38       97.48
-         86 |         56        0.35       97.83
-         87 |         77        0.48       98.32
-         88 |         49        0.31       98.62
-         89 |         62        0.39       99.01
-         90 |         22        0.14       99.15
-         91 |         24        0.15       99.30
-         92 |         22        0.14       99.44
-         93 |         30        0.19       99.62
-         94 |         20        0.13       99.75
-         95 |          8        0.05       99.80
-         96 |          5        0.03       99.83
-         97 |          6        0.04       99.87
-         98 |          8        0.05       99.92
-         99 |          5        0.03       99.95
-        100 |          1        0.01       99.96
-        101 |          2        0.01       99.97
-        102 |          1        0.01       99.97
-        103 |          2        0.01       99.99
-        108 |          1        0.01       99.99
-        109 |          1        0.01      100.00
+         18 |        239        1.52        1.52
+         19 |        205        1.31        2.83
+         20 |        269        1.72        4.55
+         21 |        247        1.58        6.13
+         22 |        249        1.59        7.71
+         23 |        245        1.56        9.28
+         24 |        234        1.49       10.77
+         25 |        264        1.68       12.45
+         26 |        259        1.65       14.11
+         27 |        251        1.60       15.71
+         28 |        288        1.84       17.55
+         29 |        276        1.76       19.31
+         30 |        286        1.82       21.13
+         31 |        268        1.71       22.84
+         32 |        253        1.61       24.46
+         33 |        278        1.77       26.23
+         34 |        262        1.67       27.90
+         35 |        260        1.66       29.56
+         36 |        256        1.63       31.19
+         37 |        259        1.65       32.85
+         38 |        252        1.61       34.45
+         39 |        274        1.75       36.20
+         40 |        233        1.49       37.69
+         41 |        251        1.60       39.29
+         42 |        258        1.65       40.94
+         43 |        275        1.75       42.69
+         44 |        216        1.38       44.07
+         45 |        259        1.65       45.72
+         46 |        263        1.68       47.40
+         47 |        272        1.74       49.14
+         48 |        251        1.60       50.74
+         49 |        284        1.81       52.55
+         50 |        286        1.82       54.37
+         51 |        268        1.71       56.08
+         52 |        305        1.95       58.03
+         53 |        303        1.93       59.96
+         54 |        267        1.70       61.67
+         55 |        267        1.70       63.37
+         56 |        236        1.51       64.88
+         57 |        263        1.68       66.55
+         58 |        241        1.54       68.09
+         59 |        284        1.81       69.90
+         60 |        240        1.53       71.43
+         61 |        202        1.29       72.72
+         62 |        220        1.40       74.13
+         63 |        191        1.22       75.35
+         64 |        226        1.44       76.79
+         65 |        210        1.34       78.13
+         66 |        207        1.32       79.45
+         67 |        213        1.36       80.81
+         68 |        191        1.22       82.03
+         69 |        223        1.42       83.45
+         70 |        200        1.28       84.73
+         71 |        180        1.15       85.87
+         72 |        213        1.36       87.23
+         73 |        193        1.23       88.46
+         74 |        205        1.31       89.77
+         75 |        139        0.89       90.66
+         76 |        140        0.89       91.55
+         77 |        104        0.66       92.22
+         78 |        141        0.90       93.12
+         79 |        140        0.89       94.01
+         80 |         88        0.56       94.57
+         81 |        108        0.69       95.26
+         82 |        112        0.71       95.97
+         83 |         93        0.59       96.57
+         84 |         96        0.61       97.18
+         85 |         53        0.34       97.52
+         86 |         47        0.30       97.82
+         87 |         64        0.41       98.23
+         88 |         62        0.40       98.62
+         89 |         55        0.35       98.97
+         90 |         31        0.20       99.17
+         91 |         32        0.20       99.37
+         92 |         17        0.11       99.48
+         93 |         27        0.17       99.66
+         94 |         22        0.14       99.80
+         95 |          6        0.04       99.83
+         96 |          5        0.03       99.87
+         97 |          6        0.04       99.90
+         98 |          6        0.04       99.94
+         99 |          6        0.04       99.98
+        101 |          1        0.01       99.99
+        106 |          1        0.01       99.99
+        107 |          1        0.01      100.00
 ------------+-----------------------------------
-      Total |     15,977      100.00
-
-. tab imd
-
-        imd |      Freq.     Percent        Cum.
-------------+-----------------------------------
-          0 |        774        4.84        4.84
-          1 |      3,019       18.90       23.74
-          2 |      3,097       19.38       43.12
-          3 |      3,053       19.11       62.23
-          4 |      2,994       18.74       80.97
-          5 |      3,040       19.03      100.00
-------------+-----------------------------------
-      Total |     15,977      100.00
+      Total |     15,673      100.00
 
 . tab male
 
    Sex (0=F |
        1=M) |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-     Female |      8,112       50.77       50.77
-       Male |      7,865       49.23      100.00
+     Female |      7,967       50.83       50.83
+       Male |      7,706       49.17      100.00
 ------------+-----------------------------------
-      Total |     15,977      100.00
+      Total |     15,673      100.00
 
 . tab covid_month
 
 covid_month |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-    apr2020 |        598        3.74        3.74
-    apr2021 |        508        3.18        6.92
-    apr2022 |        438        2.74        9.66
-    aug2020 |        595        3.72       13.39
-    aug2021 |        478        2.99       16.38
-    aug2022 |        449        2.81       19.19
-    dec2020 |        527        3.30       22.49
-    dec2021 |        482        3.02       25.51
-    feb2020 |        522        3.27       28.77
-    feb2021 |        479        3.00       31.77
-    feb2022 |        398        2.49       34.26
-    jan2021 |        536        3.35       37.62
-    jan2022 |        456        2.85       40.47
-    jul2020 |        551        3.45       43.92
-    jul2021 |        507        3.17       47.09
-    jul2022 |        415        2.60       49.69
-    jun2020 |        569        3.56       53.25
-    jun2021 |        494        3.09       56.34
-    jun2022 |        393        2.46       58.80
-    mar2020 |        623        3.90       62.70
-    mar2021 |        542        3.39       66.10
-    mar2022 |        434        2.72       68.81
-    may2020 |        603        3.77       72.59
-    may2021 |        520        3.25       75.84
-    may2022 |        438        2.74       78.58
-    nov2020 |        526        3.29       81.87
-    nov2021 |        460        2.88       84.75
-    oct2020 |        554        3.47       88.22
-    oct2021 |        469        2.94       91.16
-    sep2020 |        529        3.31       94.47
-    sep2021 |        478        2.99       97.46
-    sep2022 |        406        2.54      100.00
+    apr2020 |        560        3.57        3.57
+    apr2021 |        535        3.41        6.99
+    apr2022 |        440        2.81        9.79
+    aug2020 |        571        3.64       13.44
+    aug2021 |        481        3.07       16.51
+    aug2022 |        435        2.78       19.28
+    dec2020 |        560        3.57       22.85
+    dec2021 |        474        3.02       25.88
+    feb2020 |        562        3.59       29.46
+    feb2021 |        428        2.73       32.20
+    feb2022 |        398        2.54       34.73
+    jan2021 |        537        3.43       38.16
+    jan2022 |        471        3.01       41.17
+    jul2020 |        572        3.65       44.82
+    jul2021 |        496        3.16       47.98
+    jul2022 |        398        2.54       50.52
+    jun2020 |        550        3.51       54.03
+    jun2021 |        449        2.86       56.89
+    jun2022 |        409        2.61       59.50
+    mar2020 |        556        3.55       63.05
+    mar2021 |        518        3.31       66.36
+    mar2022 |        482        3.08       69.43
+    may2020 |        564        3.60       73.03
+    may2021 |        483        3.08       76.11
+    may2022 |        407        2.60       78.71
+    nov2020 |        519        3.31       82.02
+    nov2021 |        442        2.82       84.84
+    oct2020 |        538        3.43       88.27
+    oct2021 |        456        2.91       91.18
+    sep2020 |        555        3.54       94.72
+    sep2021 |        478        3.05       97.77
+    sep2022 |        349        2.23      100.00
 ------------+-----------------------------------
-      Total |     15,977      100.00
+      Total |     15,673      100.00
 
 . 
 . export delimited using "./output/covid_matching_2017.csv", replace
@@ -1022,5 +1000,5 @@ file ./output/covid_matching_2017.csv saved
       name:  <unnamed>
        log:  /workspace/logs/covid_matching_2017.log
   log type:  text
- closed on:   2 Nov 2022, 12:22:39
+ closed on:  21 Nov 2022, 21:58:13
 -------------------------------------------------------------------------------

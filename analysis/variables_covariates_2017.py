@@ -48,6 +48,7 @@ def generate_covariates_2017(index_date_variable):
                 }
             },
         },
+
     ),
     region=patients.registered_practice_as_of(
         "case_index_date",
@@ -69,6 +70,18 @@ def generate_covariates_2017(index_date_variable):
             },
         },
     ),
+    stp_updated=patients.registered_practice_as_of(
+        "case_index_date",
+        returning="stp_code",
+        return_expectations={
+            "rate": "universal",
+            "category": {
+                "ratios": {
+                    "STP1": 1.0,
+                    }
+                },
+            },
+        ),
 
     ethnicity=patients.with_these_clinical_events(
         ethnicity_codes,
@@ -81,7 +94,7 @@ def generate_covariates_2017(index_date_variable):
         },
     ),
     rural_urban=patients.address_as_of(
-        "index_date",
+        "case_index_date",
         returning="rural_urban_classification",
         return_expectations={
             "rate": "universal",

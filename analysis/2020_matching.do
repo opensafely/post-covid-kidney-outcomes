@@ -55,10 +55,6 @@ drop egfr_baseline_creatinine_feb2020
 drop if deceased==1
 drop deceased
 
-**Covariates
-* IMD
-drop if imd>=.
-
 **Drop excess variables
 drop krt_outcome_primary_care
 drop krt_outcome_icd_10
@@ -69,7 +65,6 @@ drop hospital_covid_date
 
 *Tabulate variables
 tab age
-tab imd
 tab male
 
 gen covid_date = date(covid_diagnosis_date, "YMD")

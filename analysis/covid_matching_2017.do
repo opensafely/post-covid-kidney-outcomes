@@ -129,10 +129,6 @@ drop covid_date_string
 drop if deceased==1
 drop deceased
 
-**Covariates
-* IMD
-drop if imd>=.
-
 **Drop disaggregated krt_outcome variables
 drop krt_outcome_primary_care
 drop krt_outcome_icd_10
@@ -140,7 +136,6 @@ drop krt_outcome_opcs_4
 
 *Tabulate variables
 tab age
-tab imd
 tab male
 tab covid_month
 

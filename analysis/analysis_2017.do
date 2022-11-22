@@ -21,7 +21,7 @@ safecount
 * Import COVID-19 dataset comprising individuals matched with historical comparators (limited matching variables only)
 capture noisily import delimited ./output/input_combined_stps_covid_2017.csv, clear
 * Drop age & covid_diagnosis_date
-keep patient_id death_date date_deregistered imd stp krt_outcome_date male covid_date covid_month set_id case match_counts
+keep patient_id death_date date_deregistered stp krt_outcome_date male covid_date covid_month set_id case match_counts
 tempfile covid_2017_matched
 * For dummy data, should do nothing in the real data
 duplicates drop patient_id, force
@@ -31,7 +31,7 @@ count
 * Import matched historical comparators (limited matching variables only)
 capture noisily import delimited ./output/input_combined_stps_matches_2017.csv, clear
 * Drop age
-keep patient_id death_date date_deregistered imd stp krt_outcome_date male set_id case covid_date
+keep patient_id death_date date_deregistered stp krt_outcome_date male set_id case covid_date
 tempfile 2017_matched
 * For dummy data, should do nothing in the real data
 duplicates drop patient_id, force
@@ -88,6 +88,54 @@ preserve
 restore
 
 ** Exclusions
+* Index of multiple deprivation missing
+* Ordered 1-5 from most deprived to least deprived
+label define imd 1 "1 Most deprived" 2 "2" 3 "3" 4 "4" 5 "5 Least deprived"
+label values imd imd
+tab imd, m
+drop if imd==.
+drop if imd==0
+safetab imd
+
+* STP missing
+drop stp
+tab stp_updated
+drop if stp_updated==""
+bysort stp_updated: gen stp = 1 if _n==1
+replace stp = sum(stp)
+drop stp_updated
+label values stp stp
+label var stp "STP"
+safetab stp
+
+* Region missing
+rename region region_string
+gen region = 1 if region_string=="East Midlands"
+replace region = 2 if region_string=="East"
+replace region = 3 if region_string=="London"
+replace region = 4 if region_string=="North East"
+replace region = 5 if region_string=="North West"
+replace region = 6 if region_string=="South East"
+replace region = 7 if region_string=="South West"
+replace region = 8 if region_string=="West Midlands"
+replace region = 9 if region_string=="Yorkshire and The Humber"
+replace region = 10 if region_string==""
+label define region 	1 "East Midlands" 					///
+						2 "East"   							///
+						3 "London" 							///
+						4 "North East" 						///
+						5 "North West" 						///
+						6 "South East" 						///
+						7 "South West"						///
+						8 "West Midlands" 					///
+						9 "Yorkshire and The Humber"		///
+						10 "Missing"
+label values region region
+label var region "Region"
+tab region
+drop if region==10
+safetab region
+
 * Exclusions due to deregistration and kidney replacement therapy will be checked (should already have been applied from previous steps in workflow)
 gen index_date = date(case_index_date, "YMD")
 format index_date %td
@@ -219,7 +267,7 @@ drop if baseline_egfr <15
 * Drop COVID-19 cases without any matched historical comparators after further application of exclusion criteria
 generate match_counts1=.
 order patient_id set_id match_counts match_counts1
-by set_id: replace match_counts1=_N-1
+bysort set_id: replace match_counts1=_N-1
 replace match_counts1=. if case==0
 drop match_counts
 rename match_counts1 match_counts
@@ -340,7 +388,7 @@ replace calendar_period = 7 if covid_month=="jul2022"
 replace calendar_period = 7 if covid_month=="aug2022"
 replace calendar_period = 7 if covid_month=="sep2022"
 replace calendar_period = 0 if case==0
-label define calendar_period	0 "Historical comparator"		///
+label define calendar_period	0 "Historical comparator"	///
 								1 "Feb20-Jun20 SARS-CoV-2"	///
 								2 "Jul20-Aug20 SARS-CoV-2"	///
 								3 "Sep20-Nov20 SARS-CoV-2"	///
@@ -354,7 +402,7 @@ safetab calendar_period, m
 
 ** Covariates
 * Age
-safetab age
+tab age
 safecount
 recode 	age 			min/39.9999=1 	///
 						40/49.9999=2 	///
@@ -412,47 +460,6 @@ label define ethnicity1	1 "White"  					///
 						6 "Unknown"	
 label values ethnicity1 ethnicity1
 safetab ethnicity1, m
-
-* Region
-* Need to clarify why region is missing for some people
-rename region region_string
-gen region = 1 if region_string=="East Midlands"
-replace region = 2 if region_string=="East"
-replace region = 3 if region_string=="London"
-replace region = 4 if region_string=="North East"
-replace region = 5 if region_string=="North West"
-replace region = 6 if region_string=="South East"
-replace region = 7 if region_string=="South West"
-replace region = 8 if region_string=="West Midlands"
-replace region = 9 if region_string=="Yorkshire and The Humber"
-replace region = 10 if region_string==""
-
-label define region 	1 "East Midlands" 					///
-						2 "East"   							///
-						3 "London" 							///
-						4 "North East" 						///
-						5 "North West" 						///
-						6 "South East" 						///
-						7 "South West"						///
-						8 "West Midlands" 					///
-						9 "Yorkshire and The Humber"		///
-						10 "Missing"
-label values region region
-label var region "Region"
-safetab region
-drop if region==10
-
-* STP
-rename stp stp_old
-bysort stp_old: gen stp = 1 if _n==1
-replace stp = sum(stp)
-drop stp_old
-
-* Index of multiple deprivation
-* Ordered 1-5 from most deprived to least deprived
-label define imd 1 "1 Most deprived" 2 "2" 3 "3" 4 "4" 5 "5 Least deprived" .u "Unknown"
-label values imd imd
-safetab imd
 
 * Rural/urban
 replace rural_urban=. if rural_urban<1|rural_urban>8
@@ -703,144 +710,6 @@ format exit_date_death %td
 replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
 gen follow_up_time_death = (exit_date_death - index_date)
 label var follow_up_time_death "Follow-up time (death) (Days)"
-
-** Descriptive statistics
-foreach exposure of varlist	case			///
-							covid_severity 	///
-							covid_aki 		///
-							covid_krt		///
-							covid_vax		///
-							calendar_period {
-	by `exposure',sort: sum age baseline_egfr follow_up_time, de
-	total follow_up_time, over(`exposure')
-	}
-
-foreach var of varlist	agegroup				///
-						sex						///
-						ethnicity1				///
-						region					///
-						stp						///
-						urbanicity				///
-						bmi						///
-						smoking					///
-						egfr_group				///
-						ckd_stage				///
-						afib					///
-						liver					///
-						diabetes				///
-						haem_cancer				///
-						heart_failure			///
-						hiv						///
-						hypertension			///
-						non_haem_cancer			///
-						myocardial_infarction	///
-						pvd						///
-						rheumatoid				///
-						stroke					///
-						lupus {
-	tab `var' case, m col chi
-	tab `var' covid_severity, m col chi
-	tab `var' covid_aki, m col chi
-	tab `var' covid_krt, m col chi
-	tab `var' covid_vax, m col chi
-	tab `var' calendar_period, m col chi
-	}
-
-* ESRD
-stset exit_date, fail(esrd_date) origin(index_date) id(patient_id) scale(365.25)
-foreach exposure of varlist	case			///
-							covid_severity 	///
-							covid_aki 		///
-							covid_krt		///
-							covid_vax		///
-							calendar_period {
-	tab _d `exposure', col chi
-	strate `exposure'
-	stcox i.`exposure' i.sex age1 age2 age3, vce(cluster practice_id)
-	stcox i.`exposure' i.sex age1 age2 age3
-	est store A
-	quietly stcox i.sex age1 age2 age3
-	est store B
-	lrtest B A
-	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
-	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
-	est store A
-	quietly stcox i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
-	est store B
-	lrtest B A
-	}
-
-* 50% eGFR reduction
-stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(patient_id) scale(365.25)
-foreach exposure of varlist	case			///
-							covid_severity 	///
-							covid_aki 		///
-							covid_krt		///
-							covid_vax		///
-							calendar_period {
-	tab _d `exposure', col chi
-	strate `exposure'
-	stcox i.`exposure' i.sex age1 age2 age3, vce(cluster practice_id)
-	stcox i.`exposure' i.sex age1 age2 age3
-	est store A
-	quietly stcox i.sex age1 age2 age3
-	est store B
-	lrtest B A
-	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
-	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
-	est store A
-	quietly stcox i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
-	est store B
-	lrtest B A
-	}
-
-* AKI
-stset exit_date_aki, fail(aki_date) origin(index_date) id(patient_id) scale(365.25)
-foreach exposure of varlist	case			///
-							covid_severity 	///
-							covid_aki 		///
-							covid_krt		///
-							covid_vax		///
-							calendar_period {
-	tab _d `exposure', col chi
-	strate `exposure'
-	stcox i.`exposure' i.sex age1 age2 age3, vce(cluster practice_id)
-	stcox i.`exposure' i.sex age1 age2 age3
-	est store A
-	quietly stcox i.sex age1 age2 age3
-	est store B
-	lrtest B A
-	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
-	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
-	est store A
-	quietly stcox i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
-	est store B
-	lrtest B A
-	}
-
-* Death
-stset exit_date_death, fail(death_date) origin(index_date) id(patient_id) scale(365.25)
-foreach exposure of varlist	case			///
-							covid_severity 	///
-							covid_aki 		///
-							covid_krt		///
-							covid_vax		///
-							calendar_period {
-	tab _d `exposure', col chi
-	strate `exposure'
-	stcox i.`exposure' i.sex age1 age2 age3, vce(cluster practice_id)
-	stcox i.`exposure' i.sex age1 age2 age3
-	est store A
-	quietly stcox i.sex age1 age2 age3
-	est store B
-	lrtest B A
-	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
-	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
-	est store A
-	quietly stcox i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
-	est store B
-	lrtest B A
-	}
 
 save ./output/analysis_2017.dta, replace
 log close
