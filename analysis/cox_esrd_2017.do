@@ -15,13 +15,42 @@ foreach exposure of varlist	case			///
 	tab _d `exposure', col chi
 	strate `exposure'
 	stcox i.`exposure' i.sex age1 age2 age3, vce(cluster practice_id)
-	stcox i.`exposure' i.sex age1 age2 age3
+	quietly stcox i.`exposure' i.sex age1 age2 age3
 	est store A
 	quietly stcox i.sex age1 age2 age3
 	est store B
 	lrtest B A
 	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
-	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
+	quietly stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
+	est store A
+	quietly stcox i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
+	est store B
+	lrtest B A
+	}
+	
+foreach exposure of varlist	case			///
+							covid_severity	///
+							covid_aki {
+	stcox i.`exposure'##i.covid_vax i.sex age1 age2 age3, vce(cluster practice_id)
+	quietly stcox i.`exposure'##i.covid_vax i.sex age1 age2 age3
+	est store A
+	quietly stcox i.sex age1 age2 age3
+	est store B
+	lrtest B A
+	stcox i.`exposure'##i.covid_vax i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
+	quietly stcox i.`exposure'##i.covid_vax i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
+	est store A
+	quietly stcox i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
+	est store B
+	lrtest B A
+	stcox i.`exposure'##i.calendar_period i.sex age1 age2 age3, vce(cluster practice_id)
+	quietly stcox i.`exposure'##i.calendar_period i.sex age1 age2 age3
+	est store A
+	quietly stcox i.sex age1 age2 age3
+	est store B
+	lrtest B A
+	stcox i.`exposure'##i.calendar_period i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
+	quietly stcox i.`exposure'##i.calendar_period i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
 	est store A
 	quietly stcox i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
 	est store B
