@@ -159,7 +159,13 @@ drop death_date
 rename death_date1 death_date
 gen index_date_28 = index_date + 28
 format index_date_28 %td
-drop if death_date < index_date_28
+gen deceased = 0
+replace deceased = 1 if death_date < index_date_28
+label define deceased 0 "Alive at 28 days after index date" 1 "Deceased within 28 days of index date"
+label values deceased deceased
+tab case deceased
+drop if deceased==1
+drop deceased
 
 * eGFR <15 before index_date - should apply to matched historical comparators only
 gen index_year = yofd(index_date)
@@ -262,7 +268,13 @@ replace baseline_egfr=egfr_baseline_creatinine_`x' if index_month=="`x'"
 drop egfr_baseline_creatinine_`x'
 }
 label var baseline_egfr "Baseline eGFR"
-drop if baseline_egfr <15
+gen baseline_esrd = 0
+replace baseline_esrd = 1 if baseline_egfr <15
+label define baseline_esrd 0 "No ESRD" 1 "ESRD"
+label values baseline_esrd baseline_esrd
+tab case baseline_esrd
+drop if baseline_esrd==1
+drop baseline_esrd
 
 * Drop COVID-19 cases without any matched historical comparators after further application of exclusion criteria
 generate match_counts1=.

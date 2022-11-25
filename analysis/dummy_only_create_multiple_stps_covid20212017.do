@@ -5,7 +5,7 @@ pwd
 
 * Open a log file
 cap log close
-log using ./logs/00b_dummyData_create_multiple_stps.log, replace t
+log using ./logs/dummy_only_create_multiple_stps_covid20212017.log, replace t
 
 *program for replacing stps that is called below
 program drop _all
@@ -35,7 +35,7 @@ end
 
 
 *(1)=========Create separate stps for cases============
-import delimited ./output/input_covid_matching.csv, clear
+import delimited ./output/covid2021_matching_2017.csv, clear
 *tabulate before changes
 tab stp
 *call program
@@ -43,13 +43,13 @@ replaceSTPs
 *tabulate after changes
 tab stp, miss
 *export output
-export delimited using "./output/input_covid_matching.csv", replace
+export delimited using "./output/covid2021_matching_2017.csv", replace
 
 
 
 
 *(2)=========Create separate stps for comparators============
-import delimited ./output/input_contemporary_matching.csv, clear
+import delimited ./output/2017_matching.csv, clear
 *tabulate before changes
 tab stp
 *call program
@@ -57,7 +57,7 @@ replaceSTPs
 *tabulate after changes
 tab stp
 *export output
-export delimited using "./output/input_contemporary_matching.csv", replace
+export delimited using "./output/2017_matching.csv", replace
 
 
 log close

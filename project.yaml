@@ -1001,6 +1001,13 @@ actions:
       moderately_sensitive:
         log: logs/analysis_2017.log
 
+  descriptive_2017:
+    run: stata-mp:latest analysis/descriptive_2017.do
+    needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017, match_2017_stp5, match_2017_stp6, match_2017_stp7, match_2017_stp8, match_2017_stp9, match_2017_stp10, match_2017_stp12, match_2017_stp13, match_2017_stp14, match_2017_stp15, match_2017_stp16, match_2017_stp17, match_2017_stp20, match_2017_stp21, match_2017_stp22, match_2017_stp23, match_2017_stp24, match_2017_stp25, match_2017_stp26, match_2017_stp27, match_2017_stp29, match_2017_stp33, match_2017_stp35, match_2017_stp36, match_2017_stp37, match_2017_stp40, match_2017_stp41, match_2017_stp42, match_2017_stp43, match_2017_stp44, match_2017_stp49, combine_stps_covid_2017, combine_stps_matches_2017, extract_covid_2017_additional, extract_2017_additional, analysis_2017]
+    outputs:
+      moderately_sensitive:
+        log: logs/descriptive_2017.log
+
   cox_esrd_2017:
     run: stata-mp:latest analysis/cox_esrd_2017.do
     needs: [extract_covid_matching, clean_covid_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_2017, match_2017_stp5, match_2017_stp6, match_2017_stp7, match_2017_stp8, match_2017_stp9, match_2017_stp10, match_2017_stp12, match_2017_stp13, match_2017_stp14, match_2017_stp15, match_2017_stp16, match_2017_stp17, match_2017_stp20, match_2017_stp21, match_2017_stp22, match_2017_stp23, match_2017_stp24, match_2017_stp25, match_2017_stp26, match_2017_stp27, match_2017_stp29, match_2017_stp33, match_2017_stp35, match_2017_stp36, match_2017_stp37, match_2017_stp40, match_2017_stp41, match_2017_stp42, match_2017_stp43, match_2017_stp44, match_2017_stp49, combine_stps_covid_2017, combine_stps_matches_2017, extract_covid_2017_additional, extract_2017_additional, analysis_2017]
@@ -1028,3 +1035,113 @@ actions:
     outputs:
       moderately_sensitive:
         log: logs/cox_death_2017.log
+
+# Extract data required for matching for covid up to May 2021 (all STPs)
+  extract_covid2021_matching:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid2021_matching
+    outputs:
+      highly_sensitive:
+        cohort: output/input_covid2021_matching.csv
+
+#Data management for covid2021_matching for matching with 2017 general population
+  clean_covid2021_matching_2017:
+    run: stata-mp:latest analysis/covid2021_matching_2017.do
+    needs: [extract_covid2021_matching]
+    outputs:
+      highly_sensitive:
+        analysis_dataset: output/covid2021_matching_2017.csv
+      moderately_sensitive:
+        log: logs/covid2021_matching_2017.log
+
+# Split covid2021_matching_2017 and 2017_matching by STP
+  split_stps_covid20212017:
+    run: stata-mp:latest analysis/split_stps_covid20212017.do
+    needs: [extract_covid2021_matching, clean_covid2021_matching_2017, extract_2017_matching, clean_2017_matching]
+    outputs:
+      highly_sensitive:
+        covid2021_stp5: output/input_covid2021_matching_2017_stp5.csv
+        covid2021_stp6: output/input_covid2021_matching_2017_stp6.csv
+        covid2021_stp7: output/input_covid2021_matching_2017_stp7.csv
+        covid2021_stp8: output/input_covid2021_matching_2017_stp8.csv
+        covid2021_stp9: output/input_covid2021_matching_2017_stp9.csv
+        covid2021_stp10: output/input_covid2021_matching_2017_stp10.csv
+        covid2021_stp12: output/input_covid2021_matching_2017_stp12.csv
+        covid2021_stp13: output/input_covid2021_matching_2017_stp13.csv
+        covid2021_stp14: output/input_covid2021_matching_2017_stp14.csv
+        covid2021_stp15: output/input_covid2021_matching_2017_stp15.csv
+        covid2021_stp16: output/input_covid2021_matching_2017_stp16.csv
+        covid2021_stp17: output/input_covid2021_matching_2017_stp17.csv
+        covid2021_stp20: output/input_covid2021_matching_2017_stp20.csv
+        covid2021_stp21: output/input_covid2021_matching_2017_stp21.csv
+        covid2021_stp22: output/input_covid2021_matching_2017_stp22.csv
+        covid2021_stp23: output/input_covid2021_matching_2017_stp23.csv
+        covid2021_stp24: output/input_covid2021_matching_2017_stp24.csv
+        covid2021_stp25: output/input_covid2021_matching_2017_stp25.csv
+        covid2021_stp26: output/input_covid2021_matching_2017_stp26.csv
+        covid2021_stp27: output/input_covid2021_matching_2017_stp27.csv
+        covid2021_stp29: output/input_covid2021_matching_2017_stp29.csv
+        covid2021_stp33: output/input_covid2021_matching_2017_stp33.csv
+        covid2021_stp35: output/input_covid2021_matching_2017_stp35.csv
+        covid2021_stp36: output/input_covid2021_matching_2017_stp36.csv
+        covid2021_stp37: output/input_covid2021_matching_2017_stp37.csv
+        covid2021_stp40: output/input_covid2021_matching_2017_stp40.csv
+        covid2021_stp41: output/input_covid2021_matching_2017_stp41.csv
+        covid2021_stp42: output/input_covid2021_matching_2017_stp42.csv
+        covid2021_stp43: output/input_covid2021_matching_2017_stp43.csv
+        covid2021_stp44: output/input_covid2021_matching_2017_stp44.csv
+        covid2021_stp49: output/input_covid2021_matching_2017_stp49.csv
+        2017covid2021_stp5: output/input_2017covid2021_matching_stp5.csv
+        2017covid2021_stp6: output/input_2017covid2021_matching_stp6.csv
+        2017covid2021_stp7: output/input_2017covid2021_matching_stp7.csv
+        2017covid2021_stp8: output/input_2017covid2021_matching_stp8.csv
+        2017covid2021_stp9: output/input_2017covid2021_matching_stp9.csv
+        2017covid2021_stp10: output/input_2017covid2021_matching_stp10.csv
+        2017covid2021_stp12: output/input_2017covid2021_matching_stp12.csv
+        2017covid2021_stp13: output/input_2017covid2021_matching_stp13.csv
+        2017covid2021_stp14: output/input_2017covid2021_matching_stp14.csv
+        2017covid2021_stp15: output/input_2017covid2021_matching_stp15.csv
+        2017covid2021_stp16: output/input_2017covid2021_matching_stp16.csv
+        2017covid2021_stp17: output/input_2017covid2021_matching_stp17.csv
+        2017covid2021_stp20: output/input_2017covid2021_matching_stp20.csv
+        2017covid2021_stp21: output/input_2017covid2021_matching_stp21.csv
+        2017covid2021_stp22: output/input_2017covid2021_matching_stp22.csv
+        2017covid2021_stp23: output/input_2017covid2021_matching_stp23.csv
+        2017covid2021_stp24: output/input_2017covid2021_matching_stp24.csv
+        2017covid2021_stp25: output/input_2017covid2021_matching_stp25.csv
+        2017covid2021_stp26: output/input_2017covid2021_matching_stp26.csv
+        2017covid2021_stp27: output/input_2017covid2021_matching_stp27.csv
+        2017covid2021_stp29: output/input_2017covid2021_matching_stp29.csv
+        2017covid2021_stp33: output/input_2017covid2021_matching_stp33.csv
+        2017covid2021_stp35: output/input_2017covid2021_matching_stp35.csv
+        2017covid2021_stp36: output/input_2017covid2021_matching_stp36.csv
+        2017covid2021_stp37: output/input_2017covid2021_matching_stp37.csv
+        2017covid2021_stp40: output/input_2017covid2021_matching_stp40.csv
+        2017covid2021_stp41: output/input_2017covid2021_matching_stp41.csv
+        2017covid2021_stp42: output/input_2017covid2021_matching_stp42.csv
+        2017covid2021_stp43: output/input_2017covid2021_matching_stp43.csv
+        2017covid2021_stp44: output/input_2017covid2021_matching_stp44.csv
+        2017covid2021_stp49: output/input_2017covid2021_matching_stp49.csv
+      moderately_sensitive:
+        log: logs/split_stps_covid20212017.log
+
+  match_covid20212017_stp10:
+    run: python:latest python analysis/match_covid20212017_stp10.py
+    needs: [extract_covid2021_matching, clean_covid2021_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_covid20212017]
+    outputs:
+      moderately_sensitive:
+        matching_report_stp10: output/matching_report_covid20212017_stp10.txt
+      highly_sensitive:
+        matched_matches_stp10: output/matched_matches_covid20212017_stp10.csv
+        matched_cases_stp10: output/matched_cases_covid20212017_stp10.csv
+        matched_all_stp10: output/matched_combined_covid20212017_stp10.csv
+
+  match_covid20212017_stp12:
+    run: python:latest python analysis/match_covid20212017_stp12.py
+    needs: [extract_covid2021_matching, clean_covid2021_matching_2017, extract_2017_matching, clean_2017_matching, split_stps_covid20212017]
+    outputs:
+      moderately_sensitive:
+        matching_report_stp12: output/matching_report_covid20212017_stp12.txt
+      highly_sensitive:
+        matched_matches_stp12: output/matched_matches_covid20212017_stp12.csv
+        matched_cases_stp12: output/matched_cases_covid20212017_stp12.csv
+        matched_all_stp12: output/matched_combined_covid20212017_stp12.csv

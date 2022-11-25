@@ -1,0 +1,665 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /workspace/logs/covid2021_matching_2017.log
+  log type:  text
+ opened on:  24 Nov 2022, 16:57:09
+
+. clear
+
+. 
+. import delimited ./output/input_covid2021_matching.csv, delimiter(comma) varn
+> ames(1) case(preserve) 
+(36 vars, 50,000 obs)
+
+. 
+. **Exclusions
+. * Age <18
+. drop if age <18
+(10,580 observations deleted)
+
+. 
+. * Anyone not registered at one practice for 3 months before COVID-19 diagnosi
+> s
+. drop if has_follow_up==0
+(1,956 observations deleted)
+
+. drop has_follow_up
+
+. 
+. * Pre-existing kidney replacement therapy
+. drop if baseline_krt_primary_care==1
+(1,878 observations deleted)
+
+. drop baseline_krt_primary_care
+
+. drop if baseline_krt_icd_10==1
+(1,818 observations deleted)
+
+. drop baseline_krt_icd_10
+
+. drop if baseline_krt_opcs_4==1
+(1,698 observations deleted)
+
+. drop baseline_krt_opcs_4
+
+. 
+. * Baseline eGFR <15 as at February 2020
+. assert inlist(sex, "M", "F")
+
+. gen male = (sex=="M")
+
+. drop sex
+
+. label define sexLab 1 "Male" 0 "Female"
+
+. label values male sexLab
+
+. label var male "Sex (0=F 1=M)"
+
+. 
+. replace baseline_creatinine_feb2020 = . if !inrange(baseline_creatinine_feb20
+> 20, 20, 3000)
+(14,071 real changes made, 14,071 to missing)
+
+. gen mgdl_baseline_creatinine_feb2020 = baseline_creatinine_feb2020/88.4
+(14,071 missing values generated)
+
+. gen min_baseline_creatinine_feb2020=.
+(32,070 missing values generated)
+
+. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 7 if male==0
+(9,224 real changes made)
+
+. replace min_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 9 if male==1
+(8,775 real changes made)
+
+. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
+> 329  if male==0
+(9,224 real changes made)
+
+. replace min_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020^-0.
+> 411  if male==1
+(8,775 real changes made)
+
+. replace min_baseline_creatinine_feb2020 = 1 if min_baseline_creatinine_feb202
+> 0<1
+(11,488 real changes made)
+
+. gen max_baseline_creatinine_feb2020=.
+(32,070 missing values generated)
+
+. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 7 if male==0
+(9,224 real changes made)
+
+. replace max_baseline_creatinine_feb2020 = mgdl_baseline_creatinine_feb2020/0.
+> 9 if male==1
+(8,775 real changes made)
+
+. replace max_baseline_creatinine_feb2020 = max_baseline_creatinine_feb2020^-1.
+> 209
+(17,999 real changes made)
+
+. replace max_baseline_creatinine_feb2020 = 1 if max_baseline_creatinine_feb202
+> 0>1
+(20,582 real changes made)
+
+. gen egfr_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020*max_ba
+> seline_creatinine_feb2020*141
+(14,071 missing values generated)
+
+. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*(
+> 0.993^age)
+(17,999 real changes made)
+
+. replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*1
+> .018 if male==0
+(9,224 real changes made)
+
+. drop if egfr_baseline_creatinine_feb2020 <15
+(0 observations deleted)
+
+. drop baseline_creatinine_feb2020
+
+. drop mgdl_baseline_creatinine_feb2020
+
+. drop min_baseline_creatinine_feb2020
+
+. drop max_baseline_creatinine_feb2020
+
+. 
+. * Baseline eGFR <15 at time of COVID diagnosis using baseline creatinine upda
+> ted monthly
+. gen covid_date = date(covid_diagnosis_date, "YMD")
+(22,433 missing values generated)
+
+. format covid_date %td
+
+. drop if covid_date ==.
+(22,433 observations deleted)
+
+. drop sgss_positive_date
+
+. drop primary_care_covid_date
+
+. drop hospital_covid_date
+
+. drop sars_cov_2
+
+. 
+. foreach baseline_creatinine_monthly of varlist  baseline_creatinine_mar2020 /
+> //
+>                                                                              
+>                    baseline_creatinine_apr2020 ///
+>                                                                              
+>                    baseline_creatinine_may2020 ///
+>                                                                              
+>                    baseline_creatinine_jun2020 ///
+>                                                                              
+>                    baseline_creatinine_jul2020 ///
+>                                                                              
+>                    baseline_creatinine_aug2020 ///
+>                                                                              
+>                    baseline_creatinine_sep2020 ///
+>                                                                              
+>                    baseline_creatinine_oct2020 ///                           
+>                       
+>                                                                              
+>                    baseline_creatinine_nov2020 ///
+>                                                                              
+>                    baseline_creatinine_dec2020 ///
+>                                                                              
+>                    baseline_creatinine_jan2021 ///
+>                                                                              
+>                    baseline_creatinine_feb2021 ///
+>                                                                              
+>                    baseline_creatinine_mar2021 ///
+>                                                                              
+>                    baseline_creatinine_apr2021 ///
+>                                                                              
+>                    baseline_creatinine_may2021 {
+  2. replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine
+> _monthly', 20, 3000)
+  3. gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.
+> 4
+  4. gen min_`baseline_creatinine_monthly'=.
+  5. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.7 if male==0
+  6. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.9 if male==1
+  7. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_month
+> ly'^-0.329 if male==0
+  8. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_month
+> ly'^-0.411 if male==1
+  9. replace min_`baseline_creatinine_monthly' = 1 if min_`baseline_creatinine_
+> monthly'<1
+ 10. gen max_`baseline_creatinine_monthly'=.
+ 11. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.7 if male==0
+ 12. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.9 if male==1
+ 13. replace max_`baseline_creatinine_monthly' = max_`baseline_creatinine_month
+> ly'^-1.209
+ 14. replace max_`baseline_creatinine_monthly' = 1 if max_`baseline_creatinine_
+> monthly'>1
+ 15. gen egfr_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'
+> *max_`baseline_creatinine_monthly'*141
+ 16. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_mon
+> thly'*(0.993^age)
+ 17. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_mon
+> thly'*1.018 if male==0
+ 18. drop `baseline_creatinine_monthly'
+ 19. drop mgdl_`baseline_creatinine_monthly'
+ 20. drop min_`baseline_creatinine_monthly'
+ 21. drop max_`baseline_creatinine_monthly'
+ 22. }
+(4,254 real changes made, 4,254 to missing)
+(4,254 missing values generated)
+(9,637 missing values generated)
+(2,746 real changes made)
+(2,637 real changes made)
+(2,746 real changes made)
+(2,637 real changes made)
+(3,441 real changes made)
+(9,637 missing values generated)
+(2,746 real changes made)
+(2,637 real changes made)
+(5,383 real changes made)
+(6,196 real changes made)
+(4,254 missing values generated)
+(5,383 real changes made)
+(2,746 real changes made)
+(4,181 real changes made, 4,181 to missing)
+(4,181 missing values generated)
+(9,637 missing values generated)
+(2,739 real changes made)
+(2,717 real changes made)
+(2,739 real changes made)
+(2,717 real changes made)
+(3,451 real changes made)
+(9,637 missing values generated)
+(2,739 real changes made)
+(2,717 real changes made)
+(5,456 real changes made)
+(6,186 real changes made)
+(4,181 missing values generated)
+(5,456 real changes made)
+(2,739 real changes made)
+(4,289 real changes made, 4,289 to missing)
+(4,289 missing values generated)
+(9,637 missing values generated)
+(2,668 real changes made)
+(2,680 real changes made)
+(2,668 real changes made)
+(2,680 real changes made)
+(3,311 real changes made)
+(9,637 missing values generated)
+(2,668 real changes made)
+(2,680 real changes made)
+(5,348 real changes made)
+(6,326 real changes made)
+(4,289 missing values generated)
+(5,348 real changes made)
+(2,668 real changes made)
+(4,245 real changes made, 4,245 to missing)
+(4,245 missing values generated)
+(9,637 missing values generated)
+(2,731 real changes made)
+(2,661 real changes made)
+(2,731 real changes made)
+(2,661 real changes made)
+(3,396 real changes made)
+(9,637 missing values generated)
+(2,731 real changes made)
+(2,661 real changes made)
+(5,392 real changes made)
+(6,241 real changes made)
+(4,245 missing values generated)
+(5,392 real changes made)
+(2,731 real changes made)
+(4,223 real changes made, 4,223 to missing)
+(4,223 missing values generated)
+(9,637 missing values generated)
+(2,720 real changes made)
+(2,694 real changes made)
+(2,720 real changes made)
+(2,694 real changes made)
+(3,438 real changes made)
+(9,637 missing values generated)
+(2,720 real changes made)
+(2,694 real changes made)
+(5,414 real changes made)
+(6,199 real changes made)
+(4,223 missing values generated)
+(5,414 real changes made)
+(2,720 real changes made)
+(4,234 real changes made, 4,234 to missing)
+(4,234 missing values generated)
+(9,637 missing values generated)
+(2,744 real changes made)
+(2,659 real changes made)
+(2,744 real changes made)
+(2,659 real changes made)
+(3,444 real changes made)
+(9,637 missing values generated)
+(2,744 real changes made)
+(2,659 real changes made)
+(5,403 real changes made)
+(6,193 real changes made)
+(4,234 missing values generated)
+(5,403 real changes made)
+(2,744 real changes made)
+(4,243 real changes made, 4,243 to missing)
+(4,243 missing values generated)
+(9,637 missing values generated)
+(2,730 real changes made)
+(2,664 real changes made)
+(2,730 real changes made)
+(2,664 real changes made)
+(3,409 real changes made)
+(9,637 missing values generated)
+(2,730 real changes made)
+(2,664 real changes made)
+(5,394 real changes made)
+(6,228 real changes made)
+(4,243 missing values generated)
+(5,394 real changes made)
+(2,730 real changes made)
+(4,190 real changes made, 4,190 to missing)
+(4,190 missing values generated)
+(9,637 missing values generated)
+(2,775 real changes made)
+(2,672 real changes made)
+(2,775 real changes made)
+(2,672 real changes made)
+(3,471 real changes made)
+(9,637 missing values generated)
+(2,775 real changes made)
+(2,672 real changes made)
+(5,447 real changes made)
+(6,166 real changes made)
+(4,190 missing values generated)
+(5,447 real changes made)
+(2,775 real changes made)
+(4,226 real changes made, 4,226 to missing)
+(4,226 missing values generated)
+(9,637 missing values generated)
+(2,747 real changes made)
+(2,664 real changes made)
+(2,747 real changes made)
+(2,664 real changes made)
+(3,362 real changes made)
+(9,637 missing values generated)
+(2,747 real changes made)
+(2,664 real changes made)
+(5,411 real changes made)
+(6,275 real changes made)
+(4,226 missing values generated)
+(5,411 real changes made)
+(2,747 real changes made)
+(4,216 real changes made, 4,216 to missing)
+(4,216 missing values generated)
+(9,637 missing values generated)
+(2,759 real changes made)
+(2,662 real changes made)
+(2,759 real changes made)
+(2,662 real changes made)
+(3,373 real changes made)
+(9,637 missing values generated)
+(2,759 real changes made)
+(2,662 real changes made)
+(5,421 real changes made)
+(6,264 real changes made)
+(4,216 missing values generated)
+(5,421 real changes made)
+(2,759 real changes made)
+(4,269 real changes made, 4,269 to missing)
+(4,269 missing values generated)
+(9,637 missing values generated)
+(2,768 real changes made)
+(2,600 real changes made)
+(2,768 real changes made)
+(2,600 real changes made)
+(3,426 real changes made)
+(9,637 missing values generated)
+(2,768 real changes made)
+(2,600 real changes made)
+(5,368 real changes made)
+(6,211 real changes made)
+(4,269 missing values generated)
+(5,368 real changes made)
+(2,768 real changes made)
+(4,249 real changes made, 4,249 to missing)
+(4,249 missing values generated)
+(9,637 missing values generated)
+(2,734 real changes made)
+(2,654 real changes made)
+(2,734 real changes made)
+(2,654 real changes made)
+(3,492 real changes made)
+(9,637 missing values generated)
+(2,734 real changes made)
+(2,654 real changes made)
+(5,388 real changes made)
+(6,145 real changes made)
+(4,249 missing values generated)
+(5,388 real changes made)
+(2,734 real changes made)
+(4,211 real changes made, 4,211 to missing)
+(4,211 missing values generated)
+(9,637 missing values generated)
+(2,781 real changes made)
+(2,645 real changes made)
+(2,781 real changes made)
+(2,645 real changes made)
+(3,444 real changes made)
+(9,637 missing values generated)
+(2,781 real changes made)
+(2,645 real changes made)
+(5,426 real changes made)
+(6,193 real changes made)
+(4,211 missing values generated)
+(5,426 real changes made)
+(2,781 real changes made)
+(4,121 real changes made, 4,121 to missing)
+(4,121 missing values generated)
+(9,637 missing values generated)
+(2,778 real changes made)
+(2,738 real changes made)
+(2,778 real changes made)
+(2,738 real changes made)
+(3,530 real changes made)
+(9,637 missing values generated)
+(2,778 real changes made)
+(2,738 real changes made)
+(5,516 real changes made)
+(6,107 real changes made)
+(4,121 missing values generated)
+(5,516 real changes made)
+(2,778 real changes made)
+(4,281 real changes made, 4,281 to missing)
+(4,281 missing values generated)
+(9,637 missing values generated)
+(2,727 real changes made)
+(2,629 real changes made)
+(2,727 real changes made)
+(2,629 real changes made)
+(3,428 real changes made)
+(9,637 missing values generated)
+(2,727 real changes made)
+(2,629 real changes made)
+(5,356 real changes made)
+(6,209 real changes made)
+(4,281 missing values generated)
+(5,356 real changes made)
+(2,727 real changes made)
+
+. 
+. gen covid_date_string=string(covid_date, "%td") 
+
+. gen covid_month=substr( covid_date_string ,3,7)
+
+. 
+. gen baseline_egfr=.
+(9,637 missing values generated)
+
+. local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep
+> 2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021"
+
+. foreach x of  local month_year  {
+  2. replace baseline_egfr=egfr_baseline_creatinine_`x' if  covid_month=="`x'"
+  3. drop if baseline_egfr <15
+  4. drop egfr_baseline_creatinine_`x'
+  5. }
+(320 real changes made)
+(0 observations deleted)
+(377 real changes made)
+(0 observations deleted)
+(354 real changes made)
+(0 observations deleted)
+(347 real changes made)
+(0 observations deleted)
+(360 real changes made)
+(0 observations deleted)
+(322 real changes made)
+(0 observations deleted)
+(372 real changes made)
+(0 observations deleted)
+(381 real changes made)
+(0 observations deleted)
+(361 real changes made)
+(0 observations deleted)
+(326 real changes made)
+(0 observations deleted)
+(314 real changes made)
+(0 observations deleted)
+(324 real changes made)
+(0 observations deleted)
+(315 real changes made)
+(0 observations deleted)
+(364 real changes made)
+(0 observations deleted)
+(342 real changes made)
+(0 observations deleted)
+(332 real changes made)
+(0 observations deleted)
+
+. drop baseline_egfr
+
+. drop covid_date_string
+
+. 
+. * COVID-19 death
+. drop if deceased==1
+(1,006 observations deleted)
+
+. drop deceased
+
+. 
+. **Drop disaggregated krt_outcome variables
+. drop krt_outcome_primary_care
+
+. drop krt_outcome_icd_10
+
+. drop krt_outcome_opcs_4
+
+. 
+. *Tabulate variables
+. tab age
+
+        age |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         18 |        132        1.53        1.53
+         19 |        124        1.44        2.97
+         20 |        111        1.29        4.25
+         21 |        137        1.59        5.84
+         22 |        132        1.53        7.37
+         23 |        149        1.73        9.10
+         24 |        135        1.56       10.66
+         25 |        131        1.52       12.18
+         26 |        138        1.60       13.78
+         27 |        144        1.67       15.44
+         28 |        159        1.84       17.29
+         29 |        153        1.77       19.06
+         30 |        154        1.78       20.84
+         31 |        137        1.59       22.43
+         32 |        154        1.78       24.22
+         33 |        159        1.84       26.06
+         34 |        152        1.76       27.82
+         35 |        127        1.47       29.29
+         36 |        143        1.66       30.95
+         37 |        151        1.75       32.70
+         38 |        128        1.48       34.18
+         39 |        124        1.44       35.62
+         40 |        133        1.54       37.16
+         41 |        154        1.78       38.94
+         42 |        162        1.88       40.82
+         43 |        124        1.44       42.25
+         44 |        134        1.55       43.81
+         45 |        142        1.65       45.45
+         46 |        143        1.66       47.11
+         47 |        149        1.73       48.84
+         48 |        148        1.71       50.55
+         49 |        124        1.44       51.99
+         50 |        165        1.91       53.90
+         51 |        174        2.02       55.91
+         52 |        152        1.76       57.68
+         53 |        160        1.85       59.53
+         54 |        170        1.97       61.50
+         55 |        144        1.67       63.17
+         56 |        131        1.52       64.69
+         57 |        163        1.89       66.57
+         58 |        140        1.62       68.20
+         59 |        151        1.75       69.95
+         60 |        137        1.59       71.53
+         61 |        134        1.55       73.09
+         62 |        122        1.41       74.50
+         63 |        110        1.27       75.77
+         64 |        143        1.66       77.43
+         65 |        133        1.54       78.97
+         66 |        113        1.31       80.28
+         67 |        114        1.32       81.60
+         68 |         94        1.09       82.69
+         69 |        126        1.46       84.15
+         70 |        114        1.32       85.47
+         71 |         87        1.01       86.48
+         72 |        102        1.18       87.66
+         73 |        107        1.24       88.90
+         74 |         98        1.14       90.04
+         75 |         79        0.92       90.95
+         76 |         69        0.80       91.75
+         77 |         70        0.81       92.56
+         78 |         75        0.87       93.43
+         79 |         71        0.82       94.25
+         80 |         55        0.64       94.89
+         81 |         48        0.56       95.45
+         82 |         59        0.68       96.13
+         83 |         45        0.52       96.65
+         84 |         52        0.60       97.25
+         85 |         35        0.41       97.66
+         86 |         31        0.36       98.02
+         87 |         24        0.28       98.30
+         88 |         31        0.36       98.66
+         89 |         32        0.37       99.03
+         90 |         13        0.15       99.18
+         91 |         18        0.21       99.39
+         92 |         10        0.12       99.50
+         93 |         10        0.12       99.62
+         94 |          8        0.09       99.71
+         95 |          5        0.06       99.77
+         96 |          5        0.06       99.83
+         97 |          5        0.06       99.88
+         98 |          5        0.06       99.94
+         99 |          3        0.03       99.98
+        100 |          1        0.01       99.99
+        109 |          1        0.01      100.00
+------------+-----------------------------------
+      Total |      8,631      100.00
+
+. tab male
+
+   Sex (0=F |
+       1=M) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+     Female |      4,370       50.63       50.63
+       Male |      4,261       49.37      100.00
+------------+-----------------------------------
+      Total |      8,631      100.00
+
+. tab covid_month
+
+covid_month |      Freq.     Percent        Cum.
+------------+-----------------------------------
+    apr2020 |        566        6.56        6.56
+    apr2021 |        496        5.75       12.30
+    aug2020 |        561        6.50       18.80
+    dec2020 |        527        6.11       24.91
+    feb2020 |        514        5.96       30.87
+    feb2021 |        493        5.71       36.58
+    jan2021 |        534        6.19       42.76
+    jul2020 |        535        6.20       48.96
+    jun2020 |        571        6.62       55.58
+    mar2020 |        586        6.79       62.37
+    mar2021 |        557        6.45       68.82
+    may2020 |        559        6.48       75.30
+    may2021 |        506        5.86       81.16
+    nov2020 |        508        5.89       87.05
+    oct2020 |        556        6.44       93.49
+    sep2020 |        562        6.51      100.00
+------------+-----------------------------------
+      Total |      8,631      100.00
+
+. 
+. export delimited using "./output/covid2021_matching_2017.csv", replace
+(note: file ./output/covid2021_matching_2017.csv not found)
+file ./output/covid2021_matching_2017.csv saved
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /workspace/logs/covid2021_matching_2017.log
+  log type:  text
+ closed on:  24 Nov 2022, 16:57:12
+-------------------------------------------------------------------------------

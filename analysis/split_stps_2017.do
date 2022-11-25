@@ -5,7 +5,7 @@ pwd
 
 * Open a log file
 cap log close
-log using ./logs/split_stps_2017.log, replace t
+log using ./logs/split_stps_2017covid2021.log, replace t
 
 
 *(1)=========Split cases into separate stp files============

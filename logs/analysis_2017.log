@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2017.log
   log type:  text
- opened on:  22 Nov 2022, 21:53:47
+ opened on:  25 Nov 2022, 17:36:08
 
 . 
 . ** Analysis cohort selection
@@ -38,13 +38,13 @@ Potential COVID-19 cases after application of exclusion criteria:
 
 . capture noisily import delimited ./output/2017_matching.csv, clear
 (encoding automatically selected: ISO-8859-1)
-(7 vars, 29,000 obs)
+(7 vars, 28,967 obs)
 
 . di "Potential historical comparators after application of exclusion criteria:"
 Potential historical comparators after application of exclusion criteria:
 
 . safecount
-  29,000
+  28,967
 
 . * Import COVID-19 dataset comprising individuals matched with historical comparators (limited matching variables only)
 . capture noisily import delimited ./output/input_combined_stps_covid_2017.csv, clear
@@ -450,8 +450,29 @@ Yorkshire and The Humber |      3,742       10.22      100.00
 
 . format index_date_28 %td
 
-. drop if death_date < index_date_28
+. gen deceased = 0
+
+. replace deceased = 1 if death_date < index_date_28
+(98 real changes made)
+
+. label define deceased 0 "Alive at 28 days after index date" 1 "Deceased within 28 days of index date"
+
+. label values deceased deceased
+
+. tab case deceased
+
+           |       deceased
+      case | Alive at   Deceased  |     Total
+-----------+----------------------+----------
+         0 |    23,180         83 |    23,263 
+         1 |    13,323         15 |    13,338 
+-----------+----------------------+----------
+     Total |    36,503         98 |    36,601 
+
+. drop if deceased==1
 (98 observations deleted)
+
+. drop deceased
 
 . 
 . * eGFR <15 before index_date - should apply to matched historical comparators only
@@ -1661,8 +1682,30 @@ Yorkshire and The Humber |      3,742       10.22      100.00
 
 . label var baseline_egfr "Baseline eGFR"
 
-. drop if baseline_egfr <15
+. gen baseline_esrd = 0
+
+. replace baseline_esrd = 1 if baseline_egfr <15
+(0 real changes made)
+
+. label define baseline_esrd 0 "No ESRD" 1 "ESRD"
+
+. label values baseline_esrd baseline_esrd
+
+. tab case baseline_esrd
+
+           | baseline_e
+           |    srd
+      case |   No ESRD |     Total
+-----------+-----------+----------
+         0 |    23,180 |    23,180 
+         1 |    13,323 |    13,323 
+-----------+-----------+----------
+     Total |    36,503 |    36,503 
+
+. drop if baseline_esrd==1
 (0 observations deleted)
+
+. drop baseline_esrd
 
 . 
 . * Drop COVID-19 cases without any matched historical comparators after further application of exclusion criteria
@@ -3946,5 +3989,5 @@ file ./output/analysis_2017.dta saved
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2017.log
   log type:  text
- closed on:  22 Nov 2022, 21:54:27
+ closed on:  25 Nov 2022, 17:36:35
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
