@@ -20,10 +20,10 @@ foreach exposure of varlist	case			///
 	quietly stcox i.sex age1 age2 age3
 	est store B
 	lrtest B A
-	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
-	quietly stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
+	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
+	quietly stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3
 	est store A
-	quietly stcox i.sex i.ethnicity i.imd i.region i.urbanicity i.bmi i.smoking age1 age2 age3
+	quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3
 	est store B
 	lrtest B A
 	}

@@ -29,7 +29,7 @@ foreach exposure of varlist	case			///
 	tab ethnicity1 `exposure', m col chi
 	tab region `exposure', m col chi
 	tab stp `exposure', m col chi
-	tab urbanicity `exposure', m col chi
+	tab urban `exposure', m col chi
 	tab bmi `exposure', m col chi
 	tab smoking `exposure', m col chi
 	tab egfr_group `exposure', m col chi

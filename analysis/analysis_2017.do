@@ -151,14 +151,15 @@ gen krt_date = date(krt_outcome_date, "YMD")
 format krt_date %td
 drop krt_outcome_date
 drop if krt_date < index_date
+gen index_date_28 = index_date + 28
+format index_date_28 %td
+replace krt_date = index_date_28 if krt_date < index_date_28
 
 * Death before index_date + 28 days (i.e. only include people who survived 28 days after index_date)
 gen death_date1 = date(death_date, "YMD")
 format death_date1 %td
 drop death_date
 rename death_date1 death_date
-gen index_date_28 = index_date + 28
-format index_date_28 %td
 gen deceased = 0
 replace deceased = 1 if death_date < index_date_28
 label define deceased 0 "Alive at 28 days after index date" 1 "Deceased within 28 days of index date"
@@ -473,7 +474,7 @@ label define ethnicity1	1 "White"  					///
 label values ethnicity1 ethnicity1
 safetab ethnicity1, m
 
-* Rural/urban
+* Urban/rural
 replace rural_urban=. if rural_urban<1|rural_urban>8
 label define rural_urban 1 "Urban major conurbation" 						///
 						 2 "Urban minor conurbation" 						///
@@ -484,16 +485,17 @@ label define rural_urban 1 "Urban major conurbation" 						///
 						 7 "Rural village and dispersed" 					///
 						 8 "Rural village and dispersed in a sparse setting"
 label values rural_urban rural_urban
-safetab rural_urban, m
-* Urbanicity (binary)
+tab rural_urban, m
+* Urban (binary)
 * Urban = 1-4 + missing, Rural = 5-8
-generate urbanicity=.
-replace urbanicity=1 if rural_urban<=4|rural_urban==.
-replace urbanicity=0 if rural_urban>4 & rural_urban!=.
-label define urbanicity 0 "Rural" 1 "Urban"
-label values urbanicity urbanicity
-safetab urbanicity rural_urban, m
-label var urbanicity "Urbanicity"
+generate urban=.
+replace urban=1 if rural_urban<=4|rural_urban==.
+replace urban=0 if rural_urban>4 & rural_urban!=.
+label define urban 0 "Rural" 1 "Urban"
+label values urban urban
+tab urban rural_urban, m
+tab case urban
+label var urban "Urban/rural"
 
 * BMI
 replace body_mass_index = . if !inrange(body_mass_index, 15, 50)
@@ -679,13 +681,32 @@ replace esrd_date = krt_date if esrd_date==.
 gen exit_date = esrd_date
 format exit_date %td
 gen end_date = date("2022-09-30", "YMD") if case==1
-replace end_date = date("2020-01-31", "YMD") if case==0
+replace end_date = date("2019-09-30", "YMD") if case==0
 format end_date %td
 replace exit_date = min(deregistered_date, death_date, end_date) if esrd_date==.
 gen follow_up_time = (exit_date - index_date)
 label var follow_up_time "Follow-up time (Days)"
+gen follow_up_cat = follow_up_time
+recode follow_up_cat	min/-29=1 	///
+						-28/-1=2 	///
+						0/365=3 	///
+						366/730=4 	///
+						731/973=5	///					
+						974/max=6
+label define follow_up_cat 	1 "<-29 days" 		///
+							2 "-28 to -1 days" 	///
+							3 "0 to 365 days" 	///
+							4 "366 to 730 days" ///
+							5 "731 to 973 days"	///
+							6 ">973 days"
+label values follow_up_cat follow_up_cat
+label var follow_up_cat "Follow_up time"
+tab case follow_up_cat
+tab covid_krt follow_up_cat
 drop if follow_up_time<0
 drop if follow_up_time>972
+tab case follow_up_cat
+tab covid_krt follow_up_cat
 
 * 50% eGFR reduction (earliest month) (or ESRD)
 gen egfr_half_date=.
@@ -705,14 +726,15 @@ replace exit_date_egfr_half = min(deregistered_date,death_date,end_date) if egfr
 gen follow_up_time_egfr_half = (exit_date_egfr_half - index_date_egfr_half)
 label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
 
-* AKI date
+* AKI (or ESRD)
 gen aki_date = date(acute_kidney_injury_outcome, "YMD")
 format aki_date %td
 drop acute_kidney_injury_outcome
+replace aki_date = esrd_date if aki_date==.
 * Exit date (AKI)
 gen exit_date_aki = aki_date
 format exit_date_aki %td
-replace exit_date_aki = min(deregistered_date,esrd_date,death_date,end_date)  if aki_date==.
+replace exit_date_aki = min(deregistered_date,death_date,end_date)  if aki_date==.
 gen follow_up_time_aki = (exit_date_aki - index_date)
 label var follow_up_time_aki "Follow-up time (AKI) (Days)"
 

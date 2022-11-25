@@ -16,6 +16,6 @@ match(
         "date_deregistered": "before",
         "krt_outcome_date": "before",
     },
-    output_suffix="_covid20212017_stp10",
+    output_suffix="_2017B_stp10",
     output_path="output",
 )

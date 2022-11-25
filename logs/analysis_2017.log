@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2017.log
   log type:  text
- opened on:  25 Nov 2022, 17:36:08
+ opened on:  25 Nov 2022, 23:00:32
 
 . 
 . ** Analysis cohort selection
@@ -435,6 +435,13 @@ Yorkshire and The Humber |      3,742       10.22      100.00
 . drop if krt_date < index_date
 (0 observations deleted)
 
+. gen index_date_28 = index_date + 28
+
+. format index_date_28 %td
+
+. replace krt_date = index_date_28 if krt_date < index_date_28
+(176 real changes made)
+
 . 
 . * Death before index_date + 28 days (i.e. only include people who survived 28 days after index_date)
 . gen death_date1 = date(death_date, "YMD")
@@ -445,10 +452,6 @@ Yorkshire and The Humber |      3,742       10.22      100.00
 . drop death_date
 
 . rename death_date1 death_date
-
-. gen index_date_28 = index_date + 28
-
-. format index_date_28 %td
 
 . gen deceased = 0
 
@@ -3826,7 +3829,7 @@ myocardial_ |
 . gen end_date = date("2022-09-30", "YMD") if case==1
 (23,180 missing values generated)
 
-. replace end_date = date("2020-01-31", "YMD") if case==0
+. replace end_date = date("2019-09-30", "YMD") if case==0
 (23,180 real changes made)
 
 . format end_date %td
@@ -3838,16 +3841,81 @@ myocardial_ |
 
 . label var follow_up_time "Follow-up time (Days)"
 
+. gen follow_up_cat = follow_up_time
+
+. recode follow_up_cat    min/-29=1       ///
+>                                                 -28/-1=2        ///
+>                                                 0/365=3         ///
+>                                                 366/730=4       ///
+>                                                 731/973=5       ///                                     
+>                                                 974/max=6
+(29276 changes made to follow_up_cat)
+
+. label define follow_up_cat      1 "<-29 days"           ///
+>                                                         2 "-28 to -1 days"      ///
+>                                                         3 "0 to 365 days"       ///
+>                                                         4 "366 to 730 days" ///
+>                                                         5 "731 to 973 days"     ///
+>                                                         6 ">973 days"
+
+. label values follow_up_cat follow_up_cat
+
+. label var follow_up_cat "Follow_up time"
+
+. tab case follow_up_cat
+
+                      |               Follow_up time
+                 case | -28 to -1  0 to 365   366 to 73  731 to 97 |     Total
+----------------------+--------------------------------------------+----------
+Comparator (historica |        88      4,744      8,357      9,991 |    23,180 
+             COVID-19 |        26      1,285      2,321      2,478 |     6,110 
+----------------------+--------------------------------------------+----------
+                Total |       114      6,029     10,678     12,469 |    29,290 
+
+. tab covid_krt follow_up_cat
+
+      COVID-19 kidney |               Follow_up time
+  replacement therapy | -28 to -1  0 to 365   366 to 73  731 to 97 |     Total
+----------------------+--------------------------------------------+----------
+Historical comparator |        88      4,744      8,357      9,991 |    23,180 
+Non-hospitalised SARS |        21      1,044      1,901      2,012 |     4,978 
+No KRT hospitalised C |         4        111        191        233 |       539 
+KRT hospitalised COVI |         1        130        229        233 |       593 
+----------------------+--------------------------------------------+----------
+                Total |       114      6,029     10,678     12,469 |    29,290 
+
 . drop if follow_up_time<0
-(187 observations deleted)
+(114 observations deleted)
 
 . drop if follow_up_time>972
-(4,964 observations deleted)
+(0 observations deleted)
+
+. tab case follow_up_cat
+
+                      |          Follow_up time
+                 case | 0 to 365   366 to 73  731 to 97 |     Total
+----------------------+---------------------------------+----------
+Comparator (historica |     4,744      8,357      9,991 |    23,092 
+             COVID-19 |     1,285      2,321      2,478 |     6,084 
+----------------------+---------------------------------+----------
+                Total |     6,029     10,678     12,469 |    29,176 
+
+. tab covid_krt follow_up_cat
+
+      COVID-19 kidney |          Follow_up time
+  replacement therapy | 0 to 365   366 to 73  731 to 97 |     Total
+----------------------+---------------------------------+----------
+Historical comparator |     4,744      8,357      9,991 |    23,092 
+Non-hospitalised SARS |     1,044      1,901      2,012 |     4,957 
+No KRT hospitalised C |       111        191        233 |       535 
+KRT hospitalised COVI |       130        229        233 |       592 
+----------------------+---------------------------------+----------
+                Total |     6,029     10,678     12,469 |    29,176 
 
 . 
 . * 50% eGFR reduction (earliest month) (or ESRD)
 . gen egfr_half_date=.
-(24,139 missing values generated)
+(29,176 missing values generated)
 
 . local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 
 > jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 ju
@@ -3859,36 +3927,36 @@ myocardial_ |
   4. }
 (0 real changes made)
 (0 real changes made)
-(25 real changes made)
-(35 real changes made)
-(45 real changes made)
-(103 real changes made)
-(108 real changes made)
-(164 real changes made)
-(175 real changes made)
-(188 real changes made)
-(210 real changes made)
-(235 real changes made)
-(235 real changes made)
-(225 real changes made)
+(77 real changes made)
+(153 real changes made)
+(176 real changes made)
+(224 real changes made)
+(223 real changes made)
+(257 real changes made)
+(248 real changes made)
+(262 real changes made)
+(267 real changes made)
+(279 real changes made)
+(273 real changes made)
+(275 real changes made)
+(266 real changes made)
 (231 real changes made)
-(191 real changes made)
+(231 real changes made)
+(215 real changes made)
+(205 real changes made)
+(203 real changes made)
 (186 real changes made)
-(175 real changes made)
-(178 real changes made)
-(168 real changes made)
-(151 real changes made)
-(143 real changes made)
-(145 real changes made)
-(140 real changes made)
-(105 real changes made)
-(130 real changes made)
-(118 real changes made)
-(118 real changes made)
-(111 real changes made)
+(169 real changes made)
+(162 real changes made)
+(160 real changes made)
+(127 real changes made)
+(148 real changes made)
+(148 real changes made)
+(133 real changes made)
+(127 real changes made)
+(126 real changes made)
+(126 real changes made)
 (110 real changes made)
-(116 real changes made)
-(95 real changes made)
 (0 real changes made)
 (2 real changes made)
 (19 real changes made)
@@ -3897,7 +3965,7 @@ myocardial_ |
 (56 real changes made)
 (63 real changes made)
 (58 real changes made)
-(65 real changes made)
+(67 real changes made)
 (61 real changes made)
 (70 real changes made)
 (69 real changes made)
@@ -3907,7 +3975,7 @@ myocardial_ |
 (60 real changes made)
 (71 real changes made)
 (61 real changes made)
-(56 real changes made)
+(57 real changes made)
 (49 real changes made)
 (60 real changes made)
 (52 real changes made)
@@ -3923,32 +3991,32 @@ myocardial_ |
 (37 real changes made)
 
 . replace egfr_half_date=esrd_date if egfr_half_date==.
-(2,229 real changes made)
+(2,332 real changes made)
 
 . * Index date (50% eGFR reduction)
 . gen index_date_egfr_half = index_date
 
 . replace index_date_egfr_half =. if baseline_egfr==.
-(10,701 real changes made, 10,701 to missing)
+(12,918 real changes made, 12,918 to missing)
 
 . * Exit date (50% eGFR reduction)
 . gen exit_date_egfr_half = egfr_half_date
-(16,001 missing values generated)
+(19,504 missing values generated)
 
 . format exit_date_egfr_half %td
 
 . replace exit_date_egfr_half = min(deregistered_date,death_date,end_date) if egfr_half_date==. & index_date_egfr_half!=.
-(6,620 real changes made)
+(7,966 real changes made)
 
 . gen follow_up_time_egfr_half = (exit_date_egfr_half - index_date_egfr_half)
-(10,701 missing values generated)
+(12,918 missing values generated)
 
 . label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
 
 . 
 . * AKI date
 . gen aki_date = date(acute_kidney_injury_outcome, "YMD")
-(21,739 missing values generated)
+(26,274 missing values generated)
 
 . format aki_date %td
 
@@ -3956,12 +4024,12 @@ myocardial_ |
 
 . * Exit date (AKI)
 . gen exit_date_aki = aki_date
-(21,739 missing values generated)
+(26,274 missing values generated)
 
 . format exit_date_aki %td
 
 . replace exit_date_aki = min(deregistered_date,esrd_date,death_date,end_date)  if aki_date==.
-(21,739 real changes made)
+(26,274 real changes made)
 
 . gen follow_up_time_aki = (exit_date_aki - index_date)
 
@@ -3970,12 +4038,12 @@ myocardial_ |
 . 
 . * Exit date (death)
 . gen exit_date_death = death_date
-(22,191 missing values generated)
+(27,223 missing values generated)
 
 . format exit_date_death %td
 
 . replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
-(22,191 real changes made)
+(27,223 real changes made)
 
 . gen follow_up_time_death = (exit_date_death - index_date)
 
@@ -3989,5 +4057,5 @@ file ./output/analysis_2017.dta saved
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2017.log
   log type:  text
- closed on:  25 Nov 2022, 17:36:35
+ closed on:  25 Nov 2022, 23:00:54
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

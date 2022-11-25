@@ -1,0 +1,43 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/combine_stps_2017B.log
+  log type:  text
+ opened on:  25 Nov 2022, 21:12:10
+
+. 
+. *(1)=========Change source files to stata format============
+. foreach i of numlist 10 12 {
+  2.         capture noisily import delimited ./output/matched_cases_2017B_stp`i'.csv, clear
+  3.         capture noisily tempfile matched_cases_2017B_stp`i'
+  4.         capture noisily save `matched_cases_2017B_stp`i'', replace
+  5. }
+(encoding automatically selected: ISO-8859-1)
+(13 vars, 260 obs)
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000001.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000001.tmp saved as .dta format
+(encoding automatically selected: ISO-8859-2)
+(13 vars, 258 obs)
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000002.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000002.tmp saved as .dta format
+
+. 
+. *(2)=========Append separate cases files==========
+. use `matched_cases_2017B_stp10', clear
+
+. foreach i of numlist 10 12 {
+  2.         capture noisily append using `matched_cases_2017B_stp`i'', force
+  3. }
+
+. 
+. *save as .csv file for input into study definitions that add further variables, erase dta version
+. capture noisily export delimited using "./output/input_combined_stps_2017B.csv", replace
+(file ./output/input_combined_stps_2017B.csv not found)
+file ./output/input_combined_stps_2017B.csv saved
+
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/combine_stps_2017B.log
+  log type:  text
+ closed on:  25 Nov 2022, 21:12:10
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
