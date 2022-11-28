@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2017.log
   log type:  text
- opened on:  25 Nov 2022, 23:00:32
+ opened on:  28 Nov 2022, 12:33:21
 
 . 
 . ** Analysis cohort selection
@@ -64,8 +64,8 @@ Duplicates in terms of patient_id
 (0 observations are duplicates)
 
 . save `covid_2017_matched', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000001.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000001.tmp saved as .dta format
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000001.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000001.tmp saved as .dta format
 
 . * Number of matched COVID-19 cases
 . count
@@ -89,8 +89,8 @@ Duplicates in terms of patient_id
 (0 observations are duplicates)
 
 . save `2017_matched', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000002.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000002.tmp saved as .dta format
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000002.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000002.tmp saved as .dta format
 
 . * Number of matched historical comparators
 . count
@@ -117,8 +117,8 @@ file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000002.tmp saved as .dta format
 . tempfile covid_2017_complete
 
 . save `covid_2017_complete', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000003.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000003.tmp saved as .dta format
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000003.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000003.tmp saved as .dta format
 
 . di "Matched COVID-19 cases:"
 Matched COVID-19 cases:
@@ -147,8 +147,8 @@ Matched COVID-19 cases:
 . tempfile 2017_complete
 
 . save `2017_complete', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000004.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000004.tmp saved as .dta format
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000004.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000004.tmp saved as .dta format
 
 . di "Matched historical comparators:"
 Matched historical comparators:
@@ -192,8 +192,8 @@ Matched COVID-19 cases and historical comparators:
 .         tempfile covid_2017_matched_list
 
 .         save `covid_2017_matched_list', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000006.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000006.tmp saved as .dta format
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000006.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000006.tmp saved as .dta format
 
 . restore
 
@@ -214,8 +214,8 @@ Duplicates in terms of patient_id
 .         tempfile covid_prematching
 
 .         save `covid_prematching', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000008.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_3e0_000008.tmp saved as .dta format
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000008.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_adc_000008.tmp saved as .dta format
 
 .         use `covid_2017_matched_list', clear
 
@@ -267,9 +267,6 @@ Unmatched COVID-19 cases:
 5 Least deprived |      7,459       19.36      100.00
 -----------------+-----------------------------------
            Total |     38,528      100.00
-
-. drop if imd==.
-(0 observations deleted)
 
 . drop if imd==0
 (1,927 observations deleted)
@@ -2263,7 +2260,7 @@ South Asian |      1,061        3.62       63.81
       Total |     29,290      100.00
 
 . 
-. * Rural/urban
+. * Urban/rural
 . replace rural_urban=. if rural_urban<1|rural_urban>8
 (0 real changes made)
 
@@ -2278,7 +2275,7 @@ South Asian |      1,061        3.62       63.81
 
 . label values rural_urban rural_urban
 
-. safetab rural_urban, m
+. tab rural_urban, m
 
                             rural_urban |      Freq.     Percent        Cum.
 ----------------------------------------+-----------------------------------
@@ -2293,32 +2290,42 @@ Rural village and dispersed in a sparse |      5,942       20.29      100.00
 ----------------------------------------+-----------------------------------
                                   Total |     29,290      100.00
 
-. * Urbanicity (binary)
+. * Urban (binary)
 . * Urban = 1-4 + missing, Rural = 5-8
-. generate urbanicity=.
+. generate urban=.
 (29,290 missing values generated)
 
-. replace urbanicity=1 if rural_urban<=4|rural_urban==.
+. replace urban=1 if rural_urban<=4|rural_urban==.
 (11,581 real changes made)
 
-. replace urbanicity=0 if rural_urban>4 & rural_urban!=.
+. replace urban=0 if rural_urban>4 & rural_urban!=.
 (17,709 real changes made)
 
-. label define urbanicity 0 "Rural" 1 "Urban"
+. label define urban 0 "Rural" 1 "Urban"
 
-. label values urbanicity urbanicity
+. label values urban urban
 
-. safetab urbanicity rural_urban, m
+. tab urban rural_urban, m
 
            |                                       rural_urban
-urbanicity | Urban maj  Urban min  Urban cit  Urban cit  Rural tow  Rural tow  Rural vil  Rural vil |     Total
+     urban | Urban maj  Urban min  Urban cit  Urban cit  Rural tow  Rural tow  Rural vil  Rural vil |     Total
 -----------+----------------------------------------------------------------------------------------+----------
      Rural |         0          0          0          0      2,934      2,972      5,861      5,942 |    17,709 
      Urban |     2,799      2,906      2,953      2,923          0          0          0          0 |    11,581 
 -----------+----------------------------------------------------------------------------------------+----------
      Total |     2,799      2,906      2,953      2,923      2,934      2,972      5,861      5,942 |    29,290 
 
-. label var urbanicity "Urbanicity"
+. tab case urban
+
+                      |         urban
+                 case |     Rural      Urban |     Total
+----------------------+----------------------+----------
+Comparator (historica |    14,034      9,146 |    23,180 
+             COVID-19 |     3,675      2,435 |     6,110 
+----------------------+----------------------+----------
+                Total |    17,709     11,581 |    29,290 
+
+. label var urban "Urban/rural"
 
 . 
 . * BMI
@@ -3819,243 +3826,477 @@ myocardial_ |
 . replace esrd_date = krt_date if esrd_date==.
 (3,160 real changes made)
 
-. 
-. * Exit date
-. gen exit_date = esrd_date
+. gen esrd_time = (esrd_date - index_date)
 (26,129 missing values generated)
 
-. format exit_date %td
+. label var esrd_time "Time to ESRD (Days)"
 
-. gen end_date = date("2022-09-30", "YMD") if case==1
-(23,180 missing values generated)
+. gen esrd_time_cat = esrd_time
+(26,129 missing values generated)
 
-. replace end_date = date("2019-09-30", "YMD") if case==0
-(23,180 real changes made)
+. recode esrd_time_cat    min/-1=1        ///
+>                                                 0=2                     ///
+>                                                 1/28=3          ///
+>                                                 29/90=4         ///
+>                                                 91/180=5        ///
+>                                                 181/365=6       ///
+>                                                 366/730=7       ///
+>                                                 731/973=8       ///
+>                                                 974/max=9
+(3155 changes made to esrd_time_cat)
 
-. format end_date %td
+. label define esrd_time_cat      1 "<0 days"                     ///
+>                                                         2 "0 days"                      ///
+>                                                         3 "1 to 28 days"        ///
+>                                                         4 "20 to 90 days"       ///
+>                                                         5 "91 to 180 days"      ///
+>                                                         6 "181 to 365 days"     ///
+>                                                         7 "366 to 730 days"     ///
+>                                                         8 "731 to 973 days"     ///
+>                                                         9 ">973 days"
 
-. replace exit_date = min(deregistered_date, death_date, end_date) if esrd_date==.
-(26,129 real changes made)
+. label values esrd_time_cat esrd_time_cat
 
-. gen follow_up_time = (exit_date - index_date)
+. foreach `exposure' of varlist   case                    ///
+>                                                                 covid_severity  ///
+>                                                                 covid_aki               {
+  2.                                                                 by `exposure',sort: sum esrd_time, de
+  3.                                                                 tab esrd_time_cat `exposure', m col chi
+  4.                                                                 }
+invalid syntax
+r(198);
 
-. label var follow_up_time "Follow-up time (Days)"
+end of do-file
 
-. gen follow_up_cat = follow_up_time
+r(198);
 
-. recode follow_up_cat    min/-29=1       ///
->                                                 -28/-1=2        ///
->                                                 0/365=3         ///
->                                                 366/730=4       ///
->                                                 731/973=5       ///                                     
->                                                 974/max=6
-(29276 changes made to follow_up_cat)
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STDadc_000000.tmp"
 
-. label define follow_up_cat      1 "<-29 days"           ///
->                                                         2 "-28 to -1 days"      ///
->                                                         3 "0 to 365 days"       ///
->                                                         4 "366 to 730 days" ///
->                                                         5 "731 to 973 days"     ///
->                                                         6 ">973 days"
+. by case,sort: sum esrd_time, de
 
-. label values follow_up_cat follow_up_cat
-
-. label var follow_up_cat "Follow_up time"
-
-. tab case follow_up_cat
-
-                      |               Follow_up time
-                 case | -28 to -1  0 to 365   366 to 73  731 to 97 |     Total
-----------------------+--------------------------------------------+----------
-Comparator (historica |        88      4,744      8,357      9,991 |    23,180 
-             COVID-19 |        26      1,285      2,321      2,478 |     6,110 
-----------------------+--------------------------------------------+----------
-                Total |       114      6,029     10,678     12,469 |    29,290 
-
-. tab covid_krt follow_up_cat
-
-      COVID-19 kidney |               Follow_up time
-  replacement therapy | -28 to -1  0 to 365   366 to 73  731 to 97 |     Total
-----------------------+--------------------------------------------+----------
-Historical comparator |        88      4,744      8,357      9,991 |    23,180 
-Non-hospitalised SARS |        21      1,044      1,901      2,012 |     4,978 
-No KRT hospitalised C |         4        111        191        233 |       539 
-KRT hospitalised COVI |         1        130        229        233 |       593 
-----------------------+--------------------------------------------+----------
-                Total |       114      6,029     10,678     12,469 |    29,290 
-
-. drop if follow_up_time<0
-(114 observations deleted)
-
-. drop if follow_up_time>972
-(0 observations deleted)
-
-. tab case follow_up_cat
-
-                      |          Follow_up time
-                 case | 0 to 365   366 to 73  731 to 97 |     Total
-----------------------+---------------------------------+----------
-Comparator (historica |     4,744      8,357      9,991 |    23,092 
-             COVID-19 |     1,285      2,321      2,478 |     6,084 
-----------------------+---------------------------------+----------
-                Total |     6,029     10,678     12,469 |    29,176 
-
-. tab covid_krt follow_up_cat
-
-      COVID-19 kidney |          Follow_up time
-  replacement therapy | 0 to 365   366 to 73  731 to 97 |     Total
-----------------------+---------------------------------+----------
-Historical comparator |     4,744      8,357      9,991 |    23,092 
-Non-hospitalised SARS |     1,044      1,901      2,012 |     4,957 
-No KRT hospitalised C |       111        191        233 |       535 
-KRT hospitalised COVI |       130        229        233 |       592 
-----------------------+---------------------------------+----------
-                Total |     6,029     10,678     12,469 |    29,176 
-
-. 
-. * 50% eGFR reduction (earliest month) (or ESRD)
-. gen egfr_half_date=.
-(29,176 missing values generated)
-
-. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 
-> jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 ju
-> n2022 jul2022 aug2022 sep2022"
-
-. foreach x of local month_year {
-  2.   replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_half_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>=index_date
-  3.   format egfr_half_date %td
-  4. }
-(0 real changes made)
-(0 real changes made)
-(77 real changes made)
-(153 real changes made)
-(176 real changes made)
-(224 real changes made)
-(223 real changes made)
-(257 real changes made)
-(248 real changes made)
-(262 real changes made)
-(267 real changes made)
-(279 real changes made)
-(273 real changes made)
-(275 real changes made)
-(266 real changes made)
-(231 real changes made)
-(231 real changes made)
-(215 real changes made)
-(205 real changes made)
-(203 real changes made)
-(186 real changes made)
-(169 real changes made)
-(162 real changes made)
-(160 real changes made)
-(127 real changes made)
-(148 real changes made)
-(148 real changes made)
-(133 real changes made)
-(127 real changes made)
-(126 real changes made)
-(126 real changes made)
-(110 real changes made)
-(0 real changes made)
-(2 real changes made)
-(19 real changes made)
-(35 real changes made)
-(33 real changes made)
-(56 real changes made)
-(63 real changes made)
-(58 real changes made)
-(67 real changes made)
-(61 real changes made)
-(70 real changes made)
-(69 real changes made)
-(65 real changes made)
-(71 real changes made)
-(63 real changes made)
-(60 real changes made)
-(71 real changes made)
-(61 real changes made)
-(57 real changes made)
-(49 real changes made)
-(60 real changes made)
-(52 real changes made)
-(55 real changes made)
-(38 real changes made)
-(43 real changes made)
-(44 real changes made)
-(53 real changes made)
-(29 real changes made)
-(32 real changes made)
-(36 real changes made)
-(44 real changes made)
-(37 real changes made)
-
-. replace egfr_half_date=esrd_date if egfr_half_date==.
-(2,332 real changes made)
-
-. * Index date (50% eGFR reduction)
-. gen index_date_egfr_half = index_date
-
-. replace index_date_egfr_half =. if baseline_egfr==.
-(12,918 real changes made, 12,918 to missing)
-
-. * Exit date (50% eGFR reduction)
-. gen exit_date_egfr_half = egfr_half_date
-(19,504 missing values generated)
-
-. format exit_date_egfr_half %td
-
-. replace exit_date_egfr_half = min(deregistered_date,death_date,end_date) if egfr_half_date==. & index_date_egfr_half!=.
-(7,966 real changes made)
-
-. gen follow_up_time_egfr_half = (exit_date_egfr_half - index_date_egfr_half)
-(12,918 missing values generated)
-
-. label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
-
-. 
-. * AKI date
-. gen aki_date = date(acute_kidney_injury_outcome, "YMD")
-(26,274 missing values generated)
-
-. format aki_date %td
-
-. drop acute_kidney_injury_outcome
-
-. * Exit date (AKI)
-. gen exit_date_aki = aki_date
-(26,274 missing values generated)
-
-. format exit_date_aki %td
-
-. replace exit_date_aki = min(deregistered_date,esrd_date,death_date,end_date)  if aki_date==.
-(26,274 real changes made)
-
-. gen follow_up_time_aki = (exit_date_aki - index_date)
-
-. label var follow_up_time_aki "Follow-up time (AKI) (Days)"
-
-. 
-. * Exit date (death)
-. gen exit_date_death = death_date
-(27,223 missing values generated)
-
-. format exit_date_death %td
-
-. replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
-(27,223 real changes made)
-
-. gen follow_up_time_death = (exit_date_death - index_date)
-
-. label var follow_up_time_death "Follow-up time (death) (Days)"
-
-. 
-. save ./output/analysis_2017.dta, replace
-file ./output/analysis_2017.dta saved
-
-. log close
-      name:  <unnamed>
-       log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2017.log
-  log type:  text
- closed on:  25 Nov 2022, 23:00:54
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> case = Comparator (historical)
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            2              0
+10%           37              0       Obs               2,515
+25%          140              0       Sum of wgt.       2,515
+
+50%          321                      Mean           348.1714
+                        Largest       Std. dev.      244.4269
+75%          544            919
+90%          702            919       Variance       59744.49
+95%          782            935       Skewness       .3617585
+99%          877            940       Kurtosis        2.08713
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> case = COVID-19
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%           12              0
+10%           55              0       Obs                 646
+25%          152              0       Sum of wgt.         646
+
+50%        321.5                      Mean           353.3715
+                        Largest       Std. dev.      239.8141
+75%          532            908
+90%          695            914       Variance       57510.79
+95%          790            925       Skewness       .3838912
+99%          873            926       Kurtosis       2.134809
+
+
+. 
+end of do-file
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STDadc_000000.tmp"
+
+. tab esrd_time_cat case, m col chi
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+                |         case
+  esrd_time_cat | Comparato   COVID-19 |     Total
+----------------+----------------------+----------
+         0 days |       123         21 |       144 
+                |      0.53       0.34 |      0.49 
+----------------+----------------------+----------
+   1 to 28 days |       102         21 |       123 
+                |      0.44       0.34 |      0.42 
+----------------+----------------------+----------
+  20 to 90 days |       236         57 |       293 
+                |      1.02       0.93 |      1.00 
+----------------+----------------------+----------
+ 91 to 180 days |       316         89 |       405 
+                |      1.36       1.46 |      1.38 
+----------------+----------------------+----------
+181 to 365 days |       631        170 |       801 
+                |      2.72       2.78 |      2.73 
+----------------+----------------------+----------
+366 to 730 days |       907        239 |     1,146 
+                |      3.91       3.91 |      3.91 
+----------------+----------------------+----------
+731 to 973 days |       200         49 |       249 
+                |      0.86       0.80 |      0.85 
+----------------+----------------------+----------
+              . |    20,665      5,464 |    26,129 
+                |     89.15      89.43 |     89.21 
+----------------+----------------------+----------
+          Total |    23,180      6,110 |    29,290 
+                |    100.00     100.00 |    100.00 
+
+          Pearson chi2(7) =   5.4777   Pr = 0.602
+
+. 
+end of do-file
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STDadc_000000.tmp"
+
+. foreach `exposure' of varlist   case                    ///
+>                                                                 covid_severity  ///
+>                                                                 covid_aki               {
+  2.                                                                 by `exposure',sort: sum esrd_time, de
+  3.                                                                 }
+invalid syntax
+r(198);
+
+end of do-file
+
+r(198);
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STDadc_000000.tmp"
+
+. foreach `exposure' of varlist   case                    ///
+>                                                                 covid_severity  ///
+>                                                                 covid_aki               {
+  2.                                                                 tab esrd_time_cat `exposure', m col chi
+  3.                                                                 }
+invalid syntax
+r(198);
+
+end of do-file
+
+r(198);
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STDadc_000000.tmp"
+
+. foreach exposure of varlist     case                    ///
+>                                                                 covid_severity  ///
+>                                                                 covid_aki               {
+  2.                                                                 by `exposure',sort: sum esrd_time, de
+  3.                                                                 tab esrd_time_cat `exposure', m col chi
+  4.                                                                 }
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> case = Comparator (historical)
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            2              0
+10%           37              0       Obs               2,515
+25%          140              0       Sum of wgt.       2,515
+
+50%          321                      Mean           348.1714
+                        Largest       Std. dev.      244.4269
+75%          544            919
+90%          702            919       Variance       59744.49
+95%          782            935       Skewness       .3617585
+99%          877            940       Kurtosis        2.08713
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> case = COVID-19
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%           12              0
+10%           55              0       Obs                 646
+25%          152              0       Sum of wgt.         646
+
+50%        321.5                      Mean           353.3715
+                        Largest       Std. dev.      239.8141
+75%          532            908
+90%          695            914       Variance       57510.79
+95%          790            925       Skewness       .3838912
+99%          873            926       Kurtosis       2.134809
+
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+                |         case
+  esrd_time_cat | Comparato   COVID-19 |     Total
+----------------+----------------------+----------
+         0 days |       123         21 |       144 
+                |      0.53       0.34 |      0.49 
+----------------+----------------------+----------
+   1 to 28 days |       102         21 |       123 
+                |      0.44       0.34 |      0.42 
+----------------+----------------------+----------
+  20 to 90 days |       236         57 |       293 
+                |      1.02       0.93 |      1.00 
+----------------+----------------------+----------
+ 91 to 180 days |       316         89 |       405 
+                |      1.36       1.46 |      1.38 
+----------------+----------------------+----------
+181 to 365 days |       631        170 |       801 
+                |      2.72       2.78 |      2.73 
+----------------+----------------------+----------
+366 to 730 days |       907        239 |     1,146 
+                |      3.91       3.91 |      3.91 
+----------------+----------------------+----------
+731 to 973 days |       200         49 |       249 
+                |      0.86       0.80 |      0.85 
+----------------+----------------------+----------
+              . |    20,665      5,464 |    26,129 
+                |     89.15      89.43 |     89.21 
+----------------+----------------------+----------
+          Total |    23,180      6,110 |    29,290 
+                |    100.00     100.00 |    100.00 
+
+          Pearson chi2(7) =   5.4777   Pr = 0.602
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> covid_severity = Historical comparator
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            2              0
+10%           37              0       Obs               2,515
+25%          140              0       Sum of wgt.       2,515
+
+50%          321                      Mean           348.1714
+                        Largest       Std. dev.      244.4269
+75%          544            919
+90%          702            919       Variance       59744.49
+95%          782            935       Skewness       .3617585
+99%          877            940       Kurtosis        2.08713
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> covid_severity = Non-hospitalised SARS-CoV-2
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%           10              0
+10%           59              0       Obs                 521
+25%          152              0       Sum of wgt.         521
+
+50%          339                      Mean           361.1785
+                        Largest       Std. dev.      242.3377
+75%          543            908
+90%          700            914       Variance       58727.57
+95%          795            925       Skewness        .334893
+99%          876            926       Kurtosis       2.079453
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> covid_severity = Hospitalised COVID-19
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%           12              0
+10%           40             12       Obs                  55
+25%          132             25       Sum of wgt.          55
+
+50%          262                      Mean           296.7636
+                        Largest       Std. dev.      217.6278
+75%          450            707
+90%          662            767       Variance       47361.85
+95%          767            778       Skewness       .6926376
+99%          833            833       Kurtosis       2.765559
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> covid_severity = Critical care COVID-19
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%           29              0
+10%           64             16       Obs                  70
+25%          139             29       Sum of wgt.          70
+
+50%        299.5                      Mean           339.7429
+                        Largest       Std. dev.      233.9821
+75%          524            813
+90%        666.5            834       Variance       54747.61
+95%          813            844       Skewness       .4988802
+99%          873            873       Kurtosis        2.27611
+
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+                |             SARS-CoV-2 severity
+  esrd_time_cat | Historica  Non-hospi  Hospitali  Critical  |     Total
+----------------+--------------------------------------------+----------
+         0 days |       123         17          2          2 |       144 
+                |      0.53       0.34       0.39       0.33 |      0.49 
+----------------+--------------------------------------------+----------
+   1 to 28 days |       102         17          3          1 |       123 
+                |      0.44       0.34       0.58       0.16 |      0.42 
+----------------+--------------------------------------------+----------
+  20 to 90 days |       236         45          6          6 |       293 
+                |      1.02       0.90       1.17       0.98 |      1.00 
+----------------+--------------------------------------------+----------
+ 91 to 180 days |       316         70          7         12 |       405 
+                |      1.36       1.40       1.36       1.96 |      1.38 
+----------------+--------------------------------------------+----------
+181 to 365 days |       631        131         20         19 |       801 
+                |      2.72       2.63       3.90       3.11 |      2.73 
+----------------+--------------------------------------------+----------
+366 to 730 days |       907        199         14         26 |     1,146 
+                |      3.91       3.99       2.73       4.26 |      3.91 
+----------------+--------------------------------------------+----------
+731 to 973 days |       200         42          3          4 |       249 
+                |      0.86       0.84       0.58       0.65 |      0.85 
+----------------+--------------------------------------------+----------
+              . |    20,665      4,465        458        541 |    26,129 
+                |     89.15      89.55      89.28      88.54 |     89.21 
+----------------+--------------------------------------------+----------
+          Total |    23,180      4,986        513        611 |    29,290 
+                |    100.00     100.00     100.00     100.00 |    100.00 
+
+         Pearson chi2(21) =  14.0168   Pr = 0.869
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> covid_aki = Historical comparator
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            2              0
+10%           37              0       Obs               2,515
+25%          140              0       Sum of wgt.       2,515
+
+50%          321                      Mean           348.1714
+                        Largest       Std. dev.      244.4269
+75%          544            919
+90%          702            919       Variance       59744.49
+95%          782            935       Skewness       .3617585
+99%          877            940       Kurtosis        2.08713
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> covid_aki = Non-hospitalised SARS-CoV-2
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%           16              0
+10%           60              0       Obs                 550
+25%          157              0       Sum of wgt.         550
+
+50%        327.5                      Mean           361.1127
+                        Largest       Std. dev.      243.5717
+75%          544            908
+90%        706.5            914       Variance       59327.17
+95%          808            925       Skewness       .3638932
+99%          876            926       Kurtosis        2.08222
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> covid_aki = No AKI hospitalised COVID-19
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%         18.5              0
+10%           43             12       Obs                  60
+25%        149.5             25       Sum of wgt.          60
+
+50%        267.5                      Mean              306.6
+                        Largest       Std. dev.      213.8733
+75%          450            707
+90%        604.5            767       Variance        45741.8
+95%          737            778       Skewness       .5416818
+99%          833            833       Kurtosis       2.572167
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-> covid_aki = AKI hospitalised COVID-19
+
+                     Time to ESRD (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%           29              3       Obs                  36
+25%          112             29       Sum of wgt.          36
+
+50%          323                      Mean           313.0556
+                        Largest       Std. dev.      213.9658
+75%          485            604
+90%          604            662       Variance       45781.37
+95%          684            684       Skewness       .1254109
+99%          690            690       Kurtosis       1.838966
+
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+                |        COVID-19 acute kidney injury
+  esrd_time_cat | Historica  Non-hospi  No AKI ho  AKI hospi |     Total
+----------------+--------------------------------------------+----------
+         0 days |       123         17          2          2 |       144 
+                |      0.53       0.32       0.36       0.66 |      0.49 
+----------------+--------------------------------------------+----------
+   1 to 28 days |       102         17          3          1 |       123 
+                |      0.44       0.32       0.53       0.33 |      0.42 
+----------------+--------------------------------------------+----------
+  20 to 90 days |       236         48          6          3 |       293 
+                |      1.02       0.92       1.07       0.98 |      1.00 
+----------------+--------------------------------------------+----------
+ 91 to 180 days |       316         75          8          6 |       405 
+                |      1.36       1.43       1.42       1.97 |      1.38 
+----------------+--------------------------------------------+----------
+181 to 365 days |       631        142         19          9 |       801 
+                |      2.72       2.71       3.37       2.95 |      2.73 
+----------------+--------------------------------------------+----------
+366 to 730 days |       907        205         19         15 |     1,146 
+                |      3.91       3.91       3.37       4.92 |      3.91 
+----------------+--------------------------------------------+----------
+731 to 973 days |       200         46          3          0 |       249 
+                |      0.86       0.88       0.53       0.00 |      0.85 
+----------------+--------------------------------------------+----------
+              . |    20,665      4,692        503        269 |    26,129 
+                |     89.15      89.51      89.34      88.20 |     89.21 
+----------------+--------------------------------------------+----------
+          Total |    23,180      5,242        563        305 |    29,290 
+                |    100.00     100.00     100.00     100.00 |    100.00 
+
+         Pearson chi2(21) =  12.6372   Pr = 0.921
+
+. 
+end of do-file
+

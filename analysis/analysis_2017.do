@@ -93,7 +93,6 @@ restore
 label define imd 1 "1 Most deprived" 2 "2" 3 "3" 4 "4" 5 "5 Least deprived"
 label values imd imd
 tab imd, m
-drop if imd==.
 drop if imd==0
 safetab imd
 
@@ -676,7 +675,35 @@ format egfr15_date %td
 gen esrd_date = egfr15_date
 format esrd_date %td
 replace esrd_date = krt_date if esrd_date==.
-
+gen esrd_time = (esrd_date - index_date)
+label var esrd_time "Time to ESRD (Days)"
+gen esrd_time_cat = esrd_time
+recode esrd_time_cat	min/-1=1	///
+						0=2			///
+						1/28=3		///
+						29/90=4		///
+						91/180=5	///
+						181/365=6	///
+						366/730=7	///
+						731/973=8	///
+						974/max=9
+label define esrd_time_cat	1 "<0 days"			///
+							2 "0 days"			///
+							3 "1 to 28 days"	///
+							4 "20 to 90 days"	///
+							5 "91 to 180 days"	///
+							6 "181 to 365 days"	///
+							7 "366 to 730 days"	///
+							8 "731 to 973 days"	///
+							9 ">973 days"
+label values esrd_time_cat esrd_time_cat
+foreach `exposure' of varlist 	case			///
+								covid_severity	///
+								covid_aki		{
+								by `exposure',sort: sum esrd_time, de
+								tab esrd_time_cat `exposure', m col chi
+								}
+	
 * Exit date
 gen exit_date = esrd_date
 format exit_date %td
