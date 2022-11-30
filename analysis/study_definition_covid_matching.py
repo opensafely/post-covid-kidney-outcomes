@@ -1,20 +1,3 @@
-#Study defintion for people with COVID-19 to be matched to contemporary and historical comparators
-
-#Matching variables:
-# - age
-# - sex
-# - stp
-# - imd
-# - covid_diagnosis_date + 28 days
-
-#Exclusion variables:
-# - ESRD before covid_diagnosis_date
-# - deceased before covid_diagnosis_date
-
-#Note:
-# - Variables will be extracted at covid_diagnosis_date
-# - Matching and follow-up will commence at 28 days after covid_diagnosis_date
-
 from cohortextractor import (
     StudyDefinition,
     Measure,
@@ -138,10 +121,10 @@ study = StudyDefinition(
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-10-31"}},
         ),
     death_date=patients.with_death_recorded_in_primary_care(
-        between = ["2020-02-01", "2022-10-31"],
+        between = ["2020-02-01", "2022-11-30"],
         returning="date_of_death",
         date_format= "YYYY-MM-DD",
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-10-31"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-11-30"}},
     ),
     baseline_krt_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
@@ -449,9 +432,18 @@ study = StudyDefinition(
             "incidence": 0.60,
         }
     ),
+    baseline_creatinine_oct2022=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2021-04-01","2022-09-30"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
     krt_outcome_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
-        between = ["2020-02-01", "2022-10-31"],
+        between = ["2020-02-01", "2022-11-30"],
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
@@ -461,7 +453,7 @@ study = StudyDefinition(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between = ["2020-02-01", "2022-10-31"],
+        between = ["2020-02-01", "2022-11-30"],
         find_first_match_in_period=True,
         return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-10-31"}}
     ),
@@ -469,7 +461,7 @@ study = StudyDefinition(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between = ["2020-02-01", "2022-10-31"],
+        between = ["2020-02-01", "2022-11-30"],
         find_first_match_in_period=True,
         return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-10-31"}}
     ),
@@ -477,13 +469,12 @@ study = StudyDefinition(
         "krt_outcome_primary_care", "krt_outcome_icd_10", "krt_outcome_opcs_4",
     ),
     has_follow_up=patients.registered_with_one_practice_between(
-        "covid_diagnosis_date - 3 months", "covid_diagnosis_date",
+        "covid_diagnosis_date - 3 months", "covid_diagnosis_date + 28 days",
         return_expectations={"incidence":0.95,
     }
     ),
     date_deregistered=patients.date_deregistered_from_all_supported_practices(
-        between= ["2020-02-01", "2022-10-31"],
+        between= ["2020-02-01", "2022-11-30"],
         date_format="YYYY-MM-DD",
     ),
-
 )

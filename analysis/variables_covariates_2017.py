@@ -402,6 +402,15 @@ def generate_covariates_2017(index_date_variable):
             "incidence": 0.60,
         }
     ),
+    baseline_creatinine_oct2019=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2018-04-01","2019-09-30"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
     atrial_fibrillation_or_flutter=patients.with_these_clinical_events(
         atrial_fibrillation_or_flutter_codes,
         returning="binary_flag",
@@ -512,7 +521,7 @@ def generate_covariates_2017(index_date_variable):
         include_measurement_date=True,
         date_format="YYYY-MM-DD",
         return_expectations={
-            "date": {"earliest": "2020-01-01", "latest": "2019-09-30"},
+            "date": {"earliest": "2020-01-01", "latest": "2019-10-31"},
             "float": {"distribution": "normal", "mean": 28, "stddev": 8, "min": 18, "max": 45},
             "incidence": 0.95,
         }

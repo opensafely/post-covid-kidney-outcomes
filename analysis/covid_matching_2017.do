@@ -89,7 +89,8 @@ foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_mar2020 ///
 												baseline_creatinine_jun2022 ///
 												baseline_creatinine_jul2022 ///
 												baseline_creatinine_aug2022 ///
-												baseline_creatinine_sep2022 {
+												baseline_creatinine_sep2022 ///
+												baseline_creatinine_oct2022	{												
 replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine_monthly', 20, 3000)
 gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.4
 gen min_`baseline_creatinine_monthly'=.
@@ -116,12 +117,12 @@ gen covid_date_string=string(covid_date, "%td")
 gen covid_month=substr( covid_date_string ,3,7)
 
 gen baseline_egfr=.
-local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022"
+local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 foreach x of  local month_year  {
-replace baseline_egfr=egfr_baseline_creatinine_`x' if  covid_month=="`x'"
-drop if baseline_egfr <15
+replace baseline_egfr=egfr_baseline_creatinine_`x' if covid_month=="`x'"
 drop egfr_baseline_creatinine_`x'
 }
+drop if baseline_egfr <15
 drop baseline_egfr
 drop covid_date_string
 
@@ -134,10 +135,40 @@ drop krt_outcome_primary_care
 drop krt_outcome_icd_10
 drop krt_outcome_opcs_4
 
-*Tabulate variables
-tab age
-tab male
-tab covid_month
+* Categorise time period
+*Period 1 = February 2020 to August 2020
+*Period 2 = September 2020 to June 2021
+*Period 3 = July 2021 to November 2021
+*Period 4 = December 2021 to October 2022
+gen period = 1
+replace period = 2 if covid_month=="sep2020"
+replace period = 2 if covid_month=="oct2020"
+replace period = 2 if covid_month=="nov2020"
+replace period = 2 if covid_month=="dec2020"
+replace period = 2 if covid_month=="jan2021"
+replace period = 2 if covid_month=="feb2021"
+replace period = 2 if covid_month=="mar2021"
+replace period = 2 if covid_month=="apr2021"
+replace period = 2 if covid_month=="may2021"
+replace period = 2 if covid_month=="jun2021"
+replace period = 3 if covid_month=="jul2021"
+replace period = 3 if covid_month=="aug2021"
+replace period = 3 if covid_month=="sep2021"
+replace period = 3 if covid_month=="oct2021"
+replace period = 3 if covid_month=="nov2021"
+replace period = 4 if covid_month=="dec2021"
+replace period = 4 if covid_month=="jan2022"
+replace period = 4 if covid_month=="feb2022"
+replace period = 4 if covid_month=="mar2022"
+replace period = 4 if covid_month=="apr2022"
+replace period = 4 if covid_month=="may2022"
+replace period = 4 if covid_month=="jun2022"
+replace period = 4 if covid_month=="jul2022"
+replace period = 4 if covid_month=="aug2022"
+replace period = 4 if covid_month=="sep2022"
+replace period = 4 if covid_month=="oct2022"
+label var period "COVID-19 period"
+tab period, m
 
 export delimited using "./output/covid_matching_2017.csv", replace
 

@@ -19,12 +19,11 @@ variables_outcomes_2017= generate_outcomes_2017(index_date_variable="case_index_
 
 study = StudyDefinition(
     default_expectations={
-        "date": {"earliest": "1900-01-01", "latest": "2019-09-30"},
+        "date": {"earliest": "1900-01-01", "latest": "2019-11-30"},
         "rate": "uniform",
         "incidence" : 0.2
     },
     population=patients.which_exist_in_file(MATCHES), 
-    #Start of observation period (note, needs to be called index date)
     index_date="2017-02-01",
     case_index_date=patients.with_value_from_file(
         MATCHES, 
