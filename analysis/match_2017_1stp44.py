@@ -2,7 +2,7 @@ import pandas as pd
 from osmatching import match
 
 match(
-    case_csv="input_covid1_matching_2017_stp44",
+    case_csv="input_covid_matching_20171_stp44",
     match_csv="input_2017_matching_stp44",
     matches_per_case=5,
     match_variables={
@@ -16,6 +16,6 @@ match(
         "date_deregistered": "before",
         "krt_outcome_date": "before",
     },
-    output_suffix="_2017_1stp44",
+    output_suffix="_20171_stp44",
     output_path="output",
 )

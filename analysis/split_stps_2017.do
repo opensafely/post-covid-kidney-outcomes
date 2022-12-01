@@ -14,7 +14,7 @@ import delimited ./output/covid_matching_2017.csv, clear
 foreach i of numlist 1/4 {
 	preserve
 		capture noisily keep if period==`i'
-		capture noisily export delimited using "./output/input_covid`i'_matching_2017.csv", replace
+		capture noisily export delimited using "./output/input_covid_matching_2017`i'.csv", replace
 		count
 	restore
 }
