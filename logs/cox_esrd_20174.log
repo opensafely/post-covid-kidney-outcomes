@@ -1,0 +1,2587 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /workspace/logs/cox_esrd_20174.log
+  log type:  text
+ opened on:   1 Dec 2022, 01:14:12
+
+. use ./output/analysis_20174.dta
+
+. 
+. stset exit_date, fail(esrd_date) origin(index_date) id(patient_id) scale(365.
+> 25)
+
+                id:  patient_id
+     failure event:  esrd_date != 0 & esrd_date < .
+obs. time interval:  (exit_date[_n-1], exit_date]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date
+
+------------------------------------------------------------------------------
+     11,879  total observations
+         90  observations end on or before enter()
+          2  observations begin on or after (first) failure
+------------------------------------------------------------------------------
+     11,787  observations remaining, representing
+     11,745  subjects
+        344  failures in single-failure-per-subject data
+  4,921.027  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  3.737166
+
+. foreach exposure of varlist     case                    ///
+>                                                         covid_severity  ///
+>                                                         covid_aki            
+>    ///
+>                                                         covid_vax            
+>    ///
+>                                                         calendar_period {
+  2.         tab _d `exposure', col chi
+  3.         strate `exposure'
+  4.         stcox i.`exposure' i.sex age1 age2 age3, vce(cluster practice_id)
+  5.         quietly stcox i.`exposure' i.sex age1 age2 age3
+  6.         est store A
+  7.         quietly stcox i.sex age1 age2 age3
+  8.         est store B
+  9.         lrtest B A
+ 10.         stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi 
+> i.smoking age1 age2 age3, vce(cluster practice_id)
+ 11.         quietly stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urba
+> n i.bmi i.smoking age1 age2 age3
+ 12.         est store A
+ 13.         quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smo
+> king age1 age2 age3
+ 14.         est store B
+ 15.         lrtest B A
+ 16.         }
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+      1 if |
+failure; 0 |
+        if |         case
+  censored | Comparato   COVID-19 |     Total
+-----------+----------------------+----------
+         0 |     9,129      2,314 |    11,443 
+           |     96.93      97.68 |     97.08 
+-----------+----------------------+----------
+         1 |       289         55 |       344 
+           |      3.07       2.32 |      2.92 
+-----------+----------------------+----------
+     Total |     9,418      2,369 |    11,787 
+           |    100.00     100.00 |    100.00 
+
+          Pearson chi2(1) =   3.7273   Pr = 0.054
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Estimated rates and lower/upper bounds of 95% confidence intervals
+(11787 records included in the analysis)
+
+  +--------------------------------------------------------------------------+
+  |                    case     D         Y       Rate      Lower      Upper |
+  |--------------------------------------------------------------------------|
+  | Comparator (historical)   289   3.9e+03   0.075045   0.066873   0.084215 |
+  |                COVID-19    55   1.1e+03   0.051402   0.039465   0.066951 |
+  +--------------------------------------------------------------------------+
+
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Iteration 0:   log pseudolikelihood = -2996.5639
+Iteration 1:   log pseudolikelihood = -2988.2867
+Iteration 2:   log pseudolikelihood = -2988.2093
+Iteration 3:   log pseudolikelihood = -2988.2092
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -2988.2092
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =       11,745             Number of obs    =      11,787
+No. of failures      =          344
+Time at risk         =  4921.026694
+                                                Wald chi2(5)     =       26.84
+Log pseudolikelihood =   -2988.2092             Prob > chi2      =      0.0001
+
+                           (Std. Err. adjusted for 38 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .6825812   .1319058    -1.98   0.048     .4673727    .9968856
+             |
+         sex |
+       Male  |   1.068424   .1066653     0.66   0.507     .8785462     1.29934
+        age1 |   .9678431   .0116113    -2.72   0.006     .9453508    .9908706
+        age2 |   1.149156   .0496843     3.22   0.001     1.055789    1.250781
+        age3 |   .6400536   .0845509    -3.38   0.001     .4940522    .8292011
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(1)  =      6.54
+(Assumption: B nested in A)                           Prob > chi2 =    0.0106
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Iteration 0:   log pseudolikelihood = -240.83315
+Iteration 1:   log pseudolikelihood = -228.44096
+Iteration 2:   log pseudolikelihood = -226.98168
+Iteration 3:   log pseudolikelihood = -226.97243
+Iteration 4:   log pseudolikelihood = -226.97243
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -226.97243
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =        1,366             Number of obs    =       1,368
+No. of failures      =           39
+Time at risk         =  590.8090349
+                                                Wald chi2(28)    =    50849.18
+Log pseudolikelihood =   -226.97243             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 35 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .5239217   .3335486    -1.02   0.310     .1504385    1.824626
+             |
+         sex |
+       Male  |   1.626542   .3374153     2.35   0.019     1.083151    2.442538
+             |
+   ethnicity |
+South Asian  |   2.109633   .9373925     1.68   0.093     .8830492    5.039983
+      Black  |   1.733546    .977038     0.98   0.329     .5743713    5.232126
+      Mixed  |   .9804838   .5581141    -0.03   0.972     .3213045    2.992017
+      Other  |   .4569116   .3282326    -1.09   0.276      .111777     1.86772
+             |
+         imd |
+          2  |   .7179156    .378359    -0.63   0.529     .2555462    2.016868
+          3  |    1.50165   .5807209     1.05   0.293     .7037051    3.204402
+          4  |    1.67371   .7217149     1.19   0.232      .718847    3.896942
+5 Least d..  |   1.739032   .5048565     1.91   0.057     .9844561    3.071985
+             |
+      region |
+       East  |    2.43053   2.560048     0.84   0.399     .3084188    19.15408
+     London  |   2.393258    2.54502     0.82   0.412     .2977222    19.23834
+ North East  |   4.546286   3.305914     2.08   0.037     1.093176    18.90703
+ North West  |    1.77565   1.778947     0.57   0.567     .2492157    12.65142
+ South East  |   1.140421   1.407891     0.11   0.915     .1014438    12.82049
+ South West  |   .9234944   1.281576    -0.06   0.954      .060839    14.01801
+West Midl..  |   .8908435   1.265721    -0.08   0.935     .0550053    14.42774
+Yorkshire..  |   .9374594    1.08398    -0.06   0.955     .0972103    9.040505
+             |
+       urban |
+      Urban  |   .9226476   .2176456    -0.34   0.733     .5810906    1.464967
+             |
+         bmi |
+Normal (..)  |   1.178171   .9241738     0.21   0.834     .2532293    5.481541
+Overweig..)  |   1.028235   .8891641     0.03   0.974     .1888068    5.599731
+Obese I ..)  |   1.519932   .8555471     0.74   0.457     .5043077    4.580921
+Obese II..)  |   1.554209   1.244327     0.55   0.582     .3236104    7.464427
+Obese II..)  |   1.806224   1.957975     0.55   0.585     .2158024    15.11775
+             |
+     smoking |
+Current/f..  |   1.498069   .3778605     1.60   0.109     .9137595     2.45602
+        age1 |   1.026698   .0597657     0.45   0.651     .9159952    1.150781
+        age2 |    1.01589   .1994437     0.08   0.936     .6914094     1.49265
+        age3 |   .8124503   .4915474    -0.34   0.731     .2482014    2.659435
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(1)  =      1.86
+(Assumption: B nested in A)                           Prob > chi2 =    0.1722
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+      1 if |
+failure; 0 |
+        if |             SARS-CoV-2 severity
+  censored | Historica  Non-hospi  Hospitali  Critical  |     Total
+-----------+--------------------------------------------+----------
+         0 |     9,129      1,914        203        197 |    11,443 
+           |     96.93      97.80      97.60      96.57 |     97.08 
+-----------+--------------------------------------------+----------
+         1 |       289         43          5          7 |       344 
+           |      3.07       2.20       2.40       3.43 |      2.92 
+-----------+--------------------------------------------+----------
+     Total |     9,418      1,957        208        204 |    11,787 
+           |    100.00     100.00     100.00     100.00 |    100.00 
+
+          Pearson chi2(3) =   4.7259   Pr = 0.193
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Estimated rates and lower/upper bounds of 95% confidence intervals
+(11787 records included in the analysis)
+
+  +----------------------------------------------------------------------------
+> ---+
+  |              covid_severity     D          Y       Rate      Lower      Upp
+> er |
+  |----------------------------------------------------------------------------
+> ---|
+  |       Historical comparator   289    3.9e+03   0.075045   0.066873   0.0842
+> 15 |
+  | Non-hospitalised SARS-CoV-2    43   880.6434   0.048828   0.036213   0.0658
+> 38 |
+  |       Hospitalised COVID-19     5    95.6112   0.052295   0.021767   0.1256
+> 41 |
+  |      Critical care COVID-19     7    93.7331   0.074680   0.035603   0.1566
+> 50 |
+  +----------------------------------------------------------------------------
+> ---+
+
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Iteration 0:   log pseudolikelihood = -2996.5639
+Iteration 1:   log pseudolikelihood = -2987.7682
+Iteration 2:   log pseudolikelihood = -2987.6672
+Iteration 3:   log pseudolikelihood = -2987.6671
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -2987.6671
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =       11,745             Number of obs    =      11,787
+No. of failures      =          344
+Time at risk         =  4921.026694
+                                                Wald chi2(7)     =       27.09
+Log pseudolikelihood =   -2987.6671             Prob > chi2      =      0.0003
+
+                           (Std. Err. adjusted for 38 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+covid_seve~y |
+Non-hospi..  |   .6469819   .1482235    -1.90   0.057     .4129352    1.013684
+Hospitali..  |   .7069245   .2555617    -0.96   0.337     .3480595    1.435796
+Critical ..  |    1.01167   .2958377     0.04   0.968       .57033    1.794534
+             |
+         sex |
+       Male  |   1.067599   .1075983     0.65   0.516     .8762325    1.300759
+        age1 |   .9677737   .0116118    -2.73   0.006     .9452804    .9908021
+        age2 |   1.149831   .0497749     3.23   0.001     1.056298    1.251646
+        age3 |   .6384327   .0846057    -3.39   0.001     .4923943    .8277843
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(3)  =      7.62
+(Assumption: B nested in A)                           Prob > chi2 =    0.0546
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Iteration 0:   log pseudolikelihood = -240.83315
+Iteration 1:   log pseudolikelihood = -227.50395
+Iteration 2:   log pseudolikelihood = -225.40054
+Iteration 3:   log pseudolikelihood = -225.23853
+Iteration 4:   log pseudolikelihood = -225.18625
+Iteration 5:   log pseudolikelihood =  -225.1673
+Iteration 6:   log pseudolikelihood = -225.16036
+Iteration 7:   log pseudolikelihood = -225.15781
+Iteration 8:   log pseudolikelihood = -225.15688
+Iteration 9:   log pseudolikelihood = -225.15653
+Iteration 10:  log pseudolikelihood = -225.15641
+Iteration 11:  log pseudolikelihood = -225.15636
+Iteration 12:  log pseudolikelihood = -225.15634
+Iteration 13:  log pseudolikelihood = -225.15634
+Iteration 14:  log pseudolikelihood = -225.15633
+Iteration 15:  log pseudolikelihood = -225.15633
+Iteration 16:  log pseudolikelihood = -225.15633
+Iteration 17:  log pseudolikelihood = -225.15633
+Iteration 18:  log pseudolikelihood = -225.15633
+Iteration 19:  log pseudolikelihood = -225.15633
+Iteration 20:  log pseudolikelihood = -225.15633
+Iteration 21:  log pseudolikelihood = -225.15633
+Iteration 22:  log pseudolikelihood = -225.15633
+Iteration 23:  log pseudolikelihood = -225.15633
+Iteration 24:  log pseudolikelihood = -225.15633
+Iteration 25:  log pseudolikelihood = -225.15633
+Iteration 26:  log pseudolikelihood = -225.15633
+Iteration 27:  log pseudolikelihood = -225.15633
+Iteration 28:  log pseudolikelihood = -225.15633
+Iteration 29:  log pseudolikelihood = -225.15633
+Iteration 30:  log pseudolikelihood = -225.15633
+Iteration 31:  log pseudolikelihood = -225.15633
+Iteration 32:  log pseudolikelihood = -225.15633
+Iteration 33:  log pseudolikelihood = -225.15633
+Iteration 34:  log pseudolikelihood = -225.15633
+Iteration 35:  log pseudolikelihood = -225.15633
+Iteration 36:  log pseudolikelihood = -225.15633
+Iteration 37:  log pseudolikelihood = -225.15633
+Iteration 38:  log pseudolikelihood = -225.15633
+Iteration 39:  log pseudolikelihood = -225.15633
+Iteration 40:  log pseudolikelihood = -225.15633
+Iteration 41:  log pseudolikelihood = -225.15633
+Iteration 42:  log pseudolikelihood = -225.15633
+Iteration 43:  log pseudolikelihood = -225.15633
+Iteration 44:  log pseudolikelihood = -225.15633
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -225.15633
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =        1,366             Number of obs    =       1,368
+No. of failures      =           39
+Time at risk         =  590.8090349
+                                                Wald chi2(28)    =   192131.91
+Log pseudolikelihood =   -225.15633             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 35 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+covid_seve~y |
+Non-hospi..  |   .6539933   .3956902    -0.70   0.483     .1997859    2.140828
+Hospitali..  |   3.17e-20          .        .       .            .           .
+Critical ..  |   3.27e-20          .        .       .            .           .
+             |
+         sex |
+       Male  |   1.658753   .3726534     2.25   0.024     1.067952     2.57639
+             |
+   ethnicity |
+South Asian  |   2.280725   .9592189     1.96   0.050     1.000179    5.200776
+      Black  |   1.494891   .9548363     0.63   0.529     .4274831    5.227573
+      Mixed  |   .9712013   .5294481    -0.05   0.957     .3336405    2.827091
+      Other  |   .4280649   .3059132    -1.19   0.235     .1054885    1.737057
+             |
+         imd |
+          2  |   .6471731   .3544039    -0.79   0.427     .2212518    1.893015
+          3  |   1.321691   .5114432     0.72   0.471     .6190812    2.821707
+          4  |   1.539961   .6803458     0.98   0.328     .6478192    3.660712
+5 Least d..  |   1.558027   .4459184     1.55   0.121     .8891091    2.730203
+             |
+      region |
+       East  |   2.425766   2.617756     0.82   0.412     .2926024    20.11036
+     London  |   2.470837   2.747654     0.81   0.416      .279434    21.84786
+ North East  |   4.614585   3.552361     1.99   0.047     1.020629    20.86399
+ North West  |   2.010012   2.116814     0.66   0.507     .2551344    15.83538
+ South East  |   1.337603   1.660261     0.23   0.815     .1174351    15.23549
+ South West  |   .9376985   1.372176    -0.04   0.965     .0532675    16.50684
+West Midl..  |   .8991199   1.306713    -0.07   0.942     .0520889    15.51994
+Yorkshire..  |   1.009046   1.165322     0.01   0.994     .1049251    9.703809
+             |
+       urban |
+      Urban  |    .902898   .2164109    -0.43   0.670     .5644411    1.444304
+             |
+         bmi |
+Normal (..)  |   1.418157   1.289666     0.38   0.701     .2385859    8.429537
+Overweig..)  |   1.314091   1.298732     0.28   0.782     .1893968    9.117551
+Obese I ..)  |   1.847417    1.24312     0.91   0.362     .4940767    6.907729
+Obese II..)  |    1.91634   1.731544     0.72   0.472     .3261022    11.26137
+Obese II..)  |   2.072651    2.47405     0.61   0.541     .1997456    21.50677
+             |
+     smoking |
+Current/f..  |   1.577737   .3866067     1.86   0.063     .9760164    2.550421
+        age1 |    1.02582   .0586854     0.45   0.656      .917013    1.147538
+        age2 |   1.008435   .1955496     0.04   0.965     .6895858    1.474714
+        age3 |   .8350291   .5001556    -0.30   0.763     .2581423    2.701121
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(1)  =      5.50
+(Assumption: B nested in A)                           Prob > chi2 =    0.0191
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+      1 if |
+failure; 0 |
+        if |        COVID-19 acute kidney injury
+  censored | Historica  Non-hospi  No AKI ho  AKI hospi |     Total
+-----------+--------------------------------------------+----------
+         0 |     9,129      1,996        204        114 |    11,443 
+           |     96.93      97.70      97.61      97.44 |     97.08 
+-----------+--------------------------------------------+----------
+         1 |       289         47          5          3 |       344 
+           |      3.07       2.30       2.39       2.56 |      2.92 
+-----------+--------------------------------------------+----------
+     Total |     9,418      2,043        209        117 |    11,787 
+           |    100.00     100.00     100.00     100.00 |    100.00 
+
+          Pearson chi2(3) =   3.7585   Pr = 0.289
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Estimated rates and lower/upper bounds of 95% confidence intervals
+(11787 records included in the analysis)
+
+  +----------------------------------------------------------------------------
+> ----+
+  |                    covid_aki     D          Y       Rate      Lower      Up
+> per |
+  |----------------------------------------------------------------------------
+> ----|
+  |        Historical comparator   289    3.9e+03   0.075045   0.066873   0.084
+> 215 |
+  |  Non-hospitalised SARS-CoV-2    47   919.7782   0.051099   0.038393   0.068
+> 010 |
+  | No AKI hospitalised COVID-19     5    97.4182   0.051325   0.021363   0.123
+> 310 |
+  |    AKI hospitalised COVID-19     3    52.7912   0.056828   0.018328   0.176
+> 198 |
+  +----------------------------------------------------------------------------
+> ----+
+
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Iteration 0:   log pseudolikelihood = -2996.5639
+Iteration 1:   log pseudolikelihood = -2988.2482
+Iteration 2:   log pseudolikelihood = -2988.1689
+Iteration 3:   log pseudolikelihood = -2988.1688
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -2988.1688
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =       11,745             Number of obs    =      11,787
+No. of failures      =          344
+Time at risk         =  4921.026694
+                                                Wald chi2(7)     =       40.45
+Log pseudolikelihood =   -2988.1688             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 38 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   covid_aki |
+Non-hospi..  |   .6747412    .155582    -1.71   0.088     .4294049    1.060248
+No AKI ho..  |   .6956407   .2525628    -1.00   0.318     .3414629    1.417185
+AKI hospi..  |   .8009546   .5066302    -0.35   0.726     .2318435    2.767075
+             |
+         sex |
+       Male  |   1.068765   .1059032     0.67   0.502     .8801103    1.297858
+        age1 |   .9677542   .0117987    -2.69   0.007     .9449033    .9911578
+        age2 |   1.149646   .0511128     3.14   0.002     1.053707    1.254319
+        age3 |   .6391721   .0870676    -3.29   0.001     .4894043     .834772
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(3)  =      6.62
+(Assumption: B nested in A)                           Prob > chi2 =    0.0852
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Iteration 0:   log pseudolikelihood = -240.83315
+Iteration 1:   log pseudolikelihood = -227.79125
+Iteration 2:   log pseudolikelihood = -225.93713
+Iteration 3:   log pseudolikelihood = -225.82167
+Iteration 4:   log pseudolikelihood = -225.78437
+Iteration 5:   log pseudolikelihood = -225.77075
+Iteration 6:   log pseudolikelihood = -225.76575
+Iteration 7:   log pseudolikelihood = -225.76391
+Iteration 8:   log pseudolikelihood = -225.76324
+Iteration 9:   log pseudolikelihood = -225.76299
+Iteration 10:  log pseudolikelihood =  -225.7629
+Iteration 11:  log pseudolikelihood = -225.76287
+Iteration 12:  log pseudolikelihood = -225.76285
+Iteration 13:  log pseudolikelihood = -225.76285
+Iteration 14:  log pseudolikelihood = -225.76285
+Iteration 15:  log pseudolikelihood = -225.76285
+Iteration 16:  log pseudolikelihood = -225.76285
+Iteration 17:  log pseudolikelihood = -225.76285
+Iteration 18:  log pseudolikelihood = -225.76285
+Iteration 19:  log pseudolikelihood = -225.76285
+Iteration 20:  log pseudolikelihood = -225.76285
+Iteration 21:  log pseudolikelihood = -225.76285
+Iteration 22:  log pseudolikelihood = -225.76285
+Iteration 23:  log pseudolikelihood = -225.76285
+Iteration 24:  log pseudolikelihood = -225.76285
+Iteration 25:  log pseudolikelihood = -225.76285
+Iteration 26:  log pseudolikelihood = -225.76285
+Iteration 27:  log pseudolikelihood = -225.76285
+Iteration 28:  log pseudolikelihood = -225.76285
+Iteration 29:  log pseudolikelihood = -225.76285
+Iteration 30:  log pseudolikelihood = -225.76285
+Iteration 31:  log pseudolikelihood = -225.76285
+Iteration 32:  log pseudolikelihood = -225.76285
+Iteration 33:  log pseudolikelihood = -225.76285
+Iteration 34:  log pseudolikelihood = -225.76285
+Iteration 35:  log pseudolikelihood = -225.76285
+Iteration 36:  log pseudolikelihood = -225.76285
+Iteration 37:  log pseudolikelihood = -225.76285
+Iteration 38:  log pseudolikelihood = -225.76285
+Iteration 39:  log pseudolikelihood = -225.76285
+Iteration 40:  log pseudolikelihood = -225.76285
+Iteration 41:  log pseudolikelihood = -225.76285
+Iteration 42:  log pseudolikelihood = -225.76285
+Iteration 43:  log pseudolikelihood = -225.76285
+Iteration 44:  log pseudolikelihood = -225.76285
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -225.76285
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =        1,366             Number of obs    =       1,368
+No. of failures      =           39
+Time at risk         =  590.8090349
+                                                Wald chi2(28)    =    39865.11
+Log pseudolikelihood =   -225.76285             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 35 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   covid_aki |
+Non-hospi..  |   .6067267   .3413024    -0.89   0.374     .2014495    1.827343
+No AKI ho..  |   3.68e-20          .        .       .            .           .
+AKI hospi..  |   9.38e-20          .        .       .            .           .
+             |
+         sex |
+       Male  |   1.672699   .3622268     2.38   0.018     1.094179    2.557099
+             |
+   ethnicity |
+South Asian  |   2.040656   .9128135     1.59   0.111     .8492108    4.903701
+      Black  |   1.616642    .958192     0.81   0.418     .5059437    5.165655
+      Mixed  |   .9714811   .5470751    -0.05   0.959     .3221758    2.929381
+      Other  |   .4359025   .3151995    -1.15   0.251     .1056547    1.798415
+             |
+         imd |
+          2  |   .7342551   .3848926    -0.59   0.556     .2628159    2.051362
+          3  |   1.522994   .6024324     1.06   0.288     .7014531    3.306722
+          4  |   1.715317   .7574592     1.22   0.222     .7218814    4.075892
+5 Least d..  |   1.714748   .5135939     1.80   0.072     .9533494    3.084243
+             |
+      region |
+       East  |   2.449018   2.597863     0.84   0.398     .3062363    19.58517
+     London  |   2.440976   2.646636     0.82   0.410     .2915046    20.44003
+ North East  |   4.562128   3.404841     2.03   0.042     1.056556    19.69892
+ North West  |    2.18162   2.184584     0.78   0.436     .3064936    15.52877
+ South East  |   1.128639   1.416372     0.10   0.923     .0964605    13.20566
+ South West  |   .9014303   1.287593    -0.07   0.942     .0548385    14.81762
+West Midl..  |   .8819532   1.274341    -0.09   0.931     .0519443    14.97453
+Yorkshire..  |    .917614   1.088058    -0.07   0.942     .0898153    9.374965
+             |
+       urban |
+      Urban  |   .9049944   .2210094    -0.41   0.683     .5607552    1.460557
+             |
+         bmi |
+Normal (..)  |   1.310506   1.140494     0.31   0.756     .2380477    7.214631
+Overweig..)  |   1.224244   1.189687     0.21   0.835     .1822608    8.223233
+Obese I ..)  |   1.748777    1.15186     0.85   0.396     .4809248    6.359043
+Obese II..)  |    1.77803   1.629472     0.63   0.530      .295024    10.71571
+Obese II..)  |   2.057638    2.46034     0.60   0.546     .1975051    21.43679
+             |
+     smoking |
+Current/f..  |    1.57058   .3920487     1.81   0.071      .962904    2.561753
+        age1 |   1.028957   .0594082     0.49   0.621     .9188658    1.152239
+        age2 |   1.001735   .1963373     0.01   0.993     .6822123     1.47091
+        age3 |   .8492194   .5148219    -0.27   0.787     .2588192      2.7864
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(1)  =      4.28
+(Assumption: B nested in A)                           Prob > chi2 =    0.0385
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+      1 if |
+failure; 0 |
+        if |                   Vaccination status
+  censored | Historica  Pre-vacci  1 vaccine  2 vaccine  3 vaccine |     Total
+-----------+-------------------------------------------------------+----------
+         0 |     9,129        950        228        282        373 |    11,443 
+           |     96.93      97.44      98.28      97.58      98.42 |     97.08 
+-----------+-------------------------------------------------------+----------
+         1 |       289         25          4          7          6 |       344 
+           |      3.07       2.56       1.72       2.42       1.58 |      2.92 
+-----------+-------------------------------------------------------+----------
+     Total |     9,418        975        232        289        379 |    11,787 
+           |    100.00     100.00     100.00     100.00     100.00 |    100.00 
+
+
+      1 if |
+failure; 0 | Vaccinatio
+        if |  n status
+  censored | 4 vaccine |     Total
+-----------+-----------+----------
+         0 |       481 |    11,443 
+           |     97.37 |     97.08 
+-----------+-----------+----------
+         1 |        13 |       344 
+           |      2.63 |      2.92 
+-----------+-----------+----------
+     Total |       494 |    11,787 
+           |    100.00 |    100.00 
+
+          Pearson chi2(5) =   5.1293   Pr = 0.400
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Estimated rates and lower/upper bounds of 95% confidence intervals
+(11787 records included in the analysis)
+
+  +-------------------------------------------------------------------------+
+  |             covid_vax     D          Y       Rate      Lower      Upper |
+  |-------------------------------------------------------------------------|
+  | Historical comparator   289    3.9e+03   0.075045   0.066873   0.084215 |
+  |       Pre-vaccination    25   454.0315   0.055062   0.037206   0.081488 |
+  |        1 vaccine dose     4    94.1191   0.042499   0.015951   0.113236 |
+  |       2 vaccine doses     7   136.4353   0.051306   0.024459   0.107621 |
+  |       3 vaccine doses     6   162.5106   0.036921   0.016587   0.082181 |
+  |-------------------------------------------------------------------------|
+  |       4 vaccine doses    13   222.8912   0.058324   0.033866   0.100446 |
+  +-------------------------------------------------------------------------+
+
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Iteration 0:   log pseudolikelihood = -2996.5639
+Iteration 1:   log pseudolikelihood =  -2987.772
+Iteration 2:   log pseudolikelihood =  -2987.624
+Iteration 3:   log pseudolikelihood = -2987.6235
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -2987.6235
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =       11,745             Number of obs    =      11,787
+No. of failures      =          344
+Time at risk         =  4921.026694
+                                                Wald chi2(9)     =       41.08
+Log pseudolikelihood =   -2987.6235             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 38 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   covid_vax |
+Pre-vacci~n  |   .7292485   .1169562    -1.97   0.049     .5325504    .9985975
+1 vaccine..  |   .5836921    .218889    -1.44   0.151     .2798832    1.217281
+2 vaccine..  |   .6930129   .1905887    -1.33   0.182     .4042485    1.188049
+3 vaccine..  |   .4877816   .2259688    -1.55   0.121     .1967431    1.209349
+4 vaccine..  |   .7764442   .2162198    -0.91   0.364     .4498549    1.340134
+             |
+         sex |
+       Male  |   1.068062   .1062456     0.66   0.508      .878867    1.297986
+        age1 |   .9673339   .0114953    -2.79   0.005     .9450639    .9901286
+        age2 |   1.151292   .0494672     3.28   0.001     1.058309    1.252446
+        age3 |    .636652   .0838329    -3.43   0.001     .4918331    .8241124
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(5)  =      7.71
+(Assumption: B nested in A)                           Prob > chi2 =    0.1732
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Iteration 0:   log pseudolikelihood = -240.83315
+Iteration 1:   log pseudolikelihood = -227.01041
+Iteration 2:   log pseudolikelihood = -225.00062
+Iteration 3:   log pseudolikelihood = -224.88105
+Iteration 4:   log pseudolikelihood =  -224.8414
+Iteration 5:   log pseudolikelihood = -224.82683
+Iteration 6:   log pseudolikelihood = -224.82148
+Iteration 7:   log pseudolikelihood = -224.81951
+Iteration 8:   log pseudolikelihood = -224.81879
+Iteration 9:   log pseudolikelihood = -224.81852
+Iteration 10:  log pseudolikelihood = -224.81842
+Iteration 11:  log pseudolikelihood = -224.81839
+Iteration 12:  log pseudolikelihood = -224.81837
+Iteration 13:  log pseudolikelihood = -224.81837
+Iteration 14:  log pseudolikelihood = -224.81837
+Iteration 15:  log pseudolikelihood = -224.81836
+Iteration 16:  log pseudolikelihood = -224.81836
+Iteration 17:  log pseudolikelihood = -224.81836
+Iteration 18:  log pseudolikelihood = -224.81836
+Iteration 19:  log pseudolikelihood = -224.81836
+Iteration 20:  log pseudolikelihood = -224.81836
+Iteration 21:  log pseudolikelihood = -224.81836
+Iteration 22:  log pseudolikelihood = -224.81836
+Iteration 23:  log pseudolikelihood = -224.81836
+Iteration 24:  log pseudolikelihood = -224.81836
+Iteration 25:  log pseudolikelihood = -224.81836
+Iteration 26:  log pseudolikelihood = -224.81836
+Iteration 27:  log pseudolikelihood = -224.81836
+Iteration 28:  log pseudolikelihood = -224.81836
+Iteration 29:  log pseudolikelihood = -224.81836
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -224.81836
+Iteration 1:   log pseudolikelihood = -224.81836
+Iteration 2:   log pseudolikelihood = -224.81836
+Iteration 3:   log pseudolikelihood = -224.81836
+Iteration 4:   log pseudolikelihood = -224.81836
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =        1,366             Number of obs    =       1,368
+No. of failures      =           39
+Time at risk         =  590.8090349
+                                                Wald chi2(32)    =   479431.53
+Log pseudolikelihood =   -224.81836             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 35 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   covid_vax |
+Pre-vacci~n  |   .3417015   .2168415    -1.69   0.091     .0985099     1.18526
+1 vaccine..  |   3.50e-15   1.93e-15   -60.43   0.000     1.19e-15    1.03e-14
+2 vaccine..  |   1.483943   .9954476     0.59   0.556     .3984929    5.526039
+3 vaccine..  |   3.29e-15   2.19e-15   -50.04   0.000     8.90e-16    1.21e-14
+4 vaccine..  |   1.180413   1.141146     0.17   0.864     .1774793    7.850912
+             |
+         sex |
+       Male  |   1.748634   .3849116     2.54   0.011     1.135877    2.691947
+             |
+   ethnicity |
+South Asian  |   2.058314   .9583242     1.55   0.121     .8264248    5.126488
+      Black  |   1.652186   .9971225     0.83   0.405     .5062256    5.392295
+      Mixed  |   .9609483   .5575033    -0.07   0.945     .3082247    2.995937
+      Other  |   .5010815   .3794296    -0.91   0.361     .1135953    2.210326
+             |
+         imd |
+          2  |   .6964159   .3735001    -0.67   0.500     .2434189     1.99243
+          3  |    1.57312   .6032494     1.18   0.237     .7419059    3.335607
+          4  |   1.769062    .758571     1.33   0.183     .7633951    4.099557
+5 Least d..  |   1.712323   .5013268     1.84   0.066     .9646606    3.039464
+             |
+      region |
+       East  |   2.400908   2.619623     0.80   0.422     .2828994      20.376
+     London  |    2.42546   2.635153     0.82   0.415     .2884044    20.39794
+ North East  |   4.216883   2.946038     2.06   0.039     1.072302    16.58311
+ North West  |   1.865735   1.877887     0.62   0.536     .2594803    13.41515
+ South East  |    1.03564   1.233852     0.03   0.977     .1002524    10.69849
+ South West  |   .9369792   1.280035    -0.05   0.962     .0643989    13.63269
+West Midl..  |   .8983987   1.295906    -0.07   0.941     .0531671    15.18081
+Yorkshire..  |    .875244    1.02053    -0.11   0.909     .0890497    8.602527
+             |
+       urban |
+      Urban  |   .9420085   .2406499    -0.23   0.815     .5709563    1.554199
+             |
+         bmi |
+Normal (..)  |   1.423572   .9548278     0.53   0.599     .3823455    5.300332
+Overweig..)  |   1.237456    .951945     0.28   0.782     .2739811    5.589058
+Obese I ..)  |   1.788948   .8424616     1.24   0.217      .710796    4.502466
+Obese II..)  |   1.901176   1.378777     0.89   0.376     .4588928    7.876501
+Obese II..)  |   2.234139   2.244416     0.80   0.424      .311884    16.00395
+             |
+     smoking |
+Current/f..  |   1.437198   .3654846     1.43   0.154      .873078    2.365812
+        age1 |    1.02407   .0593297     0.41   0.681     .9141448    1.147213
+        age2 |   1.021957   .2012754     0.11   0.912     .6946842     1.50341
+        age3 |   .8034301   .4874544    -0.36   0.718     .2446301    2.638677
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(5)  =      6.17
+(Assumption: B nested in A)                           Prob > chi2 =    0.2898
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+      1 if |
+failure; 0 |
+        if |         Calendar period
+  censored | Historica  Dec21-Feb  Mar22-Sep |     Total
+-----------+---------------------------------+----------
+         0 |     9,129        866      1,448 |    11,443 
+           |     96.93      96.44      98.44 |     97.08 
+-----------+---------------------------------+----------
+         1 |       289         32         23 |       344 
+           |      3.07       3.56       1.56 |      2.92 
+-----------+---------------------------------+----------
+     Total |     9,418        898      1,471 |    11,787 
+           |    100.00     100.00     100.00 |    100.00 
+
+          Pearson chi2(2) =  11.5988   Pr = 0.003
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Estimated rates and lower/upper bounds of 95% confidence intervals
+(11787 records included in the analysis)
+
+  +--------------------------------------------------------------------------+
+  |        calendar_period     D          Y       Rate      Lower      Upper |
+  |--------------------------------------------------------------------------|
+  |  Historical comparator   289    3.9e+03   0.075045   0.066873   0.084215 |
+  | Dec21-Feb22 SARS-CoV-2    32   591.0554   0.054140   0.038287   0.076559 |
+  | Mar22-Sep22 SARS-CoV-2    23   478.9322   0.048023   0.031913   0.072267 |
+  +--------------------------------------------------------------------------+
+
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Iteration 0:   log pseudolikelihood = -2996.5639
+Iteration 1:   log pseudolikelihood = -2988.2656
+Iteration 2:   log pseudolikelihood = -2988.1865
+Iteration 3:   log pseudolikelihood = -2988.1865
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -2988.1865
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =       11,745             Number of obs    =      11,787
+No. of failures      =          344
+Time at risk         =  4921.026694
+                                                Wald chi2(6)     =       30.45
+Log pseudolikelihood =   -2988.1865             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 38 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+calendar_p~d |
+Dec21-Feb..  |   .6987941   .1051273    -2.38   0.017     .5203476    .9384365
+Mar22-Sep..  |   .6581311   .2279249    -1.21   0.227     .3338283    1.297483
+             |
+         sex |
+       Male  |   1.068545   .1064065     0.67   0.506     .8790818    1.298841
+        age1 |   .9678346   .0116078    -2.73   0.006     .9453489     .990855
+        age2 |   1.149221   .0497772     3.21   0.001     1.055685    1.251043
+        age3 |   .6399085   .0848058    -3.37   0.001     .4935258    .8297091
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(2)  =      6.58
+(Assumption: B nested in A)                           Prob > chi2 =    0.0372
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+Iteration 0:   log pseudolikelihood = -240.83315
+Iteration 1:   log pseudolikelihood =  -227.9426
+Iteration 2:   log pseudolikelihood = -226.42612
+Iteration 3:   log pseudolikelihood = -226.41619
+Iteration 4:   log pseudolikelihood = -226.41618
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -226.41618
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =        1,366             Number of obs    =       1,368
+No. of failures      =           39
+Time at risk         =  590.8090349
+                                                Wald chi2(29)    =   677640.58
+Log pseudolikelihood =   -226.41618             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 35 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+calendar_p~d |
+Dec21-Feb..  |   .3466077   .2040877    -1.80   0.072     .1093046    1.099102
+Mar22-Sep..  |   .8402034   .6563981    -0.22   0.824     .1817164    3.884854
+             |
+         sex |
+       Male  |   1.603711   .3223465     2.35   0.019     1.081519    2.378033
+             |
+   ethnicity |
+South Asian  |   2.029676   .9187153     1.56   0.118     .8358682    4.928511
+      Black  |    1.96287   1.053514     1.26   0.209     .6855409    5.620172
+      Mixed  |   .9731151   .5547757    -0.05   0.962     .3183404    2.974656
+      Other  |   .4552085   .3377338    -1.06   0.289     .1063351    1.948696
+             |
+         imd |
+          2  |   .7345934   .3996759    -0.57   0.571     .2528874    2.133864
+          3  |   1.536114   .6069298     1.09   0.277     .7081215    3.332264
+          4  |   1.696707   .7301225     1.23   0.219      .729995    3.943607
+5 Least d..  |   1.837922   .5356409     2.09   0.037     1.038136    3.253867
+             |
+      region |
+       East  |   2.432429   2.547559     0.85   0.396     .3122844    18.94655
+     London  |   2.454813    2.61721     0.84   0.400     .3037427    19.83951
+ North East  |   4.775229   3.578984     2.09   0.037     1.099075    20.74726
+ North West  |   1.681268    1.71681     0.51   0.611     .2272169    12.44037
+ South East  |   1.091485   1.366796     0.07   0.944     .0937808    12.70346
+ South West  |   .9297503   1.275031    -0.05   0.958     .0632491    13.66715
+West Midl..  |   .9050701   1.308526    -0.07   0.945     .0532155    15.39311
+Yorkshire..  |   .9500709   1.126696    -0.04   0.966      .092963    9.709618
+             |
+       urban |
+      Urban  |   .9456699   .2209149    -0.24   0.811     .5982643     1.49481
+             |
+         bmi |
+Normal (..)  |    1.06651   .7517239     0.09   0.927     .2679171    4.245509
+Overweig..)  |     .92234   .7269559    -0.10   0.918     .1967904    4.322929
+Obese I ..)  |   1.413399   .6895903     0.71   0.478     .5432098    3.677577
+Obese II..)  |   1.396546   1.008315     0.46   0.644     .3392206    5.749477
+Obese II..)  |   1.676927   1.673948     0.52   0.605      .237042    11.86324
+             |
+     smoking |
+Current/f..  |   1.506012   .3945817     1.56   0.118     .9011762    2.516789
+        age1 |   1.027974   .0593817     0.48   0.633     .9179345    1.151204
+        age2 |   1.013659   .1974966     0.07   0.944      .691907    1.485033
+        age3 |   .8175915   .4898386    -0.34   0.737     .2526744    2.645523
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(2)  =      2.98
+(Assumption: B nested in A)                           Prob > chi2 =    0.2258
+
+.         
+. foreach exposure of varlist     case                    ///
+>                                                         covid_severity  ///
+>                                                         covid_aki {
+  2.         stcox i.`exposure'##i.covid_vax i.sex age1 age2 age3, vce(cluster 
+> practice_id)
+  3.         quietly stcox i.`exposure'##i.covid_vax i.sex age1 age2 age3
+  4.         est store A
+  5.         quietly stcox i.sex age1 age2 age3
+  6.         est store B
+  7.         lrtest B A
+  8.         stcox i.`exposure'##i.covid_vax i.sex i.ethnicity i.imd i.region i
+> .urban i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
+  9.         quietly stcox i.`exposure'##i.covid_vax i.sex i.ethnicity i.imd i.
+> region i.urban i.bmi i.smoking age1 age2 age3
+ 10.         est store A
+ 11.         quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smo
+> king age1 age2 age3
+ 12.         est store B
+ 13.         lrtest B A
+ 14.         stcox i.`exposure'##i.calendar_period i.sex age1 age2 age3, vce(cl
+> uster practice_id)
+ 15.         quietly stcox i.`exposure'##i.calendar_period i.sex age1 age2 age3
+ 16.         est store A
+ 17.         quietly stcox i.sex age1 age2 age3
+ 18.         est store B
+ 19.         lrtest B A
+ 20.         stcox i.`exposure'##i.calendar_period i.sex i.ethnicity i.imd i.re
+> gion i.urban i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
+ 21.         quietly stcox i.`exposure'##i.calendar_period i.sex i.ethnicity i.
+> imd i.region i.urban i.bmi i.smoking age1 age2 age3
+ 22.         est store A
+ 23.         quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smo
+> king age1 age2 age3
+ 24.         est store B
+ 25.         lrtest B A
+ 26.         }
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 5.covid_vax omitted because of collinearity
+note: 0.case#1.covid_vax identifies no observations in the sample
+note: 0.case#2.covid_vax identifies no observations in the sample
+note: 0.case#3.covid_vax identifies no observations in the sample
+note: 0.case#4.covid_vax identifies no observations in the sample
+note: 0.case#5.covid_vax identifies no observations in the sample
+note: 1.case#0.covid_vax identifies no observations in the sample
+note: 1.case#1.covid_vax omitted because of collinearity
+note: 1.case#2.covid_vax omitted because of collinearity
+note: 1.case#3.covid_vax omitted because of collinearity
+note: 1.case#4.covid_vax omitted because of collinearity
+note: 1.case#5.covid_vax omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -2996.5639
+Iteration 1:   log pseudolikelihood =  -2987.772
+Iteration 2:   log pseudolikelihood =  -2987.624
+Iteration 3:   log pseudolikelihood = -2987.6235
+Iteration 4:   log pseudolikelihood = -2987.6235
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -2987.6235
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =       11,745             Number of obs    =      11,787
+No. of failures      =          344
+Time at risk         =  4921.026694
+                                                Wald chi2(9)     =       41.08
+Log pseudolikelihood =   -2987.6235             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 38 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .7764442   .2162198    -0.91   0.364     .4498549    1.340134
+             |
+   covid_vax |
+Pre-vacci~n  |   .9392157   .2189912    -0.27   0.788     .5946971     1.48332
+1 vaccine..  |   .7517503   .3493341    -0.61   0.539     .3023605    1.869055
+2 vaccine..  |    .892547   .2285045    -0.44   0.657     .5403954     1.47418
+3 vaccine..  |    .628225   .1890408    -1.54   0.122     .3483197    1.133059
+4 vaccine..  |          1  (omitted)
+             |
+        case#|
+   covid_vax |
+Comparat..) #|
+Pre-vacci~n  |          1  (empty)
+Comparat..) #|
+1 vaccine..  |          1  (empty)
+Comparat..) #|
+2 vaccine..  |          1  (empty)
+Comparat..) #|
+3 vaccine..  |          1  (empty)
+Comparat..) #|
+4 vaccine..  |          1  (empty)
+   COVID-19 #|
+Historica..  |          1  (empty)
+   COVID-19 #|
+Pre-vacci~n  |          1  (omitted)
+   COVID-19 #|
+1 vaccine..  |          1  (omitted)
+   COVID-19 #|
+2 vaccine..  |          1  (omitted)
+   COVID-19 #|
+3 vaccine..  |          1  (omitted)
+   COVID-19 #|
+4 vaccine..  |          1  (omitted)
+             |
+         sex |
+       Male  |   1.068062   .1062456     0.66   0.508      .878867    1.297986
+        age1 |   .9673339   .0114953    -2.79   0.005     .9450639    .9901286
+        age2 |   1.151292   .0494672     3.28   0.001     1.058309    1.252446
+        age3 |    .636652   .0838329    -3.43   0.001     .4918331    .8241124
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(5)  =      7.71
+(Assumption: B nested in A)                           Prob > chi2 =    0.1732
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 5.covid_vax omitted because of collinearity
+note: 0.case#1.covid_vax identifies no observations in the sample
+note: 0.case#2.covid_vax identifies no observations in the sample
+note: 0.case#3.covid_vax identifies no observations in the sample
+note: 0.case#4.covid_vax identifies no observations in the sample
+note: 0.case#5.covid_vax identifies no observations in the sample
+note: 1.case#0.covid_vax identifies no observations in the sample
+note: 1.case#1.covid_vax omitted because of collinearity
+note: 1.case#2.covid_vax omitted because of collinearity
+note: 1.case#3.covid_vax omitted because of collinearity
+note: 1.case#4.covid_vax omitted because of collinearity
+note: 1.case#5.covid_vax omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -240.83315
+Iteration 1:   log pseudolikelihood = -227.01041
+Iteration 2:   log pseudolikelihood = -225.00062
+Iteration 3:   log pseudolikelihood = -224.88105
+Iteration 4:   log pseudolikelihood =  -224.8414
+Iteration 5:   log pseudolikelihood = -224.82683
+Iteration 6:   log pseudolikelihood = -224.82148
+Iteration 7:   log pseudolikelihood = -224.81951
+Iteration 8:   log pseudolikelihood = -224.81879
+Iteration 9:   log pseudolikelihood = -224.81852
+Iteration 10:  log pseudolikelihood = -224.81842
+Iteration 11:  log pseudolikelihood = -224.81839
+Iteration 12:  log pseudolikelihood = -224.81837
+Iteration 13:  log pseudolikelihood = -224.81837
+Iteration 14:  log pseudolikelihood = -224.81837
+Iteration 15:  log pseudolikelihood = -224.81836
+Iteration 16:  log pseudolikelihood = -224.81836
+Iteration 17:  log pseudolikelihood = -224.81836
+Iteration 18:  log pseudolikelihood = -224.81836
+Iteration 19:  log pseudolikelihood = -224.81836
+Iteration 20:  log pseudolikelihood = -224.81836
+Iteration 21:  log pseudolikelihood = -224.81836
+Iteration 22:  log pseudolikelihood = -224.81836
+Iteration 23:  log pseudolikelihood = -224.81836
+Iteration 24:  log pseudolikelihood = -224.81836
+Iteration 25:  log pseudolikelihood = -224.81836
+Iteration 26:  log pseudolikelihood = -224.81836
+Iteration 27:  log pseudolikelihood = -224.81836
+Iteration 28:  log pseudolikelihood = -224.81836
+Iteration 29:  log pseudolikelihood = -224.81836
+Iteration 30:  log pseudolikelihood = -224.81836
+Iteration 31:  log pseudolikelihood = -224.81836
+Iteration 32:  log pseudolikelihood = -224.81836
+Iteration 33:  log pseudolikelihood = -224.81836
+Iteration 34:  log pseudolikelihood = -224.81836
+Iteration 35:  log pseudolikelihood = -224.81836
+Iteration 36:  log pseudolikelihood = -224.81836
+Iteration 37:  log pseudolikelihood = -224.81836
+Iteration 38:  log pseudolikelihood = -224.81836
+Iteration 39:  log pseudolikelihood = -224.81836
+Iteration 40:  log pseudolikelihood = -224.81836
+Iteration 41:  log pseudolikelihood = -224.81836
+Iteration 42:  log pseudolikelihood = -224.81836
+Iteration 43:  log pseudolikelihood = -224.81836
+Iteration 44:  log pseudolikelihood = -224.81836
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -224.81836
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =        1,366             Number of obs    =       1,368
+No. of failures      =           39
+Time at risk         =  590.8090349
+                                                Wald chi2(30)    =   285236.20
+Log pseudolikelihood =   -224.81836             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 35 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   1.180413   1.141146     0.17   0.864     .1774793    7.850912
+             |
+   covid_vax |
+Pre-vacci~n  |   .2894763   .2641835    -1.36   0.174     .0483932    1.731575
+1 vaccine..  |   1.35e-19          .        .       .            .           .
+2 vaccine..  |   1.257139   .5836011     0.49   0.622     .5060932    3.122743
+3 vaccine..  |   4.65e-20          .        .       .            .           .
+4 vaccine..  |          1  (omitted)
+             |
+        case#|
+   covid_vax |
+Comparat..) #|
+Pre-vacci~n  |          1  (empty)
+Comparat..) #|
+1 vaccine..  |          1  (empty)
+Comparat..) #|
+2 vaccine..  |          1  (empty)
+Comparat..) #|
+3 vaccine..  |          1  (empty)
+Comparat..) #|
+4 vaccine..  |          1  (empty)
+   COVID-19 #|
+Historica..  |          1  (empty)
+   COVID-19 #|
+Pre-vacci~n  |          1  (omitted)
+   COVID-19 #|
+1 vaccine..  |          1  (omitted)
+   COVID-19 #|
+2 vaccine..  |          1  (omitted)
+   COVID-19 #|
+3 vaccine..  |          1  (omitted)
+   COVID-19 #|
+4 vaccine..  |          1  (omitted)
+             |
+         sex |
+       Male  |   1.748634   .3849116     2.54   0.011     1.135877    2.691947
+             |
+   ethnicity |
+South Asian  |   2.058314   .9583242     1.55   0.121     .8264248    5.126488
+      Black  |   1.652186   .9971225     0.83   0.405     .5062256    5.392295
+      Mixed  |   .9609483   .5575033    -0.07   0.945     .3082247    2.995937
+      Other  |   .5010815   .3794296    -0.91   0.361     .1135953    2.210326
+             |
+         imd |
+          2  |   .6964159   .3735001    -0.67   0.500     .2434189     1.99243
+          3  |    1.57312   .6032494     1.18   0.237     .7419059    3.335607
+          4  |   1.769062    .758571     1.33   0.183     .7633951    4.099557
+5 Least d..  |   1.712323   .5013268     1.84   0.066     .9646606    3.039464
+             |
+      region |
+       East  |   2.400908   2.619623     0.80   0.422     .2828994      20.376
+     London  |    2.42546   2.635153     0.82   0.415     .2884044    20.39794
+ North East  |   4.216883   2.946038     2.06   0.039     1.072302    16.58311
+ North West  |   1.865735   1.877887     0.62   0.536     .2594803    13.41515
+ South East  |    1.03564   1.233852     0.03   0.977     .1002524    10.69849
+ South West  |   .9369792   1.280035    -0.05   0.962     .0643989    13.63269
+West Midl..  |   .8983987   1.295906    -0.07   0.941     .0531671    15.18081
+Yorkshire..  |    .875244    1.02053    -0.11   0.909     .0890497    8.602527
+             |
+       urban |
+      Urban  |   .9420085   .2406499    -0.23   0.815     .5709563    1.554199
+             |
+         bmi |
+Normal (..)  |   1.423572   .9548278     0.53   0.599     .3823455    5.300332
+Overweig..)  |   1.237456    .951945     0.28   0.782     .2739811    5.589058
+Obese I ..)  |   1.788948   .8424616     1.24   0.217      .710796    4.502466
+Obese II..)  |   1.901176   1.378777     0.89   0.376     .4588928    7.876501
+Obese II..)  |   2.234139   2.244416     0.80   0.424      .311884    16.00395
+             |
+     smoking |
+Current/f..  |   1.437198   .3654846     1.43   0.154      .873078    2.365812
+        age1 |    1.02407   .0593297     0.41   0.681     .9141448    1.147213
+        age2 |   1.021957   .2012754     0.11   0.912     .6946842     1.50341
+        age3 |   .8034301   .4874544    -0.36   0.718     .2446301    2.638677
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(3)  =      6.17
+(Assumption: B nested in A)                           Prob > chi2 =    0.1035
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 7.calendar_period omitted because of collinearity
+note: 0.case#6.calendar_period identifies no observations in the sample
+note: 0.case#7.calendar_period identifies no observations in the sample
+note: 1.case#0.calendar_period identifies no observations in the sample
+note: 1.case#6.calendar_period omitted because of collinearity
+note: 1.case#7.calendar_period omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -2996.5639
+Iteration 1:   log pseudolikelihood = -2988.2656
+Iteration 2:   log pseudolikelihood = -2988.1865
+Iteration 3:   log pseudolikelihood = -2988.1865
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -2988.1865
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =       11,745             Number of obs    =      11,787
+No. of failures      =          344
+Time at risk         =  4921.026694
+                                                Wald chi2(6)     =       30.45
+Log pseudolikelihood =   -2988.1865             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 38 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .6581311   .2279249    -1.21   0.227     .3338283    1.297483
+             |
+calendar_p~d |
+Dec21-Feb..  |   1.061786   .3302851     0.19   0.847     .5771081    1.953514
+Mar22-Sep..  |          1  (omitted)
+             |
+        case#|
+calendar_p~d |
+Comparat..) #|
+Dec21-Feb..  |          1  (empty)
+Comparat..) #|
+Mar22-Sep..  |          1  (empty)
+   COVID-19 #|
+Historica..  |          1  (empty)
+   COVID-19 #|
+Dec21-Feb..  |          1  (omitted)
+   COVID-19 #|
+Mar22-Sep..  |          1  (omitted)
+             |
+         sex |
+       Male  |   1.068545   .1064065     0.67   0.506     .8790818    1.298841
+        age1 |   .9678346   .0116078    -2.73   0.006     .9453489     .990855
+        age2 |   1.149221   .0497772     3.21   0.001     1.055685    1.251043
+        age3 |   .6399085   .0848058    -3.37   0.001     .4935258    .8297091
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(2)  =      6.58
+(Assumption: B nested in A)                           Prob > chi2 =    0.0372
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 7.calendar_period omitted because of collinearity
+note: 0.case#6.calendar_period identifies no observations in the sample
+note: 0.case#7.calendar_period identifies no observations in the sample
+note: 1.case#0.calendar_period identifies no observations in the sample
+note: 1.case#6.calendar_period omitted because of collinearity
+note: 1.case#7.calendar_period omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -240.83315
+Iteration 1:   log pseudolikelihood =  -227.9426
+Iteration 2:   log pseudolikelihood = -226.42612
+Iteration 3:   log pseudolikelihood = -226.41619
+Iteration 4:   log pseudolikelihood = -226.41618
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -226.41618
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =        1,366             Number of obs    =       1,368
+No. of failures      =           39
+Time at risk         =  590.8090349
+                                                Wald chi2(29)    =   677640.58
+Log pseudolikelihood =   -226.41618             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 35 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .8402034   .6563981    -0.22   0.824     .1817164    3.884854
+             |
+calendar_p~d |
+Dec21-Feb..  |   .4125284     .15652    -2.33   0.020     .1961075    .8677878
+Mar22-Sep..  |          1  (omitted)
+             |
+        case#|
+calendar_p~d |
+Comparat..) #|
+Dec21-Feb..  |          1  (empty)
+Comparat..) #|
+Mar22-Sep..  |          1  (empty)
+   COVID-19 #|
+Historica..  |          1  (empty)
+   COVID-19 #|
+Dec21-Feb..  |          1  (omitted)
+   COVID-19 #|
+Mar22-Sep..  |          1  (omitted)
+             |
+         sex |
+       Male  |   1.603711   .3223465     2.35   0.019     1.081519    2.378033
+             |
+   ethnicity |
+South Asian  |   2.029676   .9187153     1.56   0.118     .8358682    4.928511
+      Black  |    1.96287   1.053514     1.26   0.209     .6855409    5.620172
+      Mixed  |   .9731151   .5547757    -0.05   0.962     .3183404    2.974656
+      Other  |   .4552085   .3377338    -1.06   0.289     .1063351    1.948696
+             |
+         imd |
+          2  |   .7345934   .3996759    -0.57   0.571     .2528874    2.133864
+          3  |   1.536114   .6069298     1.09   0.277     .7081215    3.332264
+          4  |   1.696707   .7301225     1.23   0.219      .729995    3.943607
+5 Least d..  |   1.837922   .5356409     2.09   0.037     1.038136    3.253867
+             |
+      region |
+       East  |   2.432429   2.547559     0.85   0.396     .3122844    18.94655
+     London  |   2.454813    2.61721     0.84   0.400     .3037427    19.83951
+ North East  |   4.775229   3.578984     2.09   0.037     1.099075    20.74726
+ North West  |   1.681268    1.71681     0.51   0.611     .2272169    12.44037
+ South East  |   1.091485   1.366796     0.07   0.944     .0937808    12.70346
+ South West  |   .9297503   1.275031    -0.05   0.958     .0632491    13.66715
+West Midl..  |   .9050701   1.308526    -0.07   0.945     .0532155    15.39311
+Yorkshire..  |   .9500709   1.126696    -0.04   0.966      .092963    9.709618
+             |
+       urban |
+      Urban  |   .9456699   .2209149    -0.24   0.811     .5982643     1.49481
+             |
+         bmi |
+Normal (..)  |    1.06651   .7517239     0.09   0.927     .2679171    4.245509
+Overweig..)  |     .92234   .7269559    -0.10   0.918     .1967904    4.322929
+Obese I ..)  |   1.413399   .6895903     0.71   0.478     .5432098    3.677577
+Obese II..)  |   1.396546   1.008315     0.46   0.644     .3392206    5.749477
+Obese II..)  |   1.676927   1.673948     0.52   0.605      .237042    11.86324
+             |
+     smoking |
+Current/f..  |   1.506012   .3945817     1.56   0.118     .9011762    2.516789
+        age1 |   1.027974   .0593817     0.48   0.633     .9179345    1.151204
+        age2 |   1.013659   .1974966     0.07   0.944      .691907    1.485033
+        age3 |   .8175915   .4898386    -0.34   0.737     .2526744    2.645523
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(2)  =      2.98
+(Assumption: B nested in A)                           Prob > chi2 =    0.2258
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 5.covid_vax omitted because of collinearity
+note: 0.covid_severity#1.covid_vax identifies no observations in the sample
+note: 0.covid_severity#2.covid_vax identifies no observations in the sample
+note: 0.covid_severity#3.covid_vax identifies no observations in the sample
+note: 0.covid_severity#4.covid_vax identifies no observations in the sample
+note: 0.covid_severity#5.covid_vax identifies no observations in the sample
+note: 1.covid_severity#0.covid_vax identifies no observations in the sample
+note: 1.covid_severity#5.covid_vax omitted because of collinearity
+note: 2.covid_severity#0.covid_vax identifies no observations in the sample
+note: 2.covid_severity#5.covid_vax omitted because of collinearity
+note: 3.covid_severity#0.covid_vax identifies no observations in the sample
+note: 3.covid_severity#1.covid_vax omitted because of collinearity
+note: 3.covid_severity#2.covid_vax omitted because of collinearity
+note: 3.covid_severity#3.covid_vax omitted because of collinearity
+note: 3.covid_severity#4.covid_vax omitted because of collinearity
+note: 3.covid_severity#5.covid_vax omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -2996.5639
+Iteration 1:   log pseudolikelihood = -2987.0876
+Iteration 2:   log pseudolikelihood = -2982.8582
+Iteration 3:   log pseudolikelihood = -2982.4847
+Iteration 4:   log pseudolikelihood = -2982.3774
+Iteration 5:   log pseudolikelihood = -2982.3381
+Iteration 6:   log pseudolikelihood = -2982.3237
+Iteration 7:   log pseudolikelihood = -2982.3184
+Iteration 8:   log pseudolikelihood = -2982.3164
+Iteration 9:   log pseudolikelihood = -2982.3157
+Iteration 10:  log pseudolikelihood = -2982.3154
+Iteration 11:  log pseudolikelihood = -2982.3153
+Iteration 12:  log pseudolikelihood = -2982.3153
+Iteration 13:  log pseudolikelihood = -2982.3153
+Iteration 14:  log pseudolikelihood = -2982.3153
+Iteration 15:  log pseudolikelihood = -2982.3153
+Iteration 16:  log pseudolikelihood = -2982.3153
+Iteration 17:  log pseudolikelihood = -2982.3153
+Iteration 18:  log pseudolikelihood = -2982.3153
+Iteration 19:  log pseudolikelihood = -2982.3153
+Iteration 20:  log pseudolikelihood = -2982.3153
+Iteration 21:  log pseudolikelihood = -2982.3153
+Iteration 22:  log pseudolikelihood = -2982.3153
+Iteration 23:  log pseudolikelihood = -2982.3153
+Iteration 24:  log pseudolikelihood = -2982.3153
+Iteration 25:  log pseudolikelihood = -2982.3153
+Iteration 26:  log pseudolikelihood = -2982.3153
+Iteration 27:  log pseudolikelihood = -2982.3153
+Iteration 28:  log pseudolikelihood = -2982.3153
+Iteration 29:  log pseudolikelihood = -2982.3153
+Iteration 30:  log pseudolikelihood = -2982.3153
+Iteration 31:  log pseudolikelihood = -2982.3153
+Iteration 32:  log pseudolikelihood = -2982.3153
+Iteration 33:  log pseudolikelihood = -2982.3153
+Iteration 34:  log pseudolikelihood = -2982.3153
+Iteration 35:  log pseudolikelihood = -2982.3153
+Iteration 36:  log pseudolikelihood = -2982.3153
+Iteration 37:  log pseudolikelihood = -2982.3153
+Iteration 38:  log pseudolikelihood = -2982.3153
+Iteration 39:  log pseudolikelihood = -2982.3153
+Iteration 40:  log pseudolikelihood = -2982.3153
+Iteration 41:  log pseudolikelihood = -2982.3153
+Iteration 42:  log pseudolikelihood = -2982.3153
+Iteration 43:  log pseudolikelihood = -2982.3153
+Iteration 44:  log pseudolikelihood = -2982.3153
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -2982.3153
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =       11,745             Number of obs    =      11,787
+No. of failures      =          344
+Time at risk         =  4921.026694
+                                                Wald chi2(16)    =    15225.70
+Log pseudolikelihood =   -2982.3153             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 38 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+covid_seve~y |
+Non-hospi..  |    .668747   .1770815    -1.52   0.129     .3979854    1.123716
+Hospitali..  |   1.520975   1.067466     0.60   0.550     .3843464    6.018955
+Critical ..  |   1.057036   .5976729     0.10   0.922     .3489797    3.201688
+             |
+   covid_vax |
+Pre-vacci~n  |   .7557719   .8307818    -0.25   0.799     .0876411    6.517387
+1 vaccine..  |   4.537445   3.195285     2.15   0.032      1.14128    18.03975
+2 vaccine..  |   3.24e-09   8.50e-10   -74.53   0.000     1.94e-09    5.42e-09
+3 vaccine..  |   .7827982   .6445066    -0.30   0.766     .1558922     3.93075
+4 vaccine..  |          1  (omitted)
+             |
+covid_seve~y#|
+   covid_vax |
+Historica.. #|
+Pre-vacci~n  |          1  (empty)
+Historica.. #|
+1 vaccine..  |          1  (empty)
+Historica.. #|
+2 vaccine..  |          1  (empty)
+Historica.. #|
+3 vaccine..  |          1  (empty)
+Historica.. #|
+4 vaccine..  |          1  (empty)
+Non-hospi.. #|
+Historica..  |          1  (empty)
+Non-hospi.. #|
+Pre-vacci~n  |    1.47461    1.61246     0.36   0.722     .1729433    12.57335
+Non-hospi.. #|
+1 vaccine..  |   .1118163   .0970205    -2.53   0.012     .0204144     .612454
+Non-hospi.. #|
+2 vaccine..  |   3.79e+08          .        .       .            .           .
+Non-hospi.. #|
+3 vaccine..  |   .7619868    .598052    -0.35   0.729     .1636344      3.5483
+Non-hospi.. #|
+4 vaccine..  |          1  (omitted)
+Hospitali.. #|
+Historica..  |          1  (empty)
+Hospitali.. #|
+Pre-vacci~n  |   .4999205   .6808962    -0.51   0.611     .0346383    7.215147
+Hospitali.. #|
+1 vaccine..  |   1.87e-20          .        .       .            .           .
+Hospitali.. #|
+2 vaccine..  |   2.52e-11          .        .       .            .           .
+Hospitali.. #|
+3 vaccine..  |   .8186586    .725581    -0.23   0.821      .144105     4.65079
+Hospitali.. #|
+4 vaccine..  |          1  (omitted)
+Critical .. #|
+Historica..  |          1  (empty)
+Critical .. #|
+Pre-vacci~n  |          1  (omitted)
+Critical .. #|
+1 vaccine..  |          1  (omitted)
+Critical .. #|
+2 vaccine..  |          1  (omitted)
+Critical .. #|
+3 vaccine..  |          1  (omitted)
+Critical .. #|
+4 vaccine..  |          1  (omitted)
+             |
+         sex |
+       Male  |    1.06768   .1109079     0.63   0.528     .8710047    1.308766
+        age1 |   .9670633   .0113785    -2.85   0.004      .945017     .989624
+        age2 |   1.151741    .049676     3.28   0.001     1.058379    1.253338
+        age3 |   .6364851   .0845283    -3.40   0.001     .4906193    .8257183
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(12) =     18.32
+(Assumption: B nested in A)                           Prob > chi2 =    0.1062
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 5.covid_vax omitted because of collinearity
+note: 0.covid_severity#1.covid_vax identifies no observations in the sample
+note: 0.covid_severity#2.covid_vax identifies no observations in the sample
+note: 0.covid_severity#3.covid_vax identifies no observations in the sample
+note: 0.covid_severity#4.covid_vax identifies no observations in the sample
+note: 0.covid_severity#5.covid_vax identifies no observations in the sample
+note: 1.covid_severity#0.covid_vax identifies no observations in the sample
+note: 1.covid_severity#5.covid_vax omitted because of collinearity
+note: 2.covid_severity#0.covid_vax identifies no observations in the sample
+note: 2.covid_severity#5.covid_vax omitted because of collinearity
+note: 3.covid_severity#0.covid_vax identifies no observations in the sample
+note: 3.covid_severity#1.covid_vax omitted because of collinearity
+note: 3.covid_severity#2.covid_vax omitted because of collinearity
+note: 3.covid_severity#3.covid_vax omitted because of collinearity
+note: 3.covid_severity#4.covid_vax omitted because of collinearity
+note: 3.covid_severity#5.covid_vax omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -240.83315
+Iteration 1:   log pseudolikelihood = -226.07276
+Iteration 2:   log pseudolikelihood = -223.24824
+Iteration 3:   log pseudolikelihood = -223.03567
+Iteration 4:   log pseudolikelihood =  -222.9699
+Iteration 5:   log pseudolikelihood = -222.94584
+Iteration 6:   log pseudolikelihood = -222.93701
+Iteration 7:   log pseudolikelihood = -222.93376
+Iteration 8:   log pseudolikelihood = -222.93257
+Iteration 9:   log pseudolikelihood = -222.93213
+Iteration 10:  log pseudolikelihood = -222.93197
+Iteration 11:  log pseudolikelihood = -222.93191
+Iteration 12:  log pseudolikelihood = -222.93189
+Iteration 13:  log pseudolikelihood = -222.93188
+Iteration 14:  log pseudolikelihood = -222.93188
+Iteration 15:  log pseudolikelihood = -222.93187
+Iteration 16:  log pseudolikelihood = -222.93187
+Iteration 17:  log pseudolikelihood = -222.93187
+Iteration 18:  log pseudolikelihood = -222.93187
+Iteration 19:  log pseudolikelihood = -222.93187
+Iteration 20:  log pseudolikelihood = -222.93187
+Iteration 21:  log pseudolikelihood = -222.93187
+Iteration 22:  log pseudolikelihood = -222.93187
+Iteration 23:  log pseudolikelihood = -222.93187
+Iteration 24:  log pseudolikelihood = -222.93187
+Iteration 25:  log pseudolikelihood = -222.93187
+Iteration 26:  log pseudolikelihood = -222.93187
+Iteration 27:  log pseudolikelihood = -222.93187
+Iteration 28:  log pseudolikelihood = -222.93187
+Iteration 29:  log pseudolikelihood = -222.93187
+Iteration 30:  log pseudolikelihood = -222.93187
+Iteration 31:  log pseudolikelihood = -222.93187
+Iteration 32:  log pseudolikelihood = -222.93187
+Iteration 33:  log pseudolikelihood = -222.93187
+Iteration 34:  log pseudolikelihood = -222.93187
+Iteration 35:  log pseudolikelihood = -222.93187
+Iteration 36:  log pseudolikelihood = -222.93187
+Iteration 37:  log pseudolikelihood = -222.93187
+Iteration 38:  log pseudolikelihood = -222.93187
+Iteration 39:  log pseudolikelihood = -222.93187
+Iteration 40:  log pseudolikelihood = -222.93187
+Iteration 41:  log pseudolikelihood = -222.93187
+Iteration 42:  log pseudolikelihood = -222.93187
+Iteration 43:  log pseudolikelihood = -222.93187
+Iteration 44:  log pseudolikelihood = -222.93187
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -222.93187
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =        1,366             Number of obs    =       1,368
+No. of failures      =           39
+Time at risk         =  590.8090349
+                                                Wald chi2(30)    =  6332282.12
+Log pseudolikelihood =   -222.93187             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 35 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+covid_seve~y |
+Non-hospi..  |   1.626408   1.285396     0.62   0.538     .3455421    7.655225
+Hospitali..  |   2.88e-20          .        .       .            .           .
+Critical ..  |   2.12e-20          .        .       .            .           .
+             |
+   covid_vax |
+Pre-vacci~n  |   3.057428   2.525606     1.35   0.176     .6056426    15.43463
+1 vaccine..  |   .2166781          .        .       .            .           .
+2 vaccine..  |   5.976783   2.274414     4.70   0.000      2.83498    12.60042
+3 vaccine..  |   .8956363          .        .       .            .           .
+4 vaccine..  |          1  (omitted)
+             |
+covid_seve~y#|
+   covid_vax |
+Historica.. #|
+Pre-vacci~n  |          1  (empty)
+Historica.. #|
+1 vaccine..  |          1  (empty)
+Historica.. #|
+2 vaccine..  |          1  (empty)
+Historica.. #|
+3 vaccine..  |          1  (empty)
+Historica.. #|
+4 vaccine..  |          1  (empty)
+Non-hospi.. #|
+Historica..  |          1  (empty)
+Non-hospi.. #|
+Pre-vacci~n  |   .0813688          .        .       .            .           .
+Non-hospi.. #|
+1 vaccine..  |   4.10e-19          .        .       .            .           .
+Non-hospi.. #|
+2 vaccine..  |   .1480105          .        .       .            .           .
+Non-hospi.. #|
+3 vaccine..  |   4.88e-20          .        .       .            .           .
+Non-hospi.. #|
+4 vaccine..  |          1  (omitted)
+Hospitali.. #|
+Historica..  |          1  (empty)
+Hospitali.. #|
+Pre-vacci~n  |   .3039689          .        .       .            .           .
+Hospitali.. #|
+1 vaccine..  |    3.10251          .        .       .            .           .
+Hospitali.. #|
+2 vaccine..  |   .7823509          .        .       .            .           .
+Hospitali.. #|
+3 vaccine..  |   .7161329          .        .       .            .           .
+Hospitali.. #|
+4 vaccine..  |          1  (omitted)
+Critical .. #|
+Historica..  |          1  (empty)
+Critical .. #|
+Pre-vacci~n  |          1  (omitted)
+Critical .. #|
+1 vaccine..  |          1  (omitted)
+Critical .. #|
+2 vaccine..  |          1  (omitted)
+Critical .. #|
+3 vaccine..  |          1  (omitted)
+Critical .. #|
+4 vaccine..  |          1  (omitted)
+             |
+         sex |
+       Male  |     1.7917   .4017765     2.60   0.009     1.154487    2.780618
+             |
+   ethnicity |
+South Asian  |   2.375913    .991239     2.07   0.038     1.048833    5.382137
+      Black  |    1.31298   .9773814     0.37   0.715     .3052279    5.647964
+      Mixed  |   .9517646   .5213872    -0.09   0.928     .3252609    2.785013
+      Other  |   .4792313   .3695554    -0.95   0.340     .1057178    2.172413
+             |
+         imd |
+          2  |   .5912919   .3221684    -0.96   0.335     .2032453    1.720218
+          3  |   1.305472   .4892809     0.71   0.477      .626244    2.721394
+          4  |   1.520573   .6758003     0.94   0.346      .636357    3.633403
+5 Least d..  |   1.428538   .4236687     1.20   0.229     .7988158    2.554682
+             |
+      region |
+       East  |   2.411625   2.747446     0.77   0.440     .2585699    22.49271
+     London  |   2.522172   2.869334     0.81   0.416     .2712752    23.44981
+ North East  |   4.271482   3.157943     1.96   0.050     1.002947    18.19194
+ North West  |   2.110885   2.216655     0.71   0.477     .2695331    16.53168
+ South East  |   1.334217   1.611752     0.24   0.811     .1250155    14.23932
+ South West  |   .9958227   1.462269    -0.00   0.998     .0560113    17.70471
+West Midl..  |   .9371921   1.398214    -0.04   0.965     .0503391    17.44824
+Yorkshire..  |   1.021932   1.180801     0.02   0.985     .1061435     9.83899
+             |
+       urban |
+      Urban  |   .9021253   .2308065    -0.40   0.687     .5463728    1.489514
+             |
+         bmi |
+Normal (..)  |   1.813774   1.545746     0.70   0.485     .3413242    9.638275
+Overweig..)  |   1.670968   1.604504     0.53   0.593     .2544624    10.97268
+Obese I ..)  |   2.236313   1.457095     1.24   0.217     .6236241    8.019409
+Obese II..)  |   2.539133   2.177619     1.09   0.277     .4727975    13.63627
+Obese II..)  |   2.659181    3.08896     0.84   0.400     .2728818    25.91322
+             |
+     smoking |
+Current/f..  |   1.529423   .3773167     1.72   0.085     .9430432     2.48041
+        age1 |   1.021404    .058666     0.37   0.712     .9126565    1.143109
+        age2 |   1.019532   .1995937     0.10   0.921     .6946419    1.496375
+        age3 |   .8164759    .492926    -0.34   0.737     .2500649     2.66584
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(3)  =      9.95
+(Assumption: B nested in A)                           Prob > chi2 =    0.0190
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 7.calendar_period omitted because of collinearity
+note: 0.covid_severity#6.calendar_period identifies no observations in the samp
+> le
+note: 0.covid_severity#7.calendar_period identifies no observations in the samp
+> le
+note: 1.covid_severity#0.calendar_period identifies no observations in the samp
+> le
+note: 1.covid_severity#7.calendar_period omitted because of collinearity
+note: 2.covid_severity#0.calendar_period identifies no observations in the samp
+> le
+note: 2.covid_severity#7.calendar_period omitted because of collinearity
+note: 3.covid_severity#0.calendar_period identifies no observations in the samp
+> le
+note: 3.covid_severity#6.calendar_period omitted because of collinearity
+note: 3.covid_severity#7.calendar_period omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -2996.5639
+Iteration 1:   log pseudolikelihood = -2986.3218
+Iteration 2:   log pseudolikelihood = -2986.0632
+Iteration 3:   log pseudolikelihood =   -2986.06
+Iteration 4:   log pseudolikelihood =   -2986.06
+Refining estimates:
+Iteration 0:   log pseudolikelihood =   -2986.06
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =       11,745             Number of obs    =      11,787
+No. of failures      =          344
+Time at risk         =  4921.026694
+                                                Wald chi2(10)    =       31.21
+Log pseudolikelihood =     -2986.06             Prob > chi2      =      0.0005
+
+                           (Std. Err. adjusted for 38 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+covid_seve~y |
+Non-hospi..  |   .7013447   .2599506    -0.96   0.339     .3391854    1.450193
+Hospitali..  |   .3009176   .1849138    -1.95   0.051      .090237    1.003484
+Critical ..  |   .5591193    .300963    -1.08   0.280     .1946791    1.605793
+             |
+calendar_p~d |
+Dec21-Feb..  |   2.594774   1.834767     1.35   0.178     .6489544    10.37493
+Mar22-Sep..  |          1  (omitted)
+             |
+covid_seve~y#|
+calendar_p~d |
+Historica.. #|
+Dec21-Feb..  |          1  (empty)
+Historica.. #|
+Mar22-Sep..  |          1  (empty)
+Non-hospi.. #|
+Historica..  |          1  (empty)
+Non-hospi.. #|
+Dec21-Feb..  |   .3263867   .2293012    -1.59   0.111     .0823617     1.29342
+Non-hospi.. #|
+Mar22-Sep..  |          1  (omitted)
+Hospitali.. #|
+Historica..  |          1  (empty)
+Hospitali.. #|
+Dec21-Feb..  |   1.343001   1.176788     0.34   0.736     .2411132    7.480513
+Hospitali.. #|
+Mar22-Sep..  |          1  (omitted)
+Critical .. #|
+Historica..  |          1  (empty)
+Critical .. #|
+Dec21-Feb..  |          1  (omitted)
+Critical .. #|
+Mar22-Sep..  |          1  (omitted)
+             |
+         sex |
+       Male  |   1.069915    .106703     0.68   0.498     .8799513    1.300888
+        age1 |   .9678574   .0116941    -2.70   0.007     .9452066     .991051
+        age2 |   1.148543   .0499873     3.18   0.001     1.054632    1.250817
+        age3 |   .6411127   .0853036    -3.34   0.001     .4939436    .8321305
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(6)  =     10.83
+(Assumption: B nested in A)                           Prob > chi2 =    0.0937
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 7.calendar_period omitted because of collinearity
+note: 0.covid_severity#6.calendar_period identifies no observations in the samp
+> le
+note: 0.covid_severity#7.calendar_period identifies no observations in the samp
+> le
+note: 1.covid_severity#0.calendar_period identifies no observations in the samp
+> le
+note: 1.covid_severity#7.calendar_period omitted because of collinearity
+note: 2.covid_severity#0.calendar_period identifies no observations in the samp
+> le
+note: 2.covid_severity#7.calendar_period omitted because of collinearity
+note: 3.covid_severity#0.calendar_period identifies no observations in the samp
+> le
+note: 3.covid_severity#6.calendar_period omitted because of collinearity
+note: 3.covid_severity#7.calendar_period omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -240.83315
+Iteration 1:   log pseudolikelihood = -226.52902
+Iteration 2:   log pseudolikelihood = -224.41337
+Iteration 3:   log pseudolikelihood = -224.25388
+Iteration 4:   log pseudolikelihood = -224.20135
+Iteration 5:   log pseudolikelihood = -224.18216
+Iteration 6:   log pseudolikelihood = -224.17513
+Iteration 7:   log pseudolikelihood = -224.17254
+Iteration 8:   log pseudolikelihood = -224.17159
+Iteration 9:   log pseudolikelihood = -224.17124
+Iteration 10:  log pseudolikelihood = -224.17111
+Iteration 11:  log pseudolikelihood = -224.17106
+Iteration 12:  log pseudolikelihood = -224.17105
+Iteration 13:  log pseudolikelihood = -224.17104
+Iteration 14:  log pseudolikelihood = -224.17104
+Iteration 15:  log pseudolikelihood = -224.17104
+Iteration 16:  log pseudolikelihood = -224.17104
+Iteration 17:  log pseudolikelihood = -224.17103
+Iteration 18:  log pseudolikelihood = -224.17103
+Iteration 19:  log pseudolikelihood = -224.17103
+Iteration 20:  log pseudolikelihood = -224.17103
+Iteration 21:  log pseudolikelihood = -224.17103
+Iteration 22:  log pseudolikelihood = -224.17103
+Iteration 23:  log pseudolikelihood = -224.17103
+Iteration 24:  log pseudolikelihood = -224.17103
+Iteration 25:  log pseudolikelihood = -224.17103
+Iteration 26:  log pseudolikelihood = -224.17103
+Iteration 27:  log pseudolikelihood = -224.17103
+Iteration 28:  log pseudolikelihood = -224.17103
+Iteration 29:  log pseudolikelihood = -224.17103
+Iteration 30:  log pseudolikelihood = -224.17103
+Iteration 31:  log pseudolikelihood = -224.17103
+Iteration 32:  log pseudolikelihood = -224.17103
+Iteration 33:  log pseudolikelihood = -224.17103
+Iteration 34:  log pseudolikelihood = -224.17103
+Iteration 35:  log pseudolikelihood = -224.17103
+Iteration 36:  log pseudolikelihood = -224.17103
+Iteration 37:  log pseudolikelihood = -224.17103
+Iteration 38:  log pseudolikelihood = -224.17103
+Iteration 39:  log pseudolikelihood = -224.17103
+Iteration 40:  log pseudolikelihood = -224.17103
+Iteration 41:  log pseudolikelihood = -224.17103
+Iteration 42:  log pseudolikelihood = -224.17103
+Iteration 43:  log pseudolikelihood = -224.17103
+Iteration 44:  log pseudolikelihood = -224.17103
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -224.17103
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =        1,366             Number of obs    =       1,368
+No. of failures      =           39
+Time at risk         =  590.8090349
+                                                Wald chi2(29)    =   427566.69
+Log pseudolikelihood =   -224.17103             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 35 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+covid_seve~y |
+Non-hospi..  |   1.186039   .8169946     0.25   0.804     .3074363    4.575548
+Hospitali..  |   2.17e-20          .        .       .            .           .
+Critical ..  |   2.35e-20          .        .       .            .           .
+             |
+calendar_p~d |
+Dec21-Feb..  |   2.961493   1.075739     2.99   0.003     1.453177    6.035357
+Mar22-Sep..  |          1  (omitted)
+             |
+covid_seve~y#|
+calendar_p~d |
+Historica.. #|
+Dec21-Feb..  |          1  (empty)
+Historica.. #|
+Mar22-Sep..  |          1  (empty)
+Non-hospi.. #|
+Historica..  |          1  (empty)
+Non-hospi.. #|
+Dec21-Feb..  |   .1046637          .        .       .            .           .
+Non-hospi.. #|
+Mar22-Sep..  |          1  (omitted)
+Hospitali.. #|
+Historica..  |          1  (empty)
+Hospitali.. #|
+Dec21-Feb..  |   1.112222          .        .       .            .           .
+Hospitali.. #|
+Mar22-Sep..  |          1  (omitted)
+Critical .. #|
+Historica..  |          1  (empty)
+Critical .. #|
+Dec21-Feb..  |          1  (omitted)
+Critical .. #|
+Mar22-Sep..  |          1  (omitted)
+             |
+         sex |
+       Male  |   1.660546   .3665314     2.30   0.022     1.077372    2.559388
+             |
+   ethnicity |
+South Asian  |   2.219143   .9338321     1.89   0.058     .9727324    5.062643
+      Black  |   1.771967   1.039546     0.98   0.329     .5611615    5.595299
+      Mixed  |   .9543425   .5183101    -0.09   0.931     .3291628    2.766927
+      Other  |    .414918   .3116558    -1.17   0.242     .0951924    1.808515
+             |
+         imd |
+          2  |   .6505805   .3728928    -0.75   0.453     .2115527    2.000708
+          3  |   1.311257   .5180204     0.69   0.493     .6045266    2.844202
+          4  |   1.546598   .6737858     1.00   0.317     .6584852    3.632529
+5 Least d..  |   1.642744   .4625626     1.76   0.078     .9459955    2.852663
+             |
+      region |
+       East  |   2.488838   2.727855     0.83   0.405     .2904353    21.32769
+     London  |   2.667574    3.05416     0.86   0.391     .2828512    25.15792
+ North East  |   5.056104   4.191142     1.96   0.051      .995937    25.66848
+ North West  |   1.979438   2.210115     0.61   0.541     .2218934    17.65791
+ South East  |   1.355374   1.752622     0.24   0.814     .1074926    17.08993
+ South West  |   .9506667   1.403867    -0.03   0.973      .052607    17.17961
+West Midl..  |   .9553596   1.449697    -0.03   0.976     .0488116    18.69869
+Yorkshire..  |   1.111512   1.340328     0.09   0.930     .1045886    11.81256
+             |
+       urban |
+      Urban  |   .9173982   .2151604    -0.37   0.713     .5793257    1.452757
+             |
+         bmi |
+Normal (..)  |   1.293636   1.067304     0.31   0.755     .2567645    6.517622
+Overweig..)  |   1.225573   1.099442     0.23   0.821     .2112223    7.111128
+Obese I ..)  |   1.748713   1.026651     0.95   0.341     .5533334    5.526501
+Obese II..)  |   1.736783   1.388013     0.69   0.490     .3626413    8.317905
+Obese II..)  |    1.93513   2.122949     0.60   0.547     .2253685    16.61603
+             |
+     smoking |
+Current/f..  |    1.60159   .4092701     1.84   0.065     .9705891    2.642818
+        age1 |   1.027511   .0577437     0.48   0.629     .9203459    1.147155
+        age2 |   1.002815   .1914837     0.01   0.988     .6897425     1.45799
+        age3 |   .8503238   .5004662    -0.28   0.783     .2682882    2.695052
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(2)  =      7.47
+(Assumption: B nested in A)                           Prob > chi2 =    0.0239
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 5.covid_vax omitted because of collinearity
+note: 0.covid_aki#1.covid_vax identifies no observations in the sample
+note: 0.covid_aki#2.covid_vax identifies no observations in the sample
+note: 0.covid_aki#3.covid_vax identifies no observations in the sample
+note: 0.covid_aki#4.covid_vax identifies no observations in the sample
+note: 0.covid_aki#5.covid_vax identifies no observations in the sample
+note: 1.covid_aki#0.covid_vax identifies no observations in the sample
+note: 1.covid_aki#5.covid_vax omitted because of collinearity
+note: 2.covid_aki#0.covid_vax identifies no observations in the sample
+note: 2.covid_aki#5.covid_vax omitted because of collinearity
+note: 3.covid_aki#0.covid_vax identifies no observations in the sample
+note: 3.covid_aki#1.covid_vax omitted because of collinearity
+note: 3.covid_aki#2.covid_vax omitted because of collinearity
+note: 3.covid_aki#3.covid_vax omitted because of collinearity
+note: 3.covid_aki#4.covid_vax omitted because of collinearity
+note: 3.covid_aki#5.covid_vax omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -2996.5639
+Iteration 1:   log pseudolikelihood = -2985.7402
+Iteration 2:   log pseudolikelihood = -2984.7093
+Iteration 3:   log pseudolikelihood = -2984.4445
+Iteration 4:   log pseudolikelihood = -2984.3506
+Iteration 5:   log pseudolikelihood =  -2984.316
+Iteration 6:   log pseudolikelihood = -2984.3033
+Iteration 7:   log pseudolikelihood = -2984.2987
+Iteration 8:   log pseudolikelihood = -2984.2969
+Iteration 9:   log pseudolikelihood = -2984.2963
+Iteration 10:  log pseudolikelihood = -2984.2961
+Iteration 11:  log pseudolikelihood =  -2984.296
+Iteration 12:  log pseudolikelihood =  -2984.296
+Iteration 13:  log pseudolikelihood =  -2984.296
+Iteration 14:  log pseudolikelihood =  -2984.296
+Iteration 15:  log pseudolikelihood =  -2984.296
+Iteration 16:  log pseudolikelihood = -2984.2959
+Iteration 17:  log pseudolikelihood = -2984.2959
+Iteration 18:  log pseudolikelihood = -2984.2959
+Iteration 19:  log pseudolikelihood = -2984.2959
+Iteration 20:  log pseudolikelihood = -2984.2959
+Iteration 21:  log pseudolikelihood = -2984.2959
+Iteration 22:  log pseudolikelihood = -2984.2959
+Iteration 23:  log pseudolikelihood = -2984.2959
+Iteration 24:  log pseudolikelihood = -2984.2959
+Iteration 25:  log pseudolikelihood = -2984.2959
+Iteration 26:  log pseudolikelihood = -2984.2959
+Iteration 27:  log pseudolikelihood = -2984.2959
+Iteration 28:  log pseudolikelihood = -2984.2959
+Iteration 29:  log pseudolikelihood = -2984.2959
+Iteration 30:  log pseudolikelihood = -2984.2959
+Iteration 31:  log pseudolikelihood = -2984.2959
+Iteration 32:  log pseudolikelihood = -2984.2959
+Iteration 33:  log pseudolikelihood = -2984.2959
+Iteration 34:  log pseudolikelihood = -2984.2959
+Iteration 35:  log pseudolikelihood = -2984.2959
+Iteration 36:  log pseudolikelihood = -2984.2959
+Iteration 37:  log pseudolikelihood = -2984.2959
+Iteration 38:  log pseudolikelihood = -2984.2959
+Iteration 39:  log pseudolikelihood = -2984.2959
+Iteration 40:  log pseudolikelihood = -2984.2959
+Iteration 41:  log pseudolikelihood = -2984.2959
+Iteration 42:  log pseudolikelihood = -2984.2959
+Iteration 43:  log pseudolikelihood = -2984.2959
+Iteration 44:  log pseudolikelihood = -2984.2959
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -2984.2959
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =       11,745             Number of obs    =      11,787
+No. of failures      =          344
+Time at risk         =  4921.026694
+                                                Wald chi2(14)    =    45452.00
+Log pseudolikelihood =   -2984.2959             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 38 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   covid_aki |
+Non-hospi..  |   .7431948   .1860484    -1.19   0.236     .4550052    1.213917
+No AKI ho..  |   1.417591   .9900346     0.50   0.617     .3606438    5.572159
+AKI hospi..  |   7.71e-10   8.52e-10   -18.98   0.000     8.83e-11    6.73e-09
+             |
+   covid_vax |
+Pre-vacci~n  |   1.70e+09   2.12e+09    17.04   0.000     1.48e+08    1.96e+10
+1 vaccine..  |   1.013408    .450126     0.03   0.976      .424332    2.420265
+2 vaccine..  |   3.29e+09   8.37e+08    86.04   0.000     1.99e+09    5.41e+09
+3 vaccine..  |   .9176734   .2694225    -0.29   0.770     .5161564     1.63153
+4 vaccine..  |          1  (omitted)
+             |
+   covid_aki#|
+   covid_vax |
+Historica.. #|
+Pre-vacci~n  |          1  (empty)
+Historica.. #|
+1 vaccine..  |          1  (empty)
+Historica.. #|
+2 vaccine..  |          1  (empty)
+Historica.. #|
+3 vaccine..  |          1  (empty)
+Historica.. #|
+4 vaccine..  |          1  (empty)
+Non-hospi.. #|
+Historica..  |          1  (empty)
+Non-hospi.. #|
+Pre-vacci~n  |   5.67e-10   7.04e-10   -17.16   0.000     4.98e-11    6.46e-09
+Non-hospi.. #|
+1 vaccine..  |   .9106314          .        .       .            .           .
+Non-hospi.. #|
+2 vaccine..  |   2.71e-10          .        .       .            .           .
+Non-hospi.. #|
+3 vaccine..  |   .6986802   .3173265    -0.79   0.430     .2868665    1.701677
+Non-hospi.. #|
+4 vaccine..  |          1  (omitted)
+No AKI ho.. #|
+Historica..  |          1  (empty)
+No AKI ho.. #|
+Pre-vacci~n  |   2.37e-10   4.42e-10   -11.87   0.000     6.10e-12    9.21e-09
+No AKI ho.. #|
+1 vaccine..  |   5.46e-20          .        .       .            .           .
+No AKI ho.. #|
+2 vaccine..  |   1.66e-29          .        .       .            .           .
+No AKI ho.. #|
+3 vaccine..  |   .7199364          .        .       .            .           .
+No AKI ho.. #|
+4 vaccine..  |          1  (omitted)
+AKI hospi.. #|
+Historica..  |          1  (empty)
+AKI hospi.. #|
+Pre-vacci~n  |          1  (omitted)
+AKI hospi.. #|
+1 vaccine..  |          1  (omitted)
+AKI hospi.. #|
+2 vaccine..  |          1  (omitted)
+AKI hospi.. #|
+3 vaccine..  |          1  (omitted)
+AKI hospi.. #|
+4 vaccine..  |          1  (omitted)
+             |
+         sex |
+       Male  |   1.068768   .1040826     0.68   0.495     .8830564    1.293535
+        age1 |    .967167   .0114342    -2.82   0.005      .945014    .9898392
+        age2 |   1.151138   .0496748     3.26   0.001     1.057781    1.252735
+        age3 |    .637683    .084751    -3.39   0.001     .4914466    .8274341
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(10) =     14.36
+(Assumption: B nested in A)                           Prob > chi2 =    0.1571
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 5.covid_vax omitted because of collinearity
+note: 0.covid_aki#1.covid_vax identifies no observations in the sample
+note: 0.covid_aki#2.covid_vax identifies no observations in the sample
+note: 0.covid_aki#3.covid_vax identifies no observations in the sample
+note: 0.covid_aki#4.covid_vax identifies no observations in the sample
+note: 0.covid_aki#5.covid_vax identifies no observations in the sample
+note: 1.covid_aki#0.covid_vax identifies no observations in the sample
+note: 1.covid_aki#5.covid_vax omitted because of collinearity
+note: 2.covid_aki#0.covid_vax identifies no observations in the sample
+note: 2.covid_aki#5.covid_vax omitted because of collinearity
+note: 3.covid_aki#0.covid_vax identifies no observations in the sample
+note: 3.covid_aki#1.covid_vax omitted because of collinearity
+note: 3.covid_aki#2.covid_vax omitted because of collinearity
+note: 3.covid_aki#3.covid_vax omitted because of collinearity
+note: 3.covid_aki#4.covid_vax omitted because of collinearity
+note: 3.covid_aki#5.covid_vax omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -240.83315
+Iteration 1:   log pseudolikelihood = -226.51479
+Iteration 2:   log pseudolikelihood = -224.24924
+Iteration 3:   log pseudolikelihood = -224.06112
+Iteration 4:   log pseudolikelihood = -223.99781
+Iteration 5:   log pseudolikelihood = -223.97462
+Iteration 6:   log pseudolikelihood =  -223.9661
+Iteration 7:   log pseudolikelihood = -223.96296
+Iteration 8:   log pseudolikelihood = -223.96181
+Iteration 9:   log pseudolikelihood = -223.96139
+Iteration 10:  log pseudolikelihood = -223.96123
+Iteration 11:  log pseudolikelihood = -223.96117
+Iteration 12:  log pseudolikelihood = -223.96115
+Iteration 13:  log pseudolikelihood = -223.96115
+Iteration 14:  log pseudolikelihood = -223.96114
+Iteration 15:  log pseudolikelihood = -223.96114
+Iteration 16:  log pseudolikelihood = -223.96114
+Iteration 17:  log pseudolikelihood = -223.96114
+Iteration 18:  log pseudolikelihood = -223.96114
+Iteration 19:  log pseudolikelihood = -223.96114
+Iteration 20:  log pseudolikelihood = -223.96114
+Iteration 21:  log pseudolikelihood = -223.96114
+Iteration 22:  log pseudolikelihood = -223.96114
+Iteration 23:  log pseudolikelihood = -223.96114
+Iteration 24:  log pseudolikelihood = -223.96114
+Iteration 25:  log pseudolikelihood = -223.96114
+Iteration 26:  log pseudolikelihood = -223.96114
+Iteration 27:  log pseudolikelihood = -223.96114
+Iteration 28:  log pseudolikelihood = -223.96114
+Iteration 29:  log pseudolikelihood = -223.96114
+Iteration 30:  log pseudolikelihood = -223.96114
+Iteration 31:  log pseudolikelihood = -223.96114
+Iteration 32:  log pseudolikelihood = -223.96114
+Iteration 33:  log pseudolikelihood = -223.96114
+Iteration 34:  log pseudolikelihood = -223.96114
+Iteration 35:  log pseudolikelihood = -223.96114
+Iteration 36:  log pseudolikelihood = -223.96114
+Iteration 37:  log pseudolikelihood = -223.96114
+Iteration 38:  log pseudolikelihood = -223.96114
+Iteration 39:  log pseudolikelihood = -223.96114
+Iteration 40:  log pseudolikelihood = -223.96114
+Iteration 41:  log pseudolikelihood = -223.96114
+Iteration 42:  log pseudolikelihood = -223.96114
+Iteration 43:  log pseudolikelihood = -223.96114
+Iteration 44:  log pseudolikelihood = -223.96114
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -223.96114
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =        1,366             Number of obs    =       1,368
+No. of failures      =           39
+Time at risk         =  590.8090349
+                                                Wald chi2(30)    =  4723190.51
+Log pseudolikelihood =   -223.96114             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 35 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   covid_aki |
+Non-hospi..  |   1.192334   1.166408     0.18   0.857     .1752689     8.11131
+No AKI ho..  |   6.48e-20          .        .       .            .           .
+AKI hospi..  |   4.54e-20          .        .       .            .           .
+             |
+   covid_vax |
+Pre-vacci~n  |    1.93585   2.084072     0.61   0.540      .234691    15.96787
+1 vaccine..  |   1.150307          .        .       .            .           .
+2 vaccine..  |   5.827204   2.493526     4.12   0.000     2.518961    13.48028
+3 vaccine..  |   .7059449          .        .       .            .           .
+4 vaccine..  |          1  (omitted)
+             |
+   covid_aki#|
+   covid_vax |
+Historica.. #|
+Pre-vacci~n  |          1  (empty)
+Historica.. #|
+1 vaccine..  |          1  (empty)
+Historica.. #|
+2 vaccine..  |          1  (empty)
+Historica.. #|
+3 vaccine..  |          1  (empty)
+Historica.. #|
+4 vaccine..  |          1  (empty)
+Non-hospi.. #|
+Historica..  |          1  (empty)
+Non-hospi.. #|
+Pre-vacci~n  |   .1891113          .        .       .            .           .
+Non-hospi.. #|
+1 vaccine..  |   1.20e-19          .        .       .            .           .
+Non-hospi.. #|
+2 vaccine..  |   .2187437          .        .       .            .           .
+Non-hospi.. #|
+3 vaccine..  |   7.52e-20          .        .       .            .           .
+Non-hospi.. #|
+4 vaccine..  |          1  (omitted)
+No AKI ho.. #|
+Historica..  |          1  (empty)
+No AKI ho.. #|
+Pre-vacci~n  |   .2904621          .        .       .            .           .
+No AKI ho.. #|
+1 vaccine..  |   .2550829          .        .       .            .           .
+No AKI ho.. #|
+2 vaccine..  |    .332144          .        .       .            .           .
+No AKI ho.. #|
+3 vaccine..  |   .3621244          .        .       .            .           .
+No AKI ho.. #|
+4 vaccine..  |          1  (omitted)
+AKI hospi.. #|
+Historica..  |          1  (empty)
+AKI hospi.. #|
+Pre-vacci~n  |          1  (omitted)
+AKI hospi.. #|
+1 vaccine..  |          1  (omitted)
+AKI hospi.. #|
+2 vaccine..  |          1  (omitted)
+AKI hospi.. #|
+3 vaccine..  |          1  (omitted)
+AKI hospi.. #|
+4 vaccine..  |          1  (omitted)
+             |
+         sex |
+       Male  |   1.776129    .404308     2.52   0.012     1.136873    2.774836
+             |
+   ethnicity |
+South Asian  |    2.00355   .9386472     1.48   0.138     .7998695    5.018586
+      Black  |    1.56636   .9963284     0.71   0.480     .4502566    5.449076
+      Mixed  |   .9555745   .5490049    -0.08   0.937     .3099024    2.946485
+      Other  |   .4786591    .373883    -0.94   0.346     .1035496    2.212606
+             |
+         imd |
+          2  |   .7173578   .3829298    -0.62   0.534     .2519761    2.042265
+          3  |   1.579238   .6263477     1.15   0.249     .7258538    3.435943
+          4  |   1.781891   .7847367     1.31   0.190     .7516501    4.224219
+5 Least d..  |   1.689575   .5074151     1.75   0.081     .9378718    3.043766
+             |
+      region |
+       East  |    2.43627    2.67427     0.81   0.417     .2833803    20.94504
+     London  |   2.470417   2.715475     0.82   0.411     .2865047    21.30142
+ North East  |   4.270067   3.025686     2.05   0.040     1.064853    17.12299
+ North West  |   2.129009   2.086167     0.77   0.441     .3119644    14.52948
+ South East  |   1.070742   1.287222     0.06   0.955     .1014822    11.29744
+ South West  |   .9297851   1.307605    -0.05   0.959       .05906    14.63766
+West Midl..  |   .8994791   1.315981    -0.07   0.942     .0511261    15.82485
+Yorkshire..  |    .865165   1.026343    -0.12   0.903     .0845904    8.848647
+             |
+       urban |
+      Urban  |   .9304209   .2443222    -0.27   0.784     .5561087     1.55668
+             |
+         bmi |
+Normal (..)  |   1.494747   1.062266     0.57   0.572     .3712342    6.018491
+Overweig..)  |   1.364337   1.140187     0.37   0.710     .2651955    7.019032
+Obese I ..)  |    1.90718   1.008159     1.22   0.222     .6767623    5.374614
+Obese II..)  |   2.003285   1.575134     0.88   0.377     .4290063    9.354526
+Obese II..)  |   2.369946   2.512034     0.81   0.416     .2968273    18.92227
+             |
+     smoking |
+Current/f..  |   1.498633   .3818771     1.59   0.112     .9094837    2.469425
+        age1 |    1.02576   .0595624     0.44   0.661     .9154182    1.149403
+        age2 |   1.012599   .1997877     0.06   0.949     .6878506    1.490669
+        age3 |     .82649   .5034052    -0.31   0.754     .2504845    2.727058
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(3)  =      7.89
+(Assumption: B nested in A)                           Prob > chi2 =    0.0484
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 7.calendar_period omitted because of collinearity
+note: 0.covid_aki#6.calendar_period identifies no observations in the sample
+note: 0.covid_aki#7.calendar_period identifies no observations in the sample
+note: 1.covid_aki#0.calendar_period identifies no observations in the sample
+note: 1.covid_aki#7.calendar_period omitted because of collinearity
+note: 2.covid_aki#0.calendar_period identifies no observations in the sample
+note: 2.covid_aki#7.calendar_period omitted because of collinearity
+note: 3.covid_aki#0.calendar_period identifies no observations in the sample
+note: 3.covid_aki#6.calendar_period omitted because of collinearity
+note: 3.covid_aki#7.calendar_period omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -2996.5639
+Iteration 1:   log pseudolikelihood = -2987.5206
+Iteration 2:   log pseudolikelihood = -2987.3272
+Iteration 3:   log pseudolikelihood = -2987.3241
+Iteration 4:   log pseudolikelihood = -2987.3241
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -2987.3241
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =       11,745             Number of obs    =      11,787
+No. of failures      =          344
+Time at risk         =  4921.026694
+                                                Wald chi2(10)    =       56.73
+Log pseudolikelihood =   -2987.3241             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 38 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   covid_aki |
+Non-hospi..  |   .6977553   .2560087    -0.98   0.327      .339934    1.432227
+No AKI ho..  |   .3063431   .1896245    -1.91   0.056     .0910583    1.030616
+AKI hospi..  |   .5579593   .5895606    -0.55   0.581     .0703382    4.426025
+             |
+calendar_p~d |
+Dec21-Feb..  |   1.817149   2.435195     0.45   0.656     .1314255    25.12474
+Mar22-Sep..  |          1  (omitted)
+             |
+   covid_aki#|
+calendar_p~d |
+Historica.. #|
+Dec21-Feb..  |          1  (empty)
+Historica.. #|
+Mar22-Sep..  |          1  (empty)
+Non-hospi.. #|
+Historica..  |          1  (empty)
+Non-hospi.. #|
+Dec21-Feb..  |   .5133082   .6576649    -0.52   0.603     .0416672    6.323559
+Non-hospi.. #|
+Mar22-Sep..  |          1  (omitted)
+No AKI ho.. #|
+Historica..  |          1  (empty)
+No AKI ho.. #|
+Dec21-Feb..  |   1.816786   2.630955     0.41   0.680     .1063279    31.04277
+No AKI ho.. #|
+Mar22-Sep..  |          1  (omitted)
+AKI hospi.. #|
+Historica..  |          1  (empty)
+AKI hospi.. #|
+Dec21-Feb..  |          1  (omitted)
+AKI hospi.. #|
+Mar22-Sep..  |          1  (omitted)
+             |
+         sex |
+       Male  |   1.070018   .1061255     0.68   0.495     .8809842    1.299614
+        age1 |   .9681324    .011674    -2.69   0.007       .94552    .9912855
+        age2 |   1.147898   .0502217     3.15   0.002     1.053567    1.250674
+        age3 |   .6419131   .0862597    -3.30   0.001     .4932789    .8353336
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(6)  =      8.31
+(Assumption: B nested in A)                           Prob > chi2 =    0.2166
+
+         failure _d:  esrd_date
+   analysis time _t:  (exit_date-origin)/365.25
+             origin:  time index_date
+                 id:  patient_id
+
+note: 7.calendar_period omitted because of collinearity
+note: 0.covid_aki#6.calendar_period identifies no observations in the sample
+note: 0.covid_aki#7.calendar_period identifies no observations in the sample
+note: 1.covid_aki#0.calendar_period identifies no observations in the sample
+note: 1.covid_aki#7.calendar_period omitted because of collinearity
+note: 2.covid_aki#0.calendar_period identifies no observations in the sample
+note: 2.covid_aki#7.calendar_period omitted because of collinearity
+note: 3.covid_aki#0.calendar_period identifies no observations in the sample
+note: 3.covid_aki#6.calendar_period omitted because of collinearity
+note: 3.covid_aki#7.calendar_period omitted because of collinearity
+Iteration 0:   log pseudolikelihood = -240.83315
+Iteration 1:   log pseudolikelihood = -226.91385
+Iteration 2:   log pseudolikelihood = -225.03966
+Iteration 3:   log pseudolikelihood = -224.92599
+Iteration 4:   log pseudolikelihood = -224.88859
+Iteration 5:   log pseudolikelihood = -224.87489
+Iteration 6:   log pseudolikelihood = -224.86986
+Iteration 7:   log pseudolikelihood = -224.86801
+Iteration 8:   log pseudolikelihood = -224.86733
+Iteration 9:   log pseudolikelihood = -224.86708
+Iteration 10:  log pseudolikelihood = -224.86699
+Iteration 11:  log pseudolikelihood = -224.86695
+Iteration 12:  log pseudolikelihood = -224.86694
+Iteration 13:  log pseudolikelihood = -224.86693
+Iteration 14:  log pseudolikelihood = -224.86693
+Iteration 15:  log pseudolikelihood = -224.86693
+Iteration 16:  log pseudolikelihood = -224.86693
+Iteration 17:  log pseudolikelihood = -224.86693
+Iteration 18:  log pseudolikelihood = -224.86693
+Iteration 19:  log pseudolikelihood = -224.86693
+Iteration 20:  log pseudolikelihood = -224.86693
+Iteration 21:  log pseudolikelihood = -224.86693
+Iteration 22:  log pseudolikelihood = -224.86693
+Iteration 23:  log pseudolikelihood = -224.86693
+Iteration 24:  log pseudolikelihood = -224.86693
+Iteration 25:  log pseudolikelihood = -224.86693
+Iteration 26:  log pseudolikelihood = -224.86693
+Iteration 27:  log pseudolikelihood = -224.86693
+Iteration 28:  log pseudolikelihood = -224.86693
+Iteration 29:  log pseudolikelihood = -224.86693
+Iteration 30:  log pseudolikelihood = -224.86693
+Iteration 31:  log pseudolikelihood = -224.86693
+Iteration 32:  log pseudolikelihood = -224.86693
+Iteration 33:  log pseudolikelihood = -224.86693
+Iteration 34:  log pseudolikelihood = -224.86693
+Iteration 35:  log pseudolikelihood = -224.86693
+Iteration 36:  log pseudolikelihood = -224.86693
+Iteration 37:  log pseudolikelihood = -224.86693
+Iteration 38:  log pseudolikelihood = -224.86693
+Iteration 39:  log pseudolikelihood = -224.86693
+Iteration 40:  log pseudolikelihood = -224.86693
+Iteration 41:  log pseudolikelihood = -224.86693
+Iteration 42:  log pseudolikelihood = -224.86693
+Iteration 43:  log pseudolikelihood = -224.86693
+Iteration 44:  log pseudolikelihood = -224.86693
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -224.86693
+
+Cox regression -- Breslow method for ties
+
+No. of subjects      =        1,366             Number of obs    =       1,368
+No. of failures      =           39
+Time at risk         =  590.8090349
+                                                Wald chi2(29)    =    39740.24
+Log pseudolikelihood =   -224.86693             Prob > chi2      =      0.0000
+
+                           (Std. Err. adjusted for 35 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   covid_aki |
+Non-hospi..  |   1.097696   .7071596     0.14   0.885     .3105416    3.880115
+No AKI ho..  |   2.93e-20          .        .       .            .           .
+AKI hospi..  |   7.36e-20          .        .       .            .           .
+             |
+calendar_p~d |
+Dec21-Feb..  |   2.393538   .8303801     2.52   0.012     1.212653    4.724372
+Mar22-Sep..  |          1  (omitted)
+             |
+   covid_aki#|
+calendar_p~d |
+Historica.. #|
+Dec21-Feb..  |          1  (empty)
+Historica.. #|
+Mar22-Sep..  |          1  (empty)
+Non-hospi.. #|
+Historica..  |          1  (empty)
+Non-hospi.. #|
+Dec21-Feb..  |   .1362511          .        .       .            .           .
+Non-hospi.. #|
+Mar22-Sep..  |          1  (omitted)
+No AKI ho.. #|
+Historica..  |          1  (empty)
+No AKI ho.. #|
+Dec21-Feb..  |   1.107536          .        .       .            .           .
+No AKI ho.. #|
+Mar22-Sep..  |          1  (omitted)
+AKI hospi.. #|
+Historica..  |          1  (empty)
+AKI hospi.. #|
+Dec21-Feb..  |          1  (omitted)
+AKI hospi.. #|
+Mar22-Sep..  |          1  (omitted)
+             |
+         sex |
+       Male  |   1.668866   .3520595     2.43   0.015     1.103708    2.523415
+             |
+   ethnicity |
+South Asian  |   1.910179   .8806704     1.40   0.160      .773812    4.715336
+      Black  |   1.909261     1.0611     1.16   0.245     .6423883     5.67457
+      Mixed  |   .9540829   .5400935    -0.08   0.934     .3145809    2.893609
+      Other  |    .427373   .3250179    -1.12   0.264     .0962647    1.897349
+             |
+         imd |
+          2  |   .7790064   .4208287    -0.46   0.644     .2702164    2.245797
+          3  |   1.622098   .6649376     1.18   0.238     .7263551    3.622475
+          4  |   1.808485    .801499     1.34   0.181     .7587045    4.310794
+5 Least d..  |   1.891004   .5838286     2.06   0.039     1.032505    3.463318
+             |
+      region |
+       East  |    2.49282   2.654915     0.86   0.391     .3091293    20.10211
+     London  |   2.584132   2.852976     0.86   0.390     .2968637    22.49429
+ North East  |   4.916054   3.889334     2.01   0.044     1.042771    23.17632
+ North West  |   2.226217   2.293101     0.78   0.437     .2956601    16.76264
+ South East  |   1.059342   1.386516     0.04   0.965       .08146    13.77617
+ South West  |    .910555   1.303011    -0.07   0.948     .0551099    15.04466
+West Midl..  |   .9131083   1.366756    -0.06   0.952     .0485769    17.16385
+Yorkshire..  |   .9390326    1.17441    -0.05   0.960     .0809315    10.89541
+             |
+       urban |
+      Urban  |   .9280376   .2261261    -0.31   0.759     .5756537    1.496132
+             |
+         bmi |
+Normal (..)  |   1.191368   .9226906     0.23   0.821     .2611005    5.436062
+Overweig..)  |   1.138872    1.00386     0.15   0.883     .2023866    6.408666
+Obese I ..)  |   1.660248   .9559823     0.88   0.379     .5370874    5.132166
+Obese II..)  |   1.623888   1.338068     0.59   0.556     .3229791    8.164652
+Obese II..)  |   1.974653    2.19203     0.61   0.540     .2241745    17.39384
+             |
+     smoking |
+Current/f..  |   1.594303   .4166955     1.78   0.074     .9552044    2.661003
+        age1 |   1.032095   .0585139     0.56   0.577     .9235522    1.153395
+        age2 |   .9928994   .1914437    -0.04   0.971     .6804288    1.448865
+        age3 |   .8706349   .5187122    -0.23   0.816     .2708332    2.798789
+------------------------------------------------------------------------------
+
+Likelihood-ratio test                                 LR chi2(2)  =      6.08
+(Assumption: B nested in A)                           Prob > chi2 =    0.0480
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /workspace/logs/cox_esrd_20174.log
+  log type:  text
+ closed on:   1 Dec 2022, 01:14:58
+-------------------------------------------------------------------------------
