@@ -15,7 +15,7 @@ foreach i of numlist 5/10 12/17 20/27 29 33 35/37 40/44 49 {
 }
 
 *(2)=========Append separate cases files==========
-use `matched_matches_2017_2stp5', clear
+use `matched_matches_2017_3stp5', clear
 foreach i of numlist 6/10 12/17 20/27 29 33 35/37 40/44 49 {
 	capture noisily append using `matched_matches_2017_3stp`i'', force
 }
