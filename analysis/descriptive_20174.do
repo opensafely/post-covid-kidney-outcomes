@@ -8,7 +8,7 @@ use ./output/analysis_20174.dta
 
 foreach var of varlist 	age				///
 						baseline_egfr	///
-						time_to_esrd	///
+						esrd_time		///
 						follow_up_time {
 	by case,sort: sum `var', de
 	by covid_severity,sort: sum `var', de
