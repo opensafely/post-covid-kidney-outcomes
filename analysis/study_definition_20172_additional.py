@@ -9,7 +9,7 @@ from cohortextractor import (
 
 from codelists import *
 
-MATCHES = "output/input_combined_stps_matches2_2017.csv"
+MATCHES = "output/input_combined_stps_matches_20172.csv"
 
 from variables_covariates_2017 import generate_covariates_2017
 variables_covariates_2017= generate_covariates_2017(index_date_variable="case_index_date")

@@ -5,22 +5,22 @@ pwd
 
 * Open a log file
 cap log close
-log using ./logs/combine_stps_covid1_2017.log, replace t
+log using ./logs/combine_stps_covid_20173.log, replace t
 
 *(1)=========Change source files to stata format============
 foreach i of numlist 5/10 12/17 20/27 29 33 35/37 40/44 49 {
-	capture noisily import delimited ./output/matched_cases_2017_1stp`i'.csv, clear
-	capture noisily tempfile matched_cases_2017_1stp`i'
-	capture noisily save `matched_cases_2017_1stp`i'', replace
+	capture noisily import delimited ./output/matched_cases_20173_stp`i'.csv, clear
+	capture noisily tempfile matched_cases_20173_stp`i'
+	capture noisily save `matched_cases_20173_stp`i'', replace
 }
 
 *(2)=========Append separate cases files==========
-use `matched_cases_2017_1stp5', clear
+use `matched_cases_20173_stp5', clear
 foreach i of numlist 6/10 12/17 20/27 29 33 35/37 40/44 49 {
-	capture noisily append using `matched_cases_2017_1stp`i'', force
+	capture noisily append using `matched_cases_20173_stp`i'', force
 }
 
 *save as .csv file for input into study definitions that add further variables, erase dta version
-capture noisily export delimited using "./output/input_combined_stps_covid1_2017.csv", replace
+capture noisily export delimited using "./output/input_combined_stps_covid_20173.csv", replace
 
 log close
