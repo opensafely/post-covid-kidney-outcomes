@@ -19,13 +19,13 @@ foreach i of numlist 1/4 {
 	restore
 }
 
-import delimited ./output/input_covid1_matching_2017.csv, clear
+import delimited ./output/input_covid_matching_20171.csv, clear
 *stps are coded E54000005-9, 10, 12-17, 20-27, 29, 33, 35-37, 40-44, 49
 *files need to be .csv format as this is what the matching program needs as input
 foreach i of numlist 5/9 {
 	preserve
 		capture noisily keep if stp=="E5400000`i'"
-		capture noisily export delimited using "./output/input_covid1_matching_2017_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_matching_20171_stp`i'.csv", replace
 		count
 	restore
 }
@@ -33,16 +33,16 @@ foreach i of numlist 5/9 {
 foreach i of numlist 10 12/17 20/27 29 33 35/37 40/44 49 {
 	preserve
 		capture noisily keep if stp=="E540000`i'"
-		capture noisily export delimited using "./output/input_covid1_matching_2017_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_matching_20171_stp`i'.csv", replace
 		count
 	restore
 }
 
-import delimited ./output/input_covid2_matching_2017.csv, clear
+import delimited ./output/input_covid_matching_20172.csv, clear
 foreach i of numlist 5/9 {
 	preserve
 		capture noisily keep if stp=="E5400000`i'"
-		capture noisily export delimited using "./output/input_covid2_matching_2017_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_matching_20172_stp`i'.csv", replace
 		count
 	restore
 }
@@ -50,16 +50,16 @@ foreach i of numlist 5/9 {
 foreach i of numlist 10 12/17 20/27 29 33 35/37 40/44 49 {
 	preserve
 		capture noisily keep if stp=="E540000`i'"
-		capture noisily export delimited using "./output/input_covid2_matching_2017_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_matching_20172_stp`i'.csv", replace
 		count
 	restore
 }
 
-import delimited ./output/input_covid3_matching_2017.csv, clear
+import delimited ./output/input_covid_matching_20173.csv, clear
 foreach i of numlist 5/9 {
 	preserve
 		capture noisily keep if stp=="E5400000`i'"
-		capture noisily export delimited using "./output/input_covid3_matching_2017_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_matching_20173_stp`i'.csv", replace
 		count
 	restore
 }
@@ -67,16 +67,16 @@ foreach i of numlist 5/9 {
 foreach i of numlist 10 12/17 20/27 29 33 35/37 40/44 49 {
 	preserve
 		capture noisily keep if stp=="E540000`i'"
-		capture noisily export delimited using "./output/input_covid3_matching_2017_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_matching_20173_stp`i'.csv", replace
 		count
 	restore
 }
 
-import delimited ./output/input_covid4_matching_2017.csv, clear
+import delimited ./output/input_covid_matching_20174.csv, clear
 foreach i of numlist 5/9 {
 	preserve
 		capture noisily keep if stp=="E5400000`i'"
-		capture noisily export delimited using "./output/input_covid4_matching_2017_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_matching_20174_stp`i'.csv", replace
 		count
 	restore
 }
@@ -84,7 +84,7 @@ foreach i of numlist 5/9 {
 foreach i of numlist 10 12/17 20/27 29 33 35/37 40/44 49 {
 	preserve
 		capture noisily keep if stp=="E540000`i'"
-		capture noisily export delimited using "./output/input_covid4_matching_2017_stp`i'.csv", replace
+		capture noisily export delimited using "./output/input_covid_matching_20174_stp`i'.csv", replace
 		count
 	restore
 }
