@@ -3,7 +3,7 @@ from osmatching import match
 
 match(
     case_csv="input_covid_matching_20174_stp41",
-    match_csv="input_20174_matching_stp41",
+    match_csv="input_2017_matching_stp41",
     matches_per_case=5,
     match_variables={
         "male": "category",
