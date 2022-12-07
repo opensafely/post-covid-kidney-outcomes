@@ -16,6 +16,6 @@ match(
         "date_deregistered": "before",
         "krt_outcome_date": "before",
     },
-    output_suffix="_20174_4stp33",
+    output_suffix="_20174_stp33",
     output_path="output",
 )
