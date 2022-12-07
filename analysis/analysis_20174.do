@@ -581,6 +581,19 @@ safetab stroke
 gen lupus = systemic_lupus_erythematosus
 drop systemic_lupus_erythematosus
 safetab lupus
+
+*Group comorbidities
+gen cardiovascular = afib
+replace cardiovascular = 1 if heart_failure==1
+replace cardiovascular = 1 if myocardial_infarction==1
+replace cardiovascular = 1 if pvd==1
+replace cardiovascular = 1 if stroke==1
+gen immunosuppressed = haem_cancer
+replace immunosuppressed = 1 if hiv==1
+replace immunosuppressed = 1 if rheumatoid==1
+replace immunosuppressed = 1 if lupus==1
+safetab cardiovascular
+safetab immunosuppressed
  
 **Outcomes
 * ESRD

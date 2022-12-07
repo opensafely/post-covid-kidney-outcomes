@@ -48,6 +48,8 @@ foreach exposure of varlist	case			///
 	tab rheumatoid `exposure', m col chi
 	tab stroke `exposure', m col chi
 	tab lupus `exposure', m col chi
+	tab cardiovascular `exposure', m col chi
+	tab immunosuppressed `exposure', m col chi
 	}
 
 log close
