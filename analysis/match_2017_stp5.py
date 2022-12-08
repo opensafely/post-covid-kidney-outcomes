@@ -8,7 +8,7 @@ from osmatching import match
 match(
     case_csv="input_covid_matching_2017_stp5",
     match_csv="input_2017_matching_stp5",
-    matches_per_case=5,
+    matches_per_case=3,
     match_variables={
         "male": "category",
         "age": 0,

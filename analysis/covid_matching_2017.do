@@ -135,41 +135,6 @@ drop krt_outcome_primary_care
 drop krt_outcome_icd_10
 drop krt_outcome_opcs_4
 
-* Categorise time period
-*Period 1 = February 2020 to August 2020
-*Period 2 = September 2020 to June 2021
-*Period 3 = July 2021 to November 2021
-*Period 4 = December 2021 to October 2022
-gen period = 1
-replace period = 2 if covid_month=="sep2020"
-replace period = 2 if covid_month=="oct2020"
-replace period = 2 if covid_month=="nov2020"
-replace period = 2 if covid_month=="dec2020"
-replace period = 2 if covid_month=="jan2021"
-replace period = 2 if covid_month=="feb2021"
-replace period = 2 if covid_month=="mar2021"
-replace period = 2 if covid_month=="apr2021"
-replace period = 2 if covid_month=="may2021"
-replace period = 2 if covid_month=="jun2021"
-replace period = 3 if covid_month=="jul2021"
-replace period = 3 if covid_month=="aug2021"
-replace period = 3 if covid_month=="sep2021"
-replace period = 3 if covid_month=="oct2021"
-replace period = 3 if covid_month=="nov2021"
-replace period = 4 if covid_month=="dec2021"
-replace period = 4 if covid_month=="jan2022"
-replace period = 4 if covid_month=="feb2022"
-replace period = 4 if covid_month=="mar2022"
-replace period = 4 if covid_month=="apr2022"
-replace period = 4 if covid_month=="may2022"
-replace period = 4 if covid_month=="jun2022"
-replace period = 4 if covid_month=="jul2022"
-replace period = 4 if covid_month=="aug2022"
-replace period = 4 if covid_month=="sep2022"
-replace period = 4 if covid_month=="oct2022"
-label var period "COVID-19 period"
-tab period, m
-
 export delimited using "./output/covid_matching_2017.csv", replace
 
 log close
