@@ -19,17 +19,17 @@ capture noisily import delimited ./output/2017_matching.csv, clear
 di "Potential historical comparators after application of exclusion criteria:"
 safecount
 * Import COVID-19 (December 2021 to October 2022) dataset comprising individuals matched with historical comparators (limited matching variables only)	
-capture noisily import delimited ./output/input_combined_stps_covid4_2017.csv, clear
+capture noisily import delimited ./output/input_combined_stps_covid_20174.csv, clear
 * Drop age & covid_diagnosis_date
 keep patient_id death_date date_deregistered stp krt_outcome_date male covid_date covid_month set_id case match_counts
-tempfile covid4_2017_matched
+tempfile covid_20174_matched
 * For dummy data, should do nothing in the real data
 duplicates drop patient_id, force
-save `covid4_2017_matched', replace
+save `covid_20174_matched', replace
 * Number of matched COVID-19 cases
 count
 * Import matched historical comparators (limited matching variables only)
-capture noisily import delimited ./output/input_combined_stps_matches4_2017.csv, clear
+capture noisily import delimited ./output/input_combined_stps_matches_20174.csv, clear
 * Drop age
 keep patient_id death_date date_deregistered stp krt_outcome_date male set_id case covid_date
 tempfile 20174_matched
@@ -39,12 +39,12 @@ save `20174_matched', replace
 * Number of matched historical comparators
 count
 * Merge limited COVID-19 dataset with additional variables
-capture noisily import delimited ./output/input_covid4_2017_additional.csv, clear
-merge 1:1 patient_id using `covid4_2017_matched'
+capture noisily import delimited ./output/input_covid_20174_additional.csv, clear
+merge 1:1 patient_id using `covid_20174_matched'
 keep if _merge==3
 drop _merge
-tempfile covid4_2017_complete
-save `covid4_2017_complete', replace
+tempfile covid_20174_complete
+save `covid_20174_complete', replace
 di "Matched COVID-19 cases:"
 safecount
 * Merge limited historical comparator dataset with additional variables
@@ -57,7 +57,7 @@ save `20174_complete', replace
 di "Matched historical comparators:"
 safecount
 * Append matched COVID-19 cases and historical comparators
-append using `covid4_2017_complete', force
+append using `covid_20174_complete', force
 order patient_id set_id match_count case
 gsort set_id -case
 count if case==0
@@ -68,8 +68,8 @@ tab case
 preserve
 	keep if case==1
 	keep patient_id
-	tempfile covid4_2017_matched_list
-	save `covid4_2017_matched_list', replace
+	tempfile covid_20174_matched_list
+	save `covid_20174_matched_list', replace
 restore
 * Generate list of unmatched COVID-19 cases
 preserve
@@ -78,7 +78,7 @@ preserve
 	duplicates drop patient_id, force
 	tempfile covid4_prematching
 	save `covid4_prematching', replace
-	use `covid4_2017_matched_list', clear
+	use `covid_20174_matched_list', clear
 	merge 1:1 patient_id using `covid4_prematching'
 	keep if _merge==2
 	safecount
