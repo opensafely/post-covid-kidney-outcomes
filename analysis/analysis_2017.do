@@ -18,7 +18,7 @@ safecount
 capture noisily import delimited ./output/2017_matching.csv, clear
 di "Potential historical comparators after application of exclusion criteria:"
 safecount
-* Import COVID-19 dataset comprising individuals matched with historical comparators (limited matching variables only)
+* Import COVID-19 dataset comprising individuals matched with historical comparators (limited matching variables only)	
 capture noisily import delimited ./output/input_combined_stps_covid_2017.csv, clear
 * Drop age & covid_diagnosis_date
 keep patient_id death_date date_deregistered stp krt_outcome_date male covid_date covid_month set_id case match_counts
@@ -237,7 +237,8 @@ foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_feb2017 ///
 												baseline_creatinine_jun2022 ///
 												baseline_creatinine_jul2022 ///
 												baseline_creatinine_aug2022 ///
-												baseline_creatinine_sep2022 {
+												baseline_creatinine_sep2022 ///
+												baseline_creatinine_oct2022 {
 replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine_monthly', 20, 3000)
 gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.4
 gen min_`baseline_creatinine_monthly'=.
@@ -262,7 +263,7 @@ drop max_`baseline_creatinine_monthly'
 gen index_date_string=string(index_date, "%td") 
 gen index_month=substr(index_date_string ,3,7)
 gen baseline_egfr=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022"
+local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 foreach x of local month_year  {
 replace baseline_egfr=egfr_baseline_creatinine_`x' if index_month=="`x'"
 drop egfr_baseline_creatinine_`x'
@@ -287,6 +288,13 @@ count if match_counts==0
 drop if match_counts==0
 safetab case
 tab match_counts
+
+bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 0 then only uncase in set, if 1 then only case in set
+gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set containing both case and uncase
+tab valid_set, miss
+tab valid_set case, col
+keep if valid_set==1
+drop valid_set set_case_mean
 
 ** Exposure
 label define case 0 "Comparator (historical)" ///
@@ -399,6 +407,7 @@ replace calendar_period = 7 if covid_month=="jun2022"
 replace calendar_period = 7 if covid_month=="jul2022"
 replace calendar_period = 7 if covid_month=="aug2022"
 replace calendar_period = 7 if covid_month=="sep2022"
+replace calendar_period = 7 if covid_month=="oct2022"
 replace calendar_period = 0 if case==0
 label define calendar_period	0 "Historical comparator"	///
 								1 "Feb20-Jun20 SARS-CoV-2"	///
@@ -407,7 +416,7 @@ label define calendar_period	0 "Historical comparator"	///
 								4 "Dec20-Feb21 SARS-CoV-2"	///
 								5 "Mar21-Nov21 SARS-CoV-2"	///
 								6 "Dec21-Feb22 SARS-CoV-2"	///
-								7 "Mar22-Sep22 SARS-CoV-2"
+								7 "Mar22-Oct22 SARS-CoV-2"
 label values calendar_period calendar_period
 label var calendar_period "Calendar period"
 safetab calendar_period, m
@@ -490,11 +499,11 @@ tab rural_urban, m
 generate urban=.
 replace urban=1 if rural_urban<=4|rural_urban==.
 replace urban=0 if rural_urban>4 & rural_urban!=.
+label var urban "Urban/rural"
 label define urban 0 "Rural" 1 "Urban"
 label values urban urban
 tab urban rural_urban, m
 tab case urban
-label var urban "Urban/rural"
 
 * BMI
 replace body_mass_index = . if !inrange(body_mass_index, 15, 50)
@@ -572,6 +581,19 @@ safetab stroke
 gen lupus = systemic_lupus_erythematosus
 drop systemic_lupus_erythematosus
 safetab lupus
+
+*Group comorbidities
+gen cardiovascular = afib
+replace cardiovascular = 1 if heart_failure==1
+replace cardiovascular = 1 if myocardial_infarction==1
+replace cardiovascular = 1 if pvd==1
+replace cardiovascular = 1 if stroke==1
+gen immunosuppressed = haem_cancer
+replace immunosuppressed = 1 if hiv==1
+replace immunosuppressed = 1 if rheumatoid==1
+replace immunosuppressed = 1 if lupus==1
+safetab cardiovascular
+safetab immunosuppressed
  
 **Outcomes
 * ESRD
@@ -639,7 +661,8 @@ foreach creatinine_monthly of varlist	creatinine_feb2017 ///
 										creatinine_jun2022 ///
 										creatinine_jul2022 ///
 										creatinine_aug2022 ///
-										creatinine_sep2022 {
+										creatinine_sep2022 ///
+										creatinine_oct2022 {
 replace `creatinine_monthly' = . if !inrange(`creatinine_monthly', 20, 3000)
 gen mgdl_`creatinine_monthly' = `creatinine_monthly'/88.4
 gen min_`creatinine_monthly'=.
@@ -665,7 +688,7 @@ drop max_`creatinine_monthly'
 replace index_date = index_date_28
 drop index_date_28
 gen egfr15_date=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022"
+local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 foreach x of local month_year  {
   replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatinine_`x'<15 & date("01`x'", "DMY")>=index_date
 }
@@ -697,7 +720,7 @@ label define esrd_time_cat	1 "<0 days"			///
 							8 "731 to 973 days"	///
 							9 ">973 days"
 label values esrd_time_cat esrd_time_cat
-foreach `exposure' of varlist 	case			///
+foreach exposure of varlist 	case			///
 								covid_severity	///
 								covid_aki		{
 								by `exposure',sort: sum esrd_time, de
@@ -737,7 +760,7 @@ tab covid_krt follow_up_cat
 
 * 50% eGFR reduction (earliest month) (or ESRD)
 gen egfr_half_date=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022"
+local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 foreach x of local month_year {
   replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_half_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>=index_date
   format egfr_half_date %td
