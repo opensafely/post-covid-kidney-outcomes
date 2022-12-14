@@ -8,6 +8,7 @@ use ./output/analysis_2017.dta
 
 foreach var of varlist 	age				///
 						baseline_egfr	///
+						esrd_time		///
 						follow_up_time {
 	by case,sort: sum `var', de
 	by covid_severity,sort: sum `var', de
@@ -47,6 +48,8 @@ foreach exposure of varlist	case			///
 	tab rheumatoid `exposure', m col chi
 	tab stroke `exposure', m col chi
 	tab lupus `exposure', m col chi
+	tab cardiovascular `exposure', m col chi
+	tab immunosuppressed `exposure', m col chi
 	}
 
 log close

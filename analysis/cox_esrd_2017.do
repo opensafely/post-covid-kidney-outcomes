@@ -14,45 +14,22 @@ foreach exposure of varlist	case			///
 							calendar_period {
 	tab _d `exposure', col chi
 	strate `exposure'
-	stcox i.`exposure' i.sex age1 age2 age3, vce(cluster practice_id)
-	quietly stcox i.`exposure' i.sex age1 age2 age3
+	stcox i.`exposure' i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id)
+	quietly stcox i.`exposure' i.sex age1 age2 age3, strata(set_id)
 	est store A
-	quietly stcox i.sex age1 age2 age3
+	quietly stcox i.sex age1 age2 age3, strata(set_id)
 	est store B
 	lrtest B A
-	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
-	quietly stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3
+	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
+	quietly stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3, strata(set_id)
 	est store A
-	quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3
+	quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3, strata(set_id)
 	est store B
 	lrtest B A
-	}
-	
-foreach exposure of varlist	case			///
-							covid_severity	///
-							covid_aki {
-	stcox i.`exposure'##i.covid_vax i.sex age1 age2 age3, vce(cluster practice_id)
-	quietly stcox i.`exposure'##i.covid_vax i.sex age1 age2 age3
+	stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
+	quietly stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, strata(set_id)
 	est store A
-	quietly stcox i.sex age1 age2 age3
-	est store B
-	lrtest B A
-	stcox i.`exposure'##i.covid_vax i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
-	quietly stcox i.`exposure'##i.covid_vax i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3
-	est store A
-	quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3
-	est store B
-	lrtest B A
-	stcox i.`exposure'##i.calendar_period i.sex age1 age2 age3, vce(cluster practice_id)
-	quietly stcox i.`exposure'##i.calendar_period i.sex age1 age2 age3
-	est store A
-	quietly stcox i.sex age1 age2 age3
-	est store B
-	lrtest B A
-	stcox i.`exposure'##i.calendar_period i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
-	quietly stcox i.`exposure'##i.calendar_period i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3
-	est store A
-	quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3
+	quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, strata(set_id)
 	est store B
 	lrtest B A
 	}
