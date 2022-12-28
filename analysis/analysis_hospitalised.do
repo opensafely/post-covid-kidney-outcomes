@@ -208,6 +208,7 @@ replace baseline_esrd = 1 if baseline_egfr <15
 label define baseline_esrd 0 "No ESRD" 1 "ESRD"
 label values baseline_esrd baseline_esrd
 tab covid baseline_esrd
+tab pneumonia baseline_esrd
 drop if baseline_esrd==1
 drop baseline_esrd
 
