@@ -13,7 +13,7 @@ from codelists import *
 from variables_hospitalised import generate_hospitalised
 variables_hospitalised= generate_hospitalised(index_date_variable="patient_index_date")
 
-study = StudyDefinition(
+study=StudyDefinition(
     default_expectations={
         "date": {"earliest": "1980-01-01", "latest": "today"},
         "rate": "uniform",
@@ -25,83 +25,66 @@ study = StudyDefinition(
         patient_index_date
         AND has_follow_up
         AND (age >=18)
-        AND (sex = "M" OR sex = "F")
-        AND NOT stp = ""
-        AND NOT deceased = "1"
-        AND NOT baseline_krt_primary_care = "1"
-        AND NOT baseline_krt_icd_10 = "1"
-        AND NOT baseline_krt_opcs_4 = "1"
+        AND (sex="M" OR sex="F")
+        AND NOT stp=""
+        AND NOT deceased="1"
+        AND NOT baseline_krt_primary_care="1"
+        AND NOT baseline_krt_icd_10="1"
+        AND NOT baseline_krt_opcs_4="1"
         """,
     ),
-    
-    index_date="2020-02-01",
 
     patient_index_date=patients.admitted_to_hospital(
         with_these_diagnoses=covid_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        between = ["2020-02-01", "2022-10-31"],
+        between=["2020-02-01", "2022-10-31"],
         return_expectations={"incidence": 1.0, "date": {"earliest": "2020-02-01"}},
     ),
     covid=patients.admitted_to_hospital(
         with_these_diagnoses=covid_codes,
         returning="binary_flag",
         find_first_match_in_period=True,
-        between = ["2020-02-01", "2022-10-31"],
+        between=["2020-02-01", "2022-10-31"],
         return_expectations={"incidence": 1.0,
         },
     ),
-    covid_vax_1_date = patients.with_tpp_vaccination_record(
-        target_disease_matches = "SARS-2 CORONAVIRUS",
-        returning = "date",
-        find_first_match_in_period = True,
-        between = ["2020-11-01", "patient_index_date - 7 days"],
-        date_format = "YYYY-MM-DD",
-        return_expectations = {
-        "date": {
-            "earliest": "2020-12-08",
-            "latest": "2022-09-30",
-        }
+    covid_vax_1_date=patients.with_tpp_vaccination_record(
+        target_disease_matches="SARS-2 CORONAVIRUS",
+        returning="date",
+        find_first_match_in_period=True,
+        between=["2020-11-01", "patient_index_date - 7 days"],
+        date_format="YYYY-MM-DD",
+        return_expectations={"date": {"earliest": "2020-12-08", "latest": "2022-09-30"},
         },
     ),
-    covid_vax_2_date = patients.with_tpp_vaccination_record(
-        target_disease_matches = "SARS-2 CORONAVIRUS",
-        returning = "date",
-        find_first_match_in_period = True,
-        between = ["covid_vax_1_date + 15 days", "patient_index_date - 7 days"],
-        date_format = "YYYY-MM-DD",
-        return_expectations = {
-        "date": {
-            "earliest": "2020-12-31",
-            "latest": "2022-09-30",
-        }
+    covid_vax_2_date=patients.with_tpp_vaccination_record(
+        target_disease_matches="SARS-2 CORONAVIRUS",
+        returning="date",
+        find_first_match_in_period=True,
+        between=["covid_vax_1_date + 15 days", "patient_index_date - 7 days"],
+        date_format="YYYY-MM-DD",
+        return_expectations={"date": {"earliest": "2020-12-31", "latest": "2022-09-30"},
         },
     ),
-    covid_vax_3_date = patients.with_tpp_vaccination_record(
-        target_disease_matches = "SARS-2 CORONAVIRUS",
-        returning = "date",
-        find_first_match_in_period = True,
-        between = ["covid_vax_2_date + 15 days", "patient_index_date - 7 days"],
-        date_format = "YYYY-MM-DD",
-        return_expectations = {
-        "date": {
-            "earliest": "2021-03-31",
-            "latest": "2022-09-30",
-        }
+    covid_vax_3_date=patients.with_tpp_vaccination_record(
+        target_disease_matches="SARS-2 CORONAVIRUS",
+        returning="date",
+        find_first_match_in_period=True,
+        between=["covid_vax_2_date + 15 days", "patient_index_date - 7 days"],
+        date_format="YYYY-MM-DD",
+        return_expectations={
+        "date": {"earliest": "2021-03-31", "latest": "2022-09-30"},
         },
     ),
-    covid_vax_4_date = patients.with_tpp_vaccination_record(
-        target_disease_matches = "SARS-2 CORONAVIRUS",    
-        returning = "date",
-        find_first_match_in_period = True,
-        between = ["covid_vax_3_date + 15 days", "patient_index_date - 7 days"],
-        date_format = "YYYY-MM-DD",
-        return_expectations = {
-        "date": {
-            "earliest": "2021-04-30",
-            "latest": "2022-09-30",
-        }
+    covid_vax_4_date=patients.with_tpp_vaccination_record(
+        target_disease_matches="SARS-2 CORONAVIRUS",    
+        returning="date",
+        find_first_match_in_period=True,
+        between=["covid_vax_3_date + 15 days", "patient_index_date - 7 days"],
+        date_format="YYYY-MM-DD",
+        return_expectations={"date": {"earliest": "2021-04-30", "latest": "2022-09-30"},
         },
     ),
     baseline_creatinine_feb2020=patients.mean_recorded_value(
@@ -709,7 +692,7 @@ study = StudyDefinition(
     ),
     krt_outcome_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
-        between = ["patient_index_date", "2022-11-30"],
+        between=["patient_index_date", "2022-11-30"],
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
@@ -719,7 +702,7 @@ study = StudyDefinition(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between = ["patient_index_date", "2022-11-30"],
+        between=["patient_index_date", "2022-11-30"],
         find_first_match_in_period=True,
         return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-03-01", "latest": "2022-10-31"}}
     ),
@@ -727,7 +710,7 @@ study = StudyDefinition(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between = ["patient_index_date", "2022-11-30"],
+        between=["patient_index_date", "2022-11-30"],
         find_first_match_in_period=True,
         return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-03-01", "latest": "2022-10-31"}}
     ),
@@ -736,14 +719,14 @@ study = StudyDefinition(
     ),
     acute_kidney_injury_outcome=patients.admitted_to_hospital(
         with_these_diagnoses=acute_kidney_injury_codes,
-        between = ["patient_index_date + 29 days", "2022-11-30"],
+        between=["patient_index_date + 29 days", "2022-11-30"],
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,    
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-03-01", "latest": "2022-11-30"}},
     ),
     death_date=patients.with_death_recorded_in_primary_care(
-        between = ["patient_index_date + 29 days", "2022-11-30"],
+        between=["patient_index_date + 29 days", "2022-11-30"],
         returning="date_of_death",
         date_format= "YYYY-MM-DD",
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2018-02-01", "latest": "2022-11-30"}},

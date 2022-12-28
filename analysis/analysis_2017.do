@@ -730,8 +730,8 @@ foreach exposure of varlist 	case			///
 * Exit date
 gen exit_date = esrd_date
 format exit_date %td
-gen end_date = date("2022-09-30", "YMD") if case==1
-replace end_date = date("2019-09-30", "YMD") if case==0
+gen end_date = date("2022-11-30", "YMD") if case==1
+replace end_date = date("2019-11-30", "YMD") if case==0
 format end_date %td
 replace exit_date = min(deregistered_date, death_date, end_date) if esrd_date==.
 gen follow_up_time = (exit_date - index_date)

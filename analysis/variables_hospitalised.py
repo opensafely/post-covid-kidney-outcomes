@@ -3,40 +3,40 @@ from codelists import *
 from datetime import datetime, timedelta
 
 def generate_hospitalised(index_date_variable):
-    variables_hospitalised = dict(       
+    variables_hospitalised=dict(       
     critical_care=patients.admitted_to_hospital(
         with_these_procedures=critical_care_codes,
         returning="binary_flag",
-        between = ["patient_index_date", "patient_index_date + 28 days"],
+        between=["patient_index_date", "patient_index_date + 28 days"],
         return_expectations={"incidence": 0.05,
-        }
+        },
     ),
     critical_days=patients.admitted_to_hospital(
         with_at_least_one_day_in_critical_care=True,
-        between= ["patient_index_date", "patient_index_date + 28 days"],
+        between=["patient_index_date", "patient_index_date + 28 days"],
         return_expectations={"incidence": 0.05,
-        }
+        },
     ),
     acute_kidney_injury=patients.admitted_to_hospital(
         with_these_diagnoses=acute_kidney_injury_codes,
         returning="binary_flag",
-        between = ["patient_index_date", "patient_index_date + 28 days"],
+        between=["patient_index_date", "patient_index_date + 28 days"],
         return_expectations={"incidence": 0.40,
-        }
+        },
     ),
     krt_icd_10=patients.admitted_to_hospital(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="binary_flag",
-        between = ["patient_index_date", "patient_index_date + 28 days"],
+        between=["patient_index_date", "patient_index_date + 28 days"],
         return_expectations={"incidence": 0.01,
-        }
+        },
     ),
     krt_opcs_4=patients.admitted_to_hospital(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="binary_flag",
-        between = ["patient_index_date", "patient_index_date + 28 days"],
+        between=["patient_index_date", "patient_index_date + 28 days"],
         return_expectations={"incidence": 0.01,
-        }
+        },
     ),
     practice_id=patients.registered_practice_as_of(
         "patient_index_date",
@@ -53,28 +53,28 @@ def generate_hospitalised(index_date_variable):
     ),
     deceased=patients.with_death_recorded_in_primary_care(
         returning="binary_flag",
-        between = ["1970-01-01", "patient_index_date + 28 days"],
+        between=["1970-01-01", "patient_index_date + 28 days"],
         return_expectations={"incidence": 0.01, 
         },
     ),
     baseline_krt_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
-        between = ["1970-01-01", "patient_index_date"],
+        between=["1970-01-01", "patient_index_date"],
         returning="binary_flag",
-        return_expectations = {"incidence": 0.05,
+        return_expectations={"incidence": 0.05,
         },
     ),
     baseline_krt_icd_10=patients.admitted_to_hospital(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="binary_flag",
-        between = ["1970-01-01", "patient_index_date"],
+        between=["1970-01-01", "patient_index_date"],
         return_expectations={"incidence": 0.05,
         },
     ),
     baseline_krt_opcs_4=patients.admitted_to_hospital(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="binary_flag",
-        between = ["1970-01-01", "patient_index_date"],
+        between=["1970-01-01", "patient_index_date"],
         return_expectations={"incidence": 0.05,
         },
     ),
@@ -261,13 +261,13 @@ def generate_hospitalised(index_date_variable):
     ),
     smoking_status=patients.categorised_as(
          {
-            "S": "most_recent_smoking_code = 'S'",
+            "S": "most_recent_smoking_code='S'",
             "E": """
-                 most_recent_smoking_code = 'E' OR (
-                   most_recent_smoking_code = 'N' AND ever_smoked
+                 most_recent_smoking_code='E' OR (
+                   most_recent_smoking_code='N' AND ever_smoked
                  )
             """,
-            "N": "most_recent_smoking_code = 'N' AND NOT ever_smoked",
+            "N": "most_recent_smoking_code='N' AND NOT ever_smoked",
             "M": "DEFAULT",
          },
         return_expectations={

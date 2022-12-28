@@ -86,7 +86,7 @@ format index_date_28 %td
 replace krt_date = index_date_28 if krt_date < index_date_28
 
 * Death before index_date + 28 days (i.e. only include people who survived 28 days after index_date)
-drop if deceased==0
+drop if deceased==1
 drop deceased
 gen death_date1 = date(death_date, "YMD")
 format death_date1 %td
@@ -96,13 +96,14 @@ gen deceased = 0
 replace deceased = 1 if death_date < index_date_28
 label define deceased 0 "Alive at 28 days after index date" 1 "Deceased within 28 days of index date"
 label values deceased deceased
-tab case deceased
+tab covid deceased
+tab pneumonia deceased
 drop if deceased==1
 drop deceased
 
 * eGFR <15 before index_date - should apply to matched historical comparators only
-gen sex1 = 1 if sex == "Male"
-replace sex1 = 0 if sex == "Female"
+gen sex1 = 1 if sex=="M"
+replace sex1 = 0 if sex=="F"
 drop sex
 rename sex1 sex
 label define sex 0"Female" 1"Male"
@@ -206,14 +207,14 @@ gen baseline_esrd = 0
 replace baseline_esrd = 1 if baseline_egfr <15
 label define baseline_esrd 0 "No ESRD" 1 "ESRD"
 label values baseline_esrd baseline_esrd
-tab case baseline_esrd
+tab covid baseline_esrd
 drop if baseline_esrd==1
 drop baseline_esrd
 
 ** Exposure
 gen case = covid
-replace case = 1 if covid==.
-label define case 0 "Pneumonia (historical)" ///
+replace case = 0 if covid==.
+label define case 0 "Pneumonia (pre-pandemic)" ///
 				  1 "COVID-19"
 label values case case
 tab case covid
@@ -222,49 +223,61 @@ drop covid
 drop pneumonia
 safetab case 
 
-* Critical care
-gen covid_severity = case
-replace covid_severity = 2 if covid_hospitalised==1
-replace covid_severity = 3 if covid_critical_care==1
-replace covid_severity = 3 if covid_critical_days==1
-label define covid_severity_label	0 "Historical comparator"		///
-									1 "Non-hospitalised SARS-CoV-2" ///
-									2 "Hospitalised COVID-19"		///
-									3 "Critical care COVID-19"
-label values covid_severity covid_severity_label
-label var covid_severity "SARS-CoV-2 severity"
-drop covid_critical_care
-drop covid_critical_days
-safetab covid_severity, m
+* Critical care during index admission
+replace critical_care = 1 if critical_days==1
+drop critical_days
+label define critical_care	0 "Ward-based"		///
+							1 "Critical care"
+label values critical_care critical_care
+label var critical_care "Critical care"
+safetab critical_care, m
+gen case_critical_care = critical_care
+replace case_critical_care = 2 if case==1
+replace case_critical_care = 3 if case==1 &critical_care==1
+label define case_critical_care	0 "Ward-based pneumonia (pre-pandemic)" 	///
+								1 "Critical care pneumonia (pre-pandemic)"	///
+								2 "Ward-based COVID-19" 					///
+								3 "Critical care COVID-19"
+label values case_critical_care case_critical_care
 
-* COVID-19 acute kidney injury
-gen covid_aki = case
-replace covid_aki = 2 if covid_hospitalised==1
-replace covid_aki = 3 if covid_acute_kidney_injury==1
-label define covid_aki	0 "Historical comparator" 			///
-						1 "Non-hospitalised SARS-CoV-2"		///
-						2 "No AKI hospitalised COVID-19"	///
-						3 "AKI hospitalised COVID-19"
-label values covid_aki covid_aki
-label var covid_aki "COVID-19 acute kidney injury"
-drop covid_acute_kidney_injury
-safetab covid_aki, m
+* Acute kidney injury during index admission
+label define acute_kidney_injury	0 "No AKI"	///
+									1 "AKI"
+label values acute_kidney_injury acute_kidney_injury
+label var acute_kidney_injury "Acute kidney injury"
+safetab acute_kidney_injury, m
+gen case_acute_kidney_injury = acute_kidney_injury
+replace case_acute_kidney_injury = 2 if case==1
+replace case_acute_kidney_injury = 3 if case==1 &acute_kidney_injury==1
+label define case_acute_kidney_injury	0 "No AKI pneumonia (pre-pandemic)"	///
+										1 "AKI pneumonia (pre-pandemic)" 	///
+										2 "No AKI COVID-19" 				///
+										3 "AKI COVID-19"
+label values case_acute_kidney_injury case_acute_kidney_injury
 
-* COVID-19 kidney replacement therapy
-gen covid_krt_combined = covid_krt_icd_10
-replace covid_krt_combined = covid_krt_opcs_4 if covid_krt_icd_10==0
-gen covid_krt = case
-replace covid_krt = 2 if covid_hospitalised==1
-replace covid_krt = 3 if covid_krt_combined==1
-label define covid_krt	0 "Historical comparator" 			///
-						1 "Non-hospitalised SARS-CoV-2"		///
-						2 "No KRT hospitalised COVID-19"	///
-						3 "KRT hospitalised COVID-19"
-label values covid_krt covid_krt
-label var covid_krt "COVID-19 kidney replacement therapy"
-drop covid_krt_icd_10
-drop covid_krt_opcs_4
-safetab covid_krt, m
+* Kidney replacement therapy during index admission
+gen krt = acute_kidney_injury
+replace krt = 2 if krt_icd_10==1
+drop krt_icd_10
+replace krt = 2 if krt_opcs_4==1
+drop krt_opcs_4
+label define krt	0 "No AKI" 				///
+					1 "AKI without KRT"		///
+					2 "AKI requiring KRT"
+label values krt krt
+label var krt "Kidney replacement therapy"
+safetab krt, m
+gen case_krt = krt
+replace case_krt = 3 if case==1
+replace case_krt = 4 if case==1 &krt==1
+replace case_krt = 5 if case==1 &krt==2
+label define case_krt	0 "No AKI pneumonia (pre-pandemic)" 			///
+						1 "AKI without KRT pneumonia (pre-pandemic)"	///
+						2 "AKI requiring KRT pneumonia (pre-pandemic)"	///
+						3 "No AKI COVID-19"								///
+						4 "AKI without KRT COVID-19"					///
+						5 "AKI requiring KRT COVID-19"
+label values case_krt case_krt
 
 * COVID-19 vaccination status
 gen covidvax1date = date(covid_vax_1_date, "YMD")
@@ -284,7 +297,7 @@ drop covidvax1date
 drop covidvax2date
 drop covidvax3date
 drop covidvax4date
-label define covid_vax	0 "Historical comparator"	///
+label define covid_vax	0 "Pneumonia (pre-pandemic)"	///
 						1 "Pre-vaccination"			///
 						2 "1 vaccine dose"			///
 						3 "2 vaccine doses"			///
@@ -294,52 +307,58 @@ label values covid_vax covid_vax
 label var covid_vax "Vaccination status"
 safetab covid_vax, m
 
-* Calendar period
-gen calendar_period = 1 if covid_month=="feb2020"
-replace calendar_period = 1 if covid_month=="mar2020"
-replace calendar_period = 1 if covid_month=="apr2020"
-replace calendar_period = 1 if covid_month=="may2020"
-replace calendar_period = 1 if covid_month=="jun2020"
-replace calendar_period = 2 if covid_month=="jul2020"
-replace calendar_period = 2 if covid_month=="aug2020"
-replace calendar_period = 3 if covid_month=="sep2020"
-replace calendar_period = 3 if covid_month=="oct2020"
-replace calendar_period = 3 if covid_month=="nov2020"
-replace calendar_period = 4 if covid_month=="dec2020"
-replace calendar_period = 4 if covid_month=="jan2021"
-replace calendar_period = 4 if covid_month=="feb2021"
-replace calendar_period = 5 if covid_month=="mar2021"
-replace calendar_period = 5 if covid_month=="apr2021"
-replace calendar_period = 5 if covid_month=="may2021"
-replace calendar_period = 5 if covid_month=="jun2021"
-replace calendar_period = 5 if covid_month=="jul2021"
-replace calendar_period = 5 if covid_month=="aug2021"
-replace calendar_period = 5 if covid_month=="sep2021"
-replace calendar_period = 5 if covid_month=="oct2021"
-replace calendar_period = 5 if covid_month=="nov2021"
-replace calendar_period = 6 if covid_month=="dec2021"
-replace calendar_period = 6 if covid_month=="jan2022"
-replace calendar_period = 6 if covid_month=="feb2022"
-replace calendar_period = 7 if covid_month=="mar2022"
-replace calendar_period = 7 if covid_month=="apr2022"
-replace calendar_period = 7 if covid_month=="may2022"
-replace calendar_period = 7 if covid_month=="jun2022"
-replace calendar_period = 7 if covid_month=="jul2022"
-replace calendar_period = 7 if covid_month=="aug2022"
-replace calendar_period = 7 if covid_month=="sep2022"
-replace calendar_period = 7 if covid_month=="oct2022"
-replace calendar_period = 0 if case==0
-label define calendar_period	0 "Historical comparator"	///
-								1 "Feb20-Jun20 SARS-CoV-2"	///
-								2 "Jul20-Aug20 SARS-CoV-2"	///
-								3 "Sep20-Nov20 SARS-CoV-2"	///
-								4 "Dec20-Feb21 SARS-CoV-2"	///
-								5 "Mar21-Nov21 SARS-CoV-2"	///
-								6 "Dec21-Feb22 SARS-CoV-2"	///
-								7 "Mar22-Oct22 SARS-CoV-2"
-label values calendar_period calendar_period
-label var calendar_period "Calendar period"
-safetab calendar_period, m
+* COVID-19 wave
+gen wave = case
+replace wave = 2 if index_month=="sep2020"
+replace wave = 2 if index_month=="oct2020"
+replace wave = 2 if index_month=="nov2020"
+replace wave = 2 if index_month=="dec2020"
+replace wave = 2 if index_month=="jan2021"
+replace wave = 2 if index_month=="feb2021"
+replace wave = 2 if index_month=="mar2021"
+replace wave = 2 if index_month=="apr2021"
+replace wave = 2 if index_month=="may2021"
+replace wave = 2 if index_month=="jun2021"
+replace wave = 3 if index_month=="jul2021"
+replace wave = 3 if index_month=="aug2021"
+replace wave = 3 if index_month=="sep2021"
+replace wave = 3 if index_month=="oct2021"
+replace wave = 3 if index_month=="nov2021"
+replace wave = 4 if index_month=="dec2021"
+replace wave = 4 if index_month=="jan2022"
+replace wave = 4 if index_month=="feb2022"
+replace wave = 4 if index_month=="mar2022"
+replace wave = 4 if index_month=="apr2022"
+replace wave = 4 if index_month=="may2022"
+replace wave = 4 if index_month=="jun2022"
+replace wave = 4 if index_month=="jul2022"
+replace wave = 4 if index_month=="aug2022"
+replace wave = 4 if index_month=="sep2022"
+replace wave = 4 if index_month=="oct2022"
+label define wave	0 "Pneumonia (pre-pandemic)"	///
+					1 "Feb20-Aug20"	///
+					2 "Sep20-Jun21"	///
+					3 "Jul21-Nov21"	///
+					4 "Dec21-Oct22"	
+label values wave wave
+label var wave "COVID-19 wave"
+safetab wave, m
+
+* Month
+gen month_string=substr(index_date_string ,3,3)
+gen month = 1 if month_string=="jan"
+replace month = 2 if month_string=="feb"
+replace month = 3 if month_string=="mar"
+replace month = 4 if month_string=="apr"
+replace month = 5 if month_string=="may"
+replace month = 6 if month_string=="jun"
+replace month = 7 if month_string=="jul"
+replace month = 8 if month_string=="aug"
+replace month = 9 if month_string=="sep"
+replace month = 10 if month_string=="oct"
+replace month = 11 if month_string=="nov"
+replace month = 12 if month_string=="dec"
+drop month_string
 
 ** Covariates
 * Age
@@ -641,8 +660,8 @@ label define esrd_time_cat	1 "<0 days"			///
 							9 ">973 days"
 label values esrd_time_cat esrd_time_cat
 foreach exposure of varlist 	case			///
-								covid_severity	///
-								covid_aki		{
+								critical_care	///
+								krt		{
 								by `exposure',sort: sum esrd_time, de
 								tab esrd_time_cat `exposure', m col chi
 								}
@@ -650,8 +669,8 @@ foreach exposure of varlist 	case			///
 * Exit date
 gen exit_date = esrd_date
 format exit_date %td
-gen end_date = date("2022-09-30", "YMD") if case==1
-replace end_date = date("2019-09-30", "YMD") if case==0
+gen end_date = date("2022-11-30", "YMD") if case==1
+replace end_date = date("2019-11-30", "YMD") if case==0
 format end_date %td
 replace exit_date = min(deregistered_date, death_date, end_date) if esrd_date==.
 gen follow_up_time = (exit_date - index_date)
@@ -672,11 +691,9 @@ label define follow_up_cat 	1 "<-29 days" 		///
 label values follow_up_cat follow_up_cat
 label var follow_up_cat "Follow_up time"
 tab case follow_up_cat
-tab covid_krt follow_up_cat
 drop if follow_up_time<0
 drop if follow_up_time>972
 tab case follow_up_cat
-tab covid_krt follow_up_cat
 
 * 50% eGFR reduction (earliest month) (or ESRD)
 gen egfr_half_date=.
@@ -714,3 +731,6 @@ format exit_date_death %td
 replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
 gen follow_up_time_death = (exit_date_death - index_date)
 label var follow_up_time_death "Follow-up time (death) (Days)"
+
+save ./output/analysis_hospitalised.dta, replace
+log close

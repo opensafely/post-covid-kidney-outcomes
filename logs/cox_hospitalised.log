@@ -1,0 +1,138 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/cox_hospitalised.log
+  log type:  text
+ opened on:  28 Dec 2022, 11:09:42
+
+. use ./output/analysis_hospitalised.dta
+
+. 
+. stset exit_date, fail(esrd_date) origin(index_date) id(patient_id) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: patient_id
+         Failure event: esrd_date!=0 & esrd_date<.
+Observed time interval: (exit_date[_n-1], exit_date]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date
+
+--------------------------------------------------------------------------
+     24,989  total observations
+        130  observations end on or before enter()
+         24  observations begin on or after (first) failure
+--------------------------------------------------------------------------
+     24,835  observations remaining, representing
+     24,549  subjects
+      1,896  failures in single-failure-per-subject data
+  31,606.76  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  5.708419
+
+. foreach exposure of varlist     case                    ///
+>                                                         covid_vax               ///
+>                                                         wave {
+  2.         tab _d `exposure', col chi
+  3.         strate `exposure'
+  4.         stcox i.`exposure' i.sex age1 age2 age3 i.month, vce(cluster practice_id)
+  5.         quietly stcox i.`exposure' i.sex age1 age2 age3 i.month
+  6.         est store A
+  7.         quietly stcox i.sex age1 age2 age3 i.month
+  8.         est store B
+  9.         lrtest B A
+ 10.         stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3 i.month, vce(cluster practice_id)
+ 11.         quietly stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3 i.month
+ 12.         est store A
+ 13.         quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3 i.month
+ 14.         est store B
+ 15.         lrtest B A
+ 16.         stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 i.month, vce(cluster practice_id)
+ 17.         quietly stcox i.`exposure' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 i.month
+ 18.         est store A
+ 19.         quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 i.month
+ 20.         est store B
+ 21.         lrtest B A
+ 22.         }
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+      1 if |
+failure; 0 |
+        if |         case
+  censored | Pneumonia   COVID-19 |     Total
+-----------+----------------------+----------
+         0 |    11,724     11,215 |    22,939 
+           |     92.24      92.50 |     92.37 
+-----------+----------------------+----------
+         1 |       987        909 |     1,896 
+           |      7.76       7.50 |      7.63 
+-----------+----------------------+----------
+     Total |    12,711     12,124 |    24,835 
+           |    100.00     100.00 |    100.00 
+
+          Pearson chi2(1) =   0.6292   Pr = 0.428
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Estimated failure rates
+Number of records = 24835
+
+  +---------------------------------------------------------------------------+
+  |                     case     D         Y       Rate      Lower      Upper |
+  |---------------------------------------------------------------------------|
+  | Pneumonia (pre-pandemic)   987   1.6e+04   0.062506   0.058725   0.066529 |
+  |                 COVID-19   909   1.6e+04   0.057473   0.053855   0.061333 |
+  +---------------------------------------------------------------------------+
+   Notes: Rate = D/Y = failures/person-time.
+          Lower and Upper are bounds of 95% confidence intervals.
+
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+no observations
+r(2000);
+
+end of do-file
+
+r(2000);
+
+. stcox i.case i.sex age1 age2 age3 i.month, vce(cluster practice_id)
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+no observations
+r(2000);
+
+. logistic i.case i.sex age1 age2 age3 i.month, vce(cluster practice_id)
+depvar may not be a factor variable
+r(198);
+
+. logistic case i.sex age1 age2 age3 i.month, vce(cluster practice_id)
+no observations
+r(2000);
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD1a44_000000.tmp"
+
+. sysdir set PLUS ./analysis/adofiles
+
+. sysdir set PERSONAL ./analysis/adofiles
+
+. pwd
+C:\Users\lsh1703468\Documents\repos
+
+. 
+. cap log close
