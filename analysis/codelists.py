@@ -124,9 +124,7 @@ haemofiltration_opcs_4_codes = codelist_from_csv(
     system="opcs4",
     column="code",
 )
-    #NB this codelist contains a glomerulonephritis code which needs to be removed
 #Pneumonia
-    #ICD-10 codes to restrict additional comparator population to people with hospitalised pneumonia in 2018-2019
 pneumonia_codelist = codelist_from_csv(
     "codelists/opensafely-pneumonia-secondary-care.csv",
     system="icd10",

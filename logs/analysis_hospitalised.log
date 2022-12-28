@@ -1,0 +1,209 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_hospitalised.log
+  log type:  text
+ opened on:  27 Dec 2022, 21:14:09
+
+. 
+. capture noisily import delimited ./output/input_covid_hospitalised.csv, clear
+(encoding automatically selected: ISO-8859-9)
+(115 vars, 50,000 obs)
+
+. tempfile covid_hospitalised
+
+. save `covid_hospitalised', replace
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3cec_000001.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_3cec_000001.tmp saved as .dta format
+
+. di "COVID-19 hospitalised:"
+COVID-19 hospitalised:
+
+. safecount
+  50,000
+
+. 
+. capture noisily import delimited ./output/input_pneumonia_hospitalised.csv, clear
+(encoding automatically selected: ISO-8859-9)
+(111 vars, 50,000 obs)
+
+. tempfile pneumonia_hospitalised
+
+. save `pneumonia_hospitalised', replace
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3cec_000002.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_3cec_000002.tmp saved as .dta format
+
+. di "Pneumonia hospitalised:"
+Pneumonia hospitalised:
+
+. safecount
+  50,000
+
+. 
+. append using `covid_hospitalised', force
+
+. 
+. ** Exclusions
+. * Index of multiple deprivation missing
+. * Ordered 1-5 from most deprived to least deprived
+. label define imd 1 "1 Most deprived" 2 "2" 3 "3" 4 "4" 5 "5 Least deprived"
+
+. label values imd imd
+
+. tab imd, m
+
+             imd |      Freq.     Percent        Cum.
+-----------------+-----------------------------------
+               0 |      5,022        5.02        5.02
+ 1 Most deprived |     18,916       18.92       23.94
+               2 |     18,833       18.83       42.77
+               3 |     19,099       19.10       61.87
+               4 |     19,060       19.06       80.93
+5 Least deprived |     19,070       19.07      100.00
+-----------------+-----------------------------------
+           Total |    100,000      100.00
+
+. drop if imd==0
+(5,022 observations deleted)
+
+. safetab imd
+
+             imd |      Freq.     Percent        Cum.
+-----------------+-----------------------------------
+ 1 Most deprived |     18,916       19.92       19.92
+               2 |     18,833       19.83       39.74
+               3 |     19,099       20.11       59.85
+               4 |     19,060       20.07       79.92
+5 Least deprived |     19,070       20.08      100.00
+-----------------+-----------------------------------
+           Total |     94,978      100.00
+
+. 
+. * STP missing
+. drop if stp==""
+(0 observations deleted)
+
+. bysort stp: gen stp1 = 1 if _n==1
+(94,977 missing values generated)
+
+. replace stp1 = sum(stp1)
+(94,977 real changes made)
+
+. drop stp
+
+. rename stp1 stp
+
+. label values stp stp
+
+. label var stp "STP"
+
+. safetab stp
+
+        STP |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |     94,978      100.00      100.00
+------------+-----------------------------------
+      Total |     94,978      100.00
+
+. 
+. * Region missing
+. rename region region_string
+
+. gen region = 1 if region_string=="East Midlands"
+(85,586 missing values generated)
+
+. replace region = 2 if region_string=="East"
+(9,557 real changes made)
+
+. replace region = 3 if region_string=="London"
+(19,057 real changes made)
+
+. replace region = 4 if region_string=="North East"
+(9,412 real changes made)
+
+. replace region = 5 if region_string=="North West"
+(9,519 real changes made)
+
+. replace region = 6 if region_string=="South East"
+(9,501 real changes made)
+
+. replace region = 7 if region_string=="South West"
+(9,556 real changes made)
+
+. replace region = 8 if region_string=="West Midlands"
+(9,677 real changes made)
+
+. replace region = 9 if region_string=="Yorkshire and The Humber"
+(9,307 real changes made)
+
+. replace region = 10 if region_string==""
+(0 real changes made)
+
+. label define region     1 "East Midlands"                                       ///
+>                                                 2 "East"                                                        ///
+>                                                 3 "London"                                                      ///
+>                                                 4 "North East"                                          ///
+>                                                 5 "North West"                                          ///
+>                                                 6 "South East"                                          ///
+>                                                 7 "South West"                                          ///
+>                                                 8 "West Midlands"                                       ///
+>                                                 9 "Yorkshire and The Humber"            ///
+>                                                 10 "Missing"
+
+. label values region region
+
+. label var region "Region"
+
+. tab region
+
+                  Region |      Freq.     Percent        Cum.
+-------------------------+-----------------------------------
+           East Midlands |      9,392        9.89        9.89
+                    East |      9,557       10.06       19.95
+                  London |     19,057       20.06       40.02
+              North East |      9,412        9.91       49.93
+              North West |      9,519       10.02       59.95
+              South East |      9,501       10.00       69.95
+              South West |      9,556       10.06       80.01
+           West Midlands |      9,677       10.19       90.20
+Yorkshire and The Humber |      9,307        9.80      100.00
+-------------------------+-----------------------------------
+                   Total |     94,978      100.00
+
+. drop if region==10
+(0 observations deleted)
+
+. safetab region
+
+                  Region |      Freq.     Percent        Cum.
+-------------------------+-----------------------------------
+           East Midlands |      9,392        9.89        9.89
+                    East |      9,557       10.06       19.95
+                  London |     19,057       20.06       40.02
+              North East |      9,412        9.91       49.93
+              North West |      9,519       10.02       59.95
+              South East |      9,501       10.00       69.95
+              South West |      9,556       10.06       80.01
+           West Midlands |      9,677       10.19       90.20
+Yorkshire and The Humber |      9,307        9.80      100.00
+-------------------------+-----------------------------------
+                   Total |     94,978      100.00
+
+. 
+. * Exclusions due to deregistration and kidney replacement therapy will be checked (should already have been applied from previous steps in workflow)
+. gen index_date = date(patient_index_date, "YMD")
+(85,873 missing values generated)
+
+. format index_date %td
+
+. 
+. * Deregistered before index_date
+. gen deregistered_date = date(date_deregistered, "YMD")
+date_deregistered not found
+r(111);
+
+end of do-file
+
+r(111);
+
+. browse
+
