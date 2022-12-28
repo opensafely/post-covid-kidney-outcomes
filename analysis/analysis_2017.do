@@ -741,20 +741,20 @@ recode follow_up_cat	min/-29=1 	///
 						-28/-1=2 	///
 						0/365=3 	///
 						366/730=4 	///
-						731/973=5	///					
-						974/max=6
+						731/1040=5	///					
+						1041/max=6
 label define follow_up_cat 	1 "<-29 days" 		///
 							2 "-28 to -1 days" 	///
 							3 "0 to 365 days" 	///
 							4 "366 to 730 days" ///
-							5 "731 to 973 days"	///
-							6 ">973 days"
+							5 "731 to 1040 days"	///
+							6 ">1040 days"
 label values follow_up_cat follow_up_cat
 label var follow_up_cat "Follow_up time"
 tab case follow_up_cat
 tab covid_krt follow_up_cat
 drop if follow_up_time<0
-drop if follow_up_time>972
+drop if follow_up_time>1040
 tab case follow_up_cat
 tab covid_krt follow_up_cat
 

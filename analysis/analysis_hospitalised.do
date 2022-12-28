@@ -239,6 +239,7 @@ label define case_critical_care	0 "Ward-based pneumonia (pre-pandemic)" 	///
 								2 "Ward-based COVID-19" 					///
 								3 "Critical care COVID-19"
 label values case_critical_care case_critical_care
+safetab case_critical_care, m
 
 * Acute kidney injury during index admission
 label define acute_kidney_injury	0 "No AKI"	///
@@ -254,6 +255,7 @@ label define case_acute_kidney_injury	0 "No AKI pneumonia (pre-pandemic)"	///
 										2 "No AKI COVID-19" 				///
 										3 "AKI COVID-19"
 label values case_acute_kidney_injury case_acute_kidney_injury
+safetab case_acute_kidney_injury, m
 
 * Kidney replacement therapy during index admission
 gen krt = acute_kidney_injury
@@ -278,6 +280,7 @@ label define case_krt	0 "No AKI pneumonia (pre-pandemic)" 			///
 						4 "AKI without KRT COVID-19"					///
 						5 "AKI requiring KRT COVID-19"
 label values case_krt case_krt
+safetab case_krt, m
 
 * COVID-19 vaccination status
 gen covidvax1date = date(covid_vax_1_date, "YMD")
@@ -359,6 +362,20 @@ replace month = 10 if month_string=="oct"
 replace month = 11 if month_string=="nov"
 replace month = 12 if month_string=="dec"
 drop month_string
+label define month	1 "January"		///
+					2 "February"	///
+					3 "March"		///
+					4 "April"		///
+					5 "May"			///
+					6 "June"		///
+					7 "July"		///
+					8 "August"		///
+					9 "September"	///
+					10 "October"	///
+					11 "November"	///
+					12 "December"
+label values month month
+safetab month case, m
 
 ** Covariates
 * Age
@@ -680,19 +697,19 @@ recode follow_up_cat	min/-29=1 	///
 						-28/-1=2 	///
 						0/365=3 	///
 						366/730=4 	///
-						731/973=5	///					
-						974/max=6
+						731/1040=5	///					
+						1041/max=6
 label define follow_up_cat 	1 "<-29 days" 		///
 							2 "-28 to -1 days" 	///
 							3 "0 to 365 days" 	///
 							4 "366 to 730 days" ///
-							5 "731 to 973 days"	///
-							6 ">973 days"
+							5 "731 to 1040 days"	///
+							6 ">1040 days"
 label values follow_up_cat follow_up_cat
 label var follow_up_cat "Follow_up time"
 tab case follow_up_cat
 drop if follow_up_time<0
-drop if follow_up_time>972
+drop if follow_up_time>1040
 tab case follow_up_cat
 
 * 50% eGFR reduction (earliest month) (or ESRD)

@@ -9,22 +9,22 @@ use ./output/analysis_hospitalised.dta
 stset exit_date, fail(esrd_date) origin(index_date) id(patient_id) scale(365.25)
 foreach interaction of varlist	critical_care	///
 								acute_kidney_injury {
-	stcox i.case##i.`interaction' i.sex age1 age2 age3, vce(cluster practice_id)
-	quietly stcox i.case##i.`interaction' i.sex age1 age2 age3
+	stcox i.case##i.`interaction' i.sex age1 age2 age3 i.month, vce(cluster practice_id)
+	quietly stcox i.case##i.`interaction' i.sex age1 age2 age3 i.month
 	est store A
-	quietly stcox i.sex age1 age2 age3
+	quietly stcox i.sex age1 age2 age3 i.month
 	est store B
 	lrtest B A
-	stcox i.case##i.`interaction' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3, vce(cluster practice_id)
-	quietly stcox i.case##i.`interaction' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3
+	stcox i.case##i.`interaction' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3 i.month, vce(cluster practice_id)
+	quietly stcox i.case##i.`interaction' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3 i.month
 	est store A
-	quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3
+	quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3 i.month
 	est store B
 	lrtest B A
-	stcox i.case##i.`interaction' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id)
-	quietly stcox i.case##i.`interaction' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3
+	stcox i.case##i.`interaction' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 i.month, vce(cluster practice_id)
+	quietly stcox i.case##i.`interaction' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 i.month
 	est store A
-	quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3
+	quietly stcox i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 i.month
 	est store B
 	lrtest B A
 	}

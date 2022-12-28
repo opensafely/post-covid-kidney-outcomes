@@ -25,6 +25,7 @@ foreach exposure of varlist	case						///
 							covid_vax					///
 							wave {
 	total follow_up_time, over(`exposure')
+	tab month `exposure', m col chi	
 	tab agegroup `exposure', m col chi
 	tab sex `exposure', m col chi
 	tab ethnicity1 `exposure', m col chi
