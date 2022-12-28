@@ -9,8 +9,7 @@ use ./output/analysis_hospitalised.dta
 stset exit_date, fail(death_date) origin(index_date) id(patient_id) scale(365.25)
 foreach interaction of varlist	critical_care		///
 								acute_kidney_injury ///
-								krt
-								{
+								krt {
 	stcox i.case##i.`interaction' i.sex age1 age2 age3, vce(cluster practice_id)
 	quietly stcox i.case##i.`interaction' i.sex age1 age2 age3
 	est store A
