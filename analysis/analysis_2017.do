@@ -297,8 +297,8 @@ keep if valid_set==1
 drop valid_set set_case_mean
 
 ** Exposure
-label define case 0 "Comparator (historical)" ///
-				  1 "COVID-19"
+label define case 0 "Historical comparator" ///
+				  1 "SARS-CoV-2"
 label values case case
 safetab case 
 
@@ -307,11 +307,11 @@ gen covid_severity = case
 replace covid_severity = 2 if covid_hospitalised==1
 replace covid_severity = 3 if covid_critical_care==1
 replace covid_severity = 3 if covid_critical_days==1
-label define covid_severity_label	0 "Historical comparator"		///
-									1 "Non-hospitalised SARS-CoV-2" ///
-									2 "Hospitalised COVID-19"		///
-									3 "Critical care COVID-19"
-label values covid_severity covid_severity_label
+label define covid_severity	0 "Historical comparator"		///
+							1 "Non-hospitalised COVID" ///
+							2 "Hospitalised COVID"		///
+							3 "Critical care COVID"
+label values covid_severity covid_severity
 label var covid_severity "SARS-CoV-2 severity"
 drop covid_critical_care
 drop covid_critical_days
@@ -322,9 +322,9 @@ gen covid_aki = case
 replace covid_aki = 2 if covid_hospitalised==1
 replace covid_aki = 3 if covid_acute_kidney_injury==1
 label define covid_aki	0 "Historical comparator" 			///
-						1 "Non-hospitalised SARS-CoV-2"		///
-						2 "No AKI hospitalised COVID-19"	///
-						3 "AKI hospitalised COVID-19"
+						1 "Non-hospitalised COVID"		///
+						2 "Hospitalised COVID"	///
+						3 "Hospitalised COVID-AKI"
 label values covid_aki covid_aki
 label var covid_aki "COVID-19 acute kidney injury"
 drop covid_acute_kidney_injury
@@ -374,52 +374,42 @@ label values covid_vax covid_vax
 label var covid_vax "Vaccination status"
 safetab covid_vax, m
 
-* Calendar period
-gen calendar_period = 1 if covid_month=="feb2020"
-replace calendar_period = 1 if covid_month=="mar2020"
-replace calendar_period = 1 if covid_month=="apr2020"
-replace calendar_period = 1 if covid_month=="may2020"
-replace calendar_period = 1 if covid_month=="jun2020"
-replace calendar_period = 2 if covid_month=="jul2020"
-replace calendar_period = 2 if covid_month=="aug2020"
-replace calendar_period = 3 if covid_month=="sep2020"
-replace calendar_period = 3 if covid_month=="oct2020"
-replace calendar_period = 3 if covid_month=="nov2020"
-replace calendar_period = 4 if covid_month=="dec2020"
-replace calendar_period = 4 if covid_month=="jan2021"
-replace calendar_period = 4 if covid_month=="feb2021"
-replace calendar_period = 5 if covid_month=="mar2021"
-replace calendar_period = 5 if covid_month=="apr2021"
-replace calendar_period = 5 if covid_month=="may2021"
-replace calendar_period = 5 if covid_month=="jun2021"
-replace calendar_period = 5 if covid_month=="jul2021"
-replace calendar_period = 5 if covid_month=="aug2021"
-replace calendar_period = 5 if covid_month=="sep2021"
-replace calendar_period = 5 if covid_month=="oct2021"
-replace calendar_period = 5 if covid_month=="nov2021"
-replace calendar_period = 6 if covid_month=="dec2021"
-replace calendar_period = 6 if covid_month=="jan2022"
-replace calendar_period = 6 if covid_month=="feb2022"
-replace calendar_period = 7 if covid_month=="mar2022"
-replace calendar_period = 7 if covid_month=="apr2022"
-replace calendar_period = 7 if covid_month=="may2022"
-replace calendar_period = 7 if covid_month=="jun2022"
-replace calendar_period = 7 if covid_month=="jul2022"
-replace calendar_period = 7 if covid_month=="aug2022"
-replace calendar_period = 7 if covid_month=="sep2022"
-replace calendar_period = 7 if covid_month=="oct2022"
-replace calendar_period = 0 if case==0
-label define calendar_period	0 "Historical comparator"	///
-								1 "Feb20-Jun20 SARS-CoV-2"	///
-								2 "Jul20-Aug20 SARS-CoV-2"	///
-								3 "Sep20-Nov20 SARS-CoV-2"	///
-								4 "Dec20-Feb21 SARS-CoV-2"	///
-								5 "Mar21-Nov21 SARS-CoV-2"	///
-								6 "Dec21-Feb22 SARS-CoV-2"	///
-								7 "Mar22-Oct22 SARS-CoV-2"
-label values calendar_period calendar_period
-label var calendar_period "Calendar period"
-safetab calendar_period, m
+* COVID-19 wave
+gen wave = case
+replace wave = 2 if index_month=="sep2020"
+replace wave = 2 if index_month=="oct2020"
+replace wave = 2 if index_month=="nov2020"
+replace wave = 2 if index_month=="dec2020"
+replace wave = 2 if index_month=="jan2021"
+replace wave = 2 if index_month=="feb2021"
+replace wave = 2 if index_month=="mar2021"
+replace wave = 2 if index_month=="apr2021"
+replace wave = 2 if index_month=="may2021"
+replace wave = 2 if index_month=="jun2021"
+replace wave = 3 if index_month=="jul2021"
+replace wave = 3 if index_month=="aug2021"
+replace wave = 3 if index_month=="sep2021"
+replace wave = 3 if index_month=="oct2021"
+replace wave = 3 if index_month=="nov2021"
+replace wave = 4 if index_month=="dec2021"
+replace wave = 4 if index_month=="jan2022"
+replace wave = 4 if index_month=="feb2022"
+replace wave = 4 if index_month=="mar2022"
+replace wave = 4 if index_month=="apr2022"
+replace wave = 4 if index_month=="may2022"
+replace wave = 4 if index_month=="jun2022"
+replace wave = 4 if index_month=="jul2022"
+replace wave = 4 if index_month=="aug2022"
+replace wave = 4 if index_month=="sep2022"
+replace wave = 4 if index_month=="oct2022"
+label define wave	0 "Historical comparator"	///
+					1 "Febuary20-August20"	///
+					2 "September20-June21"	///
+					3 "July21-November21"	///
+					4 "December21-October22"	
+label values wave wave
+label var wave "COVID-19 wave"
+safetab wave, m
 
 ** Covariates
 * Age
@@ -433,14 +423,17 @@ recode 	age 			min/39.9999=1 	///
 						80/max=6, 		///
 						gen(agegroup) 
 
+label var age "Age"
+label values age age
 label define agegroup 	1 "18-39" 		///
 						2 "40-49" 		///
 						3 "50-59" 		///
 						4 "60-69" 		///
 						5 "70-79"		///
 						6 "80+"
-label values agegroup agegroup
 label var agegroup "Age group"
+label values agegroup agegroup
+
 * Check there are no missing ages
 assert age<.
 assert agegroup<.
@@ -698,6 +691,9 @@ format egfr15_date %td
 gen esrd_date = egfr15_date
 format esrd_date %td
 replace esrd_date = krt_date if esrd_date==.
+gen esrd = 0
+replace esrd = 1 if esrd_date!=.
+label var esrd "Kidney failure"
 gen esrd_time = (esrd_date - index_date)
 label var esrd_time "Time to ESRD (Days)"
 gen esrd_time_cat = esrd_time
@@ -766,6 +762,9 @@ foreach x of local month_year {
   format egfr_half_date %td
 }
 replace egfr_half_date=esrd_date if egfr_half_date==.
+gen egfr_half = 0
+replace egfr_half = 1 if egfr_half_date!=.
+label var egfr_half "50% reduction in eGFR"
 * Index date (50% eGFR reduction)
 gen index_date_egfr_half = index_date
 replace index_date_egfr_half =. if baseline_egfr==.
@@ -781,6 +780,9 @@ gen aki_date = date(acute_kidney_injury_outcome, "YMD")
 format aki_date %td
 drop acute_kidney_injury_outcome
 replace aki_date = esrd_date if aki_date==.
+gen aki = 0
+replace aki = 1 if aki_date!=.
+label var aki "Acute kidney injury"
 * Exit date (AKI)
 gen exit_date_aki = aki_date
 format exit_date_aki %td
@@ -790,6 +792,9 @@ label var follow_up_time_aki "Follow-up time (AKI) (Days)"
 
 * Exit date (death)
 gen exit_date_death = death_date
+gen death = 0
+replace death = 1 if death_date!=.
+label var death "Death"
 format exit_date_death %td
 replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
 gen follow_up_time_death = (exit_date_death - index_date)

@@ -27,6 +27,7 @@ foreach exposure of varlist	case			///
 	total follow_up_time, over(`exposure')
 	tab agegroup `exposure', m col chi
 	tab sex `exposure', m col chi
+	tab imd `exposure', m col chi	
 	tab ethnicity1 `exposure', m col chi
 	tab region `exposure', m col chi
 	tab stp `exposure', m col chi

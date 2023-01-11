@@ -1,0 +1,335 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/descriptive_2017_table.log
+  log type:  text
+ opened on:  10 Jan 2023, 17:14:24
+
+. 
+. global covariates follow_up_time age agegroup sex imd ethnicity1 region stp urban bmi smoking baseline_egfr egfr_group ckd_stage cardiovascular diabetes hypertension immunosuppressed non_haem_cancer
+
+. 
+. use ./output/analysis_2017.dta, clear
+
+. 
+. cap prog drop generaterow
+
+. program define generaterow
+  1. syntax, variable(varname) condition(string) 
+  2.         
+.         cou
+  3.         local overalldenom=r(N)
+  4.         
+.         sum `variable' if `variable' `condition'
+  5.         **K Wing additional code to output variable category labels**
+.         local level=substr("`condition'",3,.)
+  6.         local lab: label `variable' `level'
+  7.         file write tablecontent (" `lab'") _tab
+  8.         
+.         *local lab: label hhRiskCatExp_5catsLabel 4
+. 
+.         
+.         /*this is the overall column - had to edit this so that the row totals are the SUM OF THE ROUNDED COUNTS FOR EXPOSED AND UNEXPOSED, not the rounded total (as these may not match)*/
+.         /*old code
+>         cou if `variable' `condition'
+>         local rowdenom = round(r(N),5)
+>         local colpct = 100*(r(N)/`overalldenom')
+>         */
+.         *updated code where the row totals (i.e. the "Total" column) is the sum of the two rounded values for the exposed (COVID case) and unexposed (comparator) columns
+.         /*this is the overall column - had to edit this so that the row totals are the SUM OF THE ROUNDED COUNTS FOR EXPOSED AND UNEXPOSED, not the rounded total (as these may not match)*/
+.         forvalues i=0/1{
+  9.                 cou if case == `i' & `variable' `condition'
+ 10.                 local subtotal_`i'=round(r(N),5)
+ 11.         }
+ 12.         local rowdenom = `subTotal_0' + `subTotal_1'
+ 13.         local colpct = 100*(`rowdenom'/`overalldenom')
+ 14.         file write tablecontent %9.0f (`rowdenom')  (" (") %3.1f (`colpct') (")") _tab
+ 15. 
+.         /*this loops through groups*/
+.         forvalues i=0/1{
+ 16.                 safecount if case==`i'
+ 17.                 local coldenom=r(N)
+ 18.                 cou if case == `i' & `variable' `condition'
+ 19.                 local pct = 100*(r(N)/`coldenom')
+ 20.                 *file write tablecontent %9.0gc (r(N)) (" (") %3.1f (`pct') (")") _tab
+.                 file write tablecontent %9.0f (round(r(N),5)) (" (") %3.1f (`pct') (")") _tab
+ 21.         }
+ 22.         
+.         file write tablecontent _n
+ 23. end
+
+. 
+. 
+. 
+. /* Explanatory Notes 
+> defines a program (SAS macro/R function equivalent), generate row
+> the syntax row specifies two inputs for the program: 
+>         a VARNAME which is your variable 
+>         a CONDITION which is a string of some condition you impose 
+>         
+> the program counts if variable and condition and returns the counts
+> column percentages are then automatically generated
+> this is then written to the text file 'tablecontent' 
+> the number followed by space, brackets, formatted pct, end bracket and then tab
+> the format %3.1f specifies length of 3, followed by 1 dp. 
+> */ 
+. 
+. ********************************************************************************
+. * Generic code to output one section (varible) within table (calls above)
+. 
+. cap prog drop tabulatevariable
+
+. prog define tabulatevariable
+  1. syntax, variable(varname) min(real) max(real) [missing]
+  2. 
+.         local lab: variable label `variable'
+  3.         file write tablecontent ("`lab'") _n 
+  4. 
+.         forvalues varlevel = `min'/`max'{ 
+  5.                 generaterow, variable(`variable') condition("==`varlevel'")
+  6.         }
+  7.         
+.         if "`missing'"!="" generaterow, variable(`variable') condition("== 12")
+  8.         
+. 
+. 
+. end
+
+. 
+. ********************************************************************************
+. 
+. /* Explanatory Notes 
+> defines program tabulate variable 
+> syntax is : 
+>         - a VARNAME which you stick in variable 
+>         - a numeric minimum 
+>         - a numeric maximum 
+>         - optional missing option, default value is . 
+> forvalues lowest to highest of the variable, manually set for each var
+> run the generate row program for the level of the variable 
+> if there is a missing specified, then run the generate row for missing vals
+> */ 
+. 
+. ********************************************************************************
+. * Generic code to qui summarize a continous variable 
+. 
+. cap prog drop summarizevariable 
+
+. prog define summarizevariable
+  1. syntax, variable(varname) 
+  2. 
+.         local lab: variable label `variable'
+  3.         file write tablecontent ("`lab'") _n 
+  4. 
+. 
+.         qui summarize `variable', d
+  5.         file write tablecontent ("Mean (SD)") _tab 
+  6.         file write tablecontent  %3.1f (r(mean)) (" (") %3.1f (r(sd)) (")") _tab
+  7.         
+.         forvalues i=0/1{                                                        
+  8.                 qui summarize `variable' if case == `i', d
+  9.                 file write tablecontent  %3.1f (r(mean)) (" (") %3.1f (r(sd)) (")") _tab
+ 10.         }
+ 11. 
+. file write tablecontent _n
+ 12. 
+.         
+.         qui summarize `variable', d
+ 13.         file write tablecontent ("Median (IQR)") _tab 
+ 14.         file write tablecontent %3.1f (r(p50)) (" (") %3.1f (r(p25)) ("-") %3.1f (r(p75)) (")") _tab
+ 15.         
+.         forvalues i=0/1{
+ 16.                 qui summarize `variable' if case == `i', d
+ 17.                 file write tablecontent %3.1f (r(p50)) (" (") %3.1f (r(p25)) ("-") %3.1f (r(p75)) (")") _tab
+ 18.         }
+ 19.         
+. file write tablecontent _n
+ 20.         
+. end
+
+. 
+. /* INVOKE PROGRAMS FOR TABLE 1================================================*/ 
+. 
+. *Set up output file
+. cap file close tablecontent
+
+. file open tablecontent using ./output/descriptive_2017_table.txt, write text replace
+
+. 
+. file write tablecontent ("Table 1: Demographic and clinical characteristics for SARS-CoV-2 infection and matched historical comparators") _n
+
+. 
+. 
+. 
+. 
+. * eth5 labelled columns *THESE WOULD BE HOUSEHOLD LABELS, eth5 is the equivalent of the hh size variable
+. *these are NOT ROUNDED - will do this manually in excel, am keeping them unrounded as a sanity check
+. 
+. local lab0: label case 0
+
+. local lab1: label case 1   
+
+. *for display n values
+. safecount if case==0
+  19,825
+
+. local comparator=r(N)
+
+. safecount if case==1
+  7,961
+
+. local case=r(N)
+
+. safecount
+  27,786
+
+. local total=r(N)
+
+. 
+. file write tablecontent _tab ("Total")  _tab ///                         
+>                                                          ("Matched historical comparator")      _tab ///
+>                                                          ("SARS-CoV-2 infection")                       _n      
+
+. 
+.                                                          
+. file write tablecontent _tab ("n=`total'")                                                _tab ///
+>                                                          ("n=`comparator'")                                     _tab ///
+>                                                          ("n=`case'")                             _n
+
+.                                                          
+. **DEMOGRAPHICS AND PREVIOUS COMRBIDITIES (more than one level, potentially missing)**
+. *Follow-up time
+. sum follow_up_time, detail
+
+                    Follow-up time (Days)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%           11              0
+ 5%           93              0
+10%          180              0       Obs              27,786
+25%          407              0       Sum of wgt.      27,786
+
+50%          673                      Mean           616.2238
+                        Largest       Std. dev.      279.6627
+75%          858           1004
+90%          948           1004       Variance       78211.23
+95%          975           1004       Skewness      -.5106984
+99%          998           1004       Kurtosis       2.136767
+
+. qui summarizevariable, variable(follow_up_time)
+
+. file write tablecontent _n
+
+. 
+. *continous
+. sum age, detail
+
+                             Age
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%           19             18
+ 5%           21             18
+10%           24             18       Obs              27,786
+25%           31             18       Sum of wgt.      27,786
+
+50%           44                      Mean            43.7995
+                        Largest       Std. dev.      14.52293
+75%           56             72
+90%           64             72       Variance       210.9155
+95%           66             72       Skewness       .0043386
+99%           69             72       Kurtosis       1.825855
+
+. qui summarizevariable, variable(age) 
+
+. file write tablecontent _n
+
+. 
+end of do-file
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD1a44_000000.tmp"
+
+. *Sex
+. tab sex case, col
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |         case
+       sex | Comparato   COVID-19 |     Total
+-----------+----------------------+----------
+    Female |    10,230      4,083 |    14,313 
+           |     51.60      51.29 |     51.51 
+-----------+----------------------+----------
+      Male |     9,595      3,878 |    13,473 
+           |     48.40      48.71 |     48.49 
+-----------+----------------------+----------
+     Total |    19,825      7,961 |    27,786 
+           |    100.00     100.00 |    100.00 
+
+. tabulatevariable, variable(sex) min(0) max(1) 
+  27,786
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+         sex |     14,313           0           0          0          0
+  10,230
+  4,083
+invalid syntax
+r(198);
+
+end of do-file
+
+r(198);
+
+. clear
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD1a44_000000.tmp"
+
+. 
+. *set filepaths
+.     global projectdir `c(pwd)'
+
+.     dis "$projectdir"
+C:\Users\lsh1703468\Documents\repos
+
+.     global outdir $projectdir/output
+
+.     dis "$outdir"
+C:\Users\lsh1703468\Documents\repos/output
+
+.     cap mkdir $projectdir/output/tables
+
+.     global tables $projectdir/output/tables
+
+.     dis "$tables"
+C:\Users\lsh1703468\Documents\repos/output/tables
+
+.     global logs $projectdir/logs
+
+.     dis "$logs"
+C:\Users\lsh1703468\Documents\repos/logs
+
+. 
+end of do-file
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD1a44_000000.tmp"
+
+. use ./output/analysis_2017.dta, clear
+
+. 
+end of do-file
+
+. do "C:\Users\lsh1703468\Documents\Repos\analysis\analysis_2017.do"
+
+. sysdir set PLUS ./analysis/adofiles
+
+. sysdir set PERSONAL ./analysis/adofiles
+
+. pwd
+C:\Users\lsh1703468\Documents\repos
+
+. 
+. cap log close

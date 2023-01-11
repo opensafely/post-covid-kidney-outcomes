@@ -1,0 +1,619 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/cox_esrd_2017_table.log
+  log type:  text
+ opened on:  11 Jan 2023, 10:56:37
+
+. 
+.         
+. prog drop _all
+
+. 
+. 
+. prog define hr
+  1.         syntax, outcome(string)
+  2.         *above will need edited when also have the historical population to compare to
+. 
+.         *get denominator                        
+.         count
+  3.         local denom=r(N)
+  4.         *get number of people with specific outcome (events column)
+.         cou if esrd== 1
+  5.         local events=round(r(N),5)
+  6.         *calculate proportion of people with events
+.         local percWEvent=100*(`events'/`denom')
+  7.         *get ORs for each regression analysis
+.         *crude 
+.         display "`outcome' adjusted only for age, sex and STP"
+  8.         *tabulate values for checking output table against log files
+.         safetab `exposure' esrd
+  9.         *Cox regression
+.         stset exit_date, fail(esrd_date) origin(index_date) id(patient_id) scale(365.25)
+ 10.         capture noisily stcox i.`exposure' age1 age2 age3, vce(cluster practice_id) strata(set_id)
+ 11.         *this lincom ensures HR and CI can be stored in the r values
+.         capture noisily lincom 1.`exposure'
+ 12.         local hr_minimally_adjusted = r(estimate)
+ 13.         local lb_minimally_adjusted = r(lb)
+ 14.         local ub_minimally_adjusted = r(ub)
+ 15.         *additionally adjusted
+.         display "`outcome' additionally adjusted for ethnicity, socioeconomic deprivation, region, rural/urban, BMI & smoking"
+ 16.         capture noisily stcox i.`exposure' i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
+ 17.         capture noisily lincom 1.`exposure'
+ 18.         local hr_additionally_adjusted = r(estimate)
+ 19.         local lb_additionally_adjusted = r(lb)
+ 20.         local ub_additionally_adjusted = r(ub)
+ 21.         *Fully adjusted
+.         display "`outcome' fully adjusted"
+ 22.         capture noisily stcox i.`exposure' i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
+ 23.         capture noisily lincom 1.`exposure'
+ 24.         local hr_fully_adjusted = r(estimate)
+ 25.         local lb_fully_adjusted = r(lb)
+ 26.         local ub_fully_adjusted = r(ub)
+ 27.                                         
+.         *get variable name
+.         local varlab: variable label `exposure'
+ 28.         display "`varlab'"
+ 29.         *get category name
+.         *local category: label `catLabel' `i'
+.         *display "Category label: `category'"
+.         
+.         *write each row
+.         *crude 
+.         file write tablecontents  ("`varLab'") _tab ("Adjusted for age, sex and STP") _tab %4.2f (`hr_crude')  " (" %4.2f (`lb_crude') "-" %4.2f (`ub_crude') ")" _tab (`events') _tab %3.1f (`percWEvent') ("%")  _n
+ 30.         *depr and ethnicity adjusted
+.         file write tablecontents  _tab _tab ("Additionally adjusted for ethnicity, IMD, region, rural/urban, BMI and smoking") _tab %4.2f (`hr_deprEth_adj')  " (" %4.2f (`lb_deprEth_adj') "-" %4.2f (`ub_deprEth_adj') ")"  _n
+ 31.         *fully adjusted
+.         file write tablecontents  _tab _tab ("Additionally adjusted for comorbidities") _tab %4.2f (`hr_full_adj')  " (" %4.2f (`lb_full_adj') "-" %4.2f (`ub_full_adj') ")"  _n
+ 32. 
+. end
+
+. 
+. *call program and output tables
+. 
+. use ./output/analysis_2017.dta, clear
+
+. file open tablecontents using ./output/cox_esrd_2017_table.txt, t w replace
+
+. file write tablecontents "Hazard ratios for end-stage renal disease after SARS-CoV-2 infection compared to matched historical comparator population" _n _n
+
+. file write tablecontents ("Outcome") _tab _tab ("HR (95% CI)") _tab ("Number of events") _tab ("Proportion of population with events") _n
+
+. 
+. *loop through each exposure
+. foreach exposure in $exposure {
+  2.         cap noisily hr, outcome(`exposure')
+  3.         file write tablecontents _n
+  4. }
+  27,786
+  2,777
+case adjusted only for age, sex and STP
+
+       esrd |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |     25,009       90.01       90.01
+          1 |      2,777        9.99      100.00
+------------+-----------------------------------
+      Total |     27,786      100.00
+
+Survival-time data settings
+
+           ID variable: patient_id
+         Failure event: esrd_date!=0 & esrd_date<.
+Observed time interval: (exit_date[_n-1], exit_date]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date
+
+--------------------------------------------------------------------------
+     27,786  total observations
+        126  observations end on or before enter()
+         36  observations begin on or after (first) failure
+--------------------------------------------------------------------------
+     27,624  observations remaining, representing
+     27,350  subjects
+      2,648  failures in single-failure-per-subject data
+ 47,153.317  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  5.744011
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+note: age2 omitted because of collinearity.
+note: age3 omitted because of collinearity.
+Iteration 0:   log pseudolikelihood = -3128.9655
+Iteration 1:   log pseudolikelihood = -3105.7065
+Iteration 2:   log pseudolikelihood = -3105.5112
+Iteration 3:   log pseudolikelihood = -3105.4739
+Iteration 4:   log pseudolikelihood = -3105.4606
+Iteration 5:   log pseudolikelihood = -3105.4557
+Iteration 6:   log pseudolikelihood = -3105.4539
+Iteration 7:   log pseudolikelihood = -3105.4533
+Iteration 8:   log pseudolikelihood =  -3105.453
+Iteration 9:   log pseudolikelihood = -3105.4529
+Iteration 10:  log pseudolikelihood = -3105.4529
+Iteration 11:  log pseudolikelihood = -3105.4529
+Iteration 12:  log pseudolikelihood = -3105.4529
+Iteration 13:  log pseudolikelihood = -3105.4529
+Iteration 14:  log pseudolikelihood = -3105.4529
+Iteration 15:  log pseudolikelihood = -3105.4529
+Iteration 16:  log pseudolikelihood = -3105.4529
+Iteration 17:  log pseudolikelihood = -3105.4529
+Iteration 18:  log pseudolikelihood = -3105.4529
+Iteration 19:  log pseudolikelihood = -3105.4529
+Iteration 20:  log pseudolikelihood = -3105.4529
+Iteration 21:  log pseudolikelihood = -3105.4529
+Iteration 22:  log pseudolikelihood = -3105.4529
+Iteration 23:  log pseudolikelihood = -3105.4529
+Iteration 24:  log pseudolikelihood = -3105.4529
+Iteration 25:  log pseudolikelihood = -3105.4529
+Iteration 26:  log pseudolikelihood = -3105.4529
+Iteration 27:  log pseudolikelihood = -3105.4529
+Iteration 28:  log pseudolikelihood = -3105.4529
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -3105.4529
+Iteration 1:   log pseudolikelihood = -3105.4529
+Iteration 2:   log pseudolikelihood = -3105.4529
+
+Stratified Cox regression with Breslow method for ties
+Strata variable: set_id
+
+No. of subjects =      27,350                         Number of obs =   27,624
+No. of failures =       2,648
+Time at risk    = 47,153.3169
+                                                      Wald chi2(37) = 29000.11
+Log pseudolikelihood = -3105.4529                     Prob > chi2   =   0.0000
+
+                           (Std. err. adjusted for 39 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        age1 |
+         19  |   1.676087   .3913302     2.21   0.027     1.060619    2.648706
+         20  |   1.636205   .2632882     3.06   0.002     1.193623    2.242889
+         21  |    1.65046   .3921026     2.11   0.035     1.036057    2.629217
+         22  |   1.237845   .2982744     0.89   0.376     .7718952    1.985061
+         23  |   1.281915   .3766854     0.85   0.398     .7206717    2.280244
+         24  |   1.545321   .3474523     1.94   0.053     .9945654    2.401066
+         25  |     1.9761   .4519891     2.98   0.003     1.262163    3.093872
+         26  |   1.934502   .4599149     2.78   0.006     1.213952    3.082738
+         27  |    1.74934   .3515274     2.78   0.005     1.179849    2.593713
+         28  |   1.738454   .5029112     1.91   0.056     .9861028    3.064815
+         29  |    1.66509   .3597263     2.36   0.018     1.090295    2.542912
+         30  |   2.259683   .4278315     4.31   0.000     1.559148    3.274973
+         31  |   1.728313   .4058455     2.33   0.020     1.090792    2.738439
+         32  |   1.576147   .4808468     1.49   0.136     .8667913    2.866019
+         33  |   1.326729   .2346467     1.60   0.110     .9380755    1.876405
+         34  |   1.698305   .2741047     3.28   0.001     1.237749     2.33023
+         35  |    2.39153   .4477461     4.66   0.000     1.656962    3.451749
+         36  |   1.901134    .379493     3.22   0.001     1.285585    2.811412
+         37  |   1.648524    .476803     1.73   0.084     .9351949    2.905952
+         38  |   1.876935   .4416817     2.68   0.007     1.183434    2.976834
+         39  |   2.004633    .394333     3.54   0.000     1.363309    2.947647
+         40  |   1.723703   .5723189     1.64   0.101     .8991641    3.304348
+         41  |    2.00938   .3764149     3.73   0.000     1.391898    2.900793
+         42  |   1.758238   .4064548     2.44   0.015     1.117645    2.765995
+         43  |   1.797178   .3642486     2.89   0.004     1.208012    2.673689
+         44  |   1.745016   .3144385     3.09   0.002       1.2258    2.484159
+         45  |   1.739112   .3405934     2.83   0.005     1.184747    2.552876
+         46  |   1.532424   .2666517     2.45   0.014     1.089593    2.155229
+         47  |   1.794222     .36466     2.88   0.004     1.204694     2.67224
+         48  |   2.167459   .4836876     3.47   0.001      1.39958    3.356634
+         49  |   1.662191   .3776043     2.24   0.025     1.064906    2.594482
+         50  |   1.433157   .3210899     1.61   0.108     .9238201    2.223311
+         51  |   2.035325   .4620289     3.13   0.002     1.304388    3.175856
+         52  |    1.94137   .4566222     2.82   0.005     1.224335    3.078337
+         53  |   1.712589   .3568314     2.58   0.010      1.13841    2.576367
+         54  |   1.986989   .3372007     4.05   0.000     1.424764    2.771074
+         55  |   1.714007   .3614939     2.55   0.011     1.133677    2.591408
+         56  |   1.610029    .291458     2.63   0.009     1.129129    2.295746
+         57  |   1.712748   .3774812     2.44   0.015     1.111969    2.638117
+         58  |   2.069005   .3166009     4.75   0.000     1.532886    2.792628
+         59  |   1.286802   .3188366     1.02   0.309     .7917825    2.091307
+         60  |   1.579657   .2949408     2.45   0.014     1.095553    2.277678
+         61  |   1.846357   .3483609     3.25   0.001     1.275603    2.672489
+         62  |   1.588632   .2933905     2.51   0.012     1.106171     2.28152
+         63  |   2.007513   .3452195     4.05   0.000      1.43312    2.812122
+         64  |   1.829188   .4197655     2.63   0.009     1.166603    2.868096
+         65  |   1.623564   .3568537     2.20   0.027     1.055306    2.497817
+         66  |   1.642065   .3283738     2.48   0.013      1.10961    2.430022
+         67  |   1.146703   .2041709     0.77   0.442     .8088985    1.625577
+         68  |   1.877706   .3104293     3.81   0.000     1.358012    2.596279
+         69  |   1.832323   .5509269     2.01   0.044     1.016413    3.303192
+         70  |   1.041087   .3066659     0.14   0.891     .5844597     1.85447
+         71  |   .8640175   .6400599    -0.20   0.844     .2022817    3.690527
+         72  |   1.20e-13   8.76e-14   -40.89   0.000     2.89e-14    5.01e-13
+             |
+        age2 |          1  (omitted)
+        age3 |          1  (omitted)
+------------------------------------------------------------------------------
+
+ ( 1) = -1
+
+------------------------------------------------------------------------------
+          _t | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |          1          .        .       .            .           .
+------------------------------------------------------------------------------
+case additionally adjusted for ethnicity, socioeconomic deprivation, region, rural/urban, BMI & smoking
+i.ethnicity invalid name
+
+ ( 1) = -1
+
+------------------------------------------------------------------------------
+          _t | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |          1          .        .       .            .           .
+------------------------------------------------------------------------------
+case fully adjusted
+i.ethnicity invalid name
+
+ ( 1) = -1
+
+------------------------------------------------------------------------------
+          _t | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |          1          .        .       .            .           .
+------------------------------------------------------------------------------
+nothing found where name expected
+  27,786
+  2,777
+covid_severity adjusted only for age, sex and STP
+
+       esrd |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |     25,009       90.01       90.01
+          1 |      2,777        9.99      100.00
+------------+-----------------------------------
+      Total |     27,786      100.00
+
+Survival-time data settings
+
+           ID variable: patient_id
+         Failure event: esrd_date!=0 & esrd_date<.
+Observed time interval: (exit_date[_n-1], exit_date]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date
+
+--------------------------------------------------------------------------
+     27,786  total observations
+        126  observations end on or before enter()
+         36  observations begin on or after (first) failure
+--------------------------------------------------------------------------
+     27,624  observations remaining, representing
+     27,350  subjects
+      2,648  failures in single-failure-per-subject data
+ 47,153.317  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  5.744011
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+note: age2 omitted because of collinearity.
+note: age3 omitted because of collinearity.
+Iteration 0:   log pseudolikelihood = -3128.9655
+Iteration 1:   log pseudolikelihood = -3105.7065
+Iteration 2:   log pseudolikelihood = -3105.5112
+Iteration 3:   log pseudolikelihood = -3105.4739
+Iteration 4:   log pseudolikelihood = -3105.4606
+Iteration 5:   log pseudolikelihood = -3105.4557
+Iteration 6:   log pseudolikelihood = -3105.4539
+Iteration 7:   log pseudolikelihood = -3105.4533
+Iteration 8:   log pseudolikelihood =  -3105.453
+Iteration 9:   log pseudolikelihood = -3105.4529
+Iteration 10:  log pseudolikelihood = -3105.4529
+Iteration 11:  log pseudolikelihood = -3105.4529
+Iteration 12:  log pseudolikelihood = -3105.4529
+Iteration 13:  log pseudolikelihood = -3105.4529
+Iteration 14:  log pseudolikelihood = -3105.4529
+Iteration 15:  log pseudolikelihood = -3105.4529
+Iteration 16:  log pseudolikelihood = -3105.4529
+Iteration 17:  log pseudolikelihood = -3105.4529
+Iteration 18:  log pseudolikelihood = -3105.4529
+Iteration 19:  log pseudolikelihood = -3105.4529
+Iteration 20:  log pseudolikelihood = -3105.4529
+Iteration 21:  log pseudolikelihood = -3105.4529
+Iteration 22:  log pseudolikelihood = -3105.4529
+Iteration 23:  log pseudolikelihood = -3105.4529
+Iteration 24:  log pseudolikelihood = -3105.4529
+Iteration 25:  log pseudolikelihood = -3105.4529
+Iteration 26:  log pseudolikelihood = -3105.4529
+Iteration 27:  log pseudolikelihood = -3105.4529
+Iteration 28:  log pseudolikelihood = -3105.4529
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -3105.4529
+Iteration 1:   log pseudolikelihood = -3105.4529
+Iteration 2:   log pseudolikelihood = -3105.4529
+
+Stratified Cox regression with Breslow method for ties
+Strata variable: set_id
+
+No. of subjects =      27,350                         Number of obs =   27,624
+No. of failures =       2,648
+Time at risk    = 47,153.3169
+                                                      Wald chi2(37) = 29000.11
+Log pseudolikelihood = -3105.4529                     Prob > chi2   =   0.0000
+
+                           (Std. err. adjusted for 39 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        age1 |
+         19  |   1.676087   .3913302     2.21   0.027     1.060619    2.648706
+         20  |   1.636205   .2632882     3.06   0.002     1.193623    2.242889
+         21  |    1.65046   .3921026     2.11   0.035     1.036057    2.629217
+         22  |   1.237845   .2982744     0.89   0.376     .7718952    1.985061
+         23  |   1.281915   .3766854     0.85   0.398     .7206717    2.280244
+         24  |   1.545321   .3474523     1.94   0.053     .9945654    2.401066
+         25  |     1.9761   .4519891     2.98   0.003     1.262163    3.093872
+         26  |   1.934502   .4599149     2.78   0.006     1.213952    3.082738
+         27  |    1.74934   .3515274     2.78   0.005     1.179849    2.593713
+         28  |   1.738454   .5029112     1.91   0.056     .9861028    3.064815
+         29  |    1.66509   .3597263     2.36   0.018     1.090295    2.542912
+         30  |   2.259683   .4278315     4.31   0.000     1.559148    3.274973
+         31  |   1.728313   .4058455     2.33   0.020     1.090792    2.738439
+         32  |   1.576147   .4808468     1.49   0.136     .8667913    2.866019
+         33  |   1.326729   .2346467     1.60   0.110     .9380755    1.876405
+         34  |   1.698305   .2741047     3.28   0.001     1.237749     2.33023
+         35  |    2.39153   .4477461     4.66   0.000     1.656962    3.451749
+         36  |   1.901134    .379493     3.22   0.001     1.285585    2.811412
+         37  |   1.648524    .476803     1.73   0.084     .9351949    2.905952
+         38  |   1.876935   .4416817     2.68   0.007     1.183434    2.976834
+         39  |   2.004633    .394333     3.54   0.000     1.363309    2.947647
+         40  |   1.723703   .5723189     1.64   0.101     .8991641    3.304348
+         41  |    2.00938   .3764149     3.73   0.000     1.391898    2.900793
+         42  |   1.758238   .4064548     2.44   0.015     1.117645    2.765995
+         43  |   1.797178   .3642486     2.89   0.004     1.208012    2.673689
+         44  |   1.745016   .3144385     3.09   0.002       1.2258    2.484159
+         45  |   1.739112   .3405934     2.83   0.005     1.184747    2.552876
+         46  |   1.532424   .2666517     2.45   0.014     1.089593    2.155229
+         47  |   1.794222     .36466     2.88   0.004     1.204694     2.67224
+         48  |   2.167459   .4836876     3.47   0.001      1.39958    3.356634
+         49  |   1.662191   .3776043     2.24   0.025     1.064906    2.594482
+         50  |   1.433157   .3210899     1.61   0.108     .9238201    2.223311
+         51  |   2.035325   .4620289     3.13   0.002     1.304388    3.175856
+         52  |    1.94137   .4566222     2.82   0.005     1.224335    3.078337
+         53  |   1.712589   .3568314     2.58   0.010      1.13841    2.576367
+         54  |   1.986989   .3372007     4.05   0.000     1.424764    2.771074
+         55  |   1.714007   .3614939     2.55   0.011     1.133677    2.591408
+         56  |   1.610029    .291458     2.63   0.009     1.129129    2.295746
+         57  |   1.712748   .3774812     2.44   0.015     1.111969    2.638117
+         58  |   2.069005   .3166009     4.75   0.000     1.532886    2.792628
+         59  |   1.286802   .3188366     1.02   0.309     .7917825    2.091307
+         60  |   1.579657   .2949408     2.45   0.014     1.095553    2.277678
+         61  |   1.846357   .3483609     3.25   0.001     1.275603    2.672489
+         62  |   1.588632   .2933905     2.51   0.012     1.106171     2.28152
+         63  |   2.007513   .3452195     4.05   0.000      1.43312    2.812122
+         64  |   1.829188   .4197655     2.63   0.009     1.166603    2.868096
+         65  |   1.623564   .3568537     2.20   0.027     1.055306    2.497817
+         66  |   1.642065   .3283738     2.48   0.013      1.10961    2.430022
+         67  |   1.146703   .2041709     0.77   0.442     .8088985    1.625577
+         68  |   1.877706   .3104293     3.81   0.000     1.358012    2.596279
+         69  |   1.832323   .5509269     2.01   0.044     1.016413    3.303192
+         70  |   1.041087   .3066659     0.14   0.891     .5844597     1.85447
+         71  |   .8640175   .6400599    -0.20   0.844     .2022817    3.690527
+         72  |   1.20e-13   8.76e-14   -40.89   0.000     2.89e-14    5.01e-13
+             |
+        age2 |          1  (omitted)
+        age3 |          1  (omitted)
+------------------------------------------------------------------------------
+
+ ( 1) = -1
+
+------------------------------------------------------------------------------
+          _t | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |          1          .        .       .            .           .
+------------------------------------------------------------------------------
+covid_severity additionally adjusted for ethnicity, socioeconomic deprivation, region, rural/urban, BMI & smoking
+i.ethnicity invalid name
+
+ ( 1) = -1
+
+------------------------------------------------------------------------------
+          _t | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |          1          .        .       .            .           .
+------------------------------------------------------------------------------
+covid_severity fully adjusted
+i.ethnicity invalid name
+
+ ( 1) = -1
+
+------------------------------------------------------------------------------
+          _t | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |          1          .        .       .            .           .
+------------------------------------------------------------------------------
+nothing found where name expected
+  27,786
+  2,777
+covid_aki adjusted only for age, sex and STP
+
+       esrd |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |     25,009       90.01       90.01
+          1 |      2,777        9.99      100.00
+------------+-----------------------------------
+      Total |     27,786      100.00
+
+Survival-time data settings
+
+           ID variable: patient_id
+         Failure event: esrd_date!=0 & esrd_date<.
+Observed time interval: (exit_date[_n-1], exit_date]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date
+
+--------------------------------------------------------------------------
+     27,786  total observations
+        126  observations end on or before enter()
+         36  observations begin on or after (first) failure
+--------------------------------------------------------------------------
+     27,624  observations remaining, representing
+     27,350  subjects
+      2,648  failures in single-failure-per-subject data
+ 47,153.317  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  5.744011
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+note: age2 omitted because of collinearity.
+note: age3 omitted because of collinearity.
+Iteration 0:   log pseudolikelihood = -3128.9655
+Iteration 1:   log pseudolikelihood = -3105.7065
+Iteration 2:   log pseudolikelihood = -3105.5112
+Iteration 3:   log pseudolikelihood = -3105.4739
+Iteration 4:   log pseudolikelihood = -3105.4606
+Iteration 5:   log pseudolikelihood = -3105.4557
+Iteration 6:   log pseudolikelihood = -3105.4539
+Iteration 7:   log pseudolikelihood = -3105.4533
+Iteration 8:   log pseudolikelihood =  -3105.453
+Iteration 9:   log pseudolikelihood = -3105.4529
+Iteration 10:  log pseudolikelihood = -3105.4529
+Iteration 11:  log pseudolikelihood = -3105.4529
+Iteration 12:  log pseudolikelihood = -3105.4529
+Iteration 13:  log pseudolikelihood = -3105.4529
+Iteration 14:  log pseudolikelihood = -3105.4529
+Iteration 15:  log pseudolikelihood = -3105.4529
+Iteration 16:  log pseudolikelihood = -3105.4529
+Iteration 17:  log pseudolikelihood = -3105.4529
+Iteration 18:  log pseudolikelihood = -3105.4529
+Iteration 19:  log pseudolikelihood = -3105.4529
+Iteration 20:  log pseudolikelihood = -3105.4529
+Iteration 21:  log pseudolikelihood = -3105.4529
+Iteration 22:  log pseudolikelihood = -3105.4529
+Iteration 23:  log pseudolikelihood = -3105.4529
+Iteration 24:  log pseudolikelihood = -3105.4529
+Iteration 25:  log pseudolikelihood = -3105.4529
+Iteration 26:  log pseudolikelihood = -3105.4529
+Iteration 27:  log pseudolikelihood = -3105.4529
+Iteration 28:  log pseudolikelihood = -3105.4529
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -3105.4529
+Iteration 1:   log pseudolikelihood = -3105.4529
+Iteration 2:   log pseudolikelihood = -3105.4529
+
+Stratified Cox regression with Breslow method for ties
+Strata variable: set_id
+
+No. of subjects =      27,350                         Number of obs =   27,624
+No. of failures =       2,648
+Time at risk    = 47,153.3169
+                                                      Wald chi2(37) = 29000.11
+Log pseudolikelihood = -3105.4529                     Prob > chi2   =   0.0000
+
+                           (Std. err. adjusted for 39 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        age1 |
+         19  |   1.676087   .3913302     2.21   0.027     1.060619    2.648706
+         20  |   1.636205   .2632882     3.06   0.002     1.193623    2.242889
+         21  |    1.65046   .3921026     2.11   0.035     1.036057    2.629217
+         22  |   1.237845   .2982744     0.89   0.376     .7718952    1.985061
+         23  |   1.281915   .3766854     0.85   0.398     .7206717    2.280244
+         24  |   1.545321   .3474523     1.94   0.053     .9945654    2.401066
+         25  |     1.9761   .4519891     2.98   0.003     1.262163    3.093872
+         26  |   1.934502   .4599149     2.78   0.006     1.213952    3.082738
+         27  |    1.74934   .3515274     2.78   0.005     1.179849    2.593713
+         28  |   1.738454   .5029112     1.91   0.056     .9861028    3.064815
+         29  |    1.66509   .3597263     2.36   0.018     1.090295    2.542912
+         30  |   2.259683   .4278315     4.31   0.000     1.559148    3.274973
+         31  |   1.728313   .4058455     2.33   0.020     1.090792    2.738439
+         32  |   1.576147   .4808468     1.49   0.136     .8667913    2.866019
+         33  |   1.326729   .2346467     1.60   0.110     .9380755    1.876405
+         34  |   1.698305   .2741047     3.28   0.001     1.237749     2.33023
+         35  |    2.39153   .4477461     4.66   0.000     1.656962    3.451749
+         36  |   1.901134    .379493     3.22   0.001     1.285585    2.811412
+         37  |   1.648524    .476803     1.73   0.084     .9351949    2.905952
+         38  |   1.876935   .4416817     2.68   0.007     1.183434    2.976834
+         39  |   2.004633    .394333     3.54   0.000     1.363309    2.947647
+         40  |   1.723703   .5723189     1.64   0.101     .8991641    3.304348
+         41  |    2.00938   .3764149     3.73   0.000     1.391898    2.900793
+         42  |   1.758238   .4064548     2.44   0.015     1.117645    2.765995
+         43  |   1.797178   .3642486     2.89   0.004     1.208012    2.673689
+         44  |   1.745016   .3144385     3.09   0.002       1.2258    2.484159
+         45  |   1.739112   .3405934     2.83   0.005     1.184747    2.552876
+         46  |   1.532424   .2666517     2.45   0.014     1.089593    2.155229
+         47  |   1.794222     .36466     2.88   0.004     1.204694     2.67224
+         48  |   2.167459   .4836876     3.47   0.001      1.39958    3.356634
+         49  |   1.662191   .3776043     2.24   0.025     1.064906    2.594482
+         50  |   1.433157   .3210899     1.61   0.108     .9238201    2.223311
+         51  |   2.035325   .4620289     3.13   0.002     1.304388    3.175856
+         52  |    1.94137   .4566222     2.82   0.005     1.224335    3.078337
+         53  |   1.712589   .3568314     2.58   0.010      1.13841    2.576367
+         54  |   1.986989   .3372007     4.05   0.000     1.424764    2.771074
+         55  |   1.714007   .3614939     2.55   0.011     1.133677    2.591408
+         56  |   1.610029    .291458     2.63   0.009     1.129129    2.295746
+         57  |   1.712748   .3774812     2.44   0.015     1.111969    2.638117
+         58  |   2.069005   .3166009     4.75   0.000     1.532886    2.792628
+         59  |   1.286802   .3188366     1.02   0.309     .7917825    2.091307
+         60  |   1.579657   .2949408     2.45   0.014     1.095553    2.277678
+         61  |   1.846357   .3483609     3.25   0.001     1.275603    2.672489
+         62  |   1.588632   .2933905     2.51   0.012     1.106171     2.28152
+         63  |   2.007513   .3452195     4.05   0.000      1.43312    2.812122
+         64  |   1.829188   .4197655     2.63   0.009     1.166603    2.868096
+         65  |   1.623564   .3568537     2.20   0.027     1.055306    2.497817
+         66  |   1.642065   .3283738     2.48   0.013      1.10961    2.430022
+         67  |   1.146703   .2041709     0.77   0.442     .8088985    1.625577
+         68  |   1.877706   .3104293     3.81   0.000     1.358012    2.596279
+         69  |   1.832323   .5509269     2.01   0.044     1.016413    3.303192
+         70  |   1.041087   .3066659     0.14   0.891     .5844597     1.85447
+         71  |   .8640175   .6400599    -0.20   0.844     .2022817    3.690527
+         72  |   1.20e-13   8.76e-14   -40.89   0.000     2.89e-14    5.01e-13
+             |
+        age2 |          1  (omitted)
+        age3 |          1  (omitted)
+------------------------------------------------------------------------------
+
+ ( 1) = -1
+
+------------------------------------------------------------------------------
+          _t | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |          1          .        .       .            .           .
+------------------------------------------------------------------------------
+covid_aki additionally adjusted for ethnicity, socioeconomic deprivation, region, rural/urban, BMI & smoking
+i.ethnicity invalid name
+
+ ( 1) = -1
+
+------------------------------------------------------------------------------
+          _t | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |          1          .        .       .            .           .
+------------------------------------------------------------------------------
+covid_aki fully adjusted
+i.ethnicity invalid name
+
+ ( 1) = -1
+
+------------------------------------------------------------------------------
+          _t | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |          1          .        .       .            .           .
+------------------------------------------------------------------------------
+nothing found where name expected
+
+. 
+. cap file close tablecontents 
+
+. cap log close

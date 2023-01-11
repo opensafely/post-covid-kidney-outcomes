@@ -1,0 +1,566 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/cox_esrd_2017_table_RMcode.log
+  log type:  text
+ opened on:  11 Jan 2023, 14:20:42
+
+. 
+. 
+. cap file close tablecontent
+
+. file open tablecontent using ./output/cox_esrd_2017_table_RMcode.txt, write text replace
+
+. file write tablecontent ("Hazard ratios for end-stage renal disease after SARS-CoV-2 infection compared to matched historical general population comparator") _n
+
+. file write tablecontent _tab _tab _tab _tab ("Denominator") _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally Adjusted") _tab ("Fully adjusted") _tab _tab _n
+
+. file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab _n
+
+. 
+. 
+. * Open Stata dataset
+. use ./output/analysis_2017.dta, clear
+
+. stset exit_date, fail(esrd_date) origin(index_date) id(patient_id) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: patient_id
+         Failure event: esrd_date!=0 & esrd_date<.
+Observed time interval: (exit_date[_n-1], exit_date]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date
+
+--------------------------------------------------------------------------
+     27,786  total observations
+        126  observations end on or before enter()
+         36  observations begin on or after (first) failure
+--------------------------------------------------------------------------
+     27,624  observations remaining, representing
+     27,350  subjects
+      2,648  failures in single-failure-per-subject data
+ 47,153.317  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  5.744011
+
+. /* Main Model=================================================================*/
+. 
+. /* Univariable model */ 
+. 
+. stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -3128.9655
+Iteration 1:   log pseudolikelihood = -3127.3439
+Iteration 2:   log pseudolikelihood = -3127.3417
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -3127.3417
+
+Stratified Cox regression with Breslow method for ties
+Strata variable: set_id
+
+No. of subjects =      27,350                           Number of obs = 27,624
+No. of failures =       2,648
+Time at risk    = 47,153.3169
+                                                        Wald chi2(3)  =   8.66
+Log pseudolikelihood = -3127.3417                       Prob > chi2   = 0.0342
+
+                                           (Std. err. adjusted for 39 clusters in practice_id)
+----------------------------------------------------------------------------------------------
+                             |               Robust
+                          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+              covid_severity |
+Non-hospitalised SARS-CoV-2  |   .9828278   .0347286    -0.49   0.624     .9170644    1.053307
+      Hospitalised COVID-19  |   1.131194   .1207933     1.15   0.248     .9175765    1.394542
+     Critical care COVID-19  |   1.244359   .1102104     2.47   0.014      1.04606    1.480249
+----------------------------------------------------------------------------------------------
+
+. estimates save "crude_covid_severity_esrd", replace 
+file crude_covid_severity_esrd.ster saved
+
+. eststo model1
+
+. parmest, label eform format(estimate p lb ub) saving("crude_covid_severity_esrd", replace) idstr("crude_covid_severity_esrd") 
+file crude_covid_severity_esrd.dta saved
+
+. local hr "`hr' "crude_covid_severity_esrd" "
+
+. 
+. 
+. /* Multivariable models */ 
+. * Minimally adjusted
+. stcox i.covid_severity i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id)
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -3128.9655
+Iteration 1:   log pseudolikelihood =  -3123.658
+Iteration 2:   log pseudolikelihood = -3123.6557
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -3123.6557
+
+Stratified Cox regression with Breslow method for ties
+Strata variable: set_id
+
+No. of subjects =      27,350                           Number of obs = 27,624
+No. of failures =       2,648
+Time at risk    = 47,153.3169
+                                                        Wald chi2(6)  =  32.58
+Log pseudolikelihood = -3123.6557                       Prob > chi2   = 0.0000
+
+                                           (Std. err. adjusted for 39 clusters in practice_id)
+----------------------------------------------------------------------------------------------
+                             |               Robust
+                          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+              covid_severity |
+Non-hospitalised SARS-CoV-2  |   .9807253   .0363925    -0.52   0.600     .9119294    1.054711
+      Hospitalised COVID-19  |   1.138784   .1191944     1.24   0.214     .9275722     1.39809
+     Critical care COVID-19  |   1.238768   .1138277     2.33   0.020     1.034606    1.483218
+                             |
+                         sex |
+                       Male  |          1  (omitted)
+                        age1 |   1.014886   .0045204     3.32   0.001     1.006065    1.023785
+                        age2 |   .9727021   .0134793    -2.00   0.046     .9466387     .999483
+                        age3 |   1.047953   .0420156     1.17   0.243     .9687564    1.133624
+----------------------------------------------------------------------------------------------
+
+. estimates save "minimal_covid_severity_esrd", replace 
+file minimal_covid_severity_esrd.ster saved
+
+. eststo model2
+
+. 
+. parmest, label eform format(estimate p lb ub) saving("minimal_covid_severity_esrd", replace) idstr("minimal_covid_severity_esrd")
+file minimal_covid_severity_esrd.dta saved
+
+. local hr "`hr' "minimal_covid_severity_esrd" "
+
+.  
+. 
+. * Additionally adjusted
+. 
+. stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -56.85162
+Iteration 1:   log pseudolikelihood = -46.015182
+Iteration 2:   log pseudolikelihood =  -45.38405
+Iteration 3:   log pseudolikelihood = -45.354585
+Iteration 4:   log pseudolikelihood = -45.354503
+Iteration 5:   log pseudolikelihood = -45.354503
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -45.354503
+
+Stratified Cox regression with no ties
+Strata variable: set_id
+
+No. of subjects =      3,390                            Number of obs =  3,397
+No. of failures =        328
+Time at risk    = 5,856.3696
+                                                        Wald chi2(19) = 516.93
+Log pseudolikelihood = -45.354503                       Prob > chi2   = 0.0000
+
+                                           (Std. err. adjusted for 34 clusters in practice_id)
+----------------------------------------------------------------------------------------------
+                             |               Robust
+                          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+              covid_severity |
+Non-hospitalised SARS-CoV-2  |   .5361025   .1880355    -1.78   0.075     .2695832    1.066112
+      Hospitalised COVID-19  |   3.486829   2.787487     1.56   0.118     .7276993    16.70742
+     Critical care COVID-19  |   1.375427   .9605259     0.46   0.648     .3499479    5.405949
+                             |
+                         sex |
+                       Male  |          1  (omitted)
+                             |
+                   ethnicity |
+                South Asian  |   .4680492   .2052259    -1.73   0.083     .1981821    1.105398
+                      Black  |    .469852   .1876395    -1.89   0.059     .2147961     1.02777
+                      Mixed  |   1.433771   .4740771     1.09   0.276     .7499453    2.741133
+                      Other  |   .3478132   .2557554    -1.44   0.151      .082307    1.469789
+                             |
+                         imd |
+                          2  |   1.463611   .5277035     1.06   0.291     .7219808    2.967055
+                          3  |   .6744791   .2322116    -1.14   0.253     .3434903     1.32441
+                          4  |   2.760143   1.563502     1.79   0.073     .9094162    8.377232
+           5 Least deprived  |    .577104   .1753663    -1.81   0.070     .3181243    1.046915
+                             |
+                       urban |
+                      Urban  |   1.460875    .407061     1.36   0.174     .8461214    2.522281
+                             |
+                         bmi |
+         Normal (18.5-24.9)  |   6.700943   7.235474     1.76   0.078     .8072989    55.62083
+       Overweight (25-29.9)  |   16.92621   18.25146     2.62   0.009     2.045089    140.0899
+          Obese I (30-34.9)  |   11.61359   13.58072     2.10   0.036      1.17378    114.9068
+         Obese II (35-39.9)  |   7.147298     11.091     1.27   0.205     .3414039    149.6288
+            Obese III (40+)  |   3.516587   4.047748     1.09   0.275     .3684265    33.56542
+                             |
+                     smoking |
+      Current/former smoker  |   1.186113    .488091     0.41   0.678     .5294835    2.657048
+                        age1 |   1.018542   .0579273     0.32   0.747     .9111057    1.138647
+                        age2 |   .9653339   .1813939    -0.19   0.851     .6679286    1.395163
+                        age3 |   .9943713   .5595433    -0.01   0.992     .3300414     2.99591
+----------------------------------------------------------------------------------------------
+
+. if _rc==0{
+. estimates
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+active results
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Stratified Cox regression with no ties
+Strata variable: set_id
+
+No. of subjects =      3,390                            Number of obs =  3,397
+No. of failures =        328
+Time at risk    = 5,856.3696
+                                                        Wald chi2(19) = 516.93
+Log pseudolikelihood = -45.354503                       Prob > chi2   = 0.0000
+
+                                           (Std. err. adjusted for 34 clusters in practice_id)
+----------------------------------------------------------------------------------------------
+                             |               Robust
+                          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+              covid_severity |
+Non-hospitalised SARS-CoV-2  |   .5361025   .1880355    -1.78   0.075     .2695832    1.066112
+      Hospitalised COVID-19  |   3.486829   2.787487     1.56   0.118     .7276993    16.70742
+     Critical care COVID-19  |   1.375427   .9605259     0.46   0.648     .3499479    5.405949
+                             |
+                         sex |
+                       Male  |          1  (omitted)
+                             |
+                   ethnicity |
+                South Asian  |   .4680492   .2052259    -1.73   0.083     .1981821    1.105398
+                      Black  |    .469852   .1876395    -1.89   0.059     .2147961     1.02777
+                      Mixed  |   1.433771   .4740771     1.09   0.276     .7499453    2.741133
+                      Other  |   .3478132   .2557554    -1.44   0.151      .082307    1.469789
+                             |
+                         imd |
+                          2  |   1.463611   .5277035     1.06   0.291     .7219808    2.967055
+                          3  |   .6744791   .2322116    -1.14   0.253     .3434903     1.32441
+                          4  |   2.760143   1.563502     1.79   0.073     .9094162    8.377232
+           5 Least deprived  |    .577104   .1753663    -1.81   0.070     .3181243    1.046915
+                             |
+                       urban |
+                      Urban  |   1.460875    .407061     1.36   0.174     .8461214    2.522281
+                             |
+                         bmi |
+         Normal (18.5-24.9)  |   6.700943   7.235474     1.76   0.078     .8072989    55.62083
+       Overweight (25-29.9)  |   16.92621   18.25146     2.62   0.009     2.045089    140.0899
+          Obese I (30-34.9)  |   11.61359   13.58072     2.10   0.036      1.17378    114.9068
+         Obese II (35-39.9)  |   7.147298     11.091     1.27   0.205     .3414039    149.6288
+            Obese III (40+)  |   3.516587   4.047748     1.09   0.275     .3684265    33.56542
+                             |
+                     smoking |
+      Current/former smoker  |   1.186113    .488091     0.41   0.678     .5294835    2.657048
+                        age1 |   1.018542   .0579273     0.32   0.747     .9111057    1.138647
+                        age2 |   .9653339   .1813939    -0.19   0.851     .6679286    1.395163
+                        age3 |   .9943713   .5595433    -0.01   0.992     .3300414     2.99591
+----------------------------------------------------------------------------------------------
+. estimates save "additional_covid_severity_esrd", replace 
+file additional_covid_severity_esrd.ster saved
+. eststo model3
+. 
+. parmest, label eform format(estimate p lb ub) saving("additional_covid_severity_esrd", replace) idstr("additional_covid_severity_esrd") 
+file additional_covid_severity_esrd.dta saved
+. local hr "`hr' "additional_covid_severity_esrd" "
+. }
+
+. else di "WARNING MODEL1 DID NOT FIT (covid_severity)"
+
+. 
+. * Age, Gender, IMD and Comorbidities 
+. stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)          
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -56.85162
+Iteration 1:   log pseudolikelihood = -39.712128
+Iteration 2:   log pseudolikelihood = -37.355088
+Iteration 3:   log pseudolikelihood =  -36.96336
+Iteration 4:   log pseudolikelihood = -36.949725
+Iteration 5:   log pseudolikelihood =   -36.9497
+Refining estimates:
+Iteration 0:   log pseudolikelihood =   -36.9497
+
+Stratified Cox regression with no ties
+Strata variable: set_id
+
+No. of subjects =      3,390                         Number of obs =     3,397
+No. of failures =        328
+Time at risk    = 5,856.3696
+                                                     Wald chi2(19) = 176656.37
+Log pseudolikelihood = -36.9497                      Prob > chi2   =    0.0000
+
+                                           (Std. err. adjusted for 34 clusters in practice_id)
+----------------------------------------------------------------------------------------------
+                             |               Robust
+                          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+              covid_severity |
+Non-hospitalised SARS-CoV-2  |   .3204463   .1168241    -3.12   0.002     .1568322    .6547495
+      Hospitalised COVID-19  |   18.41743   18.96077     2.83   0.005     2.448587    138.5295
+     Critical care COVID-19  |   1.545554   1.357342     0.50   0.620     .2764008    8.642299
+                             |
+                         sex |
+                       Male  |          1  (omitted)
+                             |
+                   ethnicity |
+                South Asian  |   .1186025   .0639129    -3.96   0.000     .0412473    .3410297
+                      Black  |   .2188717   .1415226    -2.35   0.019     .0616314    .7772792
+                      Mixed  |   1.097158   .3727439     0.27   0.785     .5637491     2.13527
+                      Other  |   .1644794   .1220195    -2.43   0.015     .0384278    .7040082
+                             |
+                         imd |
+                          2  |    2.26903   .8911701     2.09   0.037     1.050818    4.899512
+                          3  |   1.026403   .6326467     0.04   0.966     .3066627    3.435383
+                          4  |   4.217893   2.675026     2.27   0.023     1.216903    14.61959
+           5 Least deprived  |   .9369909   .3594439    -0.17   0.865     .4417755    1.987326
+                             |
+                       urban |
+                      Urban  |   1.618131   .5742324     1.36   0.175     .8071318    3.244015
+                             |
+                         bmi |
+         Normal (18.5-24.9)  |   10.21289   5.510271     4.31   0.000      3.54724    29.40401
+       Overweight (25-29.9)  |    51.5126   40.33987     5.03   0.000     11.10022    239.0536
+          Obese I (30-34.9)  |   32.89097   25.74701     4.46   0.000     7.091811    152.5444
+         Obese II (35-39.9)  |   15.13285   10.98336     3.74   0.000     3.648568    62.76524
+            Obese III (40+)  |   2.276731   1.576263     1.19   0.235     .5861302    8.843602
+                             |
+            1.cardiovascular |   1.934551   .6525715     1.96   0.050     .9987323    3.747239
+                  1.diabetes |   .2201411   .1358075    -2.45   0.014      .065703    .7375933
+              1.hypertension |    .282565   .2129329    -1.68   0.094     .0645175    1.237541
+          1.immunosuppressed |   3.084421    1.51158     2.30   0.022     1.180391    8.059747
+           1.non_haem_cancer |   3.990069   2.600381     2.12   0.034     1.112349    14.31264
+                             |
+                     smoking |
+      Current/former smoker  |   1.550797   .6401932     1.06   0.288     .6905032    3.482926
+                        age1 |   1.014808   .0681321     0.22   0.827     .8896847    1.157529
+                        age2 |   .9357779    .233451    -0.27   0.790     .5738803    1.525894
+                        age3 |   1.080584   .8382426     0.10   0.920     .2362406    4.942675
+----------------------------------------------------------------------------------------------
+
+. if _rc==0{
+. estimates
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+active results
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Stratified Cox regression with no ties
+Strata variable: set_id
+
+No. of subjects =      3,390                         Number of obs =     3,397
+No. of failures =        328
+Time at risk    = 5,856.3696
+                                                     Wald chi2(19) = 176656.37
+Log pseudolikelihood = -36.9497                      Prob > chi2   =    0.0000
+
+                                           (Std. err. adjusted for 34 clusters in practice_id)
+----------------------------------------------------------------------------------------------
+                             |               Robust
+                          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-----------------------------+----------------------------------------------------------------
+              covid_severity |
+Non-hospitalised SARS-CoV-2  |   .3204463   .1168241    -3.12   0.002     .1568322    .6547495
+      Hospitalised COVID-19  |   18.41743   18.96077     2.83   0.005     2.448587    138.5295
+     Critical care COVID-19  |   1.545554   1.357342     0.50   0.620     .2764008    8.642299
+                             |
+                         sex |
+                       Male  |          1  (omitted)
+                             |
+                   ethnicity |
+                South Asian  |   .1186025   .0639129    -3.96   0.000     .0412473    .3410297
+                      Black  |   .2188717   .1415226    -2.35   0.019     .0616314    .7772792
+                      Mixed  |   1.097158   .3727439     0.27   0.785     .5637491     2.13527
+                      Other  |   .1644794   .1220195    -2.43   0.015     .0384278    .7040082
+                             |
+                         imd |
+                          2  |    2.26903   .8911701     2.09   0.037     1.050818    4.899512
+                          3  |   1.026403   .6326467     0.04   0.966     .3066627    3.435383
+                          4  |   4.217893   2.675026     2.27   0.023     1.216903    14.61959
+           5 Least deprived  |   .9369909   .3594439    -0.17   0.865     .4417755    1.987326
+                             |
+                       urban |
+                      Urban  |   1.618131   .5742324     1.36   0.175     .8071318    3.244015
+                             |
+                         bmi |
+         Normal (18.5-24.9)  |   10.21289   5.510271     4.31   0.000      3.54724    29.40401
+       Overweight (25-29.9)  |    51.5126   40.33987     5.03   0.000     11.10022    239.0536
+          Obese I (30-34.9)  |   32.89097   25.74701     4.46   0.000     7.091811    152.5444
+         Obese II (35-39.9)  |   15.13285   10.98336     3.74   0.000     3.648568    62.76524
+            Obese III (40+)  |   2.276731   1.576263     1.19   0.235     .5861302    8.843602
+                             |
+            1.cardiovascular |   1.934551   .6525715     1.96   0.050     .9987323    3.747239
+                  1.diabetes |   .2201411   .1358075    -2.45   0.014      .065703    .7375933
+              1.hypertension |    .282565   .2129329    -1.68   0.094     .0645175    1.237541
+          1.immunosuppressed |   3.084421    1.51158     2.30   0.022     1.180391    8.059747
+           1.non_haem_cancer |   3.990069   2.600381     2.12   0.034     1.112349    14.31264
+                             |
+                     smoking |
+      Current/former smoker  |   1.550797   .6401932     1.06   0.288     .6905032    3.482926
+                        age1 |   1.014808   .0681321     0.22   0.827     .8896847    1.157529
+                        age2 |   .9357779    .233451    -0.27   0.790     .5738803    1.525894
+                        age3 |   1.080584   .8382426     0.10   0.920     .2362406    4.942675
+----------------------------------------------------------------------------------------------
+. estimates save "full_covid_severity_esrd", replace 
+file full_covid_severity_esrd.ster saved
+. eststo model4
+. 
+. parmest, label eform format(estimate p lb ub) saving("full_covid_severity_esrd", replace) idstr("full_covid_severity_esrd") 
+file full_covid_severity_esrd.dta saved
+. local hr "`hr' "full_covid_severity_esrd" "
+. }
+
+. else di "WARNING MODEL2 DID NOT FIT (covid_severity)"
+
+.                                                 
+. 
+. /* Estout================================================================*/ 
+. esttab model1 model2 model3 model4 using "./output/estout_cox_esrd_2017_table_RMcode.txt", b(a2) ci(2) label wide compress eform ///
+>         title ("`i'") ///
+>         varlabels(`e(labels)') ///
+>         stats(N_sub) ///
+>         append 
+(output written to ./output/estout_cox_esrd_2017_table_RMcode.txt)
+
+. eststo clear
+
+.                                                                                 
+. /* Print table================================================================*/ 
+. *  Print the results for the main model 
+. 
+. 
+. * Column headings 
+. file write tablecontent ("covid_severity") _n
+
+. 
+. * labelled columns
+. 
+. local lab0: label covid_severity 0
+
+. local lab1: label covid_severity 1
+
+. local lab2: label covid_severity 2
+
+. local lab3: label covid_severity 3
+
+. 
+. /* counts */
+.  
+. * First row, covid_severity = 0 (Historical general population comparator)
+.         qui safecount if covid_severity==0
+
+.         local denominator = r(N)
+
+.         qui safecount if covid_severity== 1 & esrd==1
+
+.         local event = r(N)
+
+.     bysort covid_severity: egen total_follow_up = total(_t)
+
+.         qui su total_follow_up if covid_severity==0
+
+.         local person_year = r(mean)/365.25
+
+.         local rate = 100000*(`event'/`person_year')
+
+.         
+.         file write tablecontent  ("`lab0'") _tab _tab (`denominator') _tab _tab (`event') %10.0f (`person_year') _tab _tab _tab %3.2f (`rate') _tab _tab
+
+.         file write tablecontent ("1.00") _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab _tab ("1.00") _n
+
+.         
+. * Subsequent severity
+. forvalues severity=1/3 {
+  2.         qui safecount if covid_severity==`severity'
+  3.         local denominator = r(N)
+  4.         qui safecount if covid_severity == `severity' & esrd==1
+  5.         local event = r(N)
+  6.         qui su total_follow_up if covid_severity==`severity'
+  7.         local person_year = r(mean)/365.25
+  8.         local rate = 100000*(`event'/`person_year')
+  9.         file write tablecontent  ("`lab`severity''") _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
+ 10.         cap estimates use "crude_covid_severity_esrd" 
+ 11.          cap lincom `severity'.covid_severity, eform
+ 12.         file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 13.         cap estimates clear
+ 14.         cap estimates use "minimal_covid_severity_esrd" 
+ 15.          cap lincom `severity'.covid_severity, eform
+ 16.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 17.         cap estimates clear
+ 18.         cap estimates use "additional_covid_severity_esrd" 
+ 19.          cap lincom `severity'.covid_severity, eform
+ 20.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 21.         cap estimates clear
+ 22.         cap estimates use "full_covid_severity_esrd" 
+ 23.          cap lincom `severity'.covid_severity, eform
+ 24.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 25. } //end outcomes
+
+. 
+. file close tablecontent
+
+. 
+. ************************************************create forestplot dataset
+. dsconcat `hr'
+
+. duplicates drop
+
+Duplicates in terms of all variables
+
+(0 observations are duplicates)
+
+. split idstr, p(_)
+variables created as string: 
+idstr1  idstr2  idstr3  idstr4
+
+. ren idstr1 model
+
+. ren idstr2 outcome
+
+. drop idstr idstr3
+
+. tab model
+
+      model |      Freq.     Percent        Cum.
+------------+-----------------------------------
+ additional |         29       35.80       35.80
+      crude |          4        4.94       40.74
+       full |         39       48.15       88.89
+    minimal |          9       11.11      100.00
+------------+-----------------------------------
+      Total |         81      100.00
+
+. 
+. *save dataset for later
+. outsheet using "./output/cox_esrd_2017_table_RMcode2.txt", replace
+
+. 
+. * Close log file 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/cox_esrd_2017_table_RMcode.log
+  log type:  text
+ closed on:  11 Jan 2023, 14:20:47
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

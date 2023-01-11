@@ -1,13 +1,12 @@
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2017.log
+       log:  /workspace/logs/analysis_2017.log
   log type:  text
- opened on:  28 Dec 2022, 11:43:05
+ opened on:  11 Jan 2023, 18:32:53
 
 . 
 . ** Analysis cohort selection
 . capture noisily import delimited ./output/input_covid_matching.csv, clear
-(encoding automatically selected: ISO-8859-9)
 (53 vars, 50,000 obs)
 
 . di "Potential COVID-19 cases extracted from OpenSAFELY:"
@@ -17,7 +16,6 @@ Potential COVID-19 cases extracted from OpenSAFELY:
   50,000
 
 . capture noisily import delimited ./output/input_2017_matching.csv, clear
-(encoding automatically selected: ISO-8859-1)
 (16 vars, 50,000 obs)
 
 . di "Potential historical comparators extracted from OpenSAFELY:"
@@ -27,7 +25,6 @@ Potential historical comparators extracted from OpenSAFELY:
   50,000
 
 . capture noisily import delimited ./output/covid_matching_2017.csv, clear
-(encoding automatically selected: ISO-8859-2)
 (10 vars, 15,745 obs)
 
 . di "Potential COVID-19 cases after application of exclusion criteria:"
@@ -37,22 +34,24 @@ Potential COVID-19 cases after application of exclusion criteria:
   15,745
 
 . capture noisily import delimited ./output/2017_matching.csv, clear
-(encoding automatically selected: ISO-8859-1)
 (7 vars, 28,825 obs)
 
-. di "Potential historical comparators after application of exclusion criteria:"
+. di "Potential historical comparators after application of exclusion criteria:
+> "
 Potential historical comparators after application of exclusion criteria:
 
 . safecount
   28,825
 
-. * Import COVID-19 dataset comprising individuals matched with historical comparators (limited matching variables only)  
-. capture noisily import delimited ./output/input_combined_stps_covid_2017.csv, clear
-(encoding automatically selected: ISO-8859-1)
+. * Import COVID-19 dataset comprising individuals matched with historical comp
+> arators (limited matching variables only)  
+. capture noisily import delimited ./output/input_combined_stps_covid_2017.csv,
+>  clear
 (13 vars, 13,990 obs)
 
 . * Drop age & covid_diagnosis_date
-. keep patient_id death_date date_deregistered stp krt_outcome_date male covid_date covid_month set_id case match_counts
+. keep patient_id death_date date_deregistered stp krt_outcome_date male covid_
+> date covid_month set_id case match_counts
 
 . tempfile covid_2017_matched
 
@@ -64,20 +63,21 @@ Duplicates in terms of patient_id
 (0 observations are duplicates)
 
 . save `covid_2017_matched', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000001.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000001.tmp saved as .dta format
+(note: file /tmp/St00011.000001 not found)
+file /tmp/St00011.000001 saved
 
 . * Number of matched COVID-19 cases
 . count
   13,990
 
 . * Import matched historical comparators (limited matching variables only)
-. capture noisily import delimited ./output/input_combined_stps_matches_2017.csv, clear
-(encoding automatically selected: ISO-8859-1)
+. capture noisily import delimited ./output/input_combined_stps_matches_2017.cs
+> v, clear
 (10 vars, 22,201 obs)
 
 . * Drop age
-. keep patient_id death_date date_deregistered stp krt_outcome_date male set_id case covid_date
+. keep patient_id death_date date_deregistered stp krt_outcome_date male set_id
+>  case covid_date
 
 . tempfile 2017_matched
 
@@ -89,24 +89,24 @@ Duplicates in terms of patient_id
 (0 observations are duplicates)
 
 . save `2017_matched', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000002.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000002.tmp saved as .dta format
+(note: file /tmp/St00011.000002 not found)
+file /tmp/St00011.000002 saved
 
 . * Number of matched historical comparators
 . count
   22,201
 
 . * Merge limited COVID-19 dataset with additional variables
-. capture noisily import delimited ./output/input_covid_2017_additional.csv, clear
-(encoding automatically selected: ISO-8859-9)
+. capture noisily import delimited ./output/input_covid_2017_additional.csv, cl
+> ear
 (106 vars, 13,990 obs)
 
 . merge 1:1 patient_id using `covid_2017_matched'
 
-    Result                      Number of obs
+    Result                           # of obs.
     -----------------------------------------
-    Not matched                             0
-    Matched                            13,990  (_merge==3)
+    not matched                             0
+    matched                            13,990  (_merge==3)
     -----------------------------------------
 
 . keep if _merge==3
@@ -117,8 +117,8 @@ file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000002.tmp saved as .dta forma
 . tempfile covid_2017_complete
 
 . save `covid_2017_complete', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000003.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000003.tmp saved as .dta format
+(note: file /tmp/St00011.000003 not found)
+file /tmp/St00011.000003 saved
 
 . di "Matched COVID-19 cases:"
 Matched COVID-19 cases:
@@ -128,15 +128,14 @@ Matched COVID-19 cases:
 
 . * Merge limited historical comparator dataset with additional variables
 . capture noisily import delimited ./output/input_2017_additional.csv, clear
-(encoding automatically selected: ISO-8859-9)
 (95 vars, 22,201 obs)
 
 . merge 1:1 patient_id using `2017_matched'
 
-    Result                      Number of obs
+    Result                           # of obs.
     -----------------------------------------
-    Not matched                             0
-    Matched                            22,201  (_merge==3)
+    not matched                             0
+    matched                            22,201  (_merge==3)
     -----------------------------------------
 
 . keep if _merge==3
@@ -147,8 +146,8 @@ Matched COVID-19 cases:
 . tempfile 2017_complete
 
 . save `2017_complete', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000004.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000004.tmp saved as .dta format
+(note: file /tmp/St00011.000004 not found)
+file /tmp/St00011.000004 saved
 
 . di "Matched historical comparators:"
 Matched historical comparators:
@@ -192,16 +191,16 @@ Matched COVID-19 cases and historical comparators:
 .         tempfile covid_2017_matched_list
 
 .         save `covid_2017_matched_list', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000006.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000006.tmp saved as .dta format
+(note: file /tmp/St00011.000006 not found)
+file /tmp/St00011.000006 saved
 
 . restore
 
 . * Generate list of unmatched COVID-19 cases
 . preserve
 
-.         capture noisily import delimited ./output/input_covid_matching.csv, clear
-(encoding automatically selected: ISO-8859-9)
+.         capture noisily import delimited ./output/input_covid_matching.csv, c
+> lear
 (53 vars, 50,000 obs)
 
 .         * For dummy data, should do nothing in the real data
@@ -214,20 +213,20 @@ Duplicates in terms of patient_id
 .         tempfile covid_prematching
 
 .         save `covid_prematching', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000008.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_1a44_000008.tmp saved as .dta format
+(note: file /tmp/St00011.000008 not found)
+file /tmp/St00011.000008 saved
 
 .         use `covid_2017_matched_list', clear
 
 .         merge 1:1 patient_id using `covid_prematching'
 
-    Result                      Number of obs
+    Result                           # of obs.
     -----------------------------------------
-    Not matched                        36,010
+    not matched                        36,010
         from master                         0  (_merge==1)
         from using                     36,010  (_merge==2)
 
-    Matched                            13,990  (_merge==3)
+    matched                            13,990  (_merge==3)
     -----------------------------------------
 
 .         keep if _merge==2
@@ -272,6 +271,7 @@ Unmatched COVID-19 cases:
 (1,847 observations deleted)
 
 . safetab imd
+0
 
              imd |      Freq.     Percent        Cum.
 -----------------+-----------------------------------
@@ -311,6 +311,7 @@ stp_updated |      Freq.     Percent        Cum.
 . label var stp "STP"
 
 . safetab stp
+0
 
         STP |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -352,15 +353,24 @@ stp_updated |      Freq.     Percent        Cum.
 . replace region = 10 if region_string==""
 (0 real changes made)
 
-. label define region     1 "East Midlands"                                       ///
->                                                 2 "East"                                                        ///
->                                                 3 "London"                                                      ///
->                                                 4 "North East"                                          ///
->                                                 5 "North West"                                          ///
->                                                 6 "South East"                                          ///
->                                                 7 "South West"                                          ///
->                                                 8 "West Midlands"                                       ///
->                                                 9 "Yorkshire and The Humber"            ///
+. label define region     1 "East Midlands"                                    
+>    ///
+>                                                 2 "East"                     
+>                                    ///
+>                                                 3 "London"                   
+>                                    ///
+>                                                 4 "North East"               
+>                            ///
+>                                                 5 "North West"               
+>                            ///
+>                                                 6 "South East"               
+>                            ///
+>                                                 7 "South West"               
+>                            ///
+>                                                 8 "West Midlands"            
+>                            ///
+>                                                 9 "Yorkshire and The Humber" 
+>            ///
 >                                                 10 "Missing"
 
 . label values region region
@@ -387,6 +397,7 @@ Yorkshire and The Humber |      3,345        9.74      100.00
 (0 observations deleted)
 
 . safetab region
+0
 
                   Region |      Freq.     Percent        Cum.
 -------------------------+-----------------------------------
@@ -403,7 +414,8 @@ Yorkshire and The Humber |      3,345        9.74      100.00
                    Total |     34,344      100.00
 
 . 
-. * Exclusions due to deregistration and kidney replacement therapy will be checked (should already have been applied from previous steps in workflow)
+. * Exclusions due to deregistration and kidney replacement therapy will be che
+> cked (should already have been applied from previous steps in workflow)
 . gen index_date = date(case_index_date, "YMD")
 
 . format index_date %td
@@ -440,7 +452,8 @@ Yorkshire and The Humber |      3,345        9.74      100.00
 (157 real changes made)
 
 . 
-. * Death before index_date + 28 days (i.e. only include people who survived 28 days after index_date)
+. * Death before index_date + 28 days (i.e. only include people who survived 28
+>  days after index_date)
 . gen death_date1 = date(death_date, "YMD")
 (32,407 missing values generated)
 
@@ -455,7 +468,8 @@ Yorkshire and The Humber |      3,345        9.74      100.00
 . replace deceased = 1 if death_date < index_date_28
 (90 real changes made)
 
-. label define deceased 0 "Alive at 28 days after index date" 1 "Deceased within 28 days of index date"
+. label define deceased 0 "Alive at 28 days after index date" 1 "Deceased withi
+> n 28 days of index date"
 
 . label values deceased deceased
 
@@ -475,7 +489,8 @@ Yorkshire and The Humber |      3,345        9.74      100.00
 . drop deceased
 
 . 
-. * eGFR <15 before index_date - should apply to matched historical comparators only
+. * eGFR <15 before index_date - should apply to matched historical comparators
+>  only
 . gen index_year = yofd(index_date)
 
 . gen age = index_year - year_of_birth
@@ -490,87 +505,166 @@ Yorkshire and The Humber |      3,345        9.74      100.00
 
 . label values sex sex
 
-. foreach baseline_creatinine_monthly of varlist  baseline_creatinine_feb2017 ///
->                                                                                                 baseline_creatinine_mar2017 ///
->                                                                                                 baseline_creatinine_apr2017 ///
->                                                                                                 baseline_creatinine_may2017 ///
->                                                                                                 baseline_creatinine_jun2017 ///
->                                                                                                 baseline_creatinine_jul2017 ///
->                                                                                                 baseline_creatinine_aug2017 ///
->                                                                                                 baseline_creatinine_sep2017 ///
->                                                                                                 baseline_creatinine_oct2017 ///
->                                                                                                 baseline_creatinine_nov2017 ///
->                                                                                                 baseline_creatinine_dec2017 ///
->                                                                                                 baseline_creatinine_jan2018 ///
->                                                                                                 baseline_creatinine_feb2018 ///
->                                                                                                 baseline_creatinine_mar2018 ///
->                                                                                                 baseline_creatinine_apr2018 ///
->                                                                                                 baseline_creatinine_may2018 ///
->                                                                                                 baseline_creatinine_jun2018 ///
->                                                                                                 baseline_creatinine_jul2018 ///
->                                                                                                 baseline_creatinine_aug2018 ///
->                                                                                                 baseline_creatinine_sep2018 ///
->                                                                                                 baseline_creatinine_oct2018 ///
->                                                                                                 baseline_creatinine_nov2018 ///
->                                                                                                 baseline_creatinine_dec2018 ///
->                                                                                                 baseline_creatinine_jan2019 ///
->                                                                                                 baseline_creatinine_feb2019 ///
->                                                                                                 baseline_creatinine_mar2019 ///
->                                                                                                 baseline_creatinine_apr2019 ///
->                                                                                                 baseline_creatinine_may2019 ///
->                                                                                                 baseline_creatinine_jun2019 ///
->                                                                                                 baseline_creatinine_jul2019 ///
->                                                                                                 baseline_creatinine_aug2019 ///
->                                                                                                 baseline_creatinine_sep2019 ///
->                                                                                                 baseline_creatinine_feb2020 ///
->                                                                                                 baseline_creatinine_mar2020 ///
->                                                                                                 baseline_creatinine_apr2020 ///
->                                                                                                 baseline_creatinine_may2020 ///
->                                                                                                 baseline_creatinine_jun2020 ///
->                                                                                                 baseline_creatinine_jul2020 ///
->                                                                                                 baseline_creatinine_aug2020 ///
->                                                                                                 baseline_creatinine_sep2020 ///
->                                                                                                 baseline_creatinine_oct2020 ///
->                                                                                                 baseline_creatinine_nov2020 ///
->                                                                                                 baseline_creatinine_dec2020 ///
->                                                                                                 baseline_creatinine_jan2021 ///
->                                                                                                 baseline_creatinine_feb2021 ///
->                                                                                                 baseline_creatinine_mar2021 ///
->                                                                                                 baseline_creatinine_apr2021 ///
->                                                                                                 baseline_creatinine_may2021 ///
->                                                                                                 baseline_creatinine_jun2021 ///
->                                                                                                 baseline_creatinine_jul2021 ///
->                                                                                                 baseline_creatinine_aug2021 ///
->                                                                                                 baseline_creatinine_sep2021 ///
->                                                                                                 baseline_creatinine_oct2021 ///
->                                                                                                 baseline_creatinine_nov2021 ///
->                                                                                                 baseline_creatinine_dec2021 ///
->                                                                                                 baseline_creatinine_jan2022 ///
->                                                                                                 baseline_creatinine_feb2022 ///
->                                                                                                 baseline_creatinine_mar2022 ///
->                                                                                                 baseline_creatinine_apr2022 ///
->                                                                                                 baseline_creatinine_may2022 ///
->                                                                                                 baseline_creatinine_jun2022 ///
->                                                                                                 baseline_creatinine_jul2022 ///
->                                                                                                 baseline_creatinine_aug2022 ///
->                                                                                                 baseline_creatinine_sep2022 ///
->                                                                                                 baseline_creatinine_oct2022 {
-  2. replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine_monthly', 20, 3000)
-  3. gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.4
+. foreach baseline_creatinine_monthly of varlist  baseline_creatinine_feb2017 /
+> //
+>                                                                              
+>                    baseline_creatinine_mar2017 ///
+>                                                                              
+>                    baseline_creatinine_apr2017 ///
+>                                                                              
+>                    baseline_creatinine_may2017 ///
+>                                                                              
+>                    baseline_creatinine_jun2017 ///
+>                                                                              
+>                    baseline_creatinine_jul2017 ///
+>                                                                              
+>                    baseline_creatinine_aug2017 ///
+>                                                                              
+>                    baseline_creatinine_sep2017 ///
+>                                                                              
+>                    baseline_creatinine_oct2017 ///
+>                                                                              
+>                    baseline_creatinine_nov2017 ///
+>                                                                              
+>                    baseline_creatinine_dec2017 ///
+>                                                                              
+>                    baseline_creatinine_jan2018 ///
+>                                                                              
+>                    baseline_creatinine_feb2018 ///
+>                                                                              
+>                    baseline_creatinine_mar2018 ///
+>                                                                              
+>                    baseline_creatinine_apr2018 ///
+>                                                                              
+>                    baseline_creatinine_may2018 ///
+>                                                                              
+>                    baseline_creatinine_jun2018 ///
+>                                                                              
+>                    baseline_creatinine_jul2018 ///
+>                                                                              
+>                    baseline_creatinine_aug2018 ///
+>                                                                              
+>                    baseline_creatinine_sep2018 ///
+>                                                                              
+>                    baseline_creatinine_oct2018 ///
+>                                                                              
+>                    baseline_creatinine_nov2018 ///
+>                                                                              
+>                    baseline_creatinine_dec2018 ///
+>                                                                              
+>                    baseline_creatinine_jan2019 ///
+>                                                                              
+>                    baseline_creatinine_feb2019 ///
+>                                                                              
+>                    baseline_creatinine_mar2019 ///
+>                                                                              
+>                    baseline_creatinine_apr2019 ///
+>                                                                              
+>                    baseline_creatinine_may2019 ///
+>                                                                              
+>                    baseline_creatinine_jun2019 ///
+>                                                                              
+>                    baseline_creatinine_jul2019 ///
+>                                                                              
+>                    baseline_creatinine_aug2019 ///
+>                                                                              
+>                    baseline_creatinine_sep2019 ///
+>                                                                              
+>                    baseline_creatinine_feb2020 ///
+>                                                                              
+>                    baseline_creatinine_mar2020 ///
+>                                                                              
+>                    baseline_creatinine_apr2020 ///
+>                                                                              
+>                    baseline_creatinine_may2020 ///
+>                                                                              
+>                    baseline_creatinine_jun2020 ///
+>                                                                              
+>                    baseline_creatinine_jul2020 ///
+>                                                                              
+>                    baseline_creatinine_aug2020 ///
+>                                                                              
+>                    baseline_creatinine_sep2020 ///
+>                                                                              
+>                    baseline_creatinine_oct2020 ///
+>                                                                              
+>                    baseline_creatinine_nov2020 ///
+>                                                                              
+>                    baseline_creatinine_dec2020 ///
+>                                                                              
+>                    baseline_creatinine_jan2021 ///
+>                                                                              
+>                    baseline_creatinine_feb2021 ///
+>                                                                              
+>                    baseline_creatinine_mar2021 ///
+>                                                                              
+>                    baseline_creatinine_apr2021 ///
+>                                                                              
+>                    baseline_creatinine_may2021 ///
+>                                                                              
+>                    baseline_creatinine_jun2021 ///
+>                                                                              
+>                    baseline_creatinine_jul2021 ///
+>                                                                              
+>                    baseline_creatinine_aug2021 ///
+>                                                                              
+>                    baseline_creatinine_sep2021 ///
+>                                                                              
+>                    baseline_creatinine_oct2021 ///
+>                                                                              
+>                    baseline_creatinine_nov2021 ///
+>                                                                              
+>                    baseline_creatinine_dec2021 ///
+>                                                                              
+>                    baseline_creatinine_jan2022 ///
+>                                                                              
+>                    baseline_creatinine_feb2022 ///
+>                                                                              
+>                    baseline_creatinine_mar2022 ///
+>                                                                              
+>                    baseline_creatinine_apr2022 ///
+>                                                                              
+>                    baseline_creatinine_may2022 ///
+>                                                                              
+>                    baseline_creatinine_jun2022 ///
+>                                                                              
+>                    baseline_creatinine_jul2022 ///
+>                                                                              
+>                    baseline_creatinine_aug2022 ///
+>                                                                              
+>                    baseline_creatinine_sep2022 ///
+>                                                                              
+>                    baseline_creatinine_oct2022 {
+  2. replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine
+> _monthly', 20, 3000)
+  3. gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.
+> 4
   4. gen min_`baseline_creatinine_monthly'=.
-  5. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.7 if sex==0
-  6. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.9 if sex==1
-  7. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'^-0.329 if sex==0
-  8. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'^-0.411 if sex==1
-  9. replace min_`baseline_creatinine_monthly' = 1 if min_`baseline_creatinine_monthly'<1
+  5. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.7 if sex==0
+  6. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.9 if sex==1
+  7. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_month
+> ly'^-0.329 if sex==0
+  8. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_month
+> ly'^-0.411 if sex==1
+  9. replace min_`baseline_creatinine_monthly' = 1 if min_`baseline_creatinine_
+> monthly'<1
  10. gen max_`baseline_creatinine_monthly'=.
- 11. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.7 if sex==0
- 12. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.9 if sex==1
- 13. replace max_`baseline_creatinine_monthly' = max_`baseline_creatinine_monthly'^-1.209
- 14. replace max_`baseline_creatinine_monthly' = 1 if max_`baseline_creatinine_monthly'>1
- 15. gen egfr_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'*max_`baseline_creatinine_monthly'*141
- 16. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_monthly'*(0.993^age)
- 17. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_monthly'*1.018 if sex==0
+ 11. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.7 if sex==0
+ 12. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
+> hly'/0.9 if sex==1
+ 13. replace max_`baseline_creatinine_monthly' = max_`baseline_creatinine_month
+> ly'^-1.209
+ 14. replace max_`baseline_creatinine_monthly' = 1 if max_`baseline_creatinine_
+> monthly'>1
+ 15. gen egfr_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'
+> *max_`baseline_creatinine_monthly'*141
+ 16. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_mon
+> thly'*(0.993^age)
+ 17. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_mon
+> thly'*1.018 if sex==0
  18. drop `baseline_creatinine_monthly'
  19. drop mgdl_`baseline_creatinine_monthly'
  20. drop min_`baseline_creatinine_monthly'
@@ -1624,9 +1718,13 @@ Yorkshire and The Humber |      3,345        9.74      100.00
 . gen baseline_egfr=.
 (34,254 missing values generated)
 
-. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 
-> jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 ju
-> n2022 jul2022 aug2022 sep2022 oct2022"
+. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep
+> 2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 
+> jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr20
+> 19 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 ju
+> n2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021
+>  apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2
+> 022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 
 . foreach x of local month_year  {
   2. replace baseline_egfr=egfr_baseline_creatinine_`x' if index_month=="`x'"
@@ -1726,7 +1824,8 @@ Yorkshire and The Humber |      3,345        9.74      100.00
 . drop baseline_esrd
 
 . 
-. * Drop COVID-19 cases without any matched historical comparators after further application of exclusion criteria
+. * Drop COVID-19 cases without any matched historical comparators after furthe
+> r application of exclusion criteria
 . generate match_counts1=.
 (34,254 missing values generated)
 
@@ -1749,6 +1848,7 @@ Yorkshire and The Humber |      3,345        9.74      100.00
 (5,251 observations deleted)
 
 . safetab case
+0
 
        case |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -1769,9 +1869,11 @@ match_count |
       Total |      7,971      100.00
 
 . 
-. bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 0 then only uncase in set, if 1 then only case in set
+. bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 
+> 0 then only uncase in set, if 1 then only case in set
 
-. gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set containing both case and uncase
+. gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set conta
+> ining both case and uncase
 
 . tab valid_set, miss
 
@@ -1810,19 +1912,20 @@ match_count |
 
 . 
 . ** Exposure
-. label define case 0 "Comparator (historical)" ///
->                                   1 "COVID-19"
+. label define case 0 "Historical comparator" ///
+>                                   1 "SARS-CoV-2"
 
 . label values case case
 
 . safetab case 
+0
 
-                   case |      Freq.     Percent        Cum.
-------------------------+-----------------------------------
-Comparator (historical) |     19,846       71.34       71.34
-               COVID-19 |      7,971       28.66      100.00
-------------------------+-----------------------------------
-                  Total |     27,817      100.00
+                 case |      Freq.     Percent        Cum.
+----------------------+-----------------------------------
+Historical comparator |     19,846       71.34       71.34
+           SARS-CoV-2 |      7,971       28.66      100.00
+----------------------+-----------------------------------
+                Total |     27,817      100.00
 
 . 
 . * COVID-19 severity
@@ -1837,12 +1940,15 @@ Comparator (historical) |     19,846       71.34       71.34
 . replace covid_severity = 3 if covid_critical_days==1
 (365 real changes made)
 
-. label define covid_severity_label       0 "Historical comparator"               ///
->                                                                         1 "Non-hospitalised SARS-CoV-2" ///
->                                                                         2 "Hospitalised COVID-19"               ///
->                                                                         3 "Critical care COVID-19"
+. label define covid_severity     0 "Historical comparator"               ///
+>                                                         1 "Non-hospitalised C
+> OVID" ///
+>                                                         2 "Hospitalised COVID
+> "          ///
+>                                                         3 "Critical care COVI
+> D"
 
-. label values covid_severity covid_severity_label
+. label values covid_severity covid_severity
 
 . label var covid_severity "SARS-CoV-2 severity"
 
@@ -1851,15 +1957,16 @@ Comparator (historical) |     19,846       71.34       71.34
 . drop covid_critical_days
 
 . safetab covid_severity, m
+15
 
-        SARS-CoV-2 severity |      Freq.     Percent        Cum.
-----------------------------+-----------------------------------
-      Historical comparator |     19,846       71.34       71.34
-Non-hospitalised SARS-CoV-2 |      6,466       23.24       94.59
-      Hospitalised COVID-19 |        741        2.66       97.25
-     Critical care COVID-19 |        764        2.75      100.00
-----------------------------+-----------------------------------
-                      Total |     27,817      100.00
+   SARS-CoV-2 severity |      Freq.     Percent        Cum.
+-----------------------+-----------------------------------
+ Historical comparator |     19,846       71.34       71.34
+Non-hospitalised COVID |      6,466       23.24       94.59
+    Hospitalised COVID |        741        2.66       97.25
+   Critical care COVID |        764        2.75      100.00
+-----------------------+-----------------------------------
+                 Total |     27,817      100.00
 
 . 
 . * COVID-19 acute kidney injury
@@ -1872,9 +1979,10 @@ Non-hospitalised SARS-CoV-2 |      6,466       23.24       94.59
 (411 real changes made)
 
 . label define covid_aki  0 "Historical comparator"                       ///
->                                                 1 "Non-hospitalised SARS-CoV-2"         ///
->                                                 2 "No AKI hospitalised COVID-19"        ///
->                                                 3 "AKI hospitalised COVID-19"
+>                                                 1 "Non-hospitalised COVID"   
+>            ///
+>                                                 2 "Hospitalised COVID"  ///
+>                                                 3 "Hospitalised COVID-AKI"
 
 . label values covid_aki covid_aki
 
@@ -1883,15 +1991,17 @@ Non-hospitalised SARS-CoV-2 |      6,466       23.24       94.59
 . drop covid_acute_kidney_injury
 
 . safetab covid_aki, m
+10
 
-COVID-19 acute kidney injury |      Freq.     Percent        Cum.
------------------------------+-----------------------------------
-       Historical comparator |     19,846       71.34       71.34
- Non-hospitalised SARS-CoV-2 |      6,797       24.43       95.78
-No AKI hospitalised COVID-19 |        763        2.74       98.52
-   AKI hospitalised COVID-19 |        411        1.48      100.00
------------------------------+-----------------------------------
-                       Total |     27,817      100.00
+ COVID-19 acute kidney |
+                injury |      Freq.     Percent        Cum.
+-----------------------+-----------------------------------
+ Historical comparator |     19,846       71.34       71.34
+Non-hospitalised COVID |      6,797       24.43       95.78
+    Hospitalised COVID |        763        2.74       98.52
+Hospitalised COVID-AKI |        411        1.48      100.00
+-----------------------+-----------------------------------
+                 Total |     27,817      100.00
 
 . 
 . * COVID-19 kidney replacement therapy
@@ -1910,8 +2020,10 @@ No AKI hospitalised COVID-19 |        763        2.74       98.52
 (757 real changes made)
 
 . label define covid_krt  0 "Historical comparator"                       ///
->                                                 1 "Non-hospitalised SARS-CoV-2"         ///
->                                                 2 "No KRT hospitalised COVID-19"        ///
+>                                                 1 "Non-hospitalised SARS-CoV-
+> 2"         ///
+>                                                 2 "No KRT hospitalised COVID-
+> 19"        ///
 >                                                 3 "KRT hospitalised COVID-19"
 
 . label values covid_krt covid_krt
@@ -1923,6 +2035,7 @@ No AKI hospitalised COVID-19 |        763        2.74       98.52
 . drop covid_krt_opcs_4
 
 . safetab covid_krt, m
+10
 
  COVID-19 kidney replacement |
                      therapy |      Freq.     Percent        Cum.
@@ -1979,10 +2092,14 @@ No KRT hospitalised COVID-19 |        739        2.66       97.28
 . drop covidvax4date
 
 . label define covid_vax  0 "Historical comparator"       ///
->                                                 1 "Pre-vaccination"                     ///
->                                                 2 "1 vaccine dose"                      ///
->                                                 3 "2 vaccine doses"                     ///
->                                                 4 "3 vaccine doses"                     ///
+>                                                 1 "Pre-vaccination"          
+>            ///
+>                                                 2 "1 vaccine dose"           
+>            ///
+>                                                 3 "2 vaccine doses"          
+>            ///
+>                                                 4 "3 vaccine doses"          
+>            ///
 >                                                 5 "4 vaccine doses"
 
 . label values covid_vax covid_vax
@@ -1990,6 +2107,7 @@ No KRT hospitalised COVID-19 |        739        2.66       97.28
 . label var covid_vax "Vaccination status"
 
 . safetab covid_vax, m
+10
 
    Vaccination status |      Freq.     Percent        Cum.
 ----------------------+-----------------------------------
@@ -2003,136 +2121,109 @@ Historical comparator |     19,846       71.34       71.34
                 Total |     27,817      100.00
 
 . 
-. * Calendar period
-. gen calendar_period = 1 if covid_month=="feb2020"
-(27,349 missing values generated)
+. * COVID-19 wave
+. gen wave = case
 
-. replace calendar_period = 1 if covid_month=="mar2020"
-(552 real changes made)
-
-. replace calendar_period = 1 if covid_month=="apr2020"
-(509 real changes made)
-
-. replace calendar_period = 1 if covid_month=="may2020"
-(487 real changes made)
-
-. replace calendar_period = 1 if covid_month=="jun2020"
-(449 real changes made)
-
-. replace calendar_period = 2 if covid_month=="jul2020"
-(428 real changes made)
-
-. replace calendar_period = 2 if covid_month=="aug2020"
-(388 real changes made)
-
-. replace calendar_period = 3 if covid_month=="sep2020"
+. replace wave = 2 if index_month=="sep2020"
 (354 real changes made)
 
-. replace calendar_period = 3 if covid_month=="oct2020"
+. replace wave = 2 if index_month=="oct2020"
 (368 real changes made)
 
-. replace calendar_period = 3 if covid_month=="nov2020"
+. replace wave = 2 if index_month=="nov2020"
 (327 real changes made)
 
-. replace calendar_period = 4 if covid_month=="dec2020"
+. replace wave = 2 if index_month=="dec2020"
 (349 real changes made)
 
-. replace calendar_period = 4 if covid_month=="jan2021"
+. replace wave = 2 if index_month=="jan2021"
 (281 real changes made)
 
-. replace calendar_period = 4 if covid_month=="feb2021"
+. replace wave = 2 if index_month=="feb2021"
 (229 real changes made)
 
-. replace calendar_period = 5 if covid_month=="mar2021"
+. replace wave = 2 if index_month=="mar2021"
 (280 real changes made)
 
-. replace calendar_period = 5 if covid_month=="apr2021"
+. replace wave = 2 if index_month=="apr2021"
 (205 real changes made)
 
-. replace calendar_period = 5 if covid_month=="may2021"
+. replace wave = 2 if index_month=="may2021"
 (230 real changes made)
 
-. replace calendar_period = 5 if covid_month=="jun2021"
+. replace wave = 2 if index_month=="jun2021"
 (217 real changes made)
 
-. replace calendar_period = 5 if covid_month=="jul2021"
+. replace wave = 3 if index_month=="jul2021"
 (183 real changes made)
 
-. replace calendar_period = 5 if covid_month=="aug2021"
+. replace wave = 3 if index_month=="aug2021"
 (205 real changes made)
 
-. replace calendar_period = 5 if covid_month=="sep2021"
+. replace wave = 3 if index_month=="sep2021"
 (154 real changes made)
 
-. replace calendar_period = 5 if covid_month=="oct2021"
+. replace wave = 3 if index_month=="oct2021"
 (136 real changes made)
 
-. replace calendar_period = 5 if covid_month=="nov2021"
+. replace wave = 3 if index_month=="nov2021"
 (149 real changes made)
 
-. replace calendar_period = 6 if covid_month=="dec2021"
+. replace wave = 4 if index_month=="dec2021"
 (130 real changes made)
 
-. replace calendar_period = 6 if covid_month=="jan2022"
+. replace wave = 4 if index_month=="jan2022"
 (120 real changes made)
 
-. replace calendar_period = 6 if covid_month=="feb2022"
+. replace wave = 4 if index_month=="feb2022"
 (104 real changes made)
 
-. replace calendar_period = 7 if covid_month=="mar2022"
+. replace wave = 4 if index_month=="mar2022"
 (106 real changes made)
 
-. replace calendar_period = 7 if covid_month=="apr2022"
+. replace wave = 4 if index_month=="apr2022"
 (90 real changes made)
 
-. replace calendar_period = 7 if covid_month=="may2022"
+. replace wave = 4 if index_month=="may2022"
 (100 real changes made)
 
-. replace calendar_period = 7 if covid_month=="jun2022"
+. replace wave = 4 if index_month=="jun2022"
 (102 real changes made)
 
-. replace calendar_period = 7 if covid_month=="jul2022"
+. replace wave = 4 if index_month=="jul2022"
 (67 real changes made)
 
-. replace calendar_period = 7 if covid_month=="aug2022"
+. replace wave = 4 if index_month=="aug2022"
 (85 real changes made)
 
-. replace calendar_period = 7 if covid_month=="sep2022"
+. replace wave = 4 if index_month=="sep2022"
 (49 real changes made)
 
-. replace calendar_period = 7 if covid_month=="oct2022"
+. replace wave = 4 if index_month=="oct2022"
 (70 real changes made)
 
-. replace calendar_period = 0 if case==0
-(19,846 real changes made)
+. label define wave       0 "Historical comparator"       ///
+>                                         1 "Febuary20-August20"  ///
+>                                         2 "September20-June21"  ///
+>                                         3 "July21-November21"   ///
+>                                         4 "December21-October22"        
 
-. label define calendar_period    0 "Historical comparator"       ///
->                                                                 1 "Feb20-Jun20 SARS-CoV-2"      ///
->                                                                 2 "Jul20-Aug20 SARS-CoV-2"      ///
->                                                                 3 "Sep20-Nov20 SARS-CoV-2"      ///
->                                                                 4 "Dec20-Feb21 SARS-CoV-2"      ///
->                                                                 5 "Mar21-Nov21 SARS-CoV-2"      ///
->                                                                 6 "Dec21-Feb22 SARS-CoV-2"      ///
->                                                                 7 "Mar22-Oct22 SARS-CoV-2"
+. label values wave wave
 
-. label values calendar_period calendar_period
+. label var wave "COVID-19 wave"
 
-. label var calendar_period "Calendar period"
+. safetab wave, m
+5
 
-. safetab calendar_period, m
-
-       Calendar period |      Freq.     Percent        Cum.
------------------------+-----------------------------------
- Historical comparator |     19,846       71.34       71.34
-Feb20-Jun20 SARS-CoV-2 |      2,465        8.86       80.21
-Jul20-Aug20 SARS-CoV-2 |        816        2.93       83.14
-Sep20-Nov20 SARS-CoV-2 |      1,049        3.77       86.91
-Dec20-Feb21 SARS-CoV-2 |        859        3.09       90.00
-Mar21-Nov21 SARS-CoV-2 |      1,759        6.32       96.32
-Dec21-Feb22 SARS-CoV-2 |        354        1.27       97.59
-Mar22-Oct22 SARS-CoV-2 |        669        2.41      100.00
------------------------+-----------------------------------
-                 Total |     27,817      100.00
+        COVID-19 wave |      Freq.     Percent        Cum.
+----------------------+-----------------------------------
+Historical comparator |     19,846       71.34       71.34
+   Febuary20-August20 |      3,281       11.79       83.14
+   September20-June21 |      2,840       10.21       93.35
+    July21-November21 |        827        2.97       96.32
+ December21-October22 |      1,023        3.68      100.00
+----------------------+-----------------------------------
+                Total |     27,817      100.00
 
 . 
 . ** Covariates
@@ -2206,12 +2297,17 @@ Mar22-Oct22 SARS-CoV-2 |        669        2.41      100.00
 >                                                 40/49.9999=2    ///
 >                                                 50/59.9999=3    ///
 >                                                 60/69.9999=4    ///
->                                                 70/79.9999=5    ///                                     
+>                                                 70/79.9999=5    ///          
+>                            
 >                                                 80/max=6,               ///
 >                                                 gen(agegroup) 
 (27817 differences between age and agegroup)
 
 . 
+. label var age "Age"
+
+. label values age age
+
 . label define agegroup   1 "18-39"               ///
 >                                                 2 "40-49"               ///
 >                                                 3 "50-59"               ///
@@ -2219,10 +2315,11 @@ Mar22-Oct22 SARS-CoV-2 |        669        2.41      100.00
 >                                                 5 "70-79"               ///
 >                                                 6 "80+"
 
-. label values agegroup agegroup
-
 . label var agegroup "Age group"
 
+. label values agegroup agegroup
+
+. 
 . * Check there are no missing ages
 . assert age<.
 
@@ -2234,6 +2331,7 @@ Mar22-Oct22 SARS-CoV-2 |        669        2.41      100.00
 . 
 . * Sex
 . safetab sex
+0
 
         sex |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2248,8 +2346,10 @@ Mar22-Oct22 SARS-CoV-2 |        669        2.41      100.00
 . 
 . * Ethnicity
 . * 1 = White ethnicities (white British, white Irish, with other)
-. * 2 = Mixed ethnicities (white & black Caribbean, white & black African, white & Asian, other mixed ethnicities)
-. * 3 = South Asian ethnicities (Indian, Pakistani, Bangladeshi, other South Asian)
+. * 2 = Mixed ethnicities (white & black Caribbean, white & black African, whit
+> e & Asian, other mixed ethnicities)
+. * 3 = South Asian ethnicities (Indian, Pakistani, Bangladeshi, other South As
+> ian)
 . * 4 = Black ethnicities (black Caribbean, black African, other black)
 . * 5 = Other ethnicities (Chinese, all other ethnicities)
 . * . = Unknown ethnicity
@@ -2269,14 +2369,17 @@ Mar22-Oct22 SARS-CoV-2 |        669        2.41      100.00
 (1,093 real changes made)
 
 . label define ethnicity  1 "White"               ///
->                                                 2 "South Asian" ///                                             
+>                                                 2 "South Asian" ///          
+>                                    
 >                                                 3 "Black"               ///
 >                                                 4 "Mixed"               ///
->                                                 5 "Other"                                                               
+>                                                 5 "Other"                    
+>                                            
 
 . label values ethnicity ethnicity
 
 . safetab ethnicity, m
+10
 
   ethnicity |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2297,15 +2400,20 @@ South Asian |      1,044        3.75       63.63
 (6,932 real changes made)
 
 . label define ethnicity1 1 "White"                                       ///
->                                                 2 "South Asian"                         ///                                             
->                                                 3 "Black"                                       ///
->                                                 4 "Mixed"                                       ///
->                                                 5 "Other"                                       ///
+>                                                 2 "South Asian"              
+>            ///                                             
+>                                                 3 "Black"                    
+>                    ///
+>                                                 4 "Mixed"                    
+>                    ///
+>                                                 5 "Other"                    
+>                    ///
 >                                                 6 "Unknown"     
 
 . label values ethnicity1 ethnicity1
 
 . safetab ethnicity1, m
+11
 
  ethnicity1 |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2323,14 +2431,22 @@ South Asian |      1,044        3.75       63.63
 . replace rural_urban=. if rural_urban<1|rural_urban>8
 (0 real changes made)
 
-. label define rural_urban 1 "Urban major conurbation"                                            ///
->                                                  2 "Urban minor conurbation"                                            ///
->                                                  3 "Urban city and town"                                                        ///
->                                                  4 "Urban city and town in a sparse setting"            ///
->                                                  5 "Rural town and fringe"                                                      ///
->                                                  6 "Rural town and fringe in a sparse setting"          ///
->                                                  7 "Rural village and dispersed"                                        ///
->                                                  8 "Rural village and dispersed in a sparse setting"
+. label define rural_urban 1 "Urban major conurbation"                         
+>                    ///
+>                                                  2 "Urban minor conurbation" 
+>                                            ///
+>                                                  3 "Urban city and town"     
+>                                                    ///
+>                                                  4 "Urban city and town in a 
+> sparse setting"            ///
+>                                                  5 "Rural town and fringe"   
+>                                                    ///
+>                                                  6 "Rural town and fringe in 
+> a sparse setting"          ///
+>                                                  7 "Rural village and dispers
+> ed"                                        ///
+>                                                  8 "Rural village and dispers
+> ed in a sparse setting"
 
 . label values rural_urban rural_urban
 
@@ -2368,21 +2484,30 @@ Rural village and dispersed in a sparse |      5,466       19.65      100.00
 
 . tab urban rural_urban, m
 
-Urban/rura |                                       rural_urban
-         l | Urban maj  Urban min  Urban cit  Urban cit  Rural tow  Rural tow  Rural vil  Rural vil |     Total
------------+----------------------------------------------------------------------------------------+----------
-     Rural |         0          0          0          0      2,777      2,803      5,429      5,466 |    16,475 
-     Urban |     2,966      2,789      2,833      2,754          0          0          0          0 |    11,342 
------------+----------------------------------------------------------------------------------------+----------
-     Total |     2,966      2,789      2,833      2,754      2,777      2,803      5,429      5,466 |    27,817 
+Urban/rura |                      rural_urban
+         l | Urban maj  Urban min  Urban cit  Urban cit  Rural tow |     Total
+-----------+-------------------------------------------------------+----------
+     Rural |         0          0          0          0      2,777 |    16,475 
+     Urban |     2,966      2,789      2,833      2,754          0 |    11,342 
+-----------+-------------------------------------------------------+----------
+     Total |     2,966      2,789      2,833      2,754      2,777 |    27,817 
+
+
+Urban/rura |           rural_urban
+         l | Rural tow  Rural vil  Rural vil |     Total
+-----------+---------------------------------+----------
+     Rural |     2,803      5,429      5,466 |    16,475 
+     Urban |         0          0          0 |    11,342 
+-----------+---------------------------------+----------
+     Total |     2,803      5,429      5,466 |    27,817 
 
 . tab case urban
 
                       |      Urban/rural
                  case |     Rural      Urban |     Total
 ----------------------+----------------------+----------
-Comparator (historica |    11,704      8,142 |    19,846 
-             COVID-19 |     4,771      3,200 |     7,971 
+Historical comparator |    11,704      8,142 |    19,846 
+           SARS-CoV-2 |     4,771      3,200 |     7,971 
 ----------------------+----------------------+----------
                 Total |    16,475     11,342 |    27,817 
 
@@ -2395,22 +2520,22 @@ Comparator (historica |    11,704      8,142 |    19,846
 (27,817 missing values generated)
 
 . recode  bmi . = 1 if body_mass_index<18.5
-(1701 changes made to bmi)
+(bmi: 1701 changes made)
 
 . recode  bmi . = 2 if body_mass_index<25
-(6297 changes made to bmi)
+(bmi: 6297 changes made)
 
 . recode  bmi . = 3 if body_mass_index<30
-(6525 changes made to bmi)
+(bmi: 6525 changes made)
 
 . recode  bmi . = 4 if body_mass_index<35
-(5571 changes made to bmi)
+(bmi: 5571 changes made)
 
 . recode  bmi . = 5 if body_mass_index<40
-(3192 changes made to bmi)
+(bmi: 3192 changes made)
 
 . recode  bmi . = 6 if body_mass_index<.
-(1682 changes made to bmi)
+(bmi: 1682 changes made)
 
 . replace bmi = . if body_mass_index>=.
 (0 real changes made)
@@ -2420,11 +2545,13 @@ Comparator (historica |    11,704      8,142 |    19,846
 >                                         3 "Overweight (25-29.9)"        ///
 >                                         4 "Obese I (30-34.9)"           ///
 >                                         5 "Obese II (35-39.9)"          ///
->                                         6 "Obese III (40+)"                             
+>                                         6 "Obese III (40+)"                  
+>            
 
 . label values bmi bmi
 
 . safetab bmi, m
+4
 
                  bmi |      Freq.     Percent        Cum.
 ---------------------+-----------------------------------
@@ -2459,6 +2586,7 @@ Overweight (25-29.9) |      6,525       23.46       52.21
 . label var smoking "Smoking status"
 
 . safetab smoking, m
+8
 
        Smoking status |      Freq.     Percent        Cum.
 ----------------------+-----------------------------------
@@ -2471,19 +2599,22 @@ Current/former smoker |      3,955       14.22       18.22
 . 
 . * Baseline eGFR groups
 . * All baseline eGFR <15 should already by excluded
-. egen egfr_group = cut(baseline_egfr), at(0, 15, 30, 45, 60, 75, 90, 105, 5000)
-(12,351 missing values generated)
+. egen egfr_group = cut(baseline_egfr), at(0, 15, 30, 45, 60, 75, 90, 105, 5000
+> )
+(12351 missing values generated)
 
 . recode egfr_group 0=8 15=7 30=6 45=5 60=4 75=3 90=2 105=1
-(15466 changes made to egfr_group)
+(egfr_group: 15466 changes made)
 
-. label define egfr_group 1 "≥105" 2 "90-104" 3 "75-89" 4 "60-74" 5 "45-59" 6 "30-44" 7 "15-29" 8 "<15"
+. label define egfr_group 1 "≥105" 2 "90-104" 3 "75-89" 4 "60-74" 5 "45-59" 6 "
+> 30-44" 7 "15-29" 8 "<15"
 
 . label values egfr_group egfr_group
 
 . label var egfr_group "Baseline eGFR range"
 
 . safetab egfr_group, m
+11
 
    Baseline |
  eGFR range |      Freq.     Percent        Cum.
@@ -2501,21 +2632,24 @@ Current/former smoker |      3,955       14.22       18.22
 
 . 
 . * Baseline CKD stage
-. * No CKD = eGFR >59, CKD 3A = eGFR 45-59, CKD 3B = eGFR 30-44, CKD 4 = eGFR 15-29, CKD 5 = eGFR <15
+. * No CKD = eGFR >59, CKD 3A = eGFR 45-59, CKD 3B = eGFR 30-44, CKD 4 = eGFR 1
+> 5-29, CKD 5 = eGFR <15
 . * CKD 5 should already be excluded
 . gen ckd_stage = egfr_group
 (12,351 missing values generated)
 
 . recode ckd_stage 2/4=1 5=2 6=3 7=4 8=5 .=6
-(22861 changes made to ckd_stage)
+(ckd_stage: 22861 changes made)
 
-. label define ckd_stage 1 "No CKD" 2 "CKD 3A" 3 "CKD 3B" 4 "CKD 4" 5 "CKD 5" 6 "No baseline eGFR measurement"
+. label define ckd_stage 1 "No CKD" 2 "CKD 3A" 3 "CKD 3B" 4 "CKD 4" 5 "CKD 5" 6
+>  "No baseline eGFR measurement"
 
 . label values ckd_stage ckd_stage
 
 . label var ckd_stage "Baseline CKD stage"
 
 . safetab ckd_stage, m
+10
 
           Baseline CKD stage |      Freq.     Percent        Cum.
 -----------------------------+-----------------------------------
@@ -2534,6 +2668,7 @@ No baseline eGFR measurement |     12,351       44.40      100.00
 . drop atrial_fibrillation_or_flutter
 
 . safetab afib
+0
 
        afib |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2547,6 +2682,7 @@ No baseline eGFR measurement |     12,351       44.40      100.00
 . drop chronic_liver_disease
 
 . safetab liver
+0
 
       liver |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2556,6 +2692,7 @@ No baseline eGFR measurement |     12,351       44.40      100.00
       Total |     27,817      100.00
 
 . safetab diabetes
+0
 
    diabetes |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2569,6 +2706,7 @@ No baseline eGFR measurement |     12,351       44.40      100.00
 . drop haematological_cancer
 
 . safetab haem_cancer
+0
 
 haem_cancer |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2578,6 +2716,7 @@ haem_cancer |      Freq.     Percent        Cum.
       Total |     27,817      100.00
 
 . safetab heart_failure
+0
 
 heart_failu |
          re |      Freq.     Percent        Cum.
@@ -2588,6 +2727,7 @@ heart_failu |
       Total |     27,817      100.00
 
 . safetab hiv
+0
 
         hiv |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2597,6 +2737,7 @@ heart_failu |
       Total |     27,817      100.00
 
 . safetab hypertension
+0
 
 hypertensio |
           n |      Freq.     Percent        Cum.
@@ -2611,6 +2752,7 @@ hypertensio |
 . drop non_haematological_cancer
 
 . safetab non_haem_cancer
+0
 
 non_haem_ca |
        ncer |      Freq.     Percent        Cum.
@@ -2621,6 +2763,7 @@ non_haem_ca |
       Total |     27,817      100.00
 
 . safetab myocardial_infarction
+0
 
 myocardial_ |
  infarction |      Freq.     Percent        Cum.
@@ -2635,6 +2778,7 @@ myocardial_ |
 . drop peripheral_vascular_disease
 
 . safetab pvd
+0
 
         pvd |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2648,6 +2792,7 @@ myocardial_ |
 . drop rheumatoid_arthritis
 
 . safetab rheumatoid
+0
 
  rheumatoid |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2657,6 +2802,7 @@ myocardial_ |
       Total |     27,817      100.00
 
 . safetab stroke
+0
 
      stroke |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2670,6 +2816,7 @@ myocardial_ |
 . drop systemic_lupus_erythematosus
 
 . safetab lupus
+0
 
       lupus |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2706,6 +2853,7 @@ myocardial_ |
 (536 real changes made)
 
 . safetab cardiovascular
+0
 
 cardiovascu |
         lar |      Freq.     Percent        Cum.
@@ -2716,6 +2864,7 @@ cardiovascu |
       Total |     27,817      100.00
 
 . safetab immunosuppressed
+0
 
 immunosuppr |
       essed |      Freq.     Percent        Cum.
@@ -2730,86 +2879,155 @@ immunosuppr |
 . * ESRD
 . * eGFR <15 (earliest month)
 . foreach creatinine_monthly of varlist   creatinine_feb2017 ///
->                                                                                 creatinine_mar2017 ///
->                                                                                 creatinine_apr2017 ///
->                                                                                 creatinine_may2017 ///
->                                                                                 creatinine_jun2017 ///
->                                                                                 creatinine_jul2017 ///
->                                                                                 creatinine_aug2017 ///
->                                                                                 creatinine_sep2017 ///
->                                                                                 creatinine_oct2017 ///
->                                                                                 creatinine_nov2017 ///
->                                                                                 creatinine_dec2017 ///
->                                                                                 creatinine_jan2018 ///
->                                                                                 creatinine_feb2018 ///
->                                                                                 creatinine_mar2018 ///
->                                                                                 creatinine_apr2018 ///
->                                                                                 creatinine_may2018 ///
->                                                                                 creatinine_jun2018 ///
->                                                                                 creatinine_jul2018 ///
->                                                                                 creatinine_aug2018 ///
->                                                                                 creatinine_sep2018 ///
->                                                                                 creatinine_oct2018 ///
->                                                                                 creatinine_nov2018 ///
->                                                                                 creatinine_dec2018 ///
->                                                                                 creatinine_jan2019 ///
->                                                                                 creatinine_feb2019 ///
->                                                                                 creatinine_mar2019 ///
->                                                                                 creatinine_apr2019 ///
->                                                                                 creatinine_may2019 ///
->                                                                                 creatinine_jun2019 ///
->                                                                                 creatinine_jul2019 ///
->                                                                                 creatinine_aug2019 ///
->                                                                                 creatinine_sep2019 ///
->                                                                                 creatinine_feb2020 ///
->                                                                                 creatinine_mar2020 ///
->                                                                                 creatinine_apr2020 ///
->                                                                                 creatinine_may2020 ///
->                                                                                 creatinine_jun2020 ///
->                                                                                 creatinine_jul2020 ///
->                                                                                 creatinine_aug2020 ///
->                                                                                 creatinine_sep2020 ///
->                                                                                 creatinine_oct2020 ///
->                                                                                 creatinine_nov2020 ///
->                                                                                 creatinine_dec2020 ///
->                                                                                 creatinine_jan2021 ///
->                                                                                 creatinine_feb2021 ///
->                                                                                 creatinine_mar2021 ///
->                                                                                 creatinine_apr2021 ///
->                                                                                 creatinine_may2021 ///
->                                                                                 creatinine_jun2021 ///
->                                                                                 creatinine_jul2021 ///
->                                                                                 creatinine_aug2021 ///
->                                                                                 creatinine_sep2021 ///
->                                                                                 creatinine_oct2021 ///
->                                                                                 creatinine_nov2021 ///
->                                                                                 creatinine_dec2021 ///
->                                                                                 creatinine_jan2022 ///
->                                                                                 creatinine_feb2022 ///
->                                                                                 creatinine_mar2022 ///
->                                                                                 creatinine_apr2022 ///
->                                                                                 creatinine_may2022 ///
->                                                                                 creatinine_jun2022 ///
->                                                                                 creatinine_jul2022 ///
->                                                                                 creatinine_aug2022 ///
->                                                                                 creatinine_sep2022 ///
->                                                                                 creatinine_oct2022 {
-  2. replace `creatinine_monthly' = . if !inrange(`creatinine_monthly', 20, 3000)
+>                                                                              
+>    creatinine_mar2017 ///
+>                                                                              
+>    creatinine_apr2017 ///
+>                                                                              
+>    creatinine_may2017 ///
+>                                                                              
+>    creatinine_jun2017 ///
+>                                                                              
+>    creatinine_jul2017 ///
+>                                                                              
+>    creatinine_aug2017 ///
+>                                                                              
+>    creatinine_sep2017 ///
+>                                                                              
+>    creatinine_oct2017 ///
+>                                                                              
+>    creatinine_nov2017 ///
+>                                                                              
+>    creatinine_dec2017 ///
+>                                                                              
+>    creatinine_jan2018 ///
+>                                                                              
+>    creatinine_feb2018 ///
+>                                                                              
+>    creatinine_mar2018 ///
+>                                                                              
+>    creatinine_apr2018 ///
+>                                                                              
+>    creatinine_may2018 ///
+>                                                                              
+>    creatinine_jun2018 ///
+>                                                                              
+>    creatinine_jul2018 ///
+>                                                                              
+>    creatinine_aug2018 ///
+>                                                                              
+>    creatinine_sep2018 ///
+>                                                                              
+>    creatinine_oct2018 ///
+>                                                                              
+>    creatinine_nov2018 ///
+>                                                                              
+>    creatinine_dec2018 ///
+>                                                                              
+>    creatinine_jan2019 ///
+>                                                                              
+>    creatinine_feb2019 ///
+>                                                                              
+>    creatinine_mar2019 ///
+>                                                                              
+>    creatinine_apr2019 ///
+>                                                                              
+>    creatinine_may2019 ///
+>                                                                              
+>    creatinine_jun2019 ///
+>                                                                              
+>    creatinine_jul2019 ///
+>                                                                              
+>    creatinine_aug2019 ///
+>                                                                              
+>    creatinine_sep2019 ///
+>                                                                              
+>    creatinine_feb2020 ///
+>                                                                              
+>    creatinine_mar2020 ///
+>                                                                              
+>    creatinine_apr2020 ///
+>                                                                              
+>    creatinine_may2020 ///
+>                                                                              
+>    creatinine_jun2020 ///
+>                                                                              
+>    creatinine_jul2020 ///
+>                                                                              
+>    creatinine_aug2020 ///
+>                                                                              
+>    creatinine_sep2020 ///
+>                                                                              
+>    creatinine_oct2020 ///
+>                                                                              
+>    creatinine_nov2020 ///
+>                                                                              
+>    creatinine_dec2020 ///
+>                                                                              
+>    creatinine_jan2021 ///
+>                                                                              
+>    creatinine_feb2021 ///
+>                                                                              
+>    creatinine_mar2021 ///
+>                                                                              
+>    creatinine_apr2021 ///
+>                                                                              
+>    creatinine_may2021 ///
+>                                                                              
+>    creatinine_jun2021 ///
+>                                                                              
+>    creatinine_jul2021 ///
+>                                                                              
+>    creatinine_aug2021 ///
+>                                                                              
+>    creatinine_sep2021 ///
+>                                                                              
+>    creatinine_oct2021 ///
+>                                                                              
+>    creatinine_nov2021 ///
+>                                                                              
+>    creatinine_dec2021 ///
+>                                                                              
+>    creatinine_jan2022 ///
+>                                                                              
+>    creatinine_feb2022 ///
+>                                                                              
+>    creatinine_mar2022 ///
+>                                                                              
+>    creatinine_apr2022 ///
+>                                                                              
+>    creatinine_may2022 ///
+>                                                                              
+>    creatinine_jun2022 ///
+>                                                                              
+>    creatinine_jul2022 ///
+>                                                                              
+>    creatinine_aug2022 ///
+>                                                                              
+>    creatinine_sep2022 ///
+>                                                                              
+>    creatinine_oct2022 {
+  2. replace `creatinine_monthly' = . if !inrange(`creatinine_monthly', 20, 300
+> 0)
   3. gen mgdl_`creatinine_monthly' = `creatinine_monthly'/88.4
   4. gen min_`creatinine_monthly'=.
   5. replace min_`creatinine_monthly' = mgdl_`creatinine_monthly'/0.7 if sex==0
   6. replace min_`creatinine_monthly' = mgdl_`creatinine_monthly'/0.9 if sex==1
-  7. replace min_`creatinine_monthly' = min_`creatinine_monthly'^-0.329 if sex==0
-  8. replace min_`creatinine_monthly' = min_`creatinine_monthly'^-0.411 if sex==1
+  7. replace min_`creatinine_monthly' = min_`creatinine_monthly'^-0.329 if sex=
+> =0
+  8. replace min_`creatinine_monthly' = min_`creatinine_monthly'^-0.411 if sex=
+> =1
   9. replace min_`creatinine_monthly' = 1 if min_`creatinine_monthly'<1
  10. gen max_`creatinine_monthly'=.
  11. replace max_`creatinine_monthly' = mgdl_`creatinine_monthly'/0.7 if sex==0
  12. replace max_`creatinine_monthly' = mgdl_`creatinine_monthly'/0.9 if sex==1
  13. replace max_`creatinine_monthly' = max_`creatinine_monthly'^-1.209
  14. replace max_`creatinine_monthly' = 1 if max_`creatinine_monthly'>1
- 15. gen egfr_`creatinine_monthly' = min_`creatinine_monthly'*max_`creatinine_monthly'*141
+ 15. gen egfr_`creatinine_monthly' = min_`creatinine_monthly'*max_`creatinine_m
+> onthly'*141
  16. replace egfr_`creatinine_monthly' = egfr_`creatinine_monthly'*(0.993^age)
- 17. replace egfr_`creatinine_monthly' = egfr_`creatinine_monthly'*1.018 if sex==0
+ 17. replace egfr_`creatinine_monthly' = egfr_`creatinine_monthly'*1.018 if sex
+> ==0
  18. drop `creatinine_monthly'
  19. drop mgdl_`creatinine_monthly'
  20. drop min_`creatinine_monthly'
@@ -3865,12 +4083,17 @@ immunosuppr |
 . gen egfr15_date=.
 (27,817 missing values generated)
 
-. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 
-> jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 ju
-> n2022 jul2022 aug2022 sep2022 oct2022"
+. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep
+> 2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 
+> jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr20
+> 19 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 ju
+> n2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021
+>  apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2
+> 022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 
 . foreach x of local month_year  {
-  2.   replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatinine_`x'<15 & date("01`x'", "DMY")>=index_date
+  2.   replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatin
+> ine_`x'<15 & date("01`x'", "DMY")>=index_date
   3. }
 (0 real changes made)
 (0 real changes made)
@@ -3950,6 +4173,13 @@ immunosuppr |
 . replace esrd_date = krt_date if esrd_date==.
 (2,777 real changes made)
 
+. gen esrd = 0
+
+. replace esrd = 1 if esrd_date!=.
+(2,777 real changes made)
+
+. label var esrd "Kidney failure"
+
 . gen esrd_time = (esrd_date - index_date)
 (25,040 missing values generated)
 
@@ -3967,29 +4197,40 @@ immunosuppr |
 >                                                 366/730=7       ///
 >                                                 731/973=8       ///
 >                                                 974/max=9
-(2773 changes made to esrd_time_cat)
+(esrd_time_cat: 2773 changes made)
 
 . label define esrd_time_cat      1 "<0 days"                     ///
->                                                         2 "0 days"                      ///
->                                                         3 "1 to 28 days"        ///
->                                                         4 "20 to 90 days"       ///
->                                                         5 "91 to 180 days"      ///
->                                                         6 "181 to 365 days"     ///
->                                                         7 "366 to 730 days"     ///
->                                                         8 "731 to 973 days"     ///
+>                                                         2 "0 days"           
+>            ///
+>                                                         3 "1 to 28 days"     
+>    ///
+>                                                         4 "20 to 90 days"    
+>    ///
+>                                                         5 "91 to 180 days"   
+>    ///
+>                                                         6 "181 to 365 days"  
+>    ///
+>                                                         7 "366 to 730 days"  
+>    ///
+>                                                         8 "731 to 973 days"  
+>    ///
 >                                                         9 ">973 days"
 
 . label values esrd_time_cat esrd_time_cat
 
 . foreach exposure of varlist     case                    ///
->                                                                 covid_severity  ///
->                                                                 covid_aki               {
-  2.                                                                 by `exposure',sort: sum esrd_time, de
-  3.                                                                 tab esrd_time_cat `exposure', m col chi
+>                                                                 covid_severit
+> y  ///
+>                                                                 covid_aki    
+>            {
+  2.                                                                 by `exposu
+> re',sort: sum esrd_time, de
+  3.                                                                 tab esrd_t
+> ime_cat `exposure', m col chi
   4.                                                                 }
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--> case = Comparator (historical)
+-------------------------------------------------------------------------------
+-> case = Historical comparator
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
@@ -3997,17 +4238,17 @@ immunosuppr |
  1%            0              0
  5%            4              0
 10%           42              0       Obs               1,984
-25%          160              0       Sum of wgt.       1,984
+25%          160              0       Sum of Wgt.       1,984
 
 50%          351                      Mean           372.5227
-                        Largest       Std. dev.      253.4847
+                        Largest       Std. Dev.      253.4847
 75%          568            964
 90%          743            966       Variance       64254.52
 95%          825            976       Skewness       .3465365
 99%          930            982       Kurtosis       2.153798
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--> case = COVID-19
+-------------------------------------------------------------------------------
+-> case = SARS-CoV-2
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
@@ -4015,10 +4256,10 @@ immunosuppr |
  1%            0              0
  5%            6              0
 10%           35              0       Obs                 793
-25%          135              0       Sum of wgt.         793
+25%          135              0       Sum of Wgt.         793
 
 50%          320                      Mean           352.0202
-                        Largest       Std. dev.      250.7541
+                        Largest       Std. Dev.      250.7541
 75%          546            939
 90%          720            942       Variance       62877.61
 95%          799            949       Skewness       .3956433
@@ -4033,7 +4274,7 @@ immunosuppr |
 +-------------------+
 
                 |         case
-  esrd_time_cat | Comparato   COVID-19 |     Total
+  esrd_time_cat | Historica  SARS-CoV- |     Total
 ----------------+----------------------+----------
          0 days |        91         35 |       126 
                 |      0.46       0.44 |      0.45 
@@ -4067,7 +4308,7 @@ immunosuppr |
 
           Pearson chi2(8) =   6.3206   Pr = 0.611
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -> covid_severity = Historical comparator
 
                      Time to ESRD (Days)
@@ -4076,17 +4317,17 @@ immunosuppr |
  1%            0              0
  5%            4              0
 10%           42              0       Obs               1,984
-25%          160              0       Sum of wgt.       1,984
+25%          160              0       Sum of Wgt.       1,984
 
 50%          351                      Mean           372.5227
-                        Largest       Std. dev.      253.4847
+                        Largest       Std. Dev.      253.4847
 75%          568            964
 90%          743            966       Variance       64254.52
 95%          825            976       Skewness       .3465365
 99%          930            982       Kurtosis       2.153798
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--> covid_severity = Non-hospitalised SARS-CoV-2
+-------------------------------------------------------------------------------
+-> covid_severity = Non-hospitalised COVID
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
@@ -4094,17 +4335,17 @@ immunosuppr |
  1%            0              0
  5%           10              0
 10%           40              0       Obs                 623
-25%          133              0       Sum of wgt.         623
+25%          133              0       Sum of Wgt.         623
 
 50%          311                      Mean            346.183
-                        Largest       Std. dev.       248.511
+                        Largest       Std. Dev.       248.511
 75%          537            939
 90%          720            942       Variance       61757.71
 95%          797            949       Skewness       .4597985
 99%          923            952       Kurtosis       2.234133
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--> covid_severity = Hospitalised COVID-19
+-------------------------------------------------------------------------------
+-> covid_severity = Hospitalised COVID
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
@@ -4112,17 +4353,17 @@ immunosuppr |
  1%            0              0
  5%           21              1
 10%           30              3       Obs                  78
-25%          177             21       Sum of wgt.          78
+25%          177             21       Sum of Wgt.          78
 
 50%          440                      Mean           396.4872
-                        Largest       Std. dev.      249.8106
+                        Largest       Std. Dev.      249.8106
 75%          578            807
 90%          709            815       Variance       62405.32
 95%          807            856       Skewness      -.0804598
 99%          900            900       Kurtosis       1.910028
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--> covid_severity = Critical care COVID-19
+-------------------------------------------------------------------------------
+-> covid_severity = Critical care COVID
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
@@ -4130,10 +4371,10 @@ immunosuppr |
  1%            0              0
  5%            0              0
 10%            8              0       Obs                  92
-25%          125              0       Sum of wgt.          92
+25%          125              0       Sum of Wgt.          92
 
 50%        289.5                      Mean           353.8478
-                        Largest       Std. dev.      265.2968
+                        Largest       Std. Dev.      265.2968
 75%        570.5            842
 90%          742            844       Variance       70382.42
 95%          818            882       Skewness       .3771828
@@ -4182,7 +4423,7 @@ immunosuppr |
 
          Pearson chi2(24) =  43.6247   Pr = 0.008
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -> covid_aki = Historical comparator
 
                      Time to ESRD (Days)
@@ -4191,17 +4432,17 @@ immunosuppr |
  1%            0              0
  5%            4              0
 10%           42              0       Obs               1,984
-25%          160              0       Sum of wgt.       1,984
+25%          160              0       Sum of Wgt.       1,984
 
 50%          351                      Mean           372.5227
-                        Largest       Std. dev.      253.4847
+                        Largest       Std. Dev.      253.4847
 75%          568            964
 90%          743            966       Variance       64254.52
 95%          825            976       Skewness       .3465365
 99%          930            982       Kurtosis       2.153798
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--> covid_aki = Non-hospitalised SARS-CoV-2
+-------------------------------------------------------------------------------
+-> covid_aki = Non-hospitalised COVID
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
@@ -4209,17 +4450,17 @@ immunosuppr |
  1%            0              0
  5%            3              0
 10%           39              0       Obs                 672
-25%          139              0       Sum of wgt.         672
+25%          139              0       Sum of Wgt.         672
 
 50%          322                      Mean           352.9643
-                        Largest       Std. dev.      250.7962
+                        Largest       Std. Dev.      250.7962
 75%        545.5            939
 90%          733            942       Variance       62898.75
 95%          801            949       Skewness       .4217767
 99%          923            952       Kurtosis       2.187653
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--> covid_aki = No AKI hospitalised COVID-19
+-------------------------------------------------------------------------------
+-> covid_aki = Hospitalised COVID
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
@@ -4227,17 +4468,17 @@ immunosuppr |
  1%            0              0
  5%           11              0
 10%           28              1       Obs                  80
-25%          147              3       Sum of wgt.          80
+25%          147              3       Sum of Wgt.          80
 
 50%          389                      Mean           373.4125
-                        Largest       Std. dev.       250.696
+                        Largest       Std. Dev.       250.696
 75%        567.5            807
 90%          697            815       Variance       62848.47
 95%          776            856       Skewness       .0511123
 99%          900            900       Kurtosis       1.889251
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--> covid_aki = AKI hospitalised COVID-19
+-------------------------------------------------------------------------------
+-> covid_aki = Hospitalised COVID-AKI
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
@@ -4245,10 +4486,10 @@ immunosuppr |
  1%            0              0
  5%           25             23
 10%           29             25       Obs                  41
-25%           95             26       Sum of wgt.          41
+25%           95             26       Sum of Wgt.          41
 
 50%          214                      Mean           294.8049
-                        Largest       Std. dev.      247.8684
+                        Largest       Std. Dev.      247.8684
 75%          542            717
 90%          705            734       Variance       61438.76
 95%          734            764       Skewness        .670801
@@ -4263,7 +4504,7 @@ immunosuppr |
 +-------------------+
 
                 |        COVID-19 acute kidney injury
-  esrd_time_cat | Historica  Non-hospi  No AKI ho  AKI hospi |     Total
+  esrd_time_cat | Historica  Non-hospi  Hospitali  Hospitali |     Total
 ----------------+--------------------------------------------+----------
          0 days |        91         32          2          1 |       126 
                 |      0.46       0.47       0.26       0.24 |      0.45 
@@ -4312,7 +4553,8 @@ immunosuppr |
 
 . format end_date %td
 
-. replace exit_date = min(deregistered_date, death_date, end_date) if esrd_date==.
+. replace exit_date = min(deregistered_date, death_date, end_date) if esrd_date
+> ==.
 (25,040 real changes made)
 
 . gen follow_up_time = (exit_date - index_date)
@@ -4325,16 +4567,21 @@ immunosuppr |
 >                                                 -28/-1=2        ///
 >                                                 0/365=3         ///
 >                                                 366/730=4       ///
->                                                 731/973=5       ///                                     
->                                                 974/max=6
-(27803 changes made to follow_up_cat)
+>                                                 731/1040=5      ///          
+>                            
+>                                                 1041/max=6
+(follow_up_cat: 27803 changes made)
 
 . label define follow_up_cat      1 "<-29 days"           ///
->                                                         2 "-28 to -1 days"      ///
->                                                         3 "0 to 365 days"       ///
->                                                         4 "366 to 730 days" ///
->                                                         5 "731 to 973 days"     ///
->                                                         6 ">973 days"
+>                                                         2 "-28 to -1 days"   
+>    ///
+>                                                         3 "0 to 365 days"    
+>    ///
+>                                                         4 "366 to 730 days" /
+> //
+>                                                         5 "731 to 1040 days" 
+>    ///
+>                                                         6 ">1040 days"
 
 . label values follow_up_cat follow_up_cat
 
@@ -4342,176 +4589,199 @@ immunosuppr |
 
 . tab case follow_up_cat
 
-                      |                     Follow_up time
-                 case | -28 to -1  0 to 365   366 to 73  731 to 97  >973 days |     Total
-----------------------+-------------------------------------------------------+----------
-Comparator (historica |        21      4,326      6,936      7,484      1,079 |    19,846 
-             COVID-19 |        10      1,819      2,834      2,905        403 |     7,971 
-----------------------+-------------------------------------------------------+----------
-                Total |        31      6,145      9,770     10,389      1,482 |    27,817 
+                      |               Follow_up time
+                 case | -28 to -1  0 to 365   366 to 73  731 to 10 |     Total
+----------------------+--------------------------------------------+----------
+Historical comparator |        21      4,326      6,936      8,563 |    19,846 
+           SARS-CoV-2 |        10      1,819      2,834      3,308 |     7,971 
+----------------------+--------------------------------------------+----------
+                Total |        31      6,145      9,770     11,871 |    27,817 
 
 . tab covid_krt follow_up_cat
 
-      COVID-19 kidney |                     Follow_up time
-  replacement therapy | -28 to -1  0 to 365   366 to 73  731 to 97  >973 days |     Total
-----------------------+-------------------------------------------------------+----------
-Historical comparator |        21      4,326      6,936      7,484      1,079 |    19,846 
-Non-hospitalised SARS |        10      1,492      2,280      2,370        323 |     6,475 
-No KRT hospitalised C |         0        170        286        251         32 |       739 
-KRT hospitalised COVI |         0        157        268        284         48 |       757 
-----------------------+-------------------------------------------------------+----------
-                Total |        31      6,145      9,770     10,389      1,482 |    27,817 
+      COVID-19 kidney |               Follow_up time
+  replacement therapy | -28 to -1  0 to 365   366 to 73  731 to 10 |     Total
+----------------------+--------------------------------------------+----------
+Historical comparator |        21      4,326      6,936      8,563 |    19,846 
+Non-hospitalised SARS |        10      1,492      2,280      2,693 |     6,475 
+No KRT hospitalised C |         0        170        286        283 |       739 
+KRT hospitalised COVI |         0        157        268        332 |       757 
+----------------------+--------------------------------------------+----------
+                Total |        31      6,145      9,770     11,871 |    27,817 
 
 . drop if follow_up_time<0
 (31 observations deleted)
 
-. drop if follow_up_time>972
-(1,516 observations deleted)
+. drop if follow_up_time>1040
+(0 observations deleted)
 
 . tab case follow_up_cat
 
                       |          Follow_up time
-                 case | 0 to 365   366 to 73  731 to 97 |     Total
+                 case | 0 to 365   366 to 73  731 to 10 |     Total
 ----------------------+---------------------------------+----------
-Comparator (historica |     4,326      6,936      7,458 |    18,720 
-             COVID-19 |     1,819      2,834      2,897 |     7,550 
+Historical comparator |     4,326      6,936      8,563 |    19,825 
+           SARS-CoV-2 |     1,819      2,834      3,308 |     7,961 
 ----------------------+---------------------------------+----------
-                Total |     6,145      9,770     10,355 |    26,270 
+                Total |     6,145      9,770     11,871 |    27,786 
 
 . tab covid_krt follow_up_cat
 
       COVID-19 kidney |          Follow_up time
-  replacement therapy | 0 to 365   366 to 73  731 to 97 |     Total
+  replacement therapy | 0 to 365   366 to 73  731 to 10 |     Total
 ----------------------+---------------------------------+----------
-Historical comparator |     4,326      6,936      7,458 |    18,720 
-Non-hospitalised SARS |     1,492      2,280      2,364 |     6,136 
-No KRT hospitalised C |       170        286        251 |       707 
-KRT hospitalised COVI |       157        268        282 |       707 
+Historical comparator |     4,326      6,936      8,563 |    19,825 
+Non-hospitalised SARS |     1,492      2,280      2,693 |     6,465 
+No KRT hospitalised C |       170        286        283 |       739 
+KRT hospitalised COVI |       157        268        332 |       757 
 ----------------------+---------------------------------+----------
-                Total |     6,145      9,770     10,355 |    26,270 
+                Total |     6,145      9,770     11,871 |    27,786 
 
 . 
 . * 50% eGFR reduction (earliest month) (or ESRD)
 . gen egfr_half_date=.
-(26,270 missing values generated)
+(27,786 missing values generated)
 
-. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 
-> jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 ju
-> n2022 jul2022 aug2022 sep2022 oct2022"
+. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep
+> 2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 
+> jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr20
+> 19 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 ju
+> n2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021
+>  apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2
+> 022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 
 . foreach x of local month_year {
-  2.   replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_half_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>=index_date
+  2.   replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_h
+> alf_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>=in
+> dex_date
   3.   format egfr_half_date %td
   4. }
 (0 real changes made)
 (0 real changes made)
-(16 real changes made)
-(58 real changes made)
-(92 real changes made)
-(129 real changes made)
-(150 real changes made)
-(154 real changes made)
-(169 real changes made)
-(174 real changes made)
-(186 real changes made)
-(183 real changes made)
-(189 real changes made)
-(205 real changes made)
-(192 real changes made)
-(192 real changes made)
-(194 real changes made)
-(186 real changes made)
-(181 real changes made)
-(185 real changes made)
-(170 real changes made)
-(146 real changes made)
-(169 real changes made)
-(161 real changes made)
-(168 real changes made)
-(151 real changes made)
-(124 real changes made)
-(133 real changes made)
-(141 real changes made)
-(104 real changes made)
-(79 real changes made)
-(105 real changes made)
-(0 real changes made)
-(0 real changes made)
-(0 real changes made)
-(19 real changes made)
-(35 real changes made)
-(46 real changes made)
-(49 real changes made)
-(56 real changes made)
-(53 real changes made)
-(60 real changes made)
-(70 real changes made)
-(72 real changes made)
-(66 real changes made)
-(96 real changes made)
-(77 real changes made)
-(82 real changes made)
-(66 real changes made)
-(75 real changes made)
-(71 real changes made)
-(76 real changes made)
-(66 real changes made)
-(67 real changes made)
-(60 real changes made)
-(45 real changes made)
 (62 real changes made)
-(46 real changes made)
-(54 real changes made)
-(57 real changes made)
-(47 real changes made)
-(54 real changes made)
+(81 real changes made)
+(109 real changes made)
+(151 real changes made)
+(163 real changes made)
+(178 real changes made)
+(190 real changes made)
+(185 real changes made)
+(194 real changes made)
+(193 real changes made)
+(194 real changes made)
+(212 real changes made)
+(201 real changes made)
+(206 real changes made)
+(199 real changes made)
+(190 real changes made)
+(185 real changes made)
+(187 real changes made)
+(175 real changes made)
+(151 real changes made)
+(175 real changes made)
+(163 real changes made)
+(171 real changes made)
+(158 real changes made)
+(128 real changes made)
+(136 real changes made)
+(145 real changes made)
+(107 real changes made)
+(82 real changes made)
+(110 real changes made)
+(0 real changes made)
+(1 real change made)
+(17 real changes made)
+(34 real changes made)
 (50 real changes made)
+(57 real changes made)
+(52 real changes made)
+(59 real changes made)
+(60 real changes made)
+(64 real changes made)
+(75 real changes made)
+(77 real changes made)
+(70 real changes made)
+(99 real changes made)
+(81 real changes made)
+(87 real changes made)
+(67 real changes made)
+(79 real changes made)
+(73 real changes made)
+(79 real changes made)
+(66 real changes made)
+(69 real changes made)
+(62 real changes made)
+(47 real changes made)
+(63 real changes made)
+(46 real changes made)
+(55 real changes made)
+(59 real changes made)
+(48 real changes made)
+(54 real changes made)
+(51 real changes made)
 (45 real changes made)
 (46 real changes made)
 
 . replace egfr_half_date=esrd_date if egfr_half_date==.
-(2,068 real changes made)
+(2,070 real changes made)
+
+. gen egfr_half = 0
+
+. replace egfr_half = 1 if egfr_half_date!=.
+(8,743 real changes made)
+
+. label var egfr_half "50% reduction in eGFR"
 
 . * Index date (50% eGFR reduction)
 . gen index_date_egfr_half = index_date
 
 . replace index_date_egfr_half =. if baseline_egfr==.
-(11,642 real changes made, 11,642 to missing)
+(12,336 real changes made, 12,336 to missing)
 
 . * Exit date (50% eGFR reduction)
 . gen exit_date_egfr_half = egfr_half_date
-(17,948 missing values generated)
+(19,043 missing values generated)
 
 . format exit_date_egfr_half %td
 
-. replace exit_date_egfr_half = min(deregistered_date,death_date,end_date) if egfr_half_date==. & index_date_egfr_half!=.
-(7,523 real changes made)
+. replace exit_date_egfr_half = min(deregistered_date,death_date,end_date) if e
+> gfr_half_date==. & index_date_egfr_half!=.
+(7,925 real changes made)
 
 . gen follow_up_time_egfr_half = (exit_date_egfr_half - index_date_egfr_half)
-(11,642 missing values generated)
+(12,336 missing values generated)
 
-. label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
+. label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days
+> )"
 
 . 
 . * AKI (or ESRD)
 . gen aki_date = date(acute_kidney_injury_outcome, "YMD")
-(23,680 missing values generated)
+(25,054 missing values generated)
 
 . format aki_date %td
 
 . drop acute_kidney_injury_outcome
 
 . replace aki_date = esrd_date if aki_date==.
-(2,489 real changes made)
+(2,490 real changes made)
+
+. gen aki = 0
+
+. replace aki = 1 if aki_date!=.
+(5,222 real changes made)
+
+. label var aki "Acute kidney injury"
 
 . * Exit date (AKI)
 . gen exit_date_aki = aki_date
-(21,191 missing values generated)
+(22,564 missing values generated)
 
 . format exit_date_aki %td
 
-. replace exit_date_aki = min(deregistered_date,death_date,end_date)  if aki_date==.
-(21,191 real changes made)
+. replace exit_date_aki = min(deregistered_date,death_date,end_date)  if aki_da
+> te==.
+(22,564 real changes made)
 
 . gen follow_up_time_aki = (exit_date_aki - index_date)
 
@@ -4520,12 +4790,19 @@ KRT hospitalised COVI |       157        268        282 |       707
 . 
 . * Exit date (death)
 . gen exit_date_death = death_date
-(24,626 missing values generated)
+(26,137 missing values generated)
+
+. gen death = 0
+
+. replace death = 1 if death_date!=.
+(1,649 real changes made)
+
+. label var death "Death"
 
 . format exit_date_death %td
 
 . replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
-(24,626 real changes made)
+(26,137 real changes made)
 
 . gen follow_up_time_death = (exit_date_death - index_date)
 
@@ -4533,11 +4810,12 @@ KRT hospitalised COVI |       157        268        282 |       707
 
 . 
 . save ./output/analysis_2017.dta, replace
+(note: file ./output/analysis_2017.dta not found)
 file ./output/analysis_2017.dta saved
 
 . log close
       name:  <unnamed>
-       log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2017.log
+       log:  /workspace/logs/analysis_2017.log
   log type:  text
- closed on:  28 Dec 2022, 11:43:33
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ closed on:  11 Jan 2023, 18:34:10
+-------------------------------------------------------------------------------

@@ -1,0 +1,154 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/cox_esrd_2017_table_JTcode.log
+  log type:  text
+ opened on:  10 Jan 2023, 21:56:00
+
+. 
+. tempname measures
+
+.         postfile `measures' ///
+>                 str20(comparator) str20(outcome) str10(model) ptime_covid num_events_covid rate_covid /// 
+>                 ptime_comparator num_events_comparator rate_comparator hr lc uc ///
+>                 using ./output/cox_esrd_2017_JTcode, replace
+
+.                 
+. use ./output/analysis_2017.dta
+
+. gen new_patient_id = _n
+
+. 
+. global crude i.case
+
+. global minimal i.case i.sex age1 age2 age3
+
+. *problem with region
+. global additional i.case i.sex i.ethnicity i.imd i.urban i.bmi i.smoking age1 age2 age3
+
+. global full i.case i.sex i.ethnicity i.imd i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3
+
+. 
+. 
+. 
+. stset exit_date, fail(esrd_date) origin(index_date) id(patient_id) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: patient_id
+         Failure event: esrd_date!=0 & esrd_date<.
+Observed time interval: (exit_date[_n-1], exit_date]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date
+
+--------------------------------------------------------------------------
+     27,786  total observations
+        126  observations end on or before enter()
+         36  observations begin on or after (first) failure
+--------------------------------------------------------------------------
+     27,624  observations remaining, representing
+     27,350  subjects
+      2,648  failures in single-failure-per-subject data
+ 47,153.317  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  5.744011
+
+. 
+. foreach model in crude minimal additional full {
+  2.         stcox $`model', vce(cluster practice_id) strata(set_id)
+  3.         matrix b = r(table)
+  4.                         local hr= b(%4.2f)[1,2]
+  5.                         local lc = b[5,2] 
+  6.                         local uc = b[6,2]
+  7.                         
+.                         estat phtest, detail
+  8.                 
+. 
+.                         stptime if case == 1
+  9.                         local rate_covid = `r(rate)'
+ 10.                         local ptime_covid = `r(ptime)'
+ 11.                         local events_covid .
+ 12.                         if `r(failures)' == 0 | `r(failures)' > 5 local events_covid `r(failures)'
+ 13.                         
+.                         stptime if case == 0
+ 14.                         local rate_comparator = `r(rate)'
+ 15.                         local ptime_comparator = `r(ptime)'
+ 16.                         local events_comparator .
+ 17.                         if `r(failures)' == 0 | `r(failures)' > 5 local events_comparator `r(failures)'
+ 18. 
+.                         post `measures'  ("Historical") ("ESRD") ("`model'")  ///
+>                                                         (`ptime_covid') (`events_covid') (`rate_covid') (`ptime_comparator') (`events_comparator')  (`rate_comparator')  ///
+>                                                         (`hr') (`lc') (`uc')
+ 19.                         
+.                         }
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -3128.9655
+Iteration 1:   log pseudolikelihood = -3128.8642
+Iteration 2:   log pseudolikelihood = -3128.8642
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -3128.8642
+
+Stratified Cox regression with Breslow method for ties
+Strata variable: set_id
+
+No. of subjects =      27,350                           Number of obs = 27,624
+No. of failures =       2,648
+Time at risk    = 47,153.3169
+                                                        Wald chi2(1)  =   0.28
+Log pseudolikelihood = -3128.8642                       Prob > chi2   = 0.5935
+
+                           (Std. err. adjusted for 39 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   1.020595   .0389797     0.53   0.594     .9469858    1.099926
+------------------------------------------------------------------------------
+unknown function b()
+r(133);
+
+end of do-file
+
+r(133);
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD1a44_000000.tmp"
+
+. *************************************************************************
+. *Do file: 08_hhClassif_an_mv_analysis_perEth5Group_HR_table.do
+. *
+. *Purpose: Create content that is ready to paste into a pre-formatted Word 
+. * shell table containing minimally and fully-adjusted HRs for risk factors
+. * of interest, across 2 outcomes 
+. *
+. *Requires: final analysis dataset (analysis_dataset.dta)
+. 
+. *
+. *Coding: K Wing, base on file from HFORBES, based on file from Krishnan Bhaskaran
+. *
+. *Date drafted: 17th June 2021
+. *************************************************************************
+. sysdir set PLUS ./analysis/adofiles
+
+. sysdir set PERSONAL ./analysis/adofiles
+
+. *run globals of lists of diagnoses and symptoms, then make loc
+. do ./analysis/masterlists.do
+
+. global outcome esrd_date egfr_half_date aki_date
+
+. 
+. global exposure case covid_severity covid_aki
+
+. 
+end of do-file
+
+. 
+. *checking tabulations
+. capture log close
