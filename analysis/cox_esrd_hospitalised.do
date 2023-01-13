@@ -4,7 +4,7 @@ pwd
 
 cap log close
 log using ./logs/cox_esrd_hospitalised.log, replace t
-use ./output/analysis_hospitalised.dta
+use ./output/analysis_hospitalised.dta, clear
 
 stset exit_date, fail(esrd_date) origin(index_date) id(patient_id) scale(365.25)
 foreach exposure of varlist	case			///

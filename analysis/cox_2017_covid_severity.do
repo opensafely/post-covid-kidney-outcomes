@@ -69,7 +69,7 @@ local lab3: label covid_severity 3
 	local event = r(N)
     bysort covid_severity: egen total_follow_up_`outcome' = total(_t)
 	qui su total_follow_up_`outcome' if covid_severity==0
-	local person_year = r(mean)/365.25
+	local person_year = r(mean)
 	local rate = 100000*(`event'/`person_year')
 	
 	file write tablecontent _n

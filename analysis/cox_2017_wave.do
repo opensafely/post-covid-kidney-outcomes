@@ -56,8 +56,8 @@ eststo model4
 parmest, label eform format(estimate p lb ub) saving("full_wave_`outcome'", replace) idstr("full_wave_`outcome'") 
 local hr "`hr' "full_wave_`outcome'" "
 }
-else di "WARNING MODEL2 DID NOT FIT (`outcome')"
-											
+else di "WARNING MODEL2 DID NOT FIT (`outcome')"					
+							
 local lab0: label wave 0
 local lab1: label wave 1
 local lab2: label wave 2
@@ -71,7 +71,7 @@ local lab5: label wave 5
 	local event = r(N)
     bysort wave: egen total_follow_up_`outcome' = total(_t)
 	qui su total_follow_up_`outcome' if wave==0
-	local person_year = r(mean)/365.25
+	local person_year = r(mean)
 	local rate = 100000*(`event'/`person_year')
 	
 	file write tablecontent _n

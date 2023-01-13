@@ -1,0 +1,1871 @@
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/cox_hospitalised_case.log
+  log type:  text
+ opened on:  12 Jan 2023, 10:20:51
+
+. 
+. cap file close tablecontent
+
+. file open tablecontent using ./output/cox_hospitalised_case.txt, write text replace
+
+. file write tablecontent ("Kidney outcomes after COVID-19 hospitalisation compared to a pre-pandemic population hospitalised for pneumonia") _n
+
+. file write tablecontent _n
+
+. file write tablecontent ("Populations restricted to those who survived 28 days after hospital admission") _n
+
+. file write tablecontent ("Clustering by general practice accounted for using robust standard errors") _n
+
+. file write tablecontent _n
+
+. file write tablecontent ("Cox regression models:") _n
+
+. file write tablecontent ("1. Crude") _n
+
+. file write tablecontent ("2. Minimally adjusted: adjusted for age (using spline functions), sex and calendar month") _n
+
+. file write tablecontent ("3. Additionally adjusted: additionally adjusted for ethnicity, socioeconomic deprivation, region, rural/urban, body mass index and smoking") _n
+
+. file write tablecontent ("4. Fully adjusted: additionally adjusted for cardiovascular diseases, diabetes, hypertension, immunocompromise and cancer") _n
+
+. file write tablecontent _n
+
+. file write tablecontent _tab _tab _tab _tab _tab ("Number") _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally adjusted") 
+> _tab ("Fully adjusted") _tab _tab _n
+
+. file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _t
+> ab _tab _n
+
+. 
+. use ./output/analysis_hospitalised.dta, clear
+
+. foreach outcome of varlist esrd egfr_half aki death {
+  2. stset exit_date, fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
+  3. 
+. stcox i.case, vce(cluster practice_id)
+  4. estimates save "crude_case_`outcome'", replace 
+  5. eststo model1
+  6. parmest, label eform format(estimate p lb ub) saving("crude_case_`outcome'", replace) idstr("crude_case_`outcome'") 
+  7. local hr "`hr' "crude_case_`outcome'" "
+  8. 
+. stcox i.case i.sex age1 age2 age3 i.month, vce(cluster practice_id)
+  9. estimates save "minimal_case_`outcome'", replace 
+ 10. eststo model2
+ 11. parmest, label eform format(estimate p lb ub) saving("minimal_case_`outcome'", replace) idstr("minimal_case_`outcome'")
+ 12. local hr "`hr' "minimal_case_`outcome'" "
+ 13. 
+. stcox i.case i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3 i.month, vce(cluster practice_id)
+ 14. if _rc==0{
+ 15. estimates
+ 16. estimates save "additional_case_`outcome'", replace 
+ 17. eststo model3
+ 18. parmest, label eform format(estimate p lb ub) saving("additional_case_`outcome'", replace) idstr("additional_case_`outcome'") 
+ 19. local hr "`hr' "additional_case_`outcome'" "
+ 20. }
+ 21. else di "WARNING MODEL1 DID NOT FIT (`outcome')"
+ 22. 
+. stcox i.case i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 i.month, vce(cluster practice_id)          
+ 23. if _rc==0{
+ 24. estimates
+ 25. estimates save "full_case_`outcome'", replace 
+ 26. eststo model4
+ 27. parmest, label eform format(estimate p lb ub) saving("full_case_`outcome'", replace) idstr("full_case_`outcome'") 
+ 28. local hr "`hr' "full_case_`outcome'" "
+ 29. }
+ 30. else di "WARNING MODEL2 DID NOT FIT (`outcome')"
+ 31.                                                                                 
+. local lab0: label case 0
+ 32. local lab1: label case 1
+ 33. 
+.         qui safecount if case==0
+ 34.         local denominator = r(N)
+ 35.         qui safecount if case== 1 & `outcome'==1
+ 36.         local event = r(N)
+ 37.     bysort case: egen total_follow_up_`outcome' = total(_t)
+ 38.         qui su total_follow_up_`outcome' if case==0
+ 39.         local person_year = r(mean)/365.25
+ 40.         local rate = 100000*(`event'/`person_year')
+ 41.         
+.         file write tablecontent _n
+ 42.         file write tablecontent ("`outcome'") _n
+ 43.         file write tablecontent _tab ("`lab0'") _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab
+ 44.         file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
+ 45.         
+.         qui safecount if case==1
+ 46.         local denominator = r(N)
+ 47.         qui safecount if case == 1 & `outcome'==1
+ 48.         local event = r(N)
+ 49.         qui su total_follow_up_`outcome' if case==1
+ 50.         local person_year = r(mean)/365.25
+ 51.         local rate = 100000*(`event'/`person_year')
+ 52.         file write tablecontent _tab ("`lab1'") _tab _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
+ 53.         cap estimates use "crude_case_`outcome'" 
+ 54.          cap lincom 1.case, eform
+ 55.         file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 56.         cap estimates clear
+ 57.         cap estimates use "minimal_case_`outcome'" 
+ 58.          cap lincom 1.case, eform
+ 59.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 60.         cap estimates clear
+ 61.         cap estimates use "additional_case_`outcome'" 
+ 62.          cap lincom 1.case, eform
+ 63.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 64.         cap estimates clear
+ 65.         cap estimates use "full_case_`outcome'" 
+ 66.          cap lincom 1.case, eform
+ 67.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
+ 68. }
+
+Survival-time data settings
+
+           ID variable: patient_id
+         Failure event: esrd_date!=0 & esrd_date<.
+Observed time interval: (exit_date[_n-1], exit_date]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date
+
+--------------------------------------------------------------------------
+     25,443  total observations
+        128  observations end on or before enter()
+         26  observations begin on or after (first) failure
+--------------------------------------------------------------------------
+     25,289  observations remaining, representing
+     24,987  subjects
+      1,890  failures in single-failure-per-subject data
+ 33,159.975  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  5.744011
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -18062.944
+Iteration 1:   log pseudolikelihood = -18061.331
+Iteration 2:   log pseudolikelihood = -18061.331
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18061.331
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      24,987                           Number of obs = 25,289
+No. of failures =       1,890
+Time at risk    = 33,159.9754
+                                                        Wald chi2(1)  =   3.13
+Log pseudolikelihood = -18061.331                       Prob > chi2   = 0.0769
+
+                           (Std. err. adjusted for 40 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .9202744   .0432294    -1.77   0.077     .8393298    1.009025
+------------------------------------------------------------------------------
+file crude_case_esrd.ster saved
+file crude_case_esrd.dta saved
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -18062.944
+Iteration 1:   log pseudolikelihood = -18051.166
+Iteration 2:   log pseudolikelihood = -18051.151
+Iteration 3:   log pseudolikelihood = -18051.151
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18051.151
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      24,987                           Number of obs = 25,289
+No. of failures =       1,890
+Time at risk    = 33,159.9754
+                                                        Wald chi2(16) = 103.04
+Log pseudolikelihood = -18051.151                       Prob > chi2   = 0.0000
+
+                           (Std. err. adjusted for 40 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .9211052   .0434343    -1.74   0.081     .8397909    1.010293
+             |
+         sex |
+       Male  |   1.126627   .0379276     3.54   0.000     1.054689    1.203471
+        age1 |   .9902009   .0035916    -2.71   0.007     .9831866    .9972653
+        age2 |   1.026262   .0114074     2.33   0.020     1.004146    1.048866
+        age3 |   .9324512   .0306153    -2.13   0.033     .8743363    .9944288
+             |
+       month |
+   February  |   .9822984   .0956586    -0.18   0.854     .8116174    1.188873
+      March  |    1.08491   .1142208     0.77   0.439     .8826288     1.33355
+      April  |   1.007469   .1031309     0.07   0.942     .8243224    1.231306
+        May  |   1.102483   .1128722     0.95   0.341     .9020398    1.347466
+       June  |    .965886   .1179336    -0.28   0.776     .7603177    1.227034
+       July  |   .9663206   .0859132    -0.39   0.700     .8117886    1.150269
+     August  |   .9254605   .0945016    -0.76   0.448     .7575986    1.130516
+  September  |   1.078502   .0884141     0.92   0.357      .918419    1.266489
+    October  |   1.005132   .1184851     0.04   0.965     .7977808    1.266377
+   November  |   1.198291   .1513214     1.43   0.152     .9355605    1.534804
+   December  |   1.027477   .1152646     0.24   0.809     .8246742    1.280153
+------------------------------------------------------------------------------
+file minimal_case_esrd.ster saved
+file minimal_case_esrd.dta saved
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -7148.4823
+Iteration 1:   log pseudolikelihood = -7123.2775
+Iteration 2:   log pseudolikelihood =  -7123.077
+Iteration 3:   log pseudolikelihood = -7123.0769
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -7123.0769
+
+Cox regression with Breslow method for ties
+
+No. of subjects =     10,742                          Number of obs =   10,802
+No. of failures =        822
+Time at risk    = 14,265.744
+                                                      Wald chi2(35) = 1.51e+07
+Log pseudolikelihood = -7123.0769                     Prob > chi2   =   0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8684902   .0512609    -2.39   0.017     .7736142    .9750018
+                          |
+                      sex |
+                    Male  |   1.094128   .0662711     1.49   0.137     .9716524    1.232041
+                          |
+                ethnicity |
+             South Asian  |   1.073566   .1613857     0.47   0.637     .7995951    1.441408
+                   Black  |    1.23357   .1822973     1.42   0.155     .9233637     1.64799
+                   Mixed  |   .7167151   .0814442    -2.93   0.003     .5736143    .8955156
+                   Other  |   .7718708   .1189055    -1.68   0.093     .5707138    1.043929
+                          |
+                      imd |
+                       2  |   .8831127   .0894661    -1.23   0.220     .7240739    1.077083
+                       3  |    .845519   .0875243    -1.62   0.105     .6902569    1.035705
+                       4  |   .9721958   .0881802    -0.31   0.756     .8138568     1.16134
+        5 Least deprived  |   .8929169   .0769424    -1.31   0.189     .7541596    1.057204
+                          |
+                   region |
+                    East  |   1.591856    .200775     3.69   0.000     1.243211    2.038275
+                  London  |   1.099056   .1337441     0.78   0.438     .8658391    1.395091
+              North East  |   1.227644   .1457129     1.73   0.084     .9728381    1.549188
+              North West  |   1.388328   .1522777     2.99   0.003      1.11977    1.721296
+              South East  |   1.206204   .1291656     1.75   0.080     .9778457    1.487891
+              South West  |   1.140693   .0973726     1.54   0.123      .964957    1.348434
+           West Midlands  |   1.070382   .1631556     0.45   0.655     .7939483    1.443063
+Yorkshire and The Humber  |   .9781629   .1336991    -0.16   0.872     .7482827    1.278665
+                          |
+                    urban |
+                   Urban  |   1.017092   .0650676     0.26   0.791     .8972327    1.152962
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .9698766   .1048345    -0.28   0.777     .7847109    1.198735
+    Overweight (25-29.9)  |   1.033785   .1504015     0.23   0.819     .7773062    1.374891
+       Obese I (30-34.9)  |   1.026016   .1810267     0.15   0.884     .7260578    1.449897
+      Obese II (35-39.9)  |   .8714683   .1181871    -1.01   0.310     .6680563    1.136816
+         Obese III (40+)  |   .8393098    .169786    -0.87   0.387     .5645867    1.247711
+                          |
+                  smoking |
+   Current/former smoker  |   .9424258   .0393757    -1.42   0.156     .8683263    1.022849
+                     age1 |   .9983385   .0086148    -0.19   0.847     .9815958    1.015367
+                     age2 |   .9932092   .0275002    -0.25   0.806     .9407463    1.048598
+                     age3 |   1.028554   .0867755     0.33   0.739     .8717949    1.213501
+                          |
+                    month |
+                February  |   1.292188   .2610874     1.27   0.205     .8696408    1.920046
+                   March  |    1.07124   .2513917     0.29   0.769     .6762891    1.696842
+                   April  |   1.277097   .3225166     0.97   0.333     .7785068    2.095006
+                     May  |   1.217074   .2496198     0.96   0.338      .814211    1.819269
+                    June  |   1.139793   .1931586     0.77   0.440     .8176629     1.58883
+                    July  |   1.453083   .3199468     1.70   0.090      .943776    2.237238
+                  August  |   1.069228   .2306205     0.31   0.756     .7006093    1.631793
+               September  |   1.284216   .2910561     1.10   0.270     .8236084     2.00242
+                 October  |   1.272938   .2714341     1.13   0.258     .8381113     1.93336
+                November  |   1.109267   .3873276     0.30   0.766     .5595235    2.199145
+                December  |   1.117273   .1797405     0.69   0.491      .815122    1.531425
+-------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+active results
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Cox regression with Breslow method for ties
+
+No. of subjects =     10,742                          Number of obs =   10,802
+No. of failures =        822
+Time at risk    = 14,265.744
+                                                      Wald chi2(35) = 1.51e+07
+Log pseudolikelihood = -7123.0769                     Prob > chi2   =   0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8684902   .0512609    -2.39   0.017     .7736142    .9750018
+                          |
+                      sex |
+                    Male  |   1.094128   .0662711     1.49   0.137     .9716524    1.232041
+                          |
+                ethnicity |
+             South Asian  |   1.073566   .1613857     0.47   0.637     .7995951    1.441408
+                   Black  |    1.23357   .1822973     1.42   0.155     .9233637     1.64799
+                   Mixed  |   .7167151   .0814442    -2.93   0.003     .5736143    .8955156
+                   Other  |   .7718708   .1189055    -1.68   0.093     .5707138    1.043929
+                          |
+                      imd |
+                       2  |   .8831127   .0894661    -1.23   0.220     .7240739    1.077083
+                       3  |    .845519   .0875243    -1.62   0.105     .6902569    1.035705
+                       4  |   .9721958   .0881802    -0.31   0.756     .8138568     1.16134
+        5 Least deprived  |   .8929169   .0769424    -1.31   0.189     .7541596    1.057204
+                          |
+                   region |
+                    East  |   1.591856    .200775     3.69   0.000     1.243211    2.038275
+                  London  |   1.099056   .1337441     0.78   0.438     .8658391    1.395091
+              North East  |   1.227644   .1457129     1.73   0.084     .9728381    1.549188
+              North West  |   1.388328   .1522777     2.99   0.003      1.11977    1.721296
+              South East  |   1.206204   .1291656     1.75   0.080     .9778457    1.487891
+              South West  |   1.140693   .0973726     1.54   0.123      .964957    1.348434
+           West Midlands  |   1.070382   .1631556     0.45   0.655     .7939483    1.443063
+Yorkshire and The Humber  |   .9781629   .1336991    -0.16   0.872     .7482827    1.278665
+                          |
+                    urban |
+                   Urban  |   1.017092   .0650676     0.26   0.791     .8972327    1.152962
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .9698766   .1048345    -0.28   0.777     .7847109    1.198735
+    Overweight (25-29.9)  |   1.033785   .1504015     0.23   0.819     .7773062    1.374891
+       Obese I (30-34.9)  |   1.026016   .1810267     0.15   0.884     .7260578    1.449897
+      Obese II (35-39.9)  |   .8714683   .1181871    -1.01   0.310     .6680563    1.136816
+         Obese III (40+)  |   .8393098    .169786    -0.87   0.387     .5645867    1.247711
+                          |
+                  smoking |
+   Current/former smoker  |   .9424258   .0393757    -1.42   0.156     .8683263    1.022849
+                     age1 |   .9983385   .0086148    -0.19   0.847     .9815958    1.015367
+                     age2 |   .9932092   .0275002    -0.25   0.806     .9407463    1.048598
+                     age3 |   1.028554   .0867755     0.33   0.739     .8717949    1.213501
+                          |
+                    month |
+                February  |   1.292188   .2610874     1.27   0.205     .8696408    1.920046
+                   March  |    1.07124   .2513917     0.29   0.769     .6762891    1.696842
+                   April  |   1.277097   .3225166     0.97   0.333     .7785068    2.095006
+                     May  |   1.217074   .2496198     0.96   0.338      .814211    1.819269
+                    June  |   1.139793   .1931586     0.77   0.440     .8176629     1.58883
+                    July  |   1.453083   .3199468     1.70   0.090      .943776    2.237238
+                  August  |   1.069228   .2306205     0.31   0.756     .7006093    1.631793
+               September  |   1.284216   .2910561     1.10   0.270     .8236084     2.00242
+                 October  |   1.272938   .2714341     1.13   0.258     .8381113     1.93336
+                November  |   1.109267   .3873276     0.30   0.766     .5595235    2.199145
+                December  |   1.117273   .1797405     0.69   0.491      .815122    1.531425
+-------------------------------------------------------------------------------------------
+file additional_case_esrd.ster saved
+file additional_case_esrd.dta saved
+
+        Failure _d: esrd_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -7148.4823
+Iteration 1:   log pseudolikelihood = -7118.5236
+Iteration 2:   log pseudolikelihood = -7118.3157
+Iteration 3:   log pseudolikelihood = -7118.3156
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -7118.3156
+
+Cox regression with Breslow method for ties
+
+No. of subjects =     10,742                        Number of obs =     10,802
+No. of failures =        822
+Time at risk    = 14,265.744
+                                                    Wald chi2(35) = 7915438.99
+Log pseudolikelihood = -7118.3156                   Prob > chi2   =     0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8703479   .0511253    -2.36   0.018     .7756972    .9765478
+                          |
+                      sex |
+                    Male  |   1.095705   .0681657     1.47   0.142     .9699265    1.237794
+                          |
+                ethnicity |
+             South Asian  |   1.065611   .1605689     0.42   0.673     .7931177    1.431726
+                   Black  |   1.233842   .1776758     1.46   0.145     .9304325    1.636192
+                   Mixed  |   .7122271   .0822321    -2.94   0.003       .56799    .8930921
+                   Other  |   .7658275   .1181616    -1.73   0.084     .5659744    1.036251
+                          |
+                      imd |
+                       2  |   .8752321   .0912609    -1.28   0.201     .7134573    1.073689
+                       3  |   .8384122   .0868162    -1.70   0.089     .6844111    1.027065
+                       4  |   .9705508   .0880732    -0.33   0.742     .8124105    1.159474
+        5 Least deprived  |   .8918594   .0765373    -1.33   0.182     .7537863    1.055224
+                          |
+                   region |
+                    East  |   1.599883   .2084398     3.61   0.000     1.239338    2.065316
+                  London  |   1.099563    .136709     0.76   0.445     .8617674    1.402976
+              North East  |   1.229967   .1474429     1.73   0.084      .972423    1.555721
+              North West  |   1.389194   .1545976     2.95   0.003     1.116956    1.727784
+              South East  |   1.208601   .1268801     1.80   0.071     .9838363    1.484714
+              South West  |   1.143531   .0972272     1.58   0.115     .9680009    1.350891
+           West Midlands  |   1.068148   .1640763     0.43   0.668     .7904598    1.443388
+Yorkshire and The Humber  |    .987463   .1338452    -0.09   0.926     .7570859    1.287943
+                          |
+                    urban |
+                   Urban  |   1.019112   .0658854     0.29   0.770     .8978255    1.156783
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .9611514   .1042395    -0.37   0.715     .7770996    1.188795
+    Overweight (25-29.9)  |   1.030522   .1495561     0.21   0.836     .7753991    1.369586
+       Obese I (30-34.9)  |   1.017425   .1805577     0.10   0.922      .718528    1.440659
+      Obese II (35-39.9)  |   .8682322   .1194241    -1.03   0.304     .6630622    1.136887
+         Obese III (40+)  |    .832494    .172417    -0.89   0.376     .5547402    1.249317
+                          |
+         1.cardiovascular |   .8537847   .0482671    -2.80   0.005     .7642357    .9538265
+               1.diabetes |   1.161858   .0939336     1.86   0.064     .9915973    1.361353
+           1.hypertension |   .8604971   .0636411    -2.03   0.042     .7443819    .9947251
+       1.immunosuppressed |   1.068153   .0731923     0.96   0.336     .9339143    1.221686
+        1.non_haem_cancer |   1.113022   .1400797     0.85   0.395     .8697119      1.4244
+                          |
+                  smoking |
+   Current/former smoker  |   .9388887    .040015    -1.48   0.139      .863647    1.020685
+                     age1 |   .9985872   .0084913    -0.17   0.868     .9820824    1.015369
+                     age2 |   .9927366   .0272058    -0.27   0.790      .940821    1.047517
+                     age3 |    1.02949    .086031     0.35   0.728     .8739574    1.212703
+                          |
+                    month |
+                February  |    1.29354   .2585257     1.29   0.198     .8742983    1.913816
+                   March  |   1.067047   .2520337     0.27   0.784     .6716328    1.695255
+                   April  |   1.267028   .3183558     0.94   0.346     .7743042    2.073293
+                     May  |   1.219362   .2482346     0.97   0.330     .8181772    1.817265
+                    June  |   1.141609   .1936939     0.78   0.435     .8186463    1.591984
+                    July  |   1.454586   .3203812     1.70   0.089     .9446205    2.239864
+                  August  |   1.069465   .2270585     0.32   0.752     .7054198    1.621383
+               September  |   1.284129   .2876563     1.12   0.264     .8278125    1.991982
+                 October  |   1.274874   .2714803     1.14   0.254     .8398592    1.935209
+                November  |   1.109344   .3847145     0.30   0.765     .5621787    2.189064
+                December  |   1.112734    .179482     0.66   0.508     .8111373    1.526472
+-------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+active results
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Cox regression with Breslow method for ties
+
+No. of subjects =     10,742                        Number of obs =     10,802
+No. of failures =        822
+Time at risk    = 14,265.744
+                                                    Wald chi2(35) = 7915438.99
+Log pseudolikelihood = -7118.3156                   Prob > chi2   =     0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8703479   .0511253    -2.36   0.018     .7756972    .9765478
+                          |
+                      sex |
+                    Male  |   1.095705   .0681657     1.47   0.142     .9699265    1.237794
+                          |
+                ethnicity |
+             South Asian  |   1.065611   .1605689     0.42   0.673     .7931177    1.431726
+                   Black  |   1.233842   .1776758     1.46   0.145     .9304325    1.636192
+                   Mixed  |   .7122271   .0822321    -2.94   0.003       .56799    .8930921
+                   Other  |   .7658275   .1181616    -1.73   0.084     .5659744    1.036251
+                          |
+                      imd |
+                       2  |   .8752321   .0912609    -1.28   0.201     .7134573    1.073689
+                       3  |   .8384122   .0868162    -1.70   0.089     .6844111    1.027065
+                       4  |   .9705508   .0880732    -0.33   0.742     .8124105    1.159474
+        5 Least deprived  |   .8918594   .0765373    -1.33   0.182     .7537863    1.055224
+                          |
+                   region |
+                    East  |   1.599883   .2084398     3.61   0.000     1.239338    2.065316
+                  London  |   1.099563    .136709     0.76   0.445     .8617674    1.402976
+              North East  |   1.229967   .1474429     1.73   0.084      .972423    1.555721
+              North West  |   1.389194   .1545976     2.95   0.003     1.116956    1.727784
+              South East  |   1.208601   .1268801     1.80   0.071     .9838363    1.484714
+              South West  |   1.143531   .0972272     1.58   0.115     .9680009    1.350891
+           West Midlands  |   1.068148   .1640763     0.43   0.668     .7904598    1.443388
+Yorkshire and The Humber  |    .987463   .1338452    -0.09   0.926     .7570859    1.287943
+                          |
+                    urban |
+                   Urban  |   1.019112   .0658854     0.29   0.770     .8978255    1.156783
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .9611514   .1042395    -0.37   0.715     .7770996    1.188795
+    Overweight (25-29.9)  |   1.030522   .1495561     0.21   0.836     .7753991    1.369586
+       Obese I (30-34.9)  |   1.017425   .1805577     0.10   0.922      .718528    1.440659
+      Obese II (35-39.9)  |   .8682322   .1194241    -1.03   0.304     .6630622    1.136887
+         Obese III (40+)  |    .832494    .172417    -0.89   0.376     .5547402    1.249317
+                          |
+         1.cardiovascular |   .8537847   .0482671    -2.80   0.005     .7642357    .9538265
+               1.diabetes |   1.161858   .0939336     1.86   0.064     .9915973    1.361353
+           1.hypertension |   .8604971   .0636411    -2.03   0.042     .7443819    .9947251
+       1.immunosuppressed |   1.068153   .0731923     0.96   0.336     .9339143    1.221686
+        1.non_haem_cancer |   1.113022   .1400797     0.85   0.395     .8697119      1.4244
+                          |
+                  smoking |
+   Current/former smoker  |   .9388887    .040015    -1.48   0.139      .863647    1.020685
+                     age1 |   .9985872   .0084913    -0.17   0.868     .9820824    1.015369
+                     age2 |   .9927366   .0272058    -0.27   0.790      .940821    1.047517
+                     age3 |    1.02949    .086031     0.35   0.728     .8739574    1.212703
+                          |
+                    month |
+                February  |    1.29354   .2585257     1.29   0.198     .8742983    1.913816
+                   March  |   1.067047   .2520337     0.27   0.784     .6716328    1.695255
+                   April  |   1.267028   .3183558     0.94   0.346     .7743042    2.073293
+                     May  |   1.219362   .2482346     0.97   0.330     .8181772    1.817265
+                    June  |   1.141609   .1936939     0.78   0.435     .8186463    1.591984
+                    July  |   1.454586   .3203812     1.70   0.089     .9446205    2.239864
+                  August  |   1.069465   .2270585     0.32   0.752     .7054198    1.621383
+               September  |   1.284129   .2876563     1.12   0.264     .8278125    1.991982
+                 October  |   1.274874   .2714803     1.14   0.254     .8398592    1.935209
+                November  |   1.109344   .3847145     0.30   0.765     .5621787    2.189064
+                December  |   1.112734    .179482     0.66   0.508     .8111373    1.526472
+-------------------------------------------------------------------------------------------
+file full_case_esrd.ster saved
+file full_case_esrd.dta saved
+
+Survival-time data settings
+
+           ID variable: patient_id
+         Failure event: egfr_half_date!=0 & egfr_half_date<.
+Observed time interval: (exit_date[_n-1], exit_date]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date
+
+--------------------------------------------------------------------------
+     25,443  total observations
+        128  observations end on or before enter()
+         84  observations begin on or after (first) failure
+--------------------------------------------------------------------------
+     25,231  observations remaining, representing
+     24,987  subjects
+      6,553  failures in single-failure-per-subject data
+  32,994.53  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  5.738535
+
+        Failure _d: egfr_half_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -59140.355
+Iteration 1:   log pseudolikelihood = -59126.144
+Iteration 2:   log pseudolikelihood = -59126.144
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -59126.144
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      24,987                           Number of obs = 25,231
+No. of failures =       6,553
+Time at risk    = 32,994.5298
+                                                        Wald chi2(1)  =  49.47
+Log pseudolikelihood = -59126.144                       Prob > chi2   = 0.0000
+
+                           (Std. err. adjusted for 40 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .8754027   .0165631    -7.03   0.000     .8435341    .9084753
+------------------------------------------------------------------------------
+file crude_case_egfr_half.ster saved
+file crude_case_egfr_half.dta saved
+
+        Failure _d: egfr_half_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -59140.355
+Iteration 1:   log pseudolikelihood = -58962.437
+Iteration 2:   log pseudolikelihood = -58960.295
+Iteration 3:   log pseudolikelihood = -58960.294
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -58960.294
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      24,987                          Number of obs =  25,231
+No. of failures =       6,553
+Time at risk    = 32,994.5298
+                                                       Wald chi2(16) = 2160.45
+Log pseudolikelihood = -58960.294                      Prob > chi2   =  0.0000
+
+                           (Std. err. adjusted for 40 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .8538361    .016114    -8.37   0.000     .8228302    .8860104
+             |
+         sex |
+       Male  |   .9210893     .02546    -2.97   0.003     .8725164    .9723664
+        age1 |   .9993913   .0026318    -0.23   0.817     .9942463    1.004563
+        age2 |   1.002127   .0085438     0.25   0.803      .985521    1.019013
+        age3 |    .992001   .0260777    -0.31   0.760      .942184    1.044452
+             |
+       month |
+   February  |   .4138294   .0215874   -16.91   0.000       .37361    .4583785
+      March  |   .5417907   .0223954   -14.83   0.000     .4996276    .5875119
+      April  |   .5638155   .0231492   -13.96   0.000     .5202215    .6110626
+        May  |   .6368511   .0348872    -8.24   0.000     .5720163    .7090345
+       June  |   .7060585    .035715    -6.88   0.000     .6394166    .7796461
+       July  |    .737179   .0266895    -8.42   0.000     .6866813    .7913901
+     August  |   .7795627   .0243317    -7.98   0.000     .7333029    .8287408
+  September  |    .765172   .0321017    -6.38   0.000     .7047711    .8307495
+    October  |    .787867   .0492022    -3.82   0.000     .6971006    .8904516
+   November  |   .8814338   .0673821    -1.65   0.099     .7587851    1.023907
+   December  |   .9063272   .0355932    -2.50   0.012      .839183    .9788437
+------------------------------------------------------------------------------
+file minimal_case_egfr_half.ster saved
+file minimal_case_egfr_half.dta saved
+
+        Failure _d: egfr_half_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -22635.137
+Iteration 1:   log pseudolikelihood = -22551.875
+Iteration 2:   log pseudolikelihood = -22551.311
+Iteration 3:   log pseudolikelihood = -22551.311
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -22551.311
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,728                         Number of obs =   10,776
+No. of failures =       2,771
+Time at risk    = 14,190.0753
+                                                      Wald chi2(35) = 8.32e+08
+Log pseudolikelihood = -22551.311                     Prob > chi2   =   0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8547111   .0240681    -5.58   0.000     .8088165    .9032098
+                          |
+                      sex |
+                    Male  |   .9541972   .0442001    -1.01   0.311     .8713828    1.044882
+                          |
+                ethnicity |
+             South Asian  |   1.003362    .079323     0.04   0.966     .8593383    1.171525
+                   Black  |   1.037935   .0828265     0.47   0.641     .8876564    1.213656
+                   Mixed  |   .8780468    .086699    -1.32   0.188     .7235514    1.065531
+                   Other  |   .9333589   .0598273    -1.08   0.282     .8231663    1.058302
+                          |
+                      imd |
+                       2  |    .949664   .0630421    -0.78   0.437     .8338043    1.081623
+                       3  |   .9769638   .0592901    -0.38   0.701     .8674025    1.100364
+                       4  |   .9561056   .0392088    -1.09   0.274     .8822649    1.036126
+        5 Least deprived  |   .9474306   .0449055    -1.14   0.255     .8633819    1.039661
+                          |
+                   region |
+                    East  |   1.275125   .0925982     3.35   0.001      1.10596    1.470165
+                  London  |   1.033403   .0305279     1.11   0.266     .9752691    1.095003
+              North East  |   1.086387   .0596823     1.51   0.131     .9754896    1.209892
+              North West  |   1.145411   .0524989     2.96   0.003     1.047001     1.25307
+              South East  |   1.140101   .0706348     2.12   0.034     1.009734    1.287299
+              South West  |   1.040968   .0531827     0.79   0.432     .9417807    1.150602
+           West Midlands  |   1.063677   .0706891     0.93   0.353     .9337732    1.211653
+Yorkshire and The Humber  |    1.01169   .0711684     0.17   0.869     .8813908    1.161251
+                          |
+                    urban |
+                   Urban  |   1.001224   .0369988     0.03   0.974     .9312713    1.076431
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .8772914   .0389578    -2.95   0.003     .8041641    .9570686
+    Overweight (25-29.9)  |   .9433145   .0516161    -1.07   0.286     .8473847    1.050104
+       Obese I (30-34.9)  |    .934068   .0680516    -0.94   0.349     .8097745    1.077439
+      Obese II (35-39.9)  |   .8767629   .0467497    -2.47   0.014     .7897606    .9733496
+         Obese III (40+)  |   .8770894   .0480431    -2.39   0.017     .7878051    .9764926
+                          |
+                  smoking |
+   Current/former smoker  |   .9866645   .0326655    -0.41   0.685     .9246743    1.052811
+                     age1 |   1.005913   .0048269     1.23   0.219     .9964972    1.015418
+                     age2 |   .9836772   .0169999    -0.95   0.341     .9509159    1.017567
+                     age3 |    1.04267   .0569368     0.77   0.444     .9368402    1.160455
+                          |
+                    month |
+                February  |   .4598361   .0395515    -9.03   0.000     .3884985     .544273
+                   March  |   .5445484   .0346646    -9.55   0.000     .4806745    .6169102
+                   April  |   .6097298   .0534599    -5.64   0.000      .513459    .7240509
+                     May  |   .6961538   .0658286    -3.83   0.000     .5783826    .8379057
+                    June  |   .7775768    .069084    -2.83   0.005     .6533082     .925483
+                    July  |   .8254718   .0487868    -3.25   0.001     .7351818    .9268506
+                  August  |   .8105367   .0535152    -3.18   0.001     .7121518    .9225135
+               September  |   .8832726   .0582473    -1.88   0.060     .7761799    1.005141
+                 October  |   .8614337   .0604617    -2.13   0.034     .7507207    .9884742
+                November  |   .8833716   .0666858    -1.64   0.100     .7618792    1.024238
+                December  |   .9580165   .0640133    -0.64   0.521     .8404211    1.092066
+-------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+active results
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,728                         Number of obs =   10,776
+No. of failures =       2,771
+Time at risk    = 14,190.0753
+                                                      Wald chi2(35) = 8.32e+08
+Log pseudolikelihood = -22551.311                     Prob > chi2   =   0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8547111   .0240681    -5.58   0.000     .8088165    .9032098
+                          |
+                      sex |
+                    Male  |   .9541972   .0442001    -1.01   0.311     .8713828    1.044882
+                          |
+                ethnicity |
+             South Asian  |   1.003362    .079323     0.04   0.966     .8593383    1.171525
+                   Black  |   1.037935   .0828265     0.47   0.641     .8876564    1.213656
+                   Mixed  |   .8780468    .086699    -1.32   0.188     .7235514    1.065531
+                   Other  |   .9333589   .0598273    -1.08   0.282     .8231663    1.058302
+                          |
+                      imd |
+                       2  |    .949664   .0630421    -0.78   0.437     .8338043    1.081623
+                       3  |   .9769638   .0592901    -0.38   0.701     .8674025    1.100364
+                       4  |   .9561056   .0392088    -1.09   0.274     .8822649    1.036126
+        5 Least deprived  |   .9474306   .0449055    -1.14   0.255     .8633819    1.039661
+                          |
+                   region |
+                    East  |   1.275125   .0925982     3.35   0.001      1.10596    1.470165
+                  London  |   1.033403   .0305279     1.11   0.266     .9752691    1.095003
+              North East  |   1.086387   .0596823     1.51   0.131     .9754896    1.209892
+              North West  |   1.145411   .0524989     2.96   0.003     1.047001     1.25307
+              South East  |   1.140101   .0706348     2.12   0.034     1.009734    1.287299
+              South West  |   1.040968   .0531827     0.79   0.432     .9417807    1.150602
+           West Midlands  |   1.063677   .0706891     0.93   0.353     .9337732    1.211653
+Yorkshire and The Humber  |    1.01169   .0711684     0.17   0.869     .8813908    1.161251
+                          |
+                    urban |
+                   Urban  |   1.001224   .0369988     0.03   0.974     .9312713    1.076431
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .8772914   .0389578    -2.95   0.003     .8041641    .9570686
+    Overweight (25-29.9)  |   .9433145   .0516161    -1.07   0.286     .8473847    1.050104
+       Obese I (30-34.9)  |    .934068   .0680516    -0.94   0.349     .8097745    1.077439
+      Obese II (35-39.9)  |   .8767629   .0467497    -2.47   0.014     .7897606    .9733496
+         Obese III (40+)  |   .8770894   .0480431    -2.39   0.017     .7878051    .9764926
+                          |
+                  smoking |
+   Current/former smoker  |   .9866645   .0326655    -0.41   0.685     .9246743    1.052811
+                     age1 |   1.005913   .0048269     1.23   0.219     .9964972    1.015418
+                     age2 |   .9836772   .0169999    -0.95   0.341     .9509159    1.017567
+                     age3 |    1.04267   .0569368     0.77   0.444     .9368402    1.160455
+                          |
+                    month |
+                February  |   .4598361   .0395515    -9.03   0.000     .3884985     .544273
+                   March  |   .5445484   .0346646    -9.55   0.000     .4806745    .6169102
+                   April  |   .6097298   .0534599    -5.64   0.000      .513459    .7240509
+                     May  |   .6961538   .0658286    -3.83   0.000     .5783826    .8379057
+                    June  |   .7775768    .069084    -2.83   0.005     .6533082     .925483
+                    July  |   .8254718   .0487868    -3.25   0.001     .7351818    .9268506
+                  August  |   .8105367   .0535152    -3.18   0.001     .7121518    .9225135
+               September  |   .8832726   .0582473    -1.88   0.060     .7761799    1.005141
+                 October  |   .8614337   .0604617    -2.13   0.034     .7507207    .9884742
+                November  |   .8833716   .0666858    -1.64   0.100     .7618792    1.024238
+                December  |   .9580165   .0640133    -0.64   0.521     .8404211    1.092066
+-------------------------------------------------------------------------------------------
+file additional_case_egfr_half.ster saved
+file additional_case_egfr_half.dta saved
+
+        Failure _d: egfr_half_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -22635.137
+Iteration 1:   log pseudolikelihood = -22545.485
+Iteration 2:   log pseudolikelihood = -22544.899
+Iteration 3:   log pseudolikelihood = -22544.899
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -22544.899
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,728                         Number of obs =   10,776
+No. of failures =       2,771
+Time at risk    = 14,190.0753
+                                                      Wald chi2(35) = 1.72e+08
+Log pseudolikelihood = -22544.899                     Prob > chi2   =   0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8562256   .0238846    -5.56   0.000     .8106694    .9043419
+                          |
+                      sex |
+                    Male  |   .9533346   .0449233    -1.01   0.311     .8692302    1.045577
+                          |
+                ethnicity |
+             South Asian  |   .9967281   .0795464    -0.04   0.967     .8524018    1.165491
+                   Black  |    1.04324   .0813163     0.54   0.587     .8954396    1.215435
+                   Mixed  |   .8703168   .0888245    -1.36   0.174      .712531    1.063043
+                   Other  |   .9299628   .0587492    -1.15   0.250     .8216597    1.052541
+                          |
+                      imd |
+                       2  |   .9443359   .0644399    -0.84   0.401     .8261178    1.079471
+                       3  |   .9720432   .0596824    -0.46   0.644     .8618322    1.096348
+                       4  |   .9546218   .0395703    -1.12   0.263     .8801323    1.035416
+        5 Least deprived  |   .9453434   .0441335    -1.20   0.229     .8626827    1.035925
+                          |
+                   region |
+                    East  |   1.278752   .0979445     3.21   0.001     1.100499    1.485878
+                  London  |   1.032275    .029574     1.11   0.268     .9759087    1.091898
+              North East  |   1.085107   .0600151     1.48   0.140     .9736309    1.209347
+              North West  |   1.143188   .0532267     2.87   0.004     1.043484    1.252419
+              South East  |   1.137196   .0713678     2.05   0.041     1.005579    1.286041
+              South West  |   1.041573   .0517583     0.82   0.412     .9449119    1.148121
+           West Midlands  |   1.062345   .0699926     0.92   0.359     .9336498    1.208779
+Yorkshire and The Humber  |   1.016335   .0719741     0.23   0.819     .8846211    1.167661
+                          |
+                    urban |
+                   Urban  |   1.004025   .0369432     0.11   0.913     .9341666    1.079107
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .8770965   .0388995    -2.96   0.003     .8040746    .9567499
+    Overweight (25-29.9)  |   .9458059   .0522093    -1.01   0.313     .8488186    1.053875
+       Obese I (30-34.9)  |   .9331419   .0683767    -0.94   0.345     .8083049    1.077259
+      Obese II (35-39.9)  |   .8775657   .0464229    -2.47   0.014     .7911364    .9734371
+         Obese III (40+)  |   .8771676   .0497754    -2.31   0.021     .7848391    .9803575
+                          |
+         1.cardiovascular |    .863007   .0482603    -2.63   0.008     .7734179    .9629737
+               1.diabetes |   1.065218   .0397044     1.70   0.090     .9901734     1.14595
+           1.hypertension |   .9824773   .0279432    -0.62   0.534     .9292082      1.0388
+       1.immunosuppressed |   1.071526   .0361438     2.05   0.041     1.002976    1.144761
+        1.non_haem_cancer |   1.036892   .1155947     0.32   0.745     .8333736    1.290111
+                          |
+                  smoking |
+   Current/former smoker  |   .9840701   .0321821    -0.49   0.623     .9229734    1.049211
+                     age1 |   1.006118   .0047773     1.28   0.199     .9967978    1.015525
+                     age2 |   .9833113   .0168622    -0.98   0.326     .9508112    1.016922
+                     age3 |   1.043366    .056592     0.78   0.434     .9381399    1.160395
+                          |
+                    month |
+                February  |   .4599512   .0391177    -9.13   0.000     .3893312    .5433808
+                   March  |   .5429772    .034551    -9.60   0.000     .4793111    .6150998
+                   April  |   .6063006   .0540464    -5.61   0.000      .509109    .7220465
+                     May  |   .6967997   .0652673    -3.86   0.000     .5799337    .8372162
+                    June  |   .7820799   .0721205    -2.67   0.008     .6527644    .9370133
+                    July  |   .8255492   .0493838    -3.20   0.001     .7342173    .9282421
+                  August  |   .8121385   .0538055    -3.14   0.002     .7132415    .9247485
+               September  |   .8870361   .0597749    -1.78   0.075     .7772866    1.012282
+                 October  |   .8607656   .0596104    -2.17   0.030     .7515136    .9859002
+                November  |   .8879569   .0674693    -1.56   0.118      .765095    1.030549
+                December  |   .9577606   .0635502    -0.65   0.515     .8409637    1.090779
+-------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+active results
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,728                         Number of obs =   10,776
+No. of failures =       2,771
+Time at risk    = 14,190.0753
+                                                      Wald chi2(35) = 1.72e+08
+Log pseudolikelihood = -22544.899                     Prob > chi2   =   0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8562256   .0238846    -5.56   0.000     .8106694    .9043419
+                          |
+                      sex |
+                    Male  |   .9533346   .0449233    -1.01   0.311     .8692302    1.045577
+                          |
+                ethnicity |
+             South Asian  |   .9967281   .0795464    -0.04   0.967     .8524018    1.165491
+                   Black  |    1.04324   .0813163     0.54   0.587     .8954396    1.215435
+                   Mixed  |   .8703168   .0888245    -1.36   0.174      .712531    1.063043
+                   Other  |   .9299628   .0587492    -1.15   0.250     .8216597    1.052541
+                          |
+                      imd |
+                       2  |   .9443359   .0644399    -0.84   0.401     .8261178    1.079471
+                       3  |   .9720432   .0596824    -0.46   0.644     .8618322    1.096348
+                       4  |   .9546218   .0395703    -1.12   0.263     .8801323    1.035416
+        5 Least deprived  |   .9453434   .0441335    -1.20   0.229     .8626827    1.035925
+                          |
+                   region |
+                    East  |   1.278752   .0979445     3.21   0.001     1.100499    1.485878
+                  London  |   1.032275    .029574     1.11   0.268     .9759087    1.091898
+              North East  |   1.085107   .0600151     1.48   0.140     .9736309    1.209347
+              North West  |   1.143188   .0532267     2.87   0.004     1.043484    1.252419
+              South East  |   1.137196   .0713678     2.05   0.041     1.005579    1.286041
+              South West  |   1.041573   .0517583     0.82   0.412     .9449119    1.148121
+           West Midlands  |   1.062345   .0699926     0.92   0.359     .9336498    1.208779
+Yorkshire and The Humber  |   1.016335   .0719741     0.23   0.819     .8846211    1.167661
+                          |
+                    urban |
+                   Urban  |   1.004025   .0369432     0.11   0.913     .9341666    1.079107
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .8770965   .0388995    -2.96   0.003     .8040746    .9567499
+    Overweight (25-29.9)  |   .9458059   .0522093    -1.01   0.313     .8488186    1.053875
+       Obese I (30-34.9)  |   .9331419   .0683767    -0.94   0.345     .8083049    1.077259
+      Obese II (35-39.9)  |   .8775657   .0464229    -2.47   0.014     .7911364    .9734371
+         Obese III (40+)  |   .8771676   .0497754    -2.31   0.021     .7848391    .9803575
+                          |
+         1.cardiovascular |    .863007   .0482603    -2.63   0.008     .7734179    .9629737
+               1.diabetes |   1.065218   .0397044     1.70   0.090     .9901734     1.14595
+           1.hypertension |   .9824773   .0279432    -0.62   0.534     .9292082      1.0388
+       1.immunosuppressed |   1.071526   .0361438     2.05   0.041     1.002976    1.144761
+        1.non_haem_cancer |   1.036892   .1155947     0.32   0.745     .8333736    1.290111
+                          |
+                  smoking |
+   Current/former smoker  |   .9840701   .0321821    -0.49   0.623     .9229734    1.049211
+                     age1 |   1.006118   .0047773     1.28   0.199     .9967978    1.015525
+                     age2 |   .9833113   .0168622    -0.98   0.326     .9508112    1.016922
+                     age3 |   1.043366    .056592     0.78   0.434     .9381399    1.160395
+                          |
+                    month |
+                February  |   .4599512   .0391177    -9.13   0.000     .3893312    .5433808
+                   March  |   .5429772    .034551    -9.60   0.000     .4793111    .6150998
+                   April  |   .6063006   .0540464    -5.61   0.000      .509109    .7220465
+                     May  |   .6967997   .0652673    -3.86   0.000     .5799337    .8372162
+                    June  |   .7820799   .0721205    -2.67   0.008     .6527644    .9370133
+                    July  |   .8255492   .0493838    -3.20   0.001     .7342173    .9282421
+                  August  |   .8121385   .0538055    -3.14   0.002     .7132415    .9247485
+               September  |   .8870361   .0597749    -1.78   0.075     .7772866    1.012282
+                 October  |   .8607656   .0596104    -2.17   0.030     .7515136    .9859002
+                November  |   .8879569   .0674693    -1.56   0.118      .765095    1.030549
+                December  |   .9577606   .0635502    -0.65   0.515     .8409637    1.090779
+-------------------------------------------------------------------------------------------
+file full_case_egfr_half.ster saved
+file full_case_egfr_half.dta saved
+
+Survival-time data settings
+
+           ID variable: patient_id
+         Failure event: aki_date!=0 & aki_date<.
+Observed time interval: (exit_date[_n-1], exit_date]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date
+
+--------------------------------------------------------------------------
+     25,443  total observations
+        128  observations end on or before enter()
+         54  observations begin on or after (first) failure
+--------------------------------------------------------------------------
+     25,261  observations remaining, representing
+     24,987  subjects
+      4,141  failures in single-failure-per-subject data
+ 33,076.397  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  5.744011
+
+        Failure _d: aki_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -38564.754
+Iteration 1:   log pseudolikelihood = -38561.434
+Iteration 2:   log pseudolikelihood = -38561.434
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -38561.434
+
+Cox regression with Breslow method for ties
+
+No. of subjects =     24,987                            Number of obs = 25,261
+No. of failures =      4,141
+Time at risk    = 33,076.397
+                                                        Wald chi2(1)  =  11.16
+Log pseudolikelihood = -38561.434                       Prob > chi2   = 0.0008
+
+                           (Std. err. adjusted for 40 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |    .922399    .022305    -3.34   0.001     .8797019    .9671686
+------------------------------------------------------------------------------
+file crude_case_aki.ster saved
+file crude_case_aki.dta saved
+
+        Failure _d: aki_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -38564.754
+Iteration 1:   log pseudolikelihood = -38496.288
+Iteration 2:   log pseudolikelihood = -38495.725
+Iteration 3:   log pseudolikelihood = -38495.725
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -38495.725
+
+Cox regression with Breslow method for ties
+
+No. of subjects =     24,987                            Number of obs = 25,261
+No. of failures =      4,141
+Time at risk    = 33,076.397
+                                                        Wald chi2(16) = 699.90
+Log pseudolikelihood = -38495.725                       Prob > chi2   = 0.0000
+
+                           (Std. err. adjusted for 40 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .9106129   .0223853    -3.81   0.000     .8677786    .9555614
+             |
+         sex |
+       Male  |   1.070651     .02614     2.80   0.005     1.020624     1.12313
+        age1 |   .9944389   .0025885    -2.14   0.032     .9893785    .9995252
+        age2 |   1.012418   .0083566     1.50   0.135     .9961709     1.02893
+        age3 |   .9688084   .0269161    -1.14   0.254     .9174644    1.023026
+             |
+       month |
+   February  |   .6088732   .0604794    -4.99   0.000     .5011608    .7397359
+      March  |   .7563227   .0480499    -4.40   0.000      .667774    .8566132
+      April  |   .8007176   .0644525    -2.76   0.006     .6838538    .9375523
+        May  |   .8586416   .0570415    -2.29   0.022     .7538149    .9780457
+       June  |   .9440374   .0640327    -0.85   0.396     .8265201    1.078264
+       July  |   .9366228   .0574491    -1.07   0.286     .8305294    1.056269
+     August  |   1.005502     .07484     0.07   0.941     .8690159    1.163425
+  September  |   1.126768   .0837111     1.61   0.108     .9740833    1.303386
+    October  |   1.141158   .0798301     1.89   0.059     .9949465    1.308856
+   November  |   1.015139   .0947168     0.16   0.872     .8454831    1.218839
+   December  |   1.040928   .0689822     0.61   0.545     .9141382    1.185304
+------------------------------------------------------------------------------
+file minimal_case_aki.ster saved
+file minimal_case_aki.dta saved
+
+        Failure _d: aki_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -14891.744
+Iteration 1:   log pseudolikelihood = -14845.442
+Iteration 2:   log pseudolikelihood = -14845.248
+Iteration 3:   log pseudolikelihood = -14845.248
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -14845.248
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,738                        Number of obs =    10,793
+No. of failures =       1,757
+Time at risk    = 14,238.3546
+                                                     Wald chi2(35) = 718767.02
+Log pseudolikelihood = -14845.248                    Prob > chi2   =    0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8904866   .0354078    -2.92   0.004     .8237238    .9626605
+                          |
+                      sex |
+                    Male  |   1.050074   .0357723     1.43   0.151     .9822514    1.122581
+                          |
+                ethnicity |
+             South Asian  |   .9118853   .0844234    -1.00   0.319     .7605627    1.093315
+                   Black  |   1.022638   .1178373     0.19   0.846     .8159041    1.281755
+                   Mixed  |   .8647244   .0524541    -2.40   0.017     .7677925    .9738937
+                   Other  |   .9011314   .0620577    -1.51   0.131      .787352    1.031353
+                          |
+                      imd |
+                       2  |   .9162375   .0692614    -1.16   0.247     .7900651    1.062559
+                       3  |   .8825869   .0560054    -1.97   0.049     .7793699    .9994735
+                       4  |   .9515569   .0610378    -0.77   0.439     .8391397    1.079034
+        5 Least deprived  |   .8802533   .0546633    -2.05   0.040     .7793785    .9941843
+                          |
+                   region |
+                    East  |   1.357962   .1080183     3.85   0.000     1.161928    1.587069
+                  London  |   1.007928   .0803329     0.10   0.921     .8621599    1.178341
+              North East  |   1.075717   .0790809     0.99   0.321     .9313705    1.242436
+              North West  |   1.219004   .0964019     2.50   0.012     1.043974    1.423378
+              South East  |   1.191278   .0699995     2.98   0.003     1.061687    1.336687
+              South West  |   1.140095   .0608412     2.46   0.014     1.026873    1.265801
+           West Midlands  |   1.325788   .0865849     4.32   0.000     1.166497    1.506831
+Yorkshire and The Humber  |   1.005307   .1205546     0.04   0.965     .7947382    1.271667
+                          |
+                    urban |
+                   Urban  |   1.002691   .0376391     0.07   0.943     .9315677    1.079244
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .9009816   .0674486    -1.39   0.164     .7780257    1.043369
+    Overweight (25-29.9)  |   .9222697   .0458675    -1.63   0.104     .8366136    1.016696
+       Obese I (30-34.9)  |   .9252349   .0521694    -1.38   0.168     .8284321    1.033349
+      Obese II (35-39.9)  |   .8985999   .0473435    -2.03   0.042     .8104385    .9963516
+         Obese III (40+)  |   .7838045   .0708805    -2.69   0.007     .6564966    .9358001
+                          |
+                  smoking |
+   Current/former smoker  |   .9517182   .0322893    -1.46   0.145     .8904905    1.017156
+                     age1 |   .9958212   .0052677    -0.79   0.429       .98555    1.006199
+                     age2 |   1.002587   .0149461     0.17   0.862     .9737169    1.032313
+                     age3 |    .999566   .0454493    -0.01   0.992     .9143409    1.092735
+                          |
+                    month |
+                February  |   .6490074    .099467    -2.82   0.005     .4806116    .8764053
+                   March  |   .6268607    .096331    -3.04   0.002     .4638368    .8471824
+                   April  |   .7570996   .1026368    -2.05   0.040     .5804425    .9875221
+                     May  |   .8110233   .1052102    -1.61   0.106     .6289426    1.045817
+                    June  |   .9133072   .0841146    -0.98   0.325     .7624689    1.093986
+                    July  |   .9501613    .094258    -0.52   0.606     .7822694    1.154086
+                  August  |   .8215981   .0992506    -1.63   0.104     .6483846    1.041085
+               September  |   1.022737   .1279904     0.18   0.857     .8002769    1.307036
+                 October  |   1.082468   .1105365     0.78   0.438     .8861239    1.322317
+                November  |   .7912594   .1369102    -1.35   0.176     .5636857     1.11071
+                December  |   .9182452   .0948383    -0.83   0.409     .7499715    1.124275
+-------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+active results
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,738                        Number of obs =    10,793
+No. of failures =       1,757
+Time at risk    = 14,238.3546
+                                                     Wald chi2(35) = 718767.02
+Log pseudolikelihood = -14845.248                    Prob > chi2   =    0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8904866   .0354078    -2.92   0.004     .8237238    .9626605
+                          |
+                      sex |
+                    Male  |   1.050074   .0357723     1.43   0.151     .9822514    1.122581
+                          |
+                ethnicity |
+             South Asian  |   .9118853   .0844234    -1.00   0.319     .7605627    1.093315
+                   Black  |   1.022638   .1178373     0.19   0.846     .8159041    1.281755
+                   Mixed  |   .8647244   .0524541    -2.40   0.017     .7677925    .9738937
+                   Other  |   .9011314   .0620577    -1.51   0.131      .787352    1.031353
+                          |
+                      imd |
+                       2  |   .9162375   .0692614    -1.16   0.247     .7900651    1.062559
+                       3  |   .8825869   .0560054    -1.97   0.049     .7793699    .9994735
+                       4  |   .9515569   .0610378    -0.77   0.439     .8391397    1.079034
+        5 Least deprived  |   .8802533   .0546633    -2.05   0.040     .7793785    .9941843
+                          |
+                   region |
+                    East  |   1.357962   .1080183     3.85   0.000     1.161928    1.587069
+                  London  |   1.007928   .0803329     0.10   0.921     .8621599    1.178341
+              North East  |   1.075717   .0790809     0.99   0.321     .9313705    1.242436
+              North West  |   1.219004   .0964019     2.50   0.012     1.043974    1.423378
+              South East  |   1.191278   .0699995     2.98   0.003     1.061687    1.336687
+              South West  |   1.140095   .0608412     2.46   0.014     1.026873    1.265801
+           West Midlands  |   1.325788   .0865849     4.32   0.000     1.166497    1.506831
+Yorkshire and The Humber  |   1.005307   .1205546     0.04   0.965     .7947382    1.271667
+                          |
+                    urban |
+                   Urban  |   1.002691   .0376391     0.07   0.943     .9315677    1.079244
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .9009816   .0674486    -1.39   0.164     .7780257    1.043369
+    Overweight (25-29.9)  |   .9222697   .0458675    -1.63   0.104     .8366136    1.016696
+       Obese I (30-34.9)  |   .9252349   .0521694    -1.38   0.168     .8284321    1.033349
+      Obese II (35-39.9)  |   .8985999   .0473435    -2.03   0.042     .8104385    .9963516
+         Obese III (40+)  |   .7838045   .0708805    -2.69   0.007     .6564966    .9358001
+                          |
+                  smoking |
+   Current/former smoker  |   .9517182   .0322893    -1.46   0.145     .8904905    1.017156
+                     age1 |   .9958212   .0052677    -0.79   0.429       .98555    1.006199
+                     age2 |   1.002587   .0149461     0.17   0.862     .9737169    1.032313
+                     age3 |    .999566   .0454493    -0.01   0.992     .9143409    1.092735
+                          |
+                    month |
+                February  |   .6490074    .099467    -2.82   0.005     .4806116    .8764053
+                   March  |   .6268607    .096331    -3.04   0.002     .4638368    .8471824
+                   April  |   .7570996   .1026368    -2.05   0.040     .5804425    .9875221
+                     May  |   .8110233   .1052102    -1.61   0.106     .6289426    1.045817
+                    June  |   .9133072   .0841146    -0.98   0.325     .7624689    1.093986
+                    July  |   .9501613    .094258    -0.52   0.606     .7822694    1.154086
+                  August  |   .8215981   .0992506    -1.63   0.104     .6483846    1.041085
+               September  |   1.022737   .1279904     0.18   0.857     .8002769    1.307036
+                 October  |   1.082468   .1105365     0.78   0.438     .8861239    1.322317
+                November  |   .7912594   .1369102    -1.35   0.176     .5636857     1.11071
+                December  |   .9182452   .0948383    -0.83   0.409     .7499715    1.124275
+-------------------------------------------------------------------------------------------
+file additional_case_aki.ster saved
+file additional_case_aki.dta saved
+
+        Failure _d: aki_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -14891.744
+Iteration 1:   log pseudolikelihood = -14842.155
+Iteration 2:   log pseudolikelihood = -14841.949
+Iteration 3:   log pseudolikelihood = -14841.949
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -14841.949
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,738                         Number of obs =   10,793
+No. of failures =       1,757
+Time at risk    = 14,238.3546
+                                                      Wald chi2(35) = 1.36e+07
+Log pseudolikelihood = -14841.949                     Prob > chi2   =   0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8928404   .0348752    -2.90   0.004     .8270373    .9638791
+                          |
+                      sex |
+                    Male  |   1.052128   .0373687     1.43   0.153     .9813775    1.127978
+                          |
+                ethnicity |
+             South Asian  |   .9161918   .0852065    -0.94   0.347     .7635264    1.099382
+                   Black  |   1.026071   .1163343     0.23   0.820      .821617    1.281401
+                   Mixed  |   .8631791   .0527797    -2.41   0.016     .7656911    .9730793
+                   Other  |   .8964832   .0606211    -1.62   0.106     .7852051    1.023532
+                          |
+                      imd |
+                       2  |    .913371   .0692677    -1.19   0.232     .7872167    1.059742
+                       3  |   .8831951   .0540337    -2.03   0.042      .783394    .9957103
+                       4  |   .9516429   .0606701    -0.78   0.437     .8398608    1.078303
+        5 Least deprived  |   .8794976   .0545272    -2.07   0.038     .7788643    .9931332
+                          |
+                   region |
+                    East  |   1.354666   .1082638     3.80   0.000     1.158257    1.584381
+                  London  |   1.006389   .0820738     0.08   0.938     .8577252     1.18082
+              North East  |   1.072975   .0781551     0.97   0.334     .9302263     1.23763
+              North West  |   1.218152   .0973915     2.47   0.014     1.041472    1.424804
+              South East  |   1.188891    .069435     2.96   0.003     1.060301    1.333076
+              South West  |   1.135609   .0626023     2.31   0.021     1.019307    1.265181
+           West Midlands  |    1.31869   .0867979     4.20   0.000     1.159086    1.500272
+Yorkshire and The Humber  |   1.006475   .1198949     0.05   0.957     .7969013    1.271162
+                          |
+                    urban |
+                   Urban  |   1.003794    .037678     0.10   0.920     .9325973    1.080426
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .9005338   .0681957    -1.38   0.167     .7763189    1.044624
+    Overweight (25-29.9)  |   .9233216    .046295    -1.59   0.112     .8369009    1.018666
+       Obese I (30-34.9)  |   .9234229   .0526738    -1.40   0.163      .825746    1.032654
+      Obese II (35-39.9)  |   .8979256   .0485329    -1.99   0.046     .8076681    .9982695
+         Obese III (40+)  |   .7863055   .0714216    -2.65   0.008     .6580745    .9395234
+                          |
+         1.cardiovascular |   .9069578   .0305399    -2.90   0.004     .8490331    .9688344
+               1.diabetes |   1.069872   .0562138     1.29   0.199     .9651782    1.185922
+           1.hypertension |   .9834427   .0421366    -0.39   0.697      .904229    1.069596
+       1.immunosuppressed |   .9204646   .0649405    -1.17   0.240     .8015918    1.056966
+        1.non_haem_cancer |   .8036221   .0946234    -1.86   0.063      .638008    1.012226
+                          |
+                  smoking |
+   Current/former smoker  |   .9489615   .0322644    -1.54   0.123     .8877854    1.014353
+                     age1 |   .9957883   .0052339    -0.80   0.422     .9855828      1.0061
+                     age2 |   1.002446   .0147902     0.17   0.868      .973873    1.031858
+                     age3 |   1.000339   .0449645     0.01   0.994     .9159804    1.092466
+                          |
+                    month |
+                February  |   .6502768    .099856    -2.80   0.005     .4812695    .8786342
+                   March  |   .6277306   .0953739    -3.06   0.002      .466065    .8454739
+                   April  |   .7597347   .1023634    -2.04   0.041     .5834111    .9893483
+                     May  |   .8123629   .1041248    -1.62   0.105     .6318983    1.044367
+                    June  |    .917319   .0858859    -0.92   0.357     .7635277    1.102087
+                    July  |   .9530554   .0939143    -0.49   0.626     .7856706    1.156101
+                  August  |   .8250602   .0988322    -1.61   0.108     .6524121    1.043396
+               September  |     1.0248   .1265496     0.20   0.843      .804501    1.305424
+                 October  |   1.083485   .1109376     0.78   0.434     .8864796    1.324272
+                November  |   .7940171   .1362475    -1.34   0.179      .567244     1.11145
+                December  |   .9201654   .0948738    -0.81   0.420     .7518005    1.126235
+-------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+active results
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,738                         Number of obs =   10,793
+No. of failures =       1,757
+Time at risk    = 14,238.3546
+                                                      Wald chi2(35) = 1.36e+07
+Log pseudolikelihood = -14841.949                     Prob > chi2   =   0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .8928404   .0348752    -2.90   0.004     .8270373    .9638791
+                          |
+                      sex |
+                    Male  |   1.052128   .0373687     1.43   0.153     .9813775    1.127978
+                          |
+                ethnicity |
+             South Asian  |   .9161918   .0852065    -0.94   0.347     .7635264    1.099382
+                   Black  |   1.026071   .1163343     0.23   0.820      .821617    1.281401
+                   Mixed  |   .8631791   .0527797    -2.41   0.016     .7656911    .9730793
+                   Other  |   .8964832   .0606211    -1.62   0.106     .7852051    1.023532
+                          |
+                      imd |
+                       2  |    .913371   .0692677    -1.19   0.232     .7872167    1.059742
+                       3  |   .8831951   .0540337    -2.03   0.042      .783394    .9957103
+                       4  |   .9516429   .0606701    -0.78   0.437     .8398608    1.078303
+        5 Least deprived  |   .8794976   .0545272    -2.07   0.038     .7788643    .9931332
+                          |
+                   region |
+                    East  |   1.354666   .1082638     3.80   0.000     1.158257    1.584381
+                  London  |   1.006389   .0820738     0.08   0.938     .8577252     1.18082
+              North East  |   1.072975   .0781551     0.97   0.334     .9302263     1.23763
+              North West  |   1.218152   .0973915     2.47   0.014     1.041472    1.424804
+              South East  |   1.188891    .069435     2.96   0.003     1.060301    1.333076
+              South West  |   1.135609   .0626023     2.31   0.021     1.019307    1.265181
+           West Midlands  |    1.31869   .0867979     4.20   0.000     1.159086    1.500272
+Yorkshire and The Humber  |   1.006475   .1198949     0.05   0.957     .7969013    1.271162
+                          |
+                    urban |
+                   Urban  |   1.003794    .037678     0.10   0.920     .9325973    1.080426
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .9005338   .0681957    -1.38   0.167     .7763189    1.044624
+    Overweight (25-29.9)  |   .9233216    .046295    -1.59   0.112     .8369009    1.018666
+       Obese I (30-34.9)  |   .9234229   .0526738    -1.40   0.163      .825746    1.032654
+      Obese II (35-39.9)  |   .8979256   .0485329    -1.99   0.046     .8076681    .9982695
+         Obese III (40+)  |   .7863055   .0714216    -2.65   0.008     .6580745    .9395234
+                          |
+         1.cardiovascular |   .9069578   .0305399    -2.90   0.004     .8490331    .9688344
+               1.diabetes |   1.069872   .0562138     1.29   0.199     .9651782    1.185922
+           1.hypertension |   .9834427   .0421366    -0.39   0.697      .904229    1.069596
+       1.immunosuppressed |   .9204646   .0649405    -1.17   0.240     .8015918    1.056966
+        1.non_haem_cancer |   .8036221   .0946234    -1.86   0.063      .638008    1.012226
+                          |
+                  smoking |
+   Current/former smoker  |   .9489615   .0322644    -1.54   0.123     .8877854    1.014353
+                     age1 |   .9957883   .0052339    -0.80   0.422     .9855828      1.0061
+                     age2 |   1.002446   .0147902     0.17   0.868      .973873    1.031858
+                     age3 |   1.000339   .0449645     0.01   0.994     .9159804    1.092466
+                          |
+                    month |
+                February  |   .6502768    .099856    -2.80   0.005     .4812695    .8786342
+                   March  |   .6277306   .0953739    -3.06   0.002      .466065    .8454739
+                   April  |   .7597347   .1023634    -2.04   0.041     .5834111    .9893483
+                     May  |   .8123629   .1041248    -1.62   0.105     .6318983    1.044367
+                    June  |    .917319   .0858859    -0.92   0.357     .7635277    1.102087
+                    July  |   .9530554   .0939143    -0.49   0.626     .7856706    1.156101
+                  August  |   .8250602   .0988322    -1.61   0.108     .6524121    1.043396
+               September  |     1.0248   .1265496     0.20   0.843      .804501    1.305424
+                 October  |   1.083485   .1109376     0.78   0.434     .8864796    1.324272
+                November  |   .7940171   .1362475    -1.34   0.179      .567244     1.11145
+                December  |   .9201654   .0948738    -0.81   0.420     .7518005    1.126235
+-------------------------------------------------------------------------------------------
+file full_case_aki.ster saved
+file full_case_aki.dta saved
+
+Survival-time data settings
+
+           ID variable: patient_id
+         Failure event: death_date!=0 & death_date<.
+Observed time interval: (exit_date[_n-1], exit_date]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date
+
+--------------------------------------------------------------------------
+     25,443  total observations
+        128  observations end on or before enter()
+         18  observations begin on or after (first) failure
+--------------------------------------------------------------------------
+     25,297  observations remaining, representing
+     24,989  subjects
+      1,113  failures in single-failure-per-subject data
+ 33,197.525  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  5.744011
+
+        Failure _d: death_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -10654.689
+Iteration 1:   log pseudolikelihood = -10620.936
+Iteration 2:   log pseudolikelihood = -10620.908
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -10620.908
+
+Cox regression with Breslow method for ties
+
+No. of subjects =     24,989                            Number of obs = 25,297
+No. of failures =      1,113
+Time at risk    = 33,197.525
+                                                        Wald chi2(1)  = 139.56
+Log pseudolikelihood = -10620.908                       Prob > chi2   = 0.0000
+
+                           (Std. err. adjusted for 40 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .6033007    .025807   -11.81   0.000     .5547821    .6560625
+------------------------------------------------------------------------------
+file crude_case_death.ster saved
+file crude_case_death.dta saved
+
+        Failure _d: death_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -10654.689
+Iteration 1:   log pseudolikelihood = -10614.104
+Iteration 2:   log pseudolikelihood =     -10614
+Iteration 3:   log pseudolikelihood =     -10614
+Refining estimates:
+Iteration 0:   log pseudolikelihood =     -10614
+
+Cox regression with Breslow method for ties
+
+No. of subjects =     24,989                            Number of obs = 25,297
+No. of failures =      1,113
+Time at risk    = 33,197.525
+                                                        Wald chi2(16) = 805.48
+Log pseudolikelihood = -10614                           Prob > chi2   = 0.0000
+
+                           (Std. err. adjusted for 40 clusters in practice_id)
+------------------------------------------------------------------------------
+             |               Robust
+          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        case |
+   COVID-19  |   .6059247   .0261772   -11.60   0.000     .5567304    .6594659
+             |
+         sex |
+       Male  |   1.048653   .0433229     1.15   0.250     .9670889    1.137097
+        age1 |   .9933826   .0054062    -1.22   0.222     .9828429    1.004035
+        age2 |   1.019902   .0187379     1.07   0.283     .9838298    1.057297
+        age3 |   .9466453   .0519125    -1.00   0.317     .8501759    1.054061
+             |
+       month |
+   February  |   .9119638   .1219923    -0.69   0.491     .7016386    1.185337
+      March  |   .9083628   .0955075    -0.91   0.361        .7392    1.116238
+      April  |   .8212548   .1164183    -1.39   0.165     .6220344     1.08428
+        May  |   1.003573   .1187427     0.03   0.976     .7958569    1.265503
+       June  |   .8966142   .1440689    -0.68   0.497     .6543854    1.228507
+       July  |   .8787625   .0904947    -1.26   0.209     .7181498    1.075296
+     August  |   .8604962   .1023181    -1.26   0.206     .6816101     1.08633
+  September  |   .8325088   .0875465    -1.74   0.081     .6774489     1.02306
+    October  |   .7820415   .0949333    -2.03   0.043     .6164546     .992107
+   November  |   .6147441   .1088682    -2.75   0.006      .434461    .8698372
+   December  |   .8832412   .1170057    -0.94   0.349      .681268    1.145093
+------------------------------------------------------------------------------
+file minimal_case_death.ster saved
+file minimal_case_death.dta saved
+
+        Failure _d: death_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -4115.0572
+Iteration 1:   log pseudolikelihood = -4091.9992
+Iteration 2:   log pseudolikelihood = -4091.6836
+Iteration 3:   log pseudolikelihood = -4091.6831
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -4091.6831
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,747                         Number of obs =   10,807
+No. of failures =         471
+Time at risk    = 14,288.6297
+                                                      Wald chi2(35) = 1.70e+07
+Log pseudolikelihood = -4091.6831                     Prob > chi2   =   0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .7474468   .0519432    -4.19   0.000     .6522689    .8565129
+                          |
+                      sex |
+                    Male  |   .9991665   .0724305    -0.01   0.991     .8668291    1.151708
+                          |
+                ethnicity |
+             South Asian  |   .7396353   .1491656    -1.50   0.135     .4981407    1.098205
+                   Black  |   .7915186   .1350908    -1.37   0.171     .5664793    1.105957
+                   Mixed  |   .7683237   .1393718    -1.45   0.146     .5384417    1.096352
+                   Other  |   1.287765   .2022342     1.61   0.107     .9465897     1.75191
+                          |
+                      imd |
+                       2  |   .8230508    .083916    -1.91   0.056     .6739698    1.005108
+                       3  |   .9887185   .1242721    -0.09   0.928     .7728319    1.264912
+                       4  |   .9205403   .0894907    -0.85   0.394     .7608392    1.113763
+        5 Least deprived  |   .9212972    .148975    -0.51   0.612     .6710569    1.264853
+                          |
+                   region |
+                    East  |   1.229236   .1945445     1.30   0.192     .9014052    1.676294
+                  London  |   1.024303   .1393331     0.18   0.860      .784588    1.337257
+              North East  |   .9290429   .1151113    -0.59   0.553     .7287344    1.184411
+              North West  |   .9565409   .1493825    -0.28   0.776     .7043229    1.299078
+              South East  |   .7993282   .1437407    -1.25   0.213     .5618964    1.137088
+              South West  |    1.15007    .185583     0.87   0.386     .8382407    1.577901
+           West Midlands  |   1.137871   .2047247     0.72   0.473     .7997342    1.618976
+Yorkshire and The Humber  |   1.011652   .1388844     0.08   0.933      .772991    1.324001
+                          |
+                    urban |
+                   Urban  |   1.047726    .072383     0.67   0.500     .9150434    1.199648
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .8374376   .1251627    -1.19   0.235     .6247879    1.122464
+    Overweight (25-29.9)  |   .9364484   .1638848    -0.38   0.708     .6645349    1.319623
+       Obese I (30-34.9)  |    1.15919   .3212279     0.53   0.594     .6734021    1.995421
+      Obese II (35-39.9)  |    1.04555   .1668688     0.28   0.780     .7647049    1.429538
+         Obese III (40+)  |   .8889282   .1833768    -0.57   0.568     .5932975    1.331867
+                          |
+                  smoking |
+   Current/former smoker  |   1.091128   .0767101     1.24   0.215     .9506774    1.252328
+                     age1 |   .9928126    .007616    -0.94   0.347     .9779972    1.007852
+                     age2 |   1.013756   .0263082     0.53   0.599     .9634826    1.066653
+                     age3 |   .9726326   .0749521    -0.36   0.719     .8362851     1.13121
+                          |
+                    month |
+                February  |   .5891706   .0951326    -3.28   0.001     .4293374    .8085063
+                   March  |   .5728408   .1144672    -2.79   0.005     .3872074    .8474698
+                   April  |   .5407443   .1059268    -3.14   0.002     .3683405    .7938427
+                     May  |   .7260915   .1070659    -2.17   0.030     .5438478    .9694053
+                    June  |   .7261477   .1176782    -1.97   0.048     .5285434    .9976293
+                    July  |   .6402104   .0802519    -3.56   0.000      .500752    .8185078
+                  August  |    .594636   .1203074    -2.57   0.010     .3999772    .8840303
+               September  |   .6672822   .0917632    -2.94   0.003      .509629    .8737053
+                 October  |   .5015121   .0961863    -3.60   0.000     .3443716    .7303576
+                November  |   .4756637   .0878269    -4.02   0.000      .331233     .683072
+                December  |   .5833474   .1425921    -2.20   0.027     .3612946    .9418746
+-------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+active results
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,747                         Number of obs =   10,807
+No. of failures =         471
+Time at risk    = 14,288.6297
+                                                      Wald chi2(35) = 1.70e+07
+Log pseudolikelihood = -4091.6831                     Prob > chi2   =   0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .7474468   .0519432    -4.19   0.000     .6522689    .8565129
+                          |
+                      sex |
+                    Male  |   .9991665   .0724305    -0.01   0.991     .8668291    1.151708
+                          |
+                ethnicity |
+             South Asian  |   .7396353   .1491656    -1.50   0.135     .4981407    1.098205
+                   Black  |   .7915186   .1350908    -1.37   0.171     .5664793    1.105957
+                   Mixed  |   .7683237   .1393718    -1.45   0.146     .5384417    1.096352
+                   Other  |   1.287765   .2022342     1.61   0.107     .9465897     1.75191
+                          |
+                      imd |
+                       2  |   .8230508    .083916    -1.91   0.056     .6739698    1.005108
+                       3  |   .9887185   .1242721    -0.09   0.928     .7728319    1.264912
+                       4  |   .9205403   .0894907    -0.85   0.394     .7608392    1.113763
+        5 Least deprived  |   .9212972    .148975    -0.51   0.612     .6710569    1.264853
+                          |
+                   region |
+                    East  |   1.229236   .1945445     1.30   0.192     .9014052    1.676294
+                  London  |   1.024303   .1393331     0.18   0.860      .784588    1.337257
+              North East  |   .9290429   .1151113    -0.59   0.553     .7287344    1.184411
+              North West  |   .9565409   .1493825    -0.28   0.776     .7043229    1.299078
+              South East  |   .7993282   .1437407    -1.25   0.213     .5618964    1.137088
+              South West  |    1.15007    .185583     0.87   0.386     .8382407    1.577901
+           West Midlands  |   1.137871   .2047247     0.72   0.473     .7997342    1.618976
+Yorkshire and The Humber  |   1.011652   .1388844     0.08   0.933      .772991    1.324001
+                          |
+                    urban |
+                   Urban  |   1.047726    .072383     0.67   0.500     .9150434    1.199648
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .8374376   .1251627    -1.19   0.235     .6247879    1.122464
+    Overweight (25-29.9)  |   .9364484   .1638848    -0.38   0.708     .6645349    1.319623
+       Obese I (30-34.9)  |    1.15919   .3212279     0.53   0.594     .6734021    1.995421
+      Obese II (35-39.9)  |    1.04555   .1668688     0.28   0.780     .7647049    1.429538
+         Obese III (40+)  |   .8889282   .1833768    -0.57   0.568     .5932975    1.331867
+                          |
+                  smoking |
+   Current/former smoker  |   1.091128   .0767101     1.24   0.215     .9506774    1.252328
+                     age1 |   .9928126    .007616    -0.94   0.347     .9779972    1.007852
+                     age2 |   1.013756   .0263082     0.53   0.599     .9634826    1.066653
+                     age3 |   .9726326   .0749521    -0.36   0.719     .8362851     1.13121
+                          |
+                    month |
+                February  |   .5891706   .0951326    -3.28   0.001     .4293374    .8085063
+                   March  |   .5728408   .1144672    -2.79   0.005     .3872074    .8474698
+                   April  |   .5407443   .1059268    -3.14   0.002     .3683405    .7938427
+                     May  |   .7260915   .1070659    -2.17   0.030     .5438478    .9694053
+                    June  |   .7261477   .1176782    -1.97   0.048     .5285434    .9976293
+                    July  |   .6402104   .0802519    -3.56   0.000      .500752    .8185078
+                  August  |    .594636   .1203074    -2.57   0.010     .3999772    .8840303
+               September  |   .6672822   .0917632    -2.94   0.003      .509629    .8737053
+                 October  |   .5015121   .0961863    -3.60   0.000     .3443716    .7303576
+                November  |   .4756637   .0878269    -4.02   0.000      .331233     .683072
+                December  |   .5833474   .1425921    -2.20   0.027     .3612946    .9418746
+-------------------------------------------------------------------------------------------
+file additional_case_death.ster saved
+file additional_case_death.dta saved
+
+        Failure _d: death_date
+  Analysis time _t: (exit_date-origin)/365.25
+            Origin: time index_date
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -4115.0572
+Iteration 1:   log pseudolikelihood = -4090.9971
+Iteration 2:   log pseudolikelihood = -4090.6765
+Iteration 3:   log pseudolikelihood =  -4090.676
+Refining estimates:
+Iteration 0:   log pseudolikelihood =  -4090.676
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,747                       Number of obs =     10,807
+No. of failures =         471
+Time at risk    = 14,288.6297
+                                                    Wald chi2(35) = 1382283.79
+Log pseudolikelihood = -4090.676                    Prob > chi2   =     0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .7471504   .0520349    -4.19   0.000     .6518183    .8564254
+                          |
+                      sex |
+                    Male  |   .9956618   .0723414    -0.06   0.952      .863508    1.148041
+                          |
+                ethnicity |
+             South Asian  |   .7305984   .1482992    -1.55   0.122     .4907939    1.087573
+                   Black  |   .7921866   .1328198    -1.39   0.165     .5703128    1.100378
+                   Mixed  |   .7639682   .1374168    -1.50   0.134     .5369917    1.086883
+                   Other  |   1.291846   .2025464     1.63   0.102     .9500625    1.756585
+                          |
+                      imd |
+                       2  |   .8218167    .083102    -1.94   0.052     .6740647    1.001955
+                       3  |   .9850665   .1233567    -0.12   0.904     .7706769    1.259096
+                       4  |   .9204093   .0892979    -0.85   0.393     .7610227    1.113177
+        5 Least deprived  |   .9207669   .1518073    -0.50   0.617     .6665177    1.272002
+                          |
+                   region |
+                    East  |   1.232163   .1963516     1.31   0.190     .9016222    1.683881
+                  London  |   1.024042   .1381235     0.18   0.860     .7861527    1.333916
+              North East  |    .927333   .1159433    -0.60   0.546     .7257901    1.184842
+              North West  |   .9541408   .1503451    -0.30   0.766     .7006283    1.299383
+              South East  |   .7964301   .1469788    -1.23   0.217     .5547035    1.143495
+              South West  |   1.150418   .1813236     0.89   0.374     .8446815    1.566816
+           West Midlands  |   1.135235   .2005584     0.72   0.473     .8029836    1.604962
+Yorkshire and The Humber  |   1.011223   .1385063     0.08   0.935     .7731413    1.322621
+                          |
+                    urban |
+                   Urban  |   1.049533   .0740233     0.69   0.493     .9140318    1.205123
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .8363695   .1195565    -1.25   0.211     .6320063    1.106815
+    Overweight (25-29.9)  |   .9374826   .1607582    -0.38   0.707     .6698852    1.311977
+       Obese I (30-34.9)  |   1.161005    .312561     0.55   0.579     .6849788    1.967846
+      Obese II (35-39.9)  |   1.049243   .1641709     0.31   0.759     .7721324    1.425805
+         Obese III (40+)  |   .8892416   .1831364    -0.57   0.569     .5939059    1.331441
+                          |
+         1.cardiovascular |    .878168   .1255644    -0.91   0.364     .6635429    1.162214
+               1.diabetes |   .9605393   .1199729    -0.32   0.747     .7519669    1.226963
+           1.hypertension |   1.018576    .159642     0.12   0.907     .7491761     1.38485
+       1.immunosuppressed |   1.083424   .1523099     0.57   0.569     .8224978    1.427125
+        1.non_haem_cancer |   1.201052    .369653     0.60   0.552     .6570276    2.195532
+                          |
+                  smoking |
+   Current/former smoker  |   1.089531   .0760072     1.23   0.219     .9502949    1.249167
+                     age1 |   .9929736   .0077907    -0.90   0.369     .9778208    1.008361
+                     age2 |   1.013446   .0271368     0.50   0.618     .9616304    1.068053
+                     age3 |   .9733701   .0774173    -0.34   0.734     .8328704    1.137571
+                          |
+                    month |
+                February  |   .5894712   .0979662    -3.18   0.001      .425597    .8164444
+                   March  |   .5734441    .113594    -2.81   0.005     .3889339    .8454859
+                   April  |   .5371398   .1053899    -3.17   0.002     .3656594    .7890381
+                     May  |   .7255514   .1059904    -2.20   0.028     .5449072    .9660817
+                    June  |   .7293652   .1209338    -1.90   0.057     .5269991    1.009439
+                    July  |   .6395071   .0804533    -3.55   0.000     .4997581    .8183347
+                  August  |   .5939751   .1196689    -2.59   0.010     .4001987    .8815782
+               September  |   .6703886    .091078    -2.94   0.003     .5136693    .8749225
+                 October  |    .501777   .0974086    -3.55   0.000     .3429804    .7340948
+                November  |   .4753404   .0877566    -4.03   0.000     .3310223    .6825777
+                December  |   .5828392   .1402897    -2.24   0.025     .3636337    .9341862
+-------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+active results
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      10,747                       Number of obs =     10,807
+No. of failures =         471
+Time at risk    = 14,288.6297
+                                                    Wald chi2(35) = 1382283.79
+Log pseudolikelihood = -4090.676                    Prob > chi2   =     0.0000
+
+                                        (Std. err. adjusted for 36 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+                COVID-19  |   .7471504   .0520349    -4.19   0.000     .6518183    .8564254
+                          |
+                      sex |
+                    Male  |   .9956618   .0723414    -0.06   0.952      .863508    1.148041
+                          |
+                ethnicity |
+             South Asian  |   .7305984   .1482992    -1.55   0.122     .4907939    1.087573
+                   Black  |   .7921866   .1328198    -1.39   0.165     .5703128    1.100378
+                   Mixed  |   .7639682   .1374168    -1.50   0.134     .5369917    1.086883
+                   Other  |   1.291846   .2025464     1.63   0.102     .9500625    1.756585
+                          |
+                      imd |
+                       2  |   .8218167    .083102    -1.94   0.052     .6740647    1.001955
+                       3  |   .9850665   .1233567    -0.12   0.904     .7706769    1.259096
+                       4  |   .9204093   .0892979    -0.85   0.393     .7610227    1.113177
+        5 Least deprived  |   .9207669   .1518073    -0.50   0.617     .6665177    1.272002
+                          |
+                   region |
+                    East  |   1.232163   .1963516     1.31   0.190     .9016222    1.683881
+                  London  |   1.024042   .1381235     0.18   0.860     .7861527    1.333916
+              North East  |    .927333   .1159433    -0.60   0.546     .7257901    1.184842
+              North West  |   .9541408   .1503451    -0.30   0.766     .7006283    1.299383
+              South East  |   .7964301   .1469788    -1.23   0.217     .5547035    1.143495
+              South West  |   1.150418   .1813236     0.89   0.374     .8446815    1.566816
+           West Midlands  |   1.135235   .2005584     0.72   0.473     .8029836    1.604962
+Yorkshire and The Humber  |   1.011223   .1385063     0.08   0.935     .7731413    1.322621
+                          |
+                    urban |
+                   Urban  |   1.049533   .0740233     0.69   0.493     .9140318    1.205123
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   .8363695   .1195565    -1.25   0.211     .6320063    1.106815
+    Overweight (25-29.9)  |   .9374826   .1607582    -0.38   0.707     .6698852    1.311977
+       Obese I (30-34.9)  |   1.161005    .312561     0.55   0.579     .6849788    1.967846
+      Obese II (35-39.9)  |   1.049243   .1641709     0.31   0.759     .7721324    1.425805
+         Obese III (40+)  |   .8892416   .1831364    -0.57   0.569     .5939059    1.331441
+                          |
+         1.cardiovascular |    .878168   .1255644    -0.91   0.364     .6635429    1.162214
+               1.diabetes |   .9605393   .1199729    -0.32   0.747     .7519669    1.226963
+           1.hypertension |   1.018576    .159642     0.12   0.907     .7491761     1.38485
+       1.immunosuppressed |   1.083424   .1523099     0.57   0.569     .8224978    1.427125
+        1.non_haem_cancer |   1.201052    .369653     0.60   0.552     .6570276    2.195532
+                          |
+                  smoking |
+   Current/former smoker  |   1.089531   .0760072     1.23   0.219     .9502949    1.249167
+                     age1 |   .9929736   .0077907    -0.90   0.369     .9778208    1.008361
+                     age2 |   1.013446   .0271368     0.50   0.618     .9616304    1.068053
+                     age3 |   .9733701   .0774173    -0.34   0.734     .8328704    1.137571
+                          |
+                    month |
+                February  |   .5894712   .0979662    -3.18   0.001      .425597    .8164444
+                   March  |   .5734441    .113594    -2.81   0.005     .3889339    .8454859
+                   April  |   .5371398   .1053899    -3.17   0.002     .3656594    .7890381
+                     May  |   .7255514   .1059904    -2.20   0.028     .5449072    .9660817
+                    June  |   .7293652   .1209338    -1.90   0.057     .5269991    1.009439
+                    July  |   .6395071   .0804533    -3.55   0.000     .4997581    .8183347
+                  August  |   .5939751   .1196689    -2.59   0.010     .4001987    .8815782
+               September  |   .6703886    .091078    -2.94   0.003     .5136693    .8749225
+                 October  |    .501777   .0974086    -3.55   0.000     .3429804    .7340948
+                November  |   .4753404   .0877566    -4.03   0.000     .3310223    .6825777
+                December  |   .5828392   .1402897    -2.24   0.025     .3636337    .9341862
+-------------------------------------------------------------------------------------------
+file full_case_death.ster saved
+file full_case_death.dta saved
+
+. 
+. file close tablecontent
+
+. 
+end of do-file
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD1a44_000000.tmp"
+
+. sysdir set PLUS ./analysis/adofiles
+
+. sysdir set PERSONAL ./analysis/adofiles
+
+. pwd
+C:\Users\lsh1703468\Documents\repos
+
+. cap log close

@@ -24,20 +24,20 @@ file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _
 use ./output/analysis_hospitalised.dta, clear
 foreach outcome of varlist esrd egfr_half aki death {
 stset exit_date, fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
-
-stcox i.case, vce(cluster practice_id)
+foreach interaction of varlist critical_care acute_kidney_injury {
+stcox i.case##i.`interaction', vce(cluster practice_id)
 estimates save "crude_case_`outcome'", replace 
 eststo model1
 parmest, label eform format(estimate p lb ub) saving("crude_case_`outcome'", replace) idstr("crude_case_`outcome'") 
 local hr "`hr' "crude_case_`outcome'" "
 
-stcox i.case i.sex age1 age2 age3 i.month, vce(cluster practice_id)
+stcox i.case##i.`interaction' i.sex age1 age2 age3 i.month, vce(cluster practice_id)
 estimates save "minimal_case_`outcome'", replace 
 eststo model2
 parmest, label eform format(estimate p lb ub) saving("minimal_case_`outcome'", replace) idstr("minimal_case_`outcome'")
 local hr "`hr' "minimal_case_`outcome'" "
 
-stcox i.case i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3 i.month, vce(cluster practice_id)
+stcox i.case##i.`interaction' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3 i.month, vce(cluster practice_id)
 if _rc==0{
 estimates
 estimates save "additional_case_`outcome'", replace 
@@ -47,7 +47,7 @@ local hr "`hr' "additional_case_`outcome'" "
 }
 else di "WARNING MODEL1 DID NOT FIT (`outcome')"
 
-stcox i.case i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 i.month, vce(cluster practice_id)		
+stcox i.case##i.`interaction' i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 i.month, vce(cluster practice_id)		
 if _rc==0{
 estimates
 estimates save "full_case_`outcome'", replace 

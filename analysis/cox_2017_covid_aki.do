@@ -83,7 +83,7 @@ forvalues severity=1/3 {
 	qui safecount if covid_aki == `severity' & `outcome'==1
 	local event = r(N)
 	qui su total_follow_up_`outcome' if covid_aki==`severity'
-	local person_year = r(mean)/365.25
+	local person_year = r(mean)
 	local rate = 100000*(`event'/`person_year')
 	file write tablecontent _tab ("`lab`severity''") _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
 	cap estimates use "crude_covid_aki_`outcome'" 

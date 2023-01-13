@@ -302,13 +302,13 @@ drop covidvax2date
 drop covidvax3date
 drop covidvax4date
 label define covid_vax	0 "Pneumonia (pre-pandemic)"	///
-						1 "Pre-vaccination"			///
-						2 "1 vaccine dose"			///
-						3 "2 vaccine doses"			///
-						4 "3 vaccine doses"			///
-						5 "4 vaccine doses"
+						1 "COVID pre-vaccination"			///
+						2 "COVID 1 vaccine dose"			///
+						3 "COVID 2 vaccine doses"			///
+						4 "COVID 3 vaccine doses"			///
+						5 "COVID 4 vaccine doses"
 label values covid_vax covid_vax
-label var covid_vax "Vaccination status"
+label var covid_vax "COVID-19 vaccination status"
 safetab covid_vax, m
 
 * COVID-19 wave
@@ -340,10 +340,10 @@ replace wave = 4 if index_month=="aug2022"
 replace wave = 4 if index_month=="sep2022"
 replace wave = 4 if index_month=="oct2022"
 label define wave	0 "Pneumonia (pre-pandemic)"	///
-					1 "Feb20-Aug20"	///
-					2 "Sep20-Jun21"	///
-					3 "Jul21-Nov21"	///
-					4 "Dec21-Oct22"	
+					1 "COVID Feb20-Aug20"	///
+					2 "COVID Sep20-Jun21"	///
+					3 "COVID Jul21-Nov21"	///
+					4 "COVID Dec21-Oct22"	
 label values wave wave
 label var wave "COVID-19 wave"
 safetab wave, m
@@ -655,6 +655,9 @@ format egfr15_date %td
 gen esrd_date = egfr15_date
 format esrd_date %td
 replace esrd_date = krt_date if esrd_date==.
+gen esrd = 0
+replace esrd = 1 if esrd_date!=.
+label var esrd "Kidney failure"
 gen esrd_time = (esrd_date - index_date)
 label var esrd_time "Time to ESRD (Days)"
 gen esrd_time_cat = esrd_time
@@ -721,6 +724,9 @@ foreach x of local month_year {
   format egfr_half_date %td
 }
 replace egfr_half_date=esrd_date if egfr_half_date==.
+gen egfr_half = 0
+replace egfr_half = 1 if egfr_half_date!=.
+label var egfr_half "50% reduction in eGFR"
 * Index date (50% eGFR reduction)
 gen index_date_egfr_half = index_date
 replace index_date_egfr_half =. if baseline_egfr==.
@@ -736,6 +742,9 @@ gen aki_date = date(acute_kidney_injury_outcome, "YMD")
 format aki_date %td
 drop acute_kidney_injury_outcome
 replace aki_date = esrd_date if aki_date==.
+gen aki = 0
+replace aki = 1 if aki_date!=.
+label var aki "Acute kidney injury"
 * Exit date (AKI)
 gen exit_date_aki = aki_date
 format exit_date_aki %td
@@ -745,6 +754,9 @@ label var follow_up_time_aki "Follow-up time (AKI) (Days)"
 
 * Exit date (death)
 gen exit_date_death = death_date
+gen death = 0
+replace death = 1 if death_date!=.
+label var death "Death"
 format exit_date_death %td
 replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
 gen follow_up_time_death = (exit_date_death - index_date)
