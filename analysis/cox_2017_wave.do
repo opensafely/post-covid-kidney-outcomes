@@ -69,7 +69,7 @@ local lab5: label wave 5
 	qui safecount if wave==0
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
-	qui safecount if wave== 1 & `outcome'==1
+	qui safecount if wave== 0 & `outcome'==1
 	local event = r(N)
 	local r_event = round(`event',5)
     bysort wave: egen total_follow_up_`outcome' = total(_t)

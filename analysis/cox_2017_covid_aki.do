@@ -67,7 +67,7 @@ local lab3: label covid_aki 3
 	qui safecount if covid_aki==0
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
-	qui safecount if covid_aki== 1 & `outcome'==1
+	qui safecount if covid_aki== 0 & `outcome'==1
 	local event = r(N)
 	local r_event = round(`event',5)
     bysort covid_aki: egen total_follow_up_`outcome' = total(_t)

@@ -9,7 +9,7 @@ cap file close tablecontent
 file open tablecontent using ./output/cox_hospitalised_case.txt, write text replace
 file write tablecontent ("Kidney outcomes after COVID-19 hospitalisation compared to a pre-pandemic population hospitalised for pneumonia") _n
 file write tablecontent _n
-file write tablecontent ("Populations restricted to those who survived 28 days after hospital admission") _n
+file write tablecontent ("Restricted to those who survived 28 days after hospital admission") _n
 file write tablecontent ("Clustering by general practice accounted for using robust standard errors") _n
 file write tablecontent _n
 file write tablecontent ("Cox regression models:") _n
@@ -62,26 +62,30 @@ local lab1: label case 1
 
 	qui safecount if case==0
 	local denominator = r(N)
-	qui safecount if case== 1 & `outcome'==1
+	local r_denominator = round(`denominator',5)
+	qui safecount if case== 0 & `outcome'==1
 	local event = r(N)
+	local r_event = round(`event',5)
     bysort case: egen total_follow_up_`outcome' = total(_t)
 	qui su total_follow_up_`outcome' if case==0
-	local person_year = r(mean)/365.25
-	local rate = 100000*(`event'/`person_year')
+	local person_year = r(mean)
+	local rate = 100000*(`r_event'/`person_year')
 	
 	file write tablecontent _n
 	file write tablecontent ("`outcome'") _n
-	file write tablecontent _tab ("`lab0'") _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab
+	file write tablecontent _tab ("`lab0'") _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
 	file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 	
 	qui safecount if case==1
 	local denominator = r(N)
+	local r_denominator = round(`denominator',5)
 	qui safecount if case == 1 & `outcome'==1
 	local event = r(N)
+	local r_event = round(`event',5)
 	qui su total_follow_up_`outcome' if case==1
-	local person_year = r(mean)/365.25
-	local rate = 100000*(`event'/`person_year')
-	file write tablecontent _tab ("`lab1'") _tab _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
+	local person_year = r(mean)
+	local rate = 100000*(`r_event'/`person_year')
+	file write tablecontent _tab ("`lab1'") _tab _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab 
 	cap estimates use "crude_case_`outcome'" 
 	 cap lincom 1.case, eform
 	file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 

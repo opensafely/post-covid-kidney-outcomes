@@ -66,27 +66,31 @@ local lab5: label covid_vax 5
 
 	qui safecount if covid_vax==0
 	local denominator = r(N)
-	qui safecount if covid_vax== 1 & `outcome'==1
+	local r_denominator = round(`denominator',5)
+	qui safecount if covid_vax== 0 & `outcome'==1
 	local event = r(N)
+	local r_event = round(`event',5)
     bysort covid_vax: egen total_follow_up_`outcome' = total(_t)
 	qui su total_follow_up_`outcome' if covid_vax==0
-	local person_year = r(mean)/365.25
-	local rate = 100000*(`event'/`person_year')
+	local person_year = r(mean)
+	local rate = 100000*(`r_event'/`person_year')
 	
 	file write tablecontent _n
 	file write tablecontent ("`outcome'") _n
-	file write tablecontent _tab ("`lab0'") _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab
+	file write tablecontent _tab ("`lab0'") _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
 	file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 
 forvalues i=1/5 {
 	qui safecount if covid_vax==`i'
 	local denominator = r(N)
+	local r_denominator = round(`denominator',5)
 	qui safecount if covid_vax ==`i' & `outcome'==1
 	local event = r(N)
+	local r_event = round(`event',5)
 	qui su total_follow_up_`outcome' if covid_vax==`i'
-	local person_year = r(mean)/365.25
-	local rate = 100000*(`event'/`person_year')
-	file write tablecontent _tab ("`lab`i''") _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
+	local person_year = r(mean)
+	local rate = 100000*(`r_event'/`person_year')
+	file write tablecontent _tab ("`lab`i''") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab 
 	cap estimates use "crude_covid_vax_`outcome'" 
 	 cap lincom `i'.covid_vax, eform
 	file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 

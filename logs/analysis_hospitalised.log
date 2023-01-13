@@ -1,8 +1,8 @@
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_hospitalised.log
   log type:  text
- opened on:  13 Jan 2023, 17:17:35
+ opened on:  13 Jan 2023, 23:21:34
 
 . 
 . capture noisily import delimited ./output/input_covid_hospitalised.csv, clear
@@ -1426,9 +1426,9 @@ Yorkshire and The Humber |      9,391        9.90      100.00
 . gen baseline_egfr=.
 (26,593 missing values generated)
 
-. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 
-> jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 ju
-> n2022 jul2022 aug2022 sep2022 oct2022"
+. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb
+> 2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 
+> sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 
 . foreach x of local month_year  {
   2. replace baseline_egfr=egfr_baseline_creatinine_`x' if index_month=="`x'"
@@ -1631,14 +1631,16 @@ Critical care pneumonia (pre-pandemic) |      1,327        4.99       50.89
 
 . 
 . * Acute kidney injury during index admission
-. label define acute_kidney_injury        0 "No AKI"      ///
->                                                                         1 "AKI"
+. rename acute_kidney_injury adm_aki
 
-. label values acute_kidney_injury acute_kidney_injury
+. label define adm_aki    0 "No AKI"      ///
+>                                                 1 "AKI"
 
-. label var acute_kidney_injury "Acute kidney injury"
+. label values adm_aki adm_aki
 
-. safetab acute_kidney_injury, m
+. label var adm_aki "Acute kidney injury"
+
+. safetab adm_aki, m
 
       Acute |
      kidney |
@@ -1649,24 +1651,24 @@ Critical care pneumonia (pre-pandemic) |      1,327        4.99       50.89
 ------------+-----------------------------------
       Total |     26,593      100.00
 
-. gen case_acute_kidney_injury = acute_kidney_injury
+. gen case_adm_aki = adm_aki
 
-. replace case_acute_kidney_injury = 2 if case==1
+. replace case_adm_aki = 2 if case==1
 (13,059 real changes made)
 
-. replace case_acute_kidney_injury = 3 if case==1 &acute_kidney_injury==1
+. replace case_adm_aki = 3 if case==1 &adm_aki==1
 (5,169 real changes made)
 
-. label define case_acute_kidney_injury   0 "No AKI pneumonia (pre-pandemic)"     ///
+. label define case_adm_aki       0 "No AKI pneumonia (pre-pandemic)"     ///
 >                                                                                 1 "AKI pneumonia (pre-pandemic)"        ///
 >                                                                                 2 "No AKI COVID-19"                             ///
 >                                                                                 3 "AKI COVID-19"
 
-. label values case_acute_kidney_injury case_acute_kidney_injury
+. label values case_adm_aki case_adm_aki
 
-. safetab case_acute_kidney_injury, m
+. safetab case_adm_aki, m
 
-       case_acute_kidney_injury |      Freq.     Percent        Cum.
+                   case_adm_aki |      Freq.     Percent        Cum.
 --------------------------------+-----------------------------------
 No AKI pneumonia (pre-pandemic) |      8,178       30.75       30.75
    AKI pneumonia (pre-pandemic) |      5,356       20.14       50.89
@@ -1677,7 +1679,7 @@ No AKI pneumonia (pre-pandemic) |      8,178       30.75       30.75
 
 . 
 . * Kidney replacement therapy during index admission
-. gen krt = acute_kidney_injury
+. gen krt = adm_aki
 
 . replace krt = 2 if krt_icd_10==1
 (276 real changes made)
@@ -3777,9 +3779,9 @@ immunosuppr |
 . gen egfr15_date=.
 (26,593 missing values generated)
 
-. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 
-> jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 ju
-> n2022 jul2022 aug2022 sep2022 oct2022"
+. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb
+> 2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 
+> sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 
 . foreach x of local month_year  {
   2.   replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatinine_`x'<15 & date("01`x'", "DMY")>=index_date
@@ -3907,7 +3909,7 @@ immunosuppr |
   3.                                                                 tab esrd_time_cat `exposure', m col chi
   4.                                                                 }
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> case = Pneumonia (pre-pandemic)
 
                      Time to ESRD (Days)
@@ -3925,7 +3927,7 @@ immunosuppr |
 95%          773            970       Skewness       .5323196
 99%          904            978       Kurtosis        2.38398
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> case = COVID-19
 
                      Time to ESRD (Days)
@@ -3986,7 +3988,7 @@ immunosuppr |
 
           Pearson chi2(8) =  12.6753   Pr = 0.124
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> critical_care = Ward-based
 
                      Time to ESRD (Days)
@@ -4004,7 +4006,7 @@ immunosuppr |
 95%          766            970       Skewness       .5223131
 99%          894            978       Kurtosis       2.329626
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> critical_care = Critical care
 
                      Time to ESRD (Days)
@@ -4065,7 +4067,7 @@ immunosuppr |
 
           Pearson chi2(8) =  10.2343   Pr = 0.249
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> krt = No AKI
 
                      Time to ESRD (Days)
@@ -4083,7 +4085,7 @@ immunosuppr |
 95%          774            963       Skewness       .5235282
 99%          915            978       Kurtosis       2.340374
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> krt = AKI without KRT
 
                      Time to ESRD (Days)
@@ -4101,7 +4103,7 @@ immunosuppr |
 95%          746            969       Skewness       .4867999
 99%          880            970       Kurtosis       2.281692
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> krt = AKI requiring KRT
 
                      Time to ESRD (Days)
@@ -4238,9 +4240,9 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 . gen egfr_half_date=.
 (25,431 missing values generated)
 
-. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 
-> jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 ju
-> n2022 jul2022 aug2022 sep2022 oct2022"
+. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb
+> 2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 
+> sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 
 . foreach x of local month_year {
   2.   replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_half_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>=index_date
@@ -4397,12 +4399,11 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 
 . 
 . save ./output/analysis_hospitalised.dta, replace
-(file ./output/analysis_hospitalised.dta not found)
 file ./output/analysis_hospitalised.dta saved
 
 . log close
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_hospitalised.log
   log type:  text
- closed on:  13 Jan 2023, 17:18:01
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ closed on:  13 Jan 2023, 23:21:52
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
