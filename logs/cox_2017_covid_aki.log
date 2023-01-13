@@ -1,8 +1,8 @@
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/cox_2017_covid_aki.log
   log type:  text
- opened on:  11 Jan 2023, 20:51:59
+ opened on:  13 Jan 2023, 20:38:16
 
 . 
 . cap file close tablecontent
@@ -12,6 +12,8 @@
 . file write tablecontent ("Kidney outcomes by COVID-19 AKI compared to matched historical general population") _n
 
 . file write tablecontent _n
+
+. file write tablecontent ("Populations restricted to those who survived 28 days after first recorded SARS-CoV-2 (or equivalent date of matching for historical comparators)") _n
 
 . file write tablecontent ("Historical general population matched on age, sex and STP") _n
 
@@ -31,9 +33,11 @@
 
 . file write tablecontent _n
 
-. file write tablecontent _tab _tab _tab _tab _tab ("Number") _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally adjusted") _tab ("Fully adjusted") _tab _tab _n
+. file write tablecontent _tab _tab _tab _tab _tab ("Number") _tab _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally adjust
+> ed") _tab ("Fully adjusted") _tab _tab _n
 
-. file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab _n
+. file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI
+> ") _tab _tab _n
 
 . file write tablecontent ("By COVID-19 AKI") _n
 
@@ -65,7 +69,8 @@
  20. }
  21. else di "WARNING MODEL1 DID NOT FIT (`outcome')"
  22. 
-. stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)               
+. stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)            
+>    
  23. if _rc==0{
  24. estimates
  25. estimates save "full_covid_aki_`outcome'", replace 
@@ -82,44 +87,48 @@
  35. 
 .         qui safecount if covid_aki==0
  36.         local denominator = r(N)
- 37.         qui safecount if covid_aki== 1 & `outcome'==1
- 38.         local event = r(N)
- 39.     bysort covid_aki: egen total_follow_up_`outcome' = total(_t)
- 40.         qui su total_follow_up_`outcome' if covid_aki==0
- 41.         local person_year = r(mean)/365.25
- 42.         local rate = 100000*(`event'/`person_year')
- 43.         
+ 37.         local r_denominator = round(`denominator',5)
+ 38.         qui safecount if covid_aki== 1 & `outcome'==1
+ 39.         local event = r(N)
+ 40.         local r_event = round(`event',5)
+ 41.     bysort covid_aki: egen total_follow_up_`outcome' = total(_t)
+ 42.         qui su total_follow_up_`outcome' if covid_aki==0
+ 43.         local person_year = r(mean)
+ 44.         local rate = 100000*(`r_event'/`person_year')
+ 45.         
 .         file write tablecontent _n
- 44.         file write tablecontent ("`outcome'") _n
- 45.         file write tablecontent _tab ("`lab0'") _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab
- 46.         file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
- 47.         
+ 46.         file write tablecontent ("`outcome'") _n
+ 47.         file write tablecontent _tab ("`lab0'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
+ 48.         file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
+ 49.         
 . forvalues severity=1/3 {
- 48.         qui safecount if covid_aki==`severity'
- 49.         local denominator = r(N)
- 50.         qui safecount if covid_aki == `severity' & `outcome'==1
- 51.         local event = r(N)
- 52.         qui su total_follow_up_`outcome' if covid_aki==`severity'
- 53.         local person_year = r(mean)/365.25
- 54.         local rate = 100000*(`event'/`person_year')
- 55.         file write tablecontent _tab ("`lab`severity''") _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
- 56.         cap estimates use "crude_covid_aki_`outcome'" 
- 57.          cap lincom `severity'.covid_aki, eform
- 58.         file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 59.         cap estimates clear
- 60.         cap estimates use "minimal_covid_aki_`outcome'" 
+ 50.         qui safecount if covid_aki==`severity'
+ 51.         local denominator = r(N)
+ 52.         local r_denominator = round(`denominator',5)
+ 53.         qui safecount if covid_aki == `severity' & `outcome'==1
+ 54.         local event = r(N)
+ 55.         local r_event = round(`event',5)
+ 56.         qui su total_follow_up_`outcome' if covid_aki==`severity'
+ 57.         local person_year = r(mean)
+ 58.         local rate = 100000*(`r_event'/`person_year')
+ 59.         file write tablecontent _tab ("`lab`severity''") _tab _tab (`r_denominator') _tab _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab 
+ 60.         cap estimates use "crude_covid_aki_`outcome'" 
  61.          cap lincom `severity'.covid_aki, eform
- 62.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 62.         file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
  63.         cap estimates clear
- 64.         cap estimates use "additional_covid_aki_`outcome'" 
+ 64.         cap estimates use "minimal_covid_aki_`outcome'" 
  65.          cap lincom `severity'.covid_aki, eform
  66.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
  67.         cap estimates clear
- 68.         cap estimates use "full_covid_aki_`outcome'" 
+ 68.         cap estimates use "additional_covid_aki_`outcome'" 
  69.          cap lincom `severity'.covid_aki, eform
- 70.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
- 71.         }
- 72. }
+ 70.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 71.         cap estimates clear
+ 72.         cap estimates use "full_covid_aki_`outcome'" 
+ 73.          cap lincom `severity'.covid_aki, eform
+ 74.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
+ 75.         }
+ 76. }
 
 Survival-time data settings
 
@@ -255,10 +264,10 @@ Iteration 31:  log pseudolikelihood = -45.342813
 Iteration 32:  log pseudolikelihood = -45.342813
 Iteration 33:  log pseudolikelihood = -45.342813
 Iteration 34:  log pseudolikelihood = -45.342813
+Iteration 35:  log pseudolikelihood = -45.342813
+Iteration 36:  log pseudolikelihood = -45.342813
 Refining estimates:
 Iteration 0:   log pseudolikelihood = -45.342813
-Iteration 1:   log pseudolikelihood = -45.342813
-Iteration 2:   log pseudolikelihood = -45.342813
 
 Stratified Cox regression with no ties
 Strata variable: set_id
@@ -311,9 +320,9 @@ Hospitalised COVID-AKI  |   2.24e+15          .        .       .            .   
                    age3 |    1.00411   .5629438     0.01   0.994     .3346293    3.012996
 -----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with no ties
 Strata variable: set_id
@@ -407,11 +416,12 @@ Iteration 30:  log pseudolikelihood = -36.963613
 Iteration 31:  log pseudolikelihood = -36.963613
 Iteration 32:  log pseudolikelihood = -36.963613
 Iteration 33:  log pseudolikelihood = -36.963613
+Iteration 34:  log pseudolikelihood = -36.963613
+Iteration 35:  log pseudolikelihood = -36.963613
 Refining estimates:
 Iteration 0:   log pseudolikelihood = -36.963613
 Iteration 1:   log pseudolikelihood = -36.963613
 Iteration 2:   log pseudolikelihood = -36.963613
-Iteration 3:   log pseudolikelihood = -36.963613
 
 Stratified Cox regression with no ties
 Strata variable: set_id
@@ -419,7 +429,7 @@ Strata variable: set_id
 No. of subjects =      3,390                         Number of obs =     3,397
 No. of failures =        328
 Time at risk    = 5,856.3696
-                                                     Wald chi2(20) = 436952.52
+                                                     Wald chi2(19) = 285351.00
 Log pseudolikelihood = -36.963613                    Prob > chi2   =    0.0000
 
                                       (Std. err. adjusted for 34 clusters in practice_id)
@@ -430,7 +440,7 @@ Log pseudolikelihood = -36.963613                    Prob > chi2   =    0.0000
               covid_aki |
 Non-hospitalised COVID  |   .4072425   .1217009    -3.01   0.003     .2267142     .731522
     Hospitalised COVID  |   19.05258   21.95967     2.56   0.011     1.990095    182.4038
-Hospitalised COVID-AKI  |   3.62e+15   2.18e+16     5.93   0.000     2.62e+10    4.99e+20
+Hospitalised COVID-AKI  |   9.83e+15          .        .       .            .           .
                         |
                     sex |
                   Male  |          1  (omitted)
@@ -470,9 +480,9 @@ Hospitalised COVID-AKI  |   3.62e+15   2.18e+16     5.93   0.000     2.62e+10   
                    age3 |   1.227021   1.100755     0.23   0.820     .2114671    7.119693
 -----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with no ties
 Strata variable: set_id
@@ -480,7 +490,7 @@ Strata variable: set_id
 No. of subjects =      3,390                         Number of obs =     3,397
 No. of failures =        328
 Time at risk    = 5,856.3696
-                                                     Wald chi2(20) = 436952.52
+                                                     Wald chi2(19) = 285351.00
 Log pseudolikelihood = -36.963613                    Prob > chi2   =    0.0000
 
                                       (Std. err. adjusted for 34 clusters in practice_id)
@@ -491,7 +501,7 @@ Log pseudolikelihood = -36.963613                    Prob > chi2   =    0.0000
               covid_aki |
 Non-hospitalised COVID  |   .4072425   .1217009    -3.01   0.003     .2267142     .731522
     Hospitalised COVID  |   19.05258   21.95967     2.56   0.011     1.990095    182.4038
-Hospitalised COVID-AKI  |   3.62e+15   2.18e+16     5.93   0.000     2.62e+10    4.99e+20
+Hospitalised COVID-AKI  |   9.83e+15          .        .       .            .           .
                         |
                     sex |
                   Male  |          1  (omitted)
@@ -690,9 +700,9 @@ Hospitalised COVID-AKI  |   2.280395   1.184234     1.59   0.112     .8240844   
                    age3 |   .7888381   .1542481    -1.21   0.225     .5377066    1.157259
 -----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with Breslow method for ties
 Strata variable: set_id
@@ -816,9 +826,9 @@ Hospitalised COVID-AKI  |   2.933473   1.561014     2.02   0.043     1.033773   
                    age3 |   .8410365   .1704038    -0.85   0.393     .5653943     1.25106
 -----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with Breslow method for ties
 Strata variable: set_id
@@ -1036,9 +1046,9 @@ Hospitalised COVID-AKI  |   .6193165   .4173566    -0.71   0.477     .1653062   
                    age3 |   .6741643   .1972585    -1.35   0.178     .3799327    1.196258
 -----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with Breslow method for ties
 Strata variable: set_id
@@ -1163,9 +1173,9 @@ Hospitalised COVID-AKI  |   .8087398   .4327132    -0.40   0.692     .2833849   
                    age3 |    .638681   .2300373    -1.24   0.213     .3152841    1.293796
 -----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with Breslow method for ties
 Strata variable: set_id
@@ -1365,13 +1375,14 @@ Iteration 34:  log pseudolikelihood = -19.157756
 Iteration 35:  log pseudolikelihood = -19.157756
 Iteration 36:  log pseudolikelihood = -19.157756
 Iteration 37:  log pseudolikelihood = -19.157756
+Iteration 38:  log pseudolikelihood = -19.157756
+Iteration 39:  log pseudolikelihood = -19.157756
+Iteration 40:  log pseudolikelihood = -19.157756
+Iteration 41:  log pseudolikelihood = -19.157756
+Iteration 42:  log pseudolikelihood = -19.157756
+Iteration 43:  log pseudolikelihood = -19.157756
 Refining estimates:
 Iteration 0:   log pseudolikelihood = -19.157756
-Iteration 1:   log pseudolikelihood = -19.157756
-Iteration 2:   log pseudolikelihood = -19.157756
-Iteration 3:   log pseudolikelihood = -19.157756
-Iteration 4:   log pseudolikelihood = -19.157756
-Iteration 5:   log pseudolikelihood = -19.157756
 
 Stratified Cox regression with no ties
 Strata variable: set_id
@@ -1379,7 +1390,7 @@ Strata variable: set_id
 No. of subjects =      3,390                        Number of obs =      3,398
 No. of failures =        192
 Time at risk    = 5,864.1013
-                                                    Wald chi2(19) = 2409117.12
+                                                    Wald chi2(18) = 2131859.54
 Log pseudolikelihood = -19.157756                   Prob > chi2   =     0.0000
 
                                       (Std. err. adjusted for 34 clusters in practice_id)
@@ -1389,7 +1400,7 @@ Log pseudolikelihood = -19.157756                   Prob > chi2   =     0.0000
 ------------------------+----------------------------------------------------------------
               covid_aki |
 Non-hospitalised COVID  |   .1714717   .0858349    -3.52   0.000     .0642836    .4573879
-    Hospitalised COVID  |   1.01e-19   1.51e-19   -29.17   0.000     5.33e-21    1.90e-18
+    Hospitalised COVID  |   3.71e-20          .        .       .            .           .
 Hospitalised COVID-AKI  |   7.68e+14          .        .       .            .           .
                         |
                     sex |
@@ -1424,9 +1435,9 @@ Hospitalised COVID-AKI  |   7.68e+14          .        .       .            .   
                    age3 |   4.407665   2.683197     2.44   0.015     1.336699    14.53395
 -----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with no ties
 Strata variable: set_id
@@ -1434,7 +1445,7 @@ Strata variable: set_id
 No. of subjects =      3,390                        Number of obs =      3,398
 No. of failures =        192
 Time at risk    = 5,864.1013
-                                                    Wald chi2(19) = 2409117.12
+                                                    Wald chi2(18) = 2131859.54
 Log pseudolikelihood = -19.157756                   Prob > chi2   =     0.0000
 
                                       (Std. err. adjusted for 34 clusters in practice_id)
@@ -1444,7 +1455,7 @@ Log pseudolikelihood = -19.157756                   Prob > chi2   =     0.0000
 ------------------------+----------------------------------------------------------------
               covid_aki |
 Non-hospitalised COVID  |   .1714717   .0858349    -3.52   0.000     .0642836    .4573879
-    Hospitalised COVID  |   1.01e-19   1.51e-19   -29.17   0.000     5.33e-21    1.90e-18
+    Hospitalised COVID  |   3.71e-20          .        .       .            .           .
 Hospitalised COVID-AKI  |   7.68e+14          .        .       .            .           .
                         |
                     sex |
@@ -1513,7 +1524,8 @@ Iteration 23:  log pseudolikelihood = -13.500272
 Iteration 24:  log pseudolikelihood = -13.500272
 Iteration 25:  log pseudolikelihood = -13.500272
 Iteration 26:  log pseudolikelihood = -13.500272
-Iteration 27:  log pseudolikelihood = -13.500272  (backed up)
+Iteration 27:  log pseudolikelihood = -13.500272
+Iteration 28:  log pseudolikelihood = -13.500272  (backed up)
 Refining estimates:
 Iteration 0:   log pseudolikelihood = -13.500272
 Iteration 1:   log pseudolikelihood = -13.500272
@@ -1524,6 +1536,8 @@ Iteration 5:   log pseudolikelihood = -13.500272
 Iteration 6:   log pseudolikelihood = -13.500272
 Iteration 7:   log pseudolikelihood = -13.500272
 Iteration 8:   log pseudolikelihood = -13.500272
+Iteration 9:   log pseudolikelihood = -13.500272
+Iteration 10:  log pseudolikelihood = -13.500272
 
 Stratified Cox regression with no ties
 Strata variable: set_id
@@ -1531,7 +1545,7 @@ Strata variable: set_id
 No. of subjects =      3,390                          Number of obs =    3,398
 No. of failures =        192
 Time at risk    = 5,864.1013
-                                                      Wald chi2(20) = 1.13e+08
+                                                      Wald chi2(20) = 3.13e+07
 Log pseudolikelihood = -13.500272                     Prob > chi2   =   0.0000
 
                                       (Std. err. adjusted for 34 clusters in practice_id)
@@ -1541,8 +1555,8 @@ Log pseudolikelihood = -13.500272                     Prob > chi2   =   0.0000
 ------------------------+----------------------------------------------------------------
               covid_aki |
 Non-hospitalised COVID  |   .1360308   .0612836    -4.43   0.000     .0562549    .3289382
-    Hospitalised COVID  |   4.79e-15   8.90e-15   -17.76   0.000     1.26e-16    1.83e-13
-Hospitalised COVID-AKI  |   3.57e+14   7.56e+14    15.83   0.000     5.63e+12    2.26e+16
+    Hospitalised COVID  |   5.05e-16   9.38e-16   -18.97   0.000     1.33e-17    1.92e-14
+Hospitalised COVID-AKI  |   3.39e+15          .        .       .            .           .
                         |
                     sex |
                   Male  |          1  (omitted)
@@ -1573,7 +1587,7 @@ Hospitalised COVID-AKI  |   3.57e+14   7.56e+14    15.83   0.000     5.63e+12   
              1.diabetes |   .5449932   .8537011    -0.39   0.698     .0252948    11.74222
          1.hypertension |   .1474237   .0614945    -4.59   0.000      .065089    .3339081
      1.immunosuppressed |   .0030347   .0044571    -3.95   0.000     .0001706    .0539859
-      1.non_haem_cancer |   6.46e+09   1.52e+10     9.57   0.000     6.33e+07    6.59e+11
+      1.non_haem_cancer |   6.13e+10   1.70e+11     8.96   0.000     2.67e+08    1.41e+13
                         |
                 smoking |
  Current/former smoker  |   27.68708   13.39557     6.86   0.000     10.72627    71.46701
@@ -1582,9 +1596,9 @@ Hospitalised COVID-AKI  |   3.57e+14   7.56e+14    15.83   0.000     5.63e+12   
                    age3 |    36.4024   44.53704     2.94   0.003      3.30914    400.4468
 -----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with no ties
 Strata variable: set_id
@@ -1592,7 +1606,7 @@ Strata variable: set_id
 No. of subjects =      3,390                          Number of obs =    3,398
 No. of failures =        192
 Time at risk    = 5,864.1013
-                                                      Wald chi2(20) = 1.13e+08
+                                                      Wald chi2(20) = 3.13e+07
 Log pseudolikelihood = -13.500272                     Prob > chi2   =   0.0000
 
                                       (Std. err. adjusted for 34 clusters in practice_id)
@@ -1602,8 +1616,8 @@ Log pseudolikelihood = -13.500272                     Prob > chi2   =   0.0000
 ------------------------+----------------------------------------------------------------
               covid_aki |
 Non-hospitalised COVID  |   .1360308   .0612836    -4.43   0.000     .0562549    .3289382
-    Hospitalised COVID  |   4.79e-15   8.90e-15   -17.76   0.000     1.26e-16    1.83e-13
-Hospitalised COVID-AKI  |   3.57e+14   7.56e+14    15.83   0.000     5.63e+12    2.26e+16
+    Hospitalised COVID  |   5.05e-16   9.38e-16   -18.97   0.000     1.33e-17    1.92e-14
+Hospitalised COVID-AKI  |   3.39e+15          .        .       .            .           .
                         |
                     sex |
                   Male  |          1  (omitted)
@@ -1634,7 +1648,7 @@ Hospitalised COVID-AKI  |   3.57e+14   7.56e+14    15.83   0.000     5.63e+12   
              1.diabetes |   .5449932   .8537011    -0.39   0.698     .0252948    11.74222
          1.hypertension |   .1474237   .0614945    -4.59   0.000      .065089    .3339081
      1.immunosuppressed |   .0030347   .0044571    -3.95   0.000     .0001706    .0539859
-      1.non_haem_cancer |   6.46e+09   1.52e+10     9.57   0.000     6.33e+07    6.59e+11
+      1.non_haem_cancer |   6.13e+10   1.70e+11     8.96   0.000     2.67e+08    1.41e+13
                         |
                 smoking |
  Current/former smoker  |   27.68708   13.39557     6.86   0.000     10.72627    71.46701
@@ -1651,7 +1665,7 @@ file full_covid_aki_death.dta saved
 . 
 end of do-file
 
-. do "C:\Users\lsh1703468\Documents\Repos\analysis\cox_esrd_stratified_hospitalised.do"
+. do "C:\Users\lsh1703468\Documents\Repos\analysis\cox_2017_covid_severity.do"
 
 . sysdir set PLUS ./analysis/adofiles
 
@@ -1660,5 +1674,4 @@ end of do-file
 . pwd
 C:\Users\lsh1703468\Documents\repos
 
-. 
 . cap log close

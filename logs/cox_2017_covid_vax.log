@@ -1,19 +1,22 @@
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/cox_2017_covid_vax.log
   log type:  text
- opened on:  11 Jan 2023, 18:07:03
+ opened on:  13 Jan 2023, 21:02:09
 
 . 
 . cap file close tablecontent
 
 . file open tablecontent using ./output/cox_2017_covid_vax.txt, write text replace
+(file ./output/cox_2017_covid_vax.txt not found)
 
 . file write tablecontent ("Kidney outcomes after SARS-CoV-2 by COVID-19 vaccination status compared to matched historical general population") _n
 
 . file write tablecontent _n
 
 . file write tablecontent ("Historical general population matched on age, sex and STP") _n
+
+. file write tablecontent ("Restricted to those who survived 28 days after first recorded SARS-CoV-2 or equivalent date of matching") _n
 
 . file write tablecontent ("All models stratified by matched set and clustering by general practice accounted for using robust standard errors") _n
 
@@ -31,9 +34,11 @@
 
 . file write tablecontent _n
 
-. file write tablecontent _tab _tab _tab _tab _tab ("Number") _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally adjusted") _tab ("Fully adjusted") _tab _tab _n
+. file write tablecontent _tab _tab _tab _tab _tab ("Number") _tab _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally adjust
+> ed") _tab ("Fully adjusted") _tab _tab _n
 
-. file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab _n
+. file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI
+> ") _tab _tab _n
 
 . file write tablecontent ("By COVID-19 AKI") _n
 
@@ -65,7 +70,8 @@
  20. }
  21. else di "WARNING MODEL1 DID NOT FIT (`outcome')"
  22. 
-. stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)               
+. stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)            
+>    
  23. if _rc==0{
  24. estimates
  25. estimates save "full_covid_vax_`outcome'", replace 
@@ -74,61 +80,58 @@
  28. local hr "`hr' "full_covid_vax_`outcome'" "
  29. }
  30. else di "WARNING MODEL2 DID NOT FIT (`outcome')"
- 31.                                                 
-. esttab model1 model2 model3 model4 using "./output/estout_cox_2017_covid_vax_`outcome'.txt", b(a2) ci(2) label wide compress eform ///
->         title ("`outcome'") ///
->         varlabels(`e(labels)') ///
->         stats(N_sub) ///
->         append 
- 32. eststo clear
- 33.                                                                                 
+ 31.                                                                                                                         
 . local lab0: label covid_vax 0
- 34. local lab1: label covid_vax 1
- 35. local lab2: label covid_vax 2
- 36. local lab3: label covid_vax 3
- 37. local lab4: label covid_vax 4
- 38. local lab5: label covid_vax 5
- 39. 
+ 32. local lab1: label covid_vax 1
+ 33. local lab2: label covid_vax 2
+ 34. local lab3: label covid_vax 3
+ 35. local lab4: label covid_vax 4
+ 36. local lab5: label covid_vax 5
+ 37. 
 .         qui safecount if covid_vax==0
- 40.         local denominator = r(N)
- 41.         qui safecount if covid_vax== 1 & `outcome'==1
- 42.         local event = r(N)
+ 38.         local denominator = r(N)
+ 39.         local r_denominator = round(`denominator',5)
+ 40.         qui safecount if covid_vax== 1 & `outcome'==1
+ 41.         local event = r(N)
+ 42.         local r_event = round(`event',5)
  43.     bysort covid_vax: egen total_follow_up_`outcome' = total(_t)
  44.         qui su total_follow_up_`outcome' if covid_vax==0
- 45.         local person_year = r(mean)/365.25
- 46.         local rate = 100000*(`event'/`person_year')
+ 45.         local person_year = r(mean)
+ 46.         local rate = 100000*(`r_event'/`person_year')
  47.         
 .         file write tablecontent _n
  48.         file write tablecontent ("`outcome'") _n
- 49.         file write tablecontent _tab ("`lab0'") _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab
+ 49.         file write tablecontent _tab ("`lab0'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
  50.         file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
  51.         
 . forvalues vax=1/5 {
  52.         qui safecount if covid_vax==`vax'
  53.         local denominator = r(N)
- 54.         qui safecount if covid_vax == `vax' & `outcome'==1
- 55.         local event = r(N)
- 56.         qui su total_follow_up_`outcome' if covid_vax==`vax'
- 57.         local person_year = r(mean)/365.25
- 58.         local rate = 100000*(`event'/`person_year')
- 59.         file write tablecontent _tab ("`lab`vax''") _tab _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
- 60.         cap estimates use "crude_covid_vax_`outcome'" 
- 61.          cap lincom `vax'.covid_vax, eform
- 62.         file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 63.         cap estimates clear
- 64.         cap estimates use "minimal_covid_vax_`outcome'" 
- 65.          cap lincom `vax'.covid_vax, eform
- 66.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 67.         cap estimates clear
- 68.         cap estimates use "additional_covid_vax_`outcome'" 
- 69.          cap lincom `vax'.covid_vax, eform
- 70.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 71.         cap estimates clear
- 72.         cap estimates use "full_covid_vax_`outcome'" 
- 73.          cap lincom `vax'.covid_vax, eform
- 74.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
- 75.         }
- 76. }
+ 54.         local r_denominator = round(`denominator',5)
+ 55.         qui safecount if covid_vax == `vax' & `outcome'==1
+ 56.         local event = r(N)
+ 57.         local r_event = round(`event',5)
+ 58.         qui su total_follow_up_`outcome' if covid_vax==`vax'
+ 59.         local person_year = r(mean)
+ 60.         local rate = 100000*(`r_event'/`person_year')
+ 61.         file write tablecontent _tab ("`lab`vax''") _tab _tab _tab (`r_denominator') _tab _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
+ 62.         cap estimates use "crude_covid_vax_`outcome'" 
+ 63.          cap lincom `vax'.covid_vax, eform
+ 64.         file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 65.         cap estimates clear
+ 66.         cap estimates use "minimal_covid_vax_`outcome'" 
+ 67.          cap lincom `vax'.covid_vax, eform
+ 68.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 69.         cap estimates clear
+ 70.         cap estimates use "additional_covid_vax_`outcome'" 
+ 71.          cap lincom `vax'.covid_vax, eform
+ 72.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 73.         cap estimates clear
+ 74.         cap estimates use "full_covid_vax_`outcome'" 
+ 75.          cap lincom `vax'.covid_vax, eform
+ 76.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
+ 77.         }
+ 78. }
 
 Survival-time data settings
 
@@ -184,7 +187,9 @@ Pre-vaccination  |   1.020466   .0502977     0.41   0.681     .9264967    1.1239
 3 vaccine doses  |   1.170223   .0905007     2.03   0.042     1.005633     1.36175
 4 vaccine doses  |   .9549482   .0584451    -0.75   0.451     .8470018    1.076652
 ----------------------------------------------------------------------------------
+(note: file crude_covid_vax_esrd.ster not found)
 file crude_covid_vax_esrd.ster saved
+(file crude_covid_vax_esrd.dta not found)
 file crude_covid_vax_esrd.dta saved
 
         Failure _d: esrd_date
@@ -225,7 +230,9 @@ Pre-vaccination  |   1.017062    .051386     0.33   0.738     .9211735    1.1229
             age2 |   .9732597   .0136583    -1.93   0.053     .9468547    1.000401
             age3 |   1.045764   .0424743     1.10   0.271     .9657433    1.132415
 ----------------------------------------------------------------------------------
+(note: file minimal_covid_vax_esrd.ster not found)
 file minimal_covid_vax_esrd.ster saved
+(file minimal_covid_vax_esrd.dta not found)
 file minimal_covid_vax_esrd.dta saved
 
         Failure _d: esrd_date
@@ -294,9 +301,9 @@ Current/former smoker  |   1.430611   .7102775     0.72   0.471     .5406454    
                   age3 |   .7052791   .5011099    -0.49   0.623      .175215    2.838904
 ----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with no ties
 Strata variable: set_id
@@ -350,7 +357,9 @@ Current/former smoker  |   1.430611   .7102775     0.72   0.471     .5406454    
                   age2 |   1.067848   .2392783     0.29   0.770     .6882971    1.656695
                   age3 |   .7052791   .5011099    -0.49   0.623      .175215    2.838904
 ----------------------------------------------------------------------------------------
+(note: file additional_covid_vax_esrd.ster not found)
 file additional_covid_vax_esrd.ster saved
+(file additional_covid_vax_esrd.dta not found)
 file additional_covid_vax_esrd.dta saved
 
         Failure _d: esrd_date
@@ -426,9 +435,9 @@ Current/former smoker  |   2.571679   1.556397     1.56   0.119     .7853513    
                   age3 |      .7196   .5618503    -0.42   0.673     .1557718    3.324248
 ----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with no ties
 Strata variable: set_id
@@ -488,9 +497,10 @@ Current/former smoker  |   2.571679   1.556397     1.56   0.119     .7853513    
                   age2 |   1.078792   .2539813     0.32   0.747     .6800457    1.711343
                   age3 |      .7196   .5618503    -0.42   0.673     .1557718    3.324248
 ----------------------------------------------------------------------------------------
+(note: file full_covid_vax_esrd.ster not found)
 file full_covid_vax_esrd.ster saved
+(file full_covid_vax_esrd.dta not found)
 file full_covid_vax_esrd.dta saved
-(output written to ./output/estout_cox_2017_covid_vax_esrd.txt)
 
 Survival-time data settings
 
@@ -546,7 +556,9 @@ Pre-vaccination  |   .9307436   .0234924    -2.84   0.004     .8858198    .97794
 3 vaccine doses  |   1.038046   .0320642     1.21   0.227      .977066    1.102832
 4 vaccine doses  |   .9683375   .0310213    -1.00   0.315     .9094064    1.031087
 ----------------------------------------------------------------------------------
+(note: file crude_covid_vax_egfr_half.ster not found)
 file crude_covid_vax_egfr_half.ster saved
+(file crude_covid_vax_egfr_half.dta not found)
 file crude_covid_vax_egfr_half.dta saved
 
         Failure _d: egfr_half_date
@@ -587,7 +599,9 @@ Pre-vaccination  |   .9363177   .0236137    -2.61   0.009     .8911609    .98376
             age2 |   1.011314   .0080044     1.42   0.155     .9957468    1.027125
             age3 |   .9520826   .0219666    -2.13   0.033     .9099877    .9961247
 ----------------------------------------------------------------------------------
+(note: file minimal_covid_vax_egfr_half.ster not found)
 file minimal_covid_vax_egfr_half.ster saved
+(file minimal_covid_vax_egfr_half.dta not found)
 file minimal_covid_vax_egfr_half.dta saved
 
         Failure _d: egfr_half_date
@@ -655,9 +669,9 @@ Current/former smoker  |   1.178854   .1672246     1.16   0.246     .8927171    
                   age3 |   .8333035   .1669048    -0.91   0.363     .5627475    1.233937
 ----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with Breslow method for ties
 Strata variable: set_id
@@ -711,7 +725,9 @@ Current/former smoker  |   1.178854   .1672246     1.16   0.246     .8927171    
                   age2 |   1.059341   .0742564     0.82   0.411     .9233567    1.215353
                   age3 |   .8333035   .1669048    -0.91   0.363     .5627475    1.233937
 ----------------------------------------------------------------------------------------
+(note: file additional_covid_vax_egfr_half.ster not found)
 file additional_covid_vax_egfr_half.ster saved
+(file additional_covid_vax_egfr_half.dta not found)
 file additional_covid_vax_egfr_half.dta saved
 
         Failure _d: egfr_half_date
@@ -785,9 +801,9 @@ Current/former smoker  |   1.173864   .1413803     1.33   0.183     .9270412    
                   age3 |   .8978183   .1948026    -0.50   0.619     .5868139    1.373651
 ----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with Breslow method for ties
 Strata variable: set_id
@@ -847,9 +863,10 @@ Current/former smoker  |   1.173864   .1413803     1.33   0.183     .9270412    
                   age2 |     1.0381   .0793191     0.49   0.625      .893718    1.205807
                   age3 |   .8978183   .1948026    -0.50   0.619     .5868139    1.373651
 ----------------------------------------------------------------------------------------
+(note: file full_covid_vax_egfr_half.ster not found)
 file full_covid_vax_egfr_half.ster saved
+(file full_covid_vax_egfr_half.dta not found)
 file full_covid_vax_egfr_half.dta saved
-(output written to ./output/estout_cox_2017_covid_vax_egfr_half.txt)
 
 Survival-time data settings
 
@@ -905,7 +922,9 @@ Pre-vaccination  |   .9820371   .0388781    -0.46   0.647     .9087188    1.0612
 3 vaccine doses  |    .985609   .0558829    -0.26   0.798     .8819471    1.101455
 4 vaccine doses  |   .9603566   .0410736    -0.95   0.344     .8831355     1.04433
 ----------------------------------------------------------------------------------
+(note: file crude_covid_vax_aki.ster not found)
 file crude_covid_vax_aki.ster saved
+(file crude_covid_vax_aki.dta not found)
 file crude_covid_vax_aki.dta saved
 
         Failure _d: aki_date
@@ -946,7 +965,9 @@ Pre-vaccination  |   .9794478   .0362885    -0.56   0.575     .9108446    1.0532
             age2 |   .9789784   .0148032    -1.41   0.160     .9503903    1.008426
             age3 |   1.048299   .0453702     1.09   0.276     .9630419    1.141103
 ----------------------------------------------------------------------------------
+(note: file minimal_covid_vax_aki.ster not found)
 file minimal_covid_vax_aki.ster saved
+(file minimal_covid_vax_aki.dta not found)
 file minimal_covid_vax_aki.dta saved
 
         Failure _d: aki_date
@@ -1015,9 +1036,9 @@ Current/former smoker  |   1.375725   .3318737     1.32   0.186     .8574161    
                   age3 |   .5336876   .2310459    -1.45   0.147     .2284452    1.246787
 ----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with Breslow method for ties
 Strata variable: set_id
@@ -1071,7 +1092,9 @@ Current/former smoker  |   1.375725   .3318737     1.32   0.186     .8574161    
                   age2 |   1.216686   .1696246     1.41   0.159     .9257803    1.599002
                   age3 |   .5336876   .2310459    -1.45   0.147     .2284452    1.246787
 ----------------------------------------------------------------------------------------
+(note: file additional_covid_vax_aki.ster not found)
 file additional_covid_vax_aki.ster saved
+(file additional_covid_vax_aki.dta not found)
 file additional_covid_vax_aki.dta saved
 
         Failure _d: aki_date
@@ -1146,9 +1169,9 @@ Current/former smoker  |   1.583638   .4013857     1.81   0.070     .9636342    
                   age3 |   .4557443   .2556479    -1.40   0.161       .15179    1.368357
 ----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with Breslow method for ties
 Strata variable: set_id
@@ -1208,9 +1231,10 @@ Current/former smoker  |   1.583638   .4013857     1.81   0.070     .9636342    
                   age2 |   1.270419   .2239049     1.36   0.174     .8993466    1.794597
                   age3 |   .4557443   .2556479    -1.40   0.161       .15179    1.368357
 ----------------------------------------------------------------------------------------
+(note: file full_covid_vax_aki.ster not found)
 file full_covid_vax_aki.ster saved
+(file full_covid_vax_aki.dta not found)
 file full_covid_vax_aki.dta saved
-(output written to ./output/estout_cox_2017_covid_vax_aki.txt)
 
 Survival-time data settings
 
@@ -1267,7 +1291,9 @@ Pre-vaccination  |   .6474687   .0384908    -7.31   0.000     .5762574    .72748
 3 vaccine doses  |   .4900946   .0491372    -7.11   0.000     .4026595    .5965158
 4 vaccine doses  |   .4700632   .0358641    -9.89   0.000      .404774    .5458834
 ----------------------------------------------------------------------------------
+(note: file crude_covid_vax_death.ster not found)
 file crude_covid_vax_death.ster saved
+(file crude_covid_vax_death.dta not found)
 file crude_covid_vax_death.dta saved
 
         Failure _d: death_date
@@ -1309,7 +1335,9 @@ Pre-vaccination  |   .6508578   .0387253    -7.22   0.000      .579216    .73136
             age2 |   .9677022   .0182586    -1.74   0.082     .9325697    1.004158
             age3 |   1.057479   .0590684     1.00   0.317     .9478192    1.179826
 ----------------------------------------------------------------------------------
+(note: file minimal_covid_vax_death.ster not found)
 file minimal_covid_vax_death.ster saved
+(file minimal_covid_vax_death.dta not found)
 file minimal_covid_vax_death.dta saved
 
         Failure _d: death_date
@@ -1324,311 +1352,119 @@ Iteration 3:   log pseudolikelihood = -15.147175
 Iteration 4:   log pseudolikelihood =  -13.98607
 Iteration 5:   log pseudolikelihood =  -13.35676
 Iteration 6:   log pseudolikelihood = -13.009839
-Iteration 7:   log pseudolikelihood = -12.825069
-Iteration 8:   log pseudolikelihood = -12.785906
-Iteration 9:   log pseudolikelihood = -12.783739
-Iteration 10:  log pseudolikelihood = -12.783322
-Iteration 11:  log pseudolikelihood = -12.600079
-Iteration 12:  log pseudolikelihood =  -12.60045  (backed up)
-Iteration 13:  log pseudolikelihood = -12.600797  (backed up)
-Iteration 14:  log pseudolikelihood = -12.601149  (backed up)
-Iteration 15:  log pseudolikelihood = -12.601506  (backed up)
-Iteration 16:  log pseudolikelihood =  -12.60187  (backed up)
-Iteration 17:  log pseudolikelihood = -12.602209  (backed up)
-Iteration 18:  log pseudolikelihood = -12.602553  (backed up)
-Iteration 19:  log pseudolikelihood = -12.602902  (backed up)
-Iteration 20:  log pseudolikelihood = -12.603228  (backed up)
-Iteration 21:  log pseudolikelihood = -12.603559  (backed up)
-Iteration 22:  log pseudolikelihood = -12.603895  (backed up)
-Iteration 23:  log pseudolikelihood = -12.604237  (backed up)
-Iteration 24:  log pseudolikelihood = -12.604555  (backed up)
-Iteration 25:  log pseudolikelihood = -12.604877  (backed up)
-Iteration 26:  log pseudolikelihood = -12.605205  (backed up)
-Iteration 27:  log pseudolikelihood = -12.605538  (backed up)
-Iteration 28:  log pseudolikelihood = -12.605848  (backed up)
-Iteration 29:  log pseudolikelihood = -12.606162  (backed up)
-Iteration 30:  log pseudolikelihood = -12.606481  (backed up)
-Iteration 31:  log pseudolikelihood = -12.606805  (backed up)
-Iteration 32:  log pseudolikelihood = -12.607134  (backed up)
-Iteration 33:  log pseudolikelihood =  -12.60744  (backed up)
-Iteration 34:  log pseudolikelihood =  -12.60775  (backed up)
-Iteration 35:  log pseudolikelihood = -12.608065  (backed up)
-Iteration 36:  log pseudolikelihood = -12.608385  (backed up)
-Iteration 37:  log pseudolikelihood = -12.592182
-Iteration 38:  log pseudolikelihood = -12.592367  (backed up)
-Iteration 39:  log pseudolikelihood = -12.592795  (backed up)
-Iteration 40:  log pseudolikelihood = -12.592954  (backed up)
-Iteration 41:  log pseudolikelihood = -12.593112  (backed up)
-Iteration 42:  log pseudolikelihood = -12.593271  (backed up)
-Iteration 43:  log pseudolikelihood = -12.593431  (backed up)
-Iteration 44:  log pseudolikelihood = -12.593591  (backed up)
-Iteration 45:  log pseudolikelihood = -12.593993  (backed up)
-Iteration 46:  log pseudolikelihood = -12.594154  (backed up)
-Iteration 47:  log pseudolikelihood = -12.594316  (backed up)
-Iteration 48:  log pseudolikelihood = -12.594594  (backed up)
-Iteration 49:  log pseudolikelihood = -12.595115  (backed up)
-Iteration 50:  log pseudolikelihood = -12.595395  (backed up)
-Iteration 51:  log pseudolikelihood = -12.595677  (backed up)
-Iteration 52:  log pseudolikelihood = -12.596164  (backed up)
-Iteration 53:  log pseudolikelihood = -12.596411  (backed up)
-Iteration 54:  log pseudolikelihood = -12.596657  (backed up)
-Iteration 55:  log pseudolikelihood = -12.596905  (backed up)
-Iteration 56:  log pseudolikelihood = -12.597397  (backed up)
-Iteration 57:  log pseudolikelihood = -12.597615  (backed up)
-Iteration 58:  log pseudolikelihood = -12.597834  (backed up)
-Iteration 59:  log pseudolikelihood = -12.598054  (backed up)
-Iteration 60:  log pseudolikelihood = -12.598516  (backed up)
-Iteration 61:  log pseudolikelihood = -12.598737  (backed up)
-Iteration 62:  log pseudolikelihood = -12.599108  (backed up)
-Iteration 63:  log pseudolikelihood = -12.599304  (backed up)
-Iteration 64:  log pseudolikelihood =   -12.5995  (backed up)
-Iteration 65:  log pseudolikelihood = -12.599697  (backed up)
-Iteration 66:  log pseudolikelihood = -12.600136  (backed up)
-Iteration 67:  log pseudolikelihood = -12.600334  (backed up)
-Iteration 68:  log pseudolikelihood = -12.600747  (backed up)
-Iteration 69:  log pseudolikelihood = -12.601047  (backed up)
-Iteration 70:  log pseudolikelihood = -12.601497  (backed up)
-Iteration 71:  log pseudolikelihood = -12.601741  (backed up)
-Iteration 72:  log pseudolikelihood = -12.602179  (backed up)
-Iteration 73:  log pseudolikelihood = -12.602717  (backed up)
-Iteration 74:  log pseudolikelihood = -12.603094  (backed up)
-Iteration 75:  log pseudolikelihood = -12.603619  (backed up)
-Iteration 76:  log pseudolikelihood = -12.603923  (backed up)
-Iteration 77:  log pseudolikelihood =  -12.60426  (backed up)
-Iteration 78:  log pseudolikelihood = -12.604642  (backed up)
-Iteration 79:  log pseudolikelihood = -12.605023  (backed up)
-Iteration 80:  log pseudolikelihood = -12.605437  (backed up)
-Iteration 81:  log pseudolikelihood = -12.605892  (backed up)
-Iteration 82:  log pseudolikelihood = -12.606407  (backed up)
-Iteration 83:  log pseudolikelihood = -12.606468  (backed up)
-Iteration 84:  log pseudolikelihood = -12.606793  (backed up)
-Iteration 85:  log pseudolikelihood = -12.607139  (backed up)
-Iteration 86:  log pseudolikelihood =  -12.60751  (backed up)
-Iteration 87:  log pseudolikelihood = -12.607915  (backed up)
-Iteration 88:  log pseudolikelihood = -12.608419  (backed up)
-Iteration 89:  log pseudolikelihood = -12.608964  (backed up)
-Iteration 90:  log pseudolikelihood = -12.609265  (backed up)
-Iteration 91:  log pseudolikelihood = -12.609663  (backed up)
-Iteration 92:  log pseudolikelihood = -12.610082  (backed up)
-Iteration 93:  log pseudolikelihood = -12.610527  (backed up)
-Iteration 94:  log pseudolikelihood = -12.610761  (backed up)
-Iteration 95:  log pseudolikelihood = -12.611103  (backed up)
-Iteration 96:  log pseudolikelihood = -12.611459  (backed up)
-Iteration 97:  log pseudolikelihood = -12.611832  (backed up)
-Iteration 98:  log pseudolikelihood = -12.612223  (backed up)
-Iteration 99:  log pseudolikelihood = -12.612508  (backed up)
-Iteration 100: log pseudolikelihood = -12.612801  (backed up)
-Iteration 101: log pseudolikelihood = -12.613103  (backed up)
-Iteration 102: log pseudolikelihood = -12.613417  (backed up)
-Iteration 103: log pseudolikelihood = -12.613743  (backed up)
-Iteration 104: log pseudolikelihood = -12.614225  (backed up)
-Iteration 105: log pseudolikelihood = -12.614731  (backed up)
-Iteration 106: log pseudolikelihood = -12.615021  (backed up)
-Iteration 107: log pseudolikelihood = -12.615307  (backed up)
-Iteration 108: log pseudolikelihood = -12.615734  (backed up)
-Iteration 109: log pseudolikelihood = -12.616178  (backed up)
-Iteration 110: log pseudolikelihood = -12.616642  (backed up)
-Iteration 111: log pseudolikelihood =  -12.61713  (backed up)
-Iteration 112: log pseudolikelihood = -12.617504  (backed up)
-Iteration 113: log pseudolikelihood = -12.617892  (backed up)
-Iteration 114: log pseudolikelihood = -12.618294  (backed up)
-Iteration 115: log pseudolikelihood =  -12.61847  (backed up)
-Iteration 116: log pseudolikelihood = -12.618797  (backed up)
-Iteration 117: log pseudolikelihood = -12.619133  (backed up)
-Iteration 118: log pseudolikelihood = -12.619478  (backed up)
-Iteration 119: log pseudolikelihood = -12.619835  (backed up)
-Iteration 120: log pseudolikelihood = -12.620112  (backed up)
-Iteration 121: log pseudolikelihood = -12.620396  (backed up)
-Iteration 122: log pseudolikelihood = -12.620686  (backed up)
-Iteration 123: log pseudolikelihood = -12.620984  (backed up)
-Iteration 124: log pseudolikelihood = -12.621289  (backed up)
-Iteration 125: log pseudolikelihood = -12.621361  (backed up)
-Iteration 126: log pseudolikelihood = -12.621853  (backed up)
-Iteration 127: log pseudolikelihood = -12.622364  (backed up)
-Iteration 128: log pseudolikelihood = -12.622631  (backed up)
-Iteration 129: log pseudolikelihood = -12.622904  (backed up)
-Iteration 130: log pseudolikelihood = -12.623328  (backed up)
-Iteration 131: log pseudolikelihood = -12.623766  (backed up)
-Iteration 132: log pseudolikelihood = -12.624218  (backed up)
-Iteration 133: log pseudolikelihood = -12.624446  (backed up)
-Iteration 134: log pseudolikelihood =  -12.62482  (backed up)
-Iteration 135: log pseudolikelihood = -12.625206  (backed up)
-Iteration 136: log pseudolikelihood = -12.625603  (backed up)
-Iteration 137: log pseudolikelihood = -12.626013  (backed up)
-Iteration 138: log pseudolikelihood = -12.626333  (backed up)
-Iteration 139: log pseudolikelihood = -12.626661  (backed up)
-Iteration 140: log pseudolikelihood = -12.626997  (backed up)
-Iteration 141: log pseudolikelihood = -12.627342  (backed up)
-Iteration 142: log pseudolikelihood = -12.627453  (backed up)
-Iteration 143: log pseudolikelihood = -12.627732  (backed up)
-Iteration 144: log pseudolikelihood = -12.628015  (backed up)
-Iteration 145: log pseudolikelihood = -12.628305  (backed up)
-Iteration 146: log pseudolikelihood = -12.628602  (backed up)
-Iteration 147: log pseudolikelihood = -12.628906  (backed up)
-Iteration 148: log pseudolikelihood = -12.629216  (backed up)
-Iteration 149: log pseudolikelihood =  -12.62969  (backed up)
-Iteration 150: log pseudolikelihood = -12.629939  (backed up)
-Iteration 151: log pseudolikelihood = -12.630199  (backed up)
-Iteration 152: log pseudolikelihood = -12.630464  (backed up)
-Iteration 153: log pseudolikelihood = -12.630862  (backed up)
-Iteration 154: log pseudolikelihood = -12.631272  (backed up)
-Iteration 155: log pseudolikelihood = -12.631696  (backed up)
-Iteration 156: log pseudolikelihood = -12.631892  (backed up)
-Iteration 157: log pseudolikelihood = -12.632226  (backed up)
-Iteration 158: log pseudolikelihood = -12.632568  (backed up)
-Iteration 159: log pseudolikelihood = -12.632921  (backed up)
-Iteration 160: log pseudolikelihood = -12.633284  (backed up)
-Iteration 161: log pseudolikelihood = -12.633655  (backed up)
-Iteration 162: log pseudolikelihood = -12.633925  (backed up)
-Iteration 163: log pseudolikelihood = -12.633959  (backed up)
-Iteration 164: log pseudolikelihood = -12.634248  (backed up)
-Iteration 165: log pseudolikelihood = -12.634545  (backed up)
-Iteration 166: log pseudolikelihood = -12.634847  (backed up)
-Iteration 167: log pseudolikelihood = -12.635158  (backed up)
-Iteration 168: log pseudolikelihood = -12.635373  (backed up)
-Iteration 169: log pseudolikelihood = -12.635593  (backed up)
-Iteration 170: log pseudolikelihood = -12.635574  (backed up)
-Iteration 171: log pseudolikelihood = -12.635808  (backed up)
-Iteration 172: log pseudolikelihood = -12.636047  (backed up)
-Iteration 173: log pseudolikelihood = -12.636291  (backed up)
-Iteration 174: log pseudolikelihood =  -12.63654  (backed up)
-Iteration 175: log pseudolikelihood = -12.636794  (backed up)
-Iteration 176: log pseudolikelihood = -12.636959  (backed up)
-Iteration 177: log pseudolikelihood = -12.636884  (backed up)
-Iteration 178: log pseudolikelihood = -12.637061  (backed up)
-Iteration 179: log pseudolikelihood = -12.637241  (backed up)
-Iteration 180: log pseudolikelihood = -12.637422  (backed up)
-Iteration 181: log pseudolikelihood = -12.637607  (backed up)
-Iteration 182: log pseudolikelihood = -12.637795  (backed up)
-Iteration 183: log pseudolikelihood = -12.637986  (backed up)
-Iteration 184: log pseudolikelihood = -12.637938  (backed up)
-Iteration 185: log pseudolikelihood = -12.638142  (backed up)
-Iteration 186: log pseudolikelihood = -12.638263  (backed up)
-Iteration 187: log pseudolikelihood = -12.638386  (backed up)
-Iteration 188: log pseudolikelihood = -12.638511  (backed up)
-Iteration 189: log pseudolikelihood = -12.638637  (backed up)
-Iteration 190: log pseudolikelihood = -12.638765  (backed up)
-Iteration 191: log pseudolikelihood = -12.638893  (backed up)
-Iteration 192: log pseudolikelihood = -12.639023  (backed up)
-Iteration 193: log pseudolikelihood = -12.638912  (backed up)
-Iteration 194: log pseudolikelihood = -12.639052  (backed up)
-Iteration 195: log pseudolikelihood = -12.639194  (backed up)
-Iteration 196: log pseudolikelihood = -12.639336  (backed up)
-Iteration 197: log pseudolikelihood =  -12.63948  (backed up)
-Iteration 198: log pseudolikelihood = -12.639626  (backed up)
-Iteration 199: log pseudolikelihood = -12.639774  (backed up)
-Iteration 200: log pseudolikelihood = -12.639677  (backed up)
-Iteration 201: log pseudolikelihood = -12.639756  (backed up)
-Iteration 202: log pseudolikelihood = -12.639835  (backed up)
-Iteration 203: log pseudolikelihood = -12.639916  (backed up)
-Iteration 204: log pseudolikelihood = -12.639997  (backed up)
-Iteration 205: log pseudolikelihood = -12.640078  (backed up)
-Iteration 206: log pseudolikelihood = -12.640161  (backed up)
-Iteration 207: log pseudolikelihood = -12.640244  (backed up)
-Iteration 208: log pseudolikelihood = -12.640327  (backed up)
-Iteration 209: log pseudolikelihood =  -12.64041  (backed up)
-Iteration 210: log pseudolikelihood = -12.640336  (backed up)
-Iteration 211: log pseudolikelihood = -12.640427  (backed up)
-Iteration 212: log pseudolikelihood =  -12.64052  (backed up)
-Iteration 213: log pseudolikelihood = -12.640611  (backed up)
-Iteration 214: log pseudolikelihood = -12.640704  (backed up)
-Iteration 215: log pseudolikelihood = -12.640798  (backed up)
-Iteration 216: log pseudolikelihood = -12.640892  (backed up)
-Iteration 217: log pseudolikelihood = -12.640839  (backed up)
-Iteration 218: log pseudolikelihood =  -12.64094  (backed up)
-Iteration 219: log pseudolikelihood = -12.641042  (backed up)
-Iteration 220: log pseudolikelihood = -12.641145  (backed up)
-Iteration 221: log pseudolikelihood = -12.641162  (backed up)
-Iteration 222: log pseudolikelihood = -12.641179  (backed up)
-Iteration 223: log pseudolikelihood = -12.641195  (backed up)
-Iteration 224: log pseudolikelihood = -12.641212  (backed up)
-Iteration 225: log pseudolikelihood = -12.641228  (backed up)
-Iteration 226: log pseudolikelihood = -12.641244  (backed up)
-Iteration 227: log pseudolikelihood =  -12.64126  (backed up)
-Iteration 228: log pseudolikelihood = -12.641277  (backed up)
-Iteration 229: log pseudolikelihood = -12.641293  (backed up)
-Iteration 230: log pseudolikelihood = -12.641181  (backed up)
-Iteration 231: log pseudolikelihood =   -12.6412  (backed up)
-Iteration 232: log pseudolikelihood = -12.641219  (backed up)
-Iteration 233: log pseudolikelihood = -12.641238  (backed up)
-Iteration 234: log pseudolikelihood = -12.641257  (backed up)
-Iteration 235: log pseudolikelihood = -12.641276  (backed up)
-Iteration 236: log pseudolikelihood = -12.641295  (backed up)
-Iteration 237: log pseudolikelihood = -12.641314  (backed up)
-Iteration 238: log pseudolikelihood = -12.641333  (backed up)
-Iteration 239: log pseudolikelihood = -12.641352  (backed up)
-Iteration 240: log pseudolikelihood = -12.641371  (backed up)
-Iteration 241: log pseudolikelihood = -12.641389  (backed up)
-Iteration 242: log pseudolikelihood = -12.641408  (backed up)
-Iteration 243: log pseudolikelihood = -12.641427  (backed up)
-Iteration 244: log pseudolikelihood = -12.641446  (backed up)
-Iteration 245: log pseudolikelihood = -12.641464  (backed up)
-Iteration 246: log pseudolikelihood = -12.641483  (backed up)
-Iteration 247: log pseudolikelihood = -12.641502  (backed up)
-Iteration 248: log pseudolikelihood = -12.641521  (backed up)
-Iteration 249: log pseudolikelihood =  -12.64154  (backed up)
-Iteration 250: log pseudolikelihood = -12.641447  (backed up)
-Iteration 251: log pseudolikelihood = -12.641468  (backed up)
-Iteration 252: log pseudolikelihood = -12.641489  (backed up)
-Iteration 253: log pseudolikelihood =  -12.64151  (backed up)
-Iteration 254: log pseudolikelihood = -12.641531  (backed up)
-Iteration 255: log pseudolikelihood = -12.641552  (backed up)
-Iteration 256: log pseudolikelihood = -12.641573  (backed up)
-Iteration 257: log pseudolikelihood = -12.641594  (backed up)
-Iteration 258: log pseudolikelihood = -12.641616  (backed up)
-Iteration 259: log pseudolikelihood = -12.641637  (backed up)
-Iteration 260: log pseudolikelihood = -12.641658  (backed up)
-Iteration 261: log pseudolikelihood = -12.641679  (backed up)
-Iteration 262: log pseudolikelihood =   -12.6417  (backed up)
-Iteration 263: log pseudolikelihood = -12.641721  (backed up)
-Iteration 264: log pseudolikelihood = -12.641742  (backed up)
-Iteration 265: log pseudolikelihood = -12.641763  (backed up)
-Iteration 266: log pseudolikelihood = -12.641685  (backed up)
-Iteration 267: log pseudolikelihood = -12.641708  (backed up)
-Iteration 268: log pseudolikelihood = -12.641731  (backed up)
-Iteration 269: log pseudolikelihood = -12.641755  (backed up)
-Iteration 270: log pseudolikelihood = -12.641778  (backed up)
-Iteration 271: log pseudolikelihood = -12.641801  (backed up)
-Iteration 272: log pseudolikelihood = -12.641824  (backed up)
-Iteration 273: log pseudolikelihood = -12.641847  (backed up)
-Iteration 274: log pseudolikelihood =  -12.64187  (backed up)
-Iteration 275: log pseudolikelihood = -12.641893  (backed up)
-Iteration 276: log pseudolikelihood = -12.641915  (backed up)
-Iteration 277: log pseudolikelihood = -12.641938  (backed up)
-Iteration 278: log pseudolikelihood = -12.641961  (backed up)
-Iteration 279: log pseudolikelihood = -12.641901  (backed up)
-Iteration 280: log pseudolikelihood = -12.641926  (backed up)
-Iteration 281: log pseudolikelihood = -12.641951  (backed up)
-Iteration 282: log pseudolikelihood = -12.641976  (backed up)
-Iteration 283: log pseudolikelihood = -12.642001  (backed up)
-Iteration 284: log pseudolikelihood = -12.642026  (backed up)
-Iteration 285: log pseudolikelihood = -12.642051  (backed up)
-Iteration 286: log pseudolikelihood = -12.642076  (backed up)
-Iteration 287: log pseudolikelihood = -12.642101  (backed up)
-Iteration 288: log pseudolikelihood = -12.642126  (backed up)
-Iteration 289: log pseudolikelihood = -12.642151  (backed up)
-Iteration 290: log pseudolikelihood = -12.642107  (backed up)
-Iteration 291: log pseudolikelihood = -12.642135  (backed up)
-Iteration 292: log pseudolikelihood = -12.642162  (backed up)
-Iteration 293: log pseudolikelihood = -12.642189  (backed up)
-Iteration 294: log pseudolikelihood = -12.642216  (backed up)
-Iteration 295: log pseudolikelihood = -12.642243  (backed up)
-Iteration 296: log pseudolikelihood =  -12.64227  (backed up)
-Iteration 297: log pseudolikelihood = -12.642296  (backed up)
-Iteration 298: log pseudolikelihood = -12.642323  (backed up)
-Iteration 299: log pseudolikelihood = -12.642349  (backed up)
-Iteration 300: log pseudolikelihood = -12.642319  (backed up)
+Iteration 7:   log pseudolikelihood = -12.825068
+Iteration 8:   log pseudolikelihood = -12.785864
+Iteration 9:   log pseudolikelihood = -12.783805
+Iteration 10:  log pseudolikelihood = -12.783329
+Iteration 11:  log pseudolikelihood = -12.783098
+Iteration 12:  log pseudolikelihood = -12.783053
+Iteration 13:  log pseudolikelihood = -12.783067  (backed up)
+Iteration 14:  log pseudolikelihood =  -12.78308  (backed up)
+Iteration 15:  log pseudolikelihood = -12.783072
+Iteration 16:  log pseudolikelihood = -12.782933
+Iteration 17:  log pseudolikelihood = -12.782949  (backed up)
+Iteration 18:  log pseudolikelihood = -12.782932  (backed up)
+Iteration 19:  log pseudolikelihood = -12.782951  (backed up)
+Iteration 20:  log pseudolikelihood = -12.782948  (backed up)
+Iteration 21:  log pseudolikelihood = -12.782905
+Iteration 22:  log pseudolikelihood = -12.782912  (backed up)
+Iteration 23:  log pseudolikelihood =  -12.78292  (backed up)
+Iteration 24:  log pseudolikelihood = -12.782918  (backed up)
+Iteration 25:  log pseudolikelihood = -12.782927  (backed up)
+Iteration 26:  log pseudolikelihood = -12.782938  (backed up)
+Iteration 27:  log pseudolikelihood = -12.782908
+Iteration 28:  log pseudolikelihood = -12.782915  (backed up)
+Iteration 29:  log pseudolikelihood = -12.782922  (backed up)
+Iteration 30:  log pseudolikelihood = -12.782911
+Iteration 31:  log pseudolikelihood = -12.782903
+Iteration 32:  log pseudolikelihood = -12.782865
+Iteration 33:  log pseudolikelihood = -12.782866  (backed up)
+Iteration 34:  log pseudolikelihood = -12.782866  (backed up)
+Iteration 35:  log pseudolikelihood = -12.782866  (backed up)
+Iteration 36:  log pseudolikelihood = -12.782866  (backed up)
+Iteration 37:  log pseudolikelihood = -12.782866  (backed up)
+Iteration 38:  log pseudolikelihood = -12.782867  (backed up)
+Iteration 39:  log pseudolikelihood = -12.782867  (backed up)
+Iteration 40:  log pseudolikelihood = -12.782867  (backed up)
+Iteration 41:  log pseudolikelihood = -12.782867  (backed up)
+Iteration 42:  log pseudolikelihood = -12.782868  (backed up)
+Iteration 43:  log pseudolikelihood = -12.782868  (backed up)
+Iteration 44:  log pseudolikelihood = -12.782868  (backed up)
+Iteration 45:  log pseudolikelihood = -12.782868  (backed up)
+Iteration 46:  log pseudolikelihood = -12.782869  (backed up)
+Iteration 47:  log pseudolikelihood = -12.782869  (backed up)
+Iteration 48:  log pseudolikelihood = -12.782869  (backed up)
+Iteration 49:  log pseudolikelihood = -12.782869  (backed up)
+Iteration 50:  log pseudolikelihood =  -12.78287  (backed up)
+Iteration 51:  log pseudolikelihood =  -12.78287  (backed up)
+Iteration 52:  log pseudolikelihood =  -12.78287  (backed up)
+Iteration 53:  log pseudolikelihood =  -12.78287  (backed up)
+Iteration 54:  log pseudolikelihood = -12.782871  (backed up)
+Iteration 55:  log pseudolikelihood = -12.782871  (backed up)
+Iteration 56:  log pseudolikelihood = -12.782871  (backed up)
+Iteration 57:  log pseudolikelihood = -12.782871  (backed up)
+Iteration 58:  log pseudolikelihood = -12.782872  (backed up)
+Iteration 59:  log pseudolikelihood = -12.782872  (backed up)
+Iteration 60:  log pseudolikelihood = -12.782872  (backed up)
+Iteration 61:  log pseudolikelihood = -12.782872  (backed up)
+Iteration 62:  log pseudolikelihood = -12.782872  (backed up)
+Iteration 63:  log pseudolikelihood = -12.782873  (backed up)
+Iteration 64:  log pseudolikelihood = -12.782873  (backed up)
+Iteration 65:  log pseudolikelihood = -12.782873  (backed up)
+Iteration 66:  log pseudolikelihood = -12.782874  (backed up)
+Iteration 67:  log pseudolikelihood = -12.782874  (backed up)
+Iteration 68:  log pseudolikelihood = -12.782874  (backed up)
+Iteration 69:  log pseudolikelihood = -12.782874  (backed up)
+Iteration 70:  log pseudolikelihood = -12.782875  (backed up)
+Iteration 71:  log pseudolikelihood = -12.782875  (backed up)
+Iteration 72:  log pseudolikelihood = -12.782875  (backed up)
+Iteration 73:  log pseudolikelihood = -12.782875  (backed up)
+Iteration 74:  log pseudolikelihood = -12.782876  (backed up)
+Iteration 75:  log pseudolikelihood = -12.782876  (backed up)
+Iteration 76:  log pseudolikelihood = -12.782876  (backed up)
+Iteration 77:  log pseudolikelihood = -12.782876  (backed up)
+Iteration 78:  log pseudolikelihood = -12.782877  (backed up)
+Iteration 79:  log pseudolikelihood = -12.782877  (backed up)
+Iteration 80:  log pseudolikelihood = -12.782877  (backed up)
+Iteration 81:  log pseudolikelihood = -12.782878  (backed up)
+Iteration 82:  log pseudolikelihood = -12.782878  (backed up)
+Iteration 83:  log pseudolikelihood = -12.782878  (backed up)
+Iteration 84:  log pseudolikelihood = -12.782878  (backed up)
+Iteration 85:  log pseudolikelihood = -12.782879  (backed up)
+Iteration 86:  log pseudolikelihood = -12.782878
+Iteration 87:  log pseudolikelihood =  -12.78288  (backed up)
+Iteration 88:  log pseudolikelihood = -12.782881  (backed up)
+Iteration 89:  log pseudolikelihood = -12.782883  (backed up)
+Iteration 90:  log pseudolikelihood = -12.782885  (backed up)
+Iteration 91:  log pseudolikelihood = -12.782887  (backed up)
+Iteration 92:  log pseudolikelihood = -12.782889  (backed up)
+Iteration 93:  log pseudolikelihood = -12.782891  (backed up)
+Iteration 94:  log pseudolikelihood = -12.782893  (backed up)
+Iteration 95:  log pseudolikelihood = -12.782895  (backed up)
+Iteration 96:  log pseudolikelihood = -12.782897  (backed up)
+Iteration 97:  log pseudolikelihood =   -12.7829  (backed up)
+Iteration 98:  log pseudolikelihood = -12.782902  (backed up)
+Iteration 99:  log pseudolikelihood = -12.782905  (backed up)
+Iteration 100: log pseudolikelihood = -12.782907  (backed up)
+Iteration 101: log pseudolikelihood = -12.782909  (backed up)
+Iteration 102: log pseudolikelihood = -12.782912  (backed up)
+Iteration 103: log pseudolikelihood = -12.782914  (backed up)
+Iteration 104: log pseudolikelihood = -12.782917  (backed up)
+Iteration 105: log pseudolikelihood = -12.782919  (backed up)
+Iteration 106: log pseudolikelihood = -12.782874
+Iteration 107: log pseudolikelihood = -12.782823
+Iteration 108: log pseudolikelihood = -12.782826  (backed up)
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -12.867561
-Iteration 1:   log pseudolikelihood =  -12.78423
-Iteration 2:   log pseudolikelihood = -12.783333
-Iteration 3:   log pseudolikelihood = -12.783211
-Iteration 4:   log pseudolikelihood = -12.783166
-Iteration 5:   log pseudolikelihood =  -12.78315
-Iteration 6:   log pseudolikelihood = -12.783144
-Iteration 7:   log pseudolikelihood = -12.783142
-Iteration 8:   log pseudolikelihood = -12.783141
-Iteration 9:   log pseudolikelihood = -12.783141
+Iteration 0:   log pseudolikelihood =  -12.78316
+Iteration 1:   log pseudolikelihood = -12.783146
+Iteration 2:   log pseudolikelihood = -12.783143
+Iteration 3:   log pseudolikelihood = -12.783141
+Iteration 4:   log pseudolikelihood = -12.783141
+Iteration 5:   log pseudolikelihood =  -12.78314
+Iteration 6:   log pseudolikelihood =  -12.78314
+Iteration 7:   log pseudolikelihood =  -12.78314
+Iteration 8:   log pseudolikelihood =  -12.78314
+Iteration 9:   log pseudolikelihood =  -12.78314
 Iteration 10:  log pseudolikelihood =  -12.78314
 Iteration 11:  log pseudolikelihood =  -12.78314
 Iteration 12:  log pseudolikelihood =  -12.78314
@@ -1646,15 +1482,22 @@ Iteration 23:  log pseudolikelihood =  -12.78314
 Iteration 24:  log pseudolikelihood =  -12.78314
 Iteration 25:  log pseudolikelihood =  -12.78314
 Iteration 26:  log pseudolikelihood =  -12.78314
+Iteration 27:  log pseudolikelihood =  -12.78314
+Iteration 28:  log pseudolikelihood =  -12.78314
+Iteration 29:  log pseudolikelihood =  -12.78314
+Iteration 30:  log pseudolikelihood =  -12.78314
+Iteration 31:  log pseudolikelihood =  -12.78314
+Iteration 32:  log pseudolikelihood =  -12.78314
+Iteration 33:  log pseudolikelihood =  -12.78314
 
 Stratified Cox regression with no ties
 Strata variable: set_id
 
-No. of subjects =      3,390                          Number of obs =    3,398
+No. of subjects =      3,390                           Number of obs =   3,398
 No. of failures =        192
 Time at risk    = 5,864.1013
-                                                      Wald chi2(13) = 23781.52
-Log pseudolikelihood = -12.78314                      Prob > chi2   =   0.0000
+                                                       Wald chi2(12) = 1842.84
+Log pseudolikelihood = -12.78314                       Prob > chi2   =  0.0000
 
                                      (Std. err. adjusted for 34 clusters in practice_id)
 ----------------------------------------------------------------------------------------
@@ -1664,8 +1507,8 @@ Log pseudolikelihood = -12.78314                      Prob > chi2   =   0.0000
              covid_vax |
       Pre-vaccination  |   .0109598   .0200509    -2.47   0.014     .0003038    .3954291
        1 vaccine dose  |   .2886878   .6731448    -0.53   0.594     .0029898     27.8746
-      2 vaccine doses  |   1.98e-27   2.27e-26    -5.36   0.000     3.37e-37    1.16e-17
-      3 vaccine doses  |   7.17e-16   2.10e-15   -11.93   0.000     2.33e-18    2.20e-13
+      2 vaccine doses  |   5.25e-31          .        .       .            .           .
+      3 vaccine doses  |   7.97e-20          .        .       .            .           .
       4 vaccine doses  |   70.01686   191.9416     1.55   0.121     .3249003    15088.81
                        |
                    sex |
@@ -1700,18 +1543,18 @@ Current/former smoker  |   37634.94   189184.2     2.10   0.036     1.980395    
                   age3 |   347082.8    2022712     2.19   0.029     3.800518    3.17e+10
 ----------------------------------------------------------------------------------------
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Stratified Cox regression with no ties
 Strata variable: set_id
 
-No. of subjects =      3,390                          Number of obs =    3,398
+No. of subjects =      3,390                           Number of obs =   3,398
 No. of failures =        192
 Time at risk    = 5,864.1013
-                                                      Wald chi2(13) = 23781.52
-Log pseudolikelihood = -12.78314                      Prob > chi2   =   0.0000
+                                                       Wald chi2(12) = 1842.84
+Log pseudolikelihood = -12.78314                       Prob > chi2   =  0.0000
 
                                      (Std. err. adjusted for 34 clusters in practice_id)
 ----------------------------------------------------------------------------------------
@@ -1721,8 +1564,8 @@ Log pseudolikelihood = -12.78314                      Prob > chi2   =   0.0000
              covid_vax |
       Pre-vaccination  |   .0109598   .0200509    -2.47   0.014     .0003038    .3954291
        1 vaccine dose  |   .2886878   .6731448    -0.53   0.594     .0029898     27.8746
-      2 vaccine doses  |   1.98e-27   2.27e-26    -5.36   0.000     3.37e-37    1.16e-17
-      3 vaccine doses  |   7.17e-16   2.10e-15   -11.93   0.000     2.33e-18    2.20e-13
+      2 vaccine doses  |   5.25e-31          .        .       .            .           .
+      3 vaccine doses  |   7.97e-20          .        .       .            .           .
       4 vaccine doses  |   70.01686   191.9416     1.55   0.121     .3249003    15088.81
                        |
                    sex |
@@ -1756,7 +1599,9 @@ Current/former smoker  |   37634.94   189184.2     2.10   0.036     1.980395    
                   age2 |   .0088679    .019028    -2.20   0.028     .0001322    .5946372
                   age3 |   347082.8    2022712     2.19   0.029     3.800518    3.17e+10
 ----------------------------------------------------------------------------------------
+(note: file additional_covid_vax_death.ster not found)
 file additional_covid_vax_death.ster saved
+(file additional_covid_vax_death.dta not found)
 file additional_covid_vax_death.dta saved
 
         Failure _d: death_date
@@ -1769,34 +1614,25 @@ Iteration 1:   log pseudolikelihood = -19.751354
 Iteration 2:   log pseudolikelihood = -14.060095
 Iteration 3:   log pseudolikelihood = -10.360286
 Iteration 4:   log pseudolikelihood = -7.2428702
-Iteration 5:   log pseudolikelihood = -5.1350635
-Iteration 6:   log pseudolikelihood = -3.7864206
-Iteration 7:   log pseudolikelihood = -3.7069431
-Iteration 8:   log pseudolikelihood = -3.6217066  (backed up)
-Iteration 9:   log pseudolikelihood = -3.6041141  (backed up)
-Iteration 10:  log pseudolikelihood = -3.5932234  (backed up)
-Iteration 11:  log pseudolikelihood = -3.5920844  (backed up)
-Iteration 12:  log pseudolikelihood = -3.5918469  (backed up)
-Iteration 13:  log pseudolikelihood = -3.5917877  (backed up)
-Iteration 14:  log pseudolikelihood = -3.5917581  (backed up)
-Iteration 15:  log pseudolikelihood = -3.5917434  (backed up)
-Iteration 16:  log pseudolikelihood = -3.5917397  (backed up)
-Iteration 17:  log pseudolikelihood = -3.5917378  (backed up)
-Iteration 18:  log pseudolikelihood = -4.2848841  (backed up)
-Iteration 19:  log pseudolikelihood = -4.0089899
-Iteration 20:  log pseudolikelihood = -3.8673639  (backed up)
-Iteration 21:  log pseudolikelihood = -3.7842415  (backed up)
-Iteration 22:  log pseudolikelihood = -3.7651328  (backed up)
-Iteration 23:  log pseudolikelihood = -3.7636234  (backed up)
-Iteration 24:  log pseudolikelihood =  -3.763426  (backed up)
-Iteration 25:  log pseudolikelihood = -3.7629437  (backed up)
-Iteration 26:  log pseudolikelihood = -4.4556271  (backed up)
-Iteration 27:  log pseudolikelihood = -4.0993186  (backed up)
-Iteration 28:  log pseudolikelihood = -4.0237883  (backed up)
-Iteration 29:  log pseudolikelihood = -3.9858557  (backed up)
-Iteration 30:  log pseudolikelihood =   -3.96862  (backed up)
-Iteration 31:  log pseudolikelihood = -3.9659995  (backed up)
-Iteration 32:  log pseudolikelihood =  -3.962384  (backed up)
+Iteration 5:   log pseudolikelihood = -5.1350637
+Iteration 6:   log pseudolikelihood = -3.7863983
+Iteration 7:   log pseudolikelihood = -3.7066352
+Iteration 8:   log pseudolikelihood = -3.6342975  (backed up)
+Iteration 9:   log pseudolikelihood = -3.5914166  (backed up)
+Iteration 10:  log pseudolikelihood = -3.5912365  (backed up)
+Iteration 11:  log pseudolikelihood = -3.5907596  (backed up)
+Iteration 12:  log pseudolikelihood = -3.5905223  (backed up)
+Iteration 13:  log pseudolikelihood =  -3.590404  (backed up)
+Iteration 14:  log pseudolikelihood = -3.5903966  (backed up)
+Iteration 15:  log pseudolikelihood = -3.5903929  (backed up)
+Iteration 16:  log pseudolikelihood =  -3.590392  (backed up)
+Iteration 17:  log pseudolikelihood = -4.2835382  (backed up)
+Iteration 18:  log pseudolikelihood = -4.0073927
+Iteration 19:  log pseudolikelihood = -3.9446603  (backed up)
+Iteration 20:  log pseudolikelihood = -3.9435519  (backed up)
+Iteration 21:  log pseudolikelihood = -3.9424766  (backed up)
+Iteration 22:  log pseudolikelihood =  -3.943333  (backed up)
+Iteration 23:  log pseudolikelihood = -3.9428347  (backed up)
 flat region resulting in a missing likelihood
 r(430);
 
@@ -1804,7 +1640,7 @@ end of do-file
 
 r(430);
 
-. do "C:\Users\LSH170~1\AppData\Local\Temp\STD1a44_000000.tmp"
+. do "C:\Users\lsh1703468\Documents\Repos\analysis\cox_2017_wave.do"
 
 . sysdir set PLUS ./analysis/adofiles
 

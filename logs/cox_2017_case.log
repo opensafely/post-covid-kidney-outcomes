@@ -2,13 +2,12 @@
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/cox_2017_case.log
   log type:  text
- opened on:  13 Jan 2023, 10:26:38
+ opened on:  13 Jan 2023, 20:22:14
 
 . 
 . cap file close tablecontent
 
-. file open tablecontent using ./output/cox_2017_case.csv, write text replace
-(file ./output/cox_2017_case.csv not found)
+. file open tablecontent using ./output/cox_2017_case.txt, write text replace
 
 . file write tablecontent ("Kidney outcomes after SARS-CoV-2 infection compared to matched historical general population") _n
 
@@ -32,9 +31,10 @@
 
 . file write tablecontent _n
 
-. file write tablecontent _tab _tab _tab _tab _tab ("Number") _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally adjusted") _tab ("Fully adjusted") _tab _tab _n
+. file write tablecontent _tab _tab _tab _tab _tab ("Number") _tab _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally adjusted") _tab ("Fully adjusted") _tab _ta
+> b _n
 
-. file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab _n
+. file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab _n
 
 . file write tablecontent ("By SARS-CoV-2 infection") _n
 
@@ -81,42 +81,46 @@
  33. 
 .         qui safecount if case==0
  34.         local denominator = r(N)
- 35.         qui safecount if case== 1 & `outcome'==1
- 36.         local event = r(N)
- 37.     bysort case: egen total_follow_up_`outcome' = total(_t)
- 38.         qui su total_follow_up_`outcome' if case==0
- 39.         local person_year = r(mean)/365.25
- 40.         local rate = 100000*(`event'/`person_year')
- 41.         
+ 35.         local r_denominator = round(`denominator',5)
+ 36.         
+.         qui safecount if case== 1 & `outcome'==1
+ 37.         local event = r(N)
+ 38.         local r_event = round(`event',5)
+ 39.     bysort case: egen total_follow_up_`outcome' = total(_t)
+ 40.         qui su total_follow_up_`outcome' if case==0
+ 41.         local person_year = r(mean)
+ 42.         local rate = 100000*(`r_event'/`person_year')
+ 43.         
 .         file write tablecontent _n
- 42.         file write tablecontent ("`outcome'") _n
- 43.         file write tablecontent _tab ("`lab0'") _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab
- 44.         file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
- 45.         
+ 44.         file write tablecontent ("`outcome'") _n
+ 45.         file write tablecontent _tab ("`lab0'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
+ 46.         
 .         qui safecount if case==1
- 46.         local denominator = r(N)
- 47.         qui safecount if case == 1 & `outcome'==1
- 48.         local event = r(N)
- 49.         qui su total_follow_up_`outcome' if case==1
- 50.         local person_year = r(mean)/365.25
- 51.         local rate = 100000*(`event'/`person_year')
- 52.         file write tablecontent _tab ("`lab1'") _tab _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
- 53.         cap estimates use "crude_case_`outcome'" 
- 54.          cap lincom 1.case, eform
- 55.         file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 56.         cap estimates clear
- 57.         cap estimates use "minimal_case_`outcome'" 
- 58.          cap lincom 1.case, eform
- 59.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 60.         cap estimates clear
- 61.         cap estimates use "additional_case_`outcome'" 
- 62.          cap lincom 1.case, eform
- 63.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 64.         cap estimates clear
- 65.         cap estimates use "full_case_`outcome'" 
- 66.          cap lincom 1.case, eform
- 67.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
- 68. }
+ 47.         local denominator = r(N)
+ 48.         local r_denominator = round(`denominator',5)
+ 49.         qui safecount if case == 1 & `outcome'==1
+ 50.         local event = r(N)
+ 51.         local r_event = round(`event',5)
+ 52.         qui su total_follow_up_`outcome' if case==1
+ 53.         local person_year = r(mean)
+ 54.         local rate = 100000*(`r_event'/`person_year')
+ 55.         file write tablecontent _tab ("`lab1'") _tab _tab _tab (`r_denominator') _tab _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab  
+ 56.         cap estimates use "crude_case_`outcome'" 
+ 57.          cap lincom 1.case, eform
+ 58.         file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 59.         cap estimates clear
+ 60.         cap estimates use "minimal_case_`outcome'" 
+ 61.          cap lincom 1.case, eform
+ 62.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 63.         cap estimates clear
+ 64.         cap estimates use "additional_case_`outcome'" 
+ 65.          cap lincom 1.case, eform
+ 66.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 67.         cap estimates clear
+ 68.         cap estimates use "full_case_`outcome'" 
+ 69.          cap lincom 1.case, eform
+ 70.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
+ 71. }
 
 Survival-time data settings
 
@@ -1238,7 +1242,7 @@ Strata variable: set_id
 No. of subjects =      3,390                        Number of obs =      3,398
 No. of failures =        192
 Time at risk    = 5,864.1013
-                                                    Wald chi2(18) = 2681735.90
+                                                    Wald chi2(18) = 2681726.72
 Log pseudolikelihood = -19.464701                   Prob > chi2   =     0.0000
 
                                      (Std. err. adjusted for 34 clusters in practice_id)
@@ -1291,7 +1295,7 @@ Strata variable: set_id
 No. of subjects =      3,390                        Number of obs =      3,398
 No. of failures =        192
 Time at risk    = 5,864.1013
-                                                    Wald chi2(18) = 2681735.90
+                                                    Wald chi2(18) = 2681726.72
 Log pseudolikelihood = -19.464701                   Prob > chi2   =     0.0000
 
                                      (Std. err. adjusted for 34 clusters in practice_id)
@@ -1368,7 +1372,13 @@ Iteration 23:  log pseudolikelihood = -13.799769
 Iteration 24:  log pseudolikelihood = -13.799769
 Iteration 25:  log pseudolikelihood = -13.799769
 Iteration 26:  log pseudolikelihood = -13.799769
-Iteration 27:  log pseudolikelihood = -13.799769  (backed up)
+Iteration 27:  log pseudolikelihood = -13.799769
+Iteration 28:  log pseudolikelihood = -13.799769
+Iteration 29:  log pseudolikelihood = -13.799769
+Iteration 30:  log pseudolikelihood = -13.799769
+Iteration 31:  log pseudolikelihood = -13.799769  (backed up)
+Iteration 32:  log pseudolikelihood = -13.799769  (backed up)
+Iteration 33:  log pseudolikelihood = -13.799769  (backed up)
 Refining estimates:
 Iteration 0:   log pseudolikelihood = -13.799769
 Iteration 1:   log pseudolikelihood = -13.799769
@@ -1380,9 +1390,6 @@ Iteration 6:   log pseudolikelihood = -13.799769
 Iteration 7:   log pseudolikelihood = -13.799769
 Iteration 8:   log pseudolikelihood = -13.799769
 Iteration 9:   log pseudolikelihood = -13.799769
-Iteration 10:  log pseudolikelihood = -13.799769
-Iteration 11:  log pseudolikelihood = -13.799769
-Iteration 12:  log pseudolikelihood = -13.799769
 
 Stratified Cox regression with no ties
 Strata variable: set_id
@@ -1390,7 +1397,7 @@ Strata variable: set_id
 No. of subjects =      3,390                        Number of obs =      3,398
 No. of failures =        192
 Time at risk    = 5,864.1013
-                                                    Wald chi2(18) = 8489083.89
+                                                    Wald chi2(18) = 8489083.84
 Log pseudolikelihood = -13.799769                   Prob > chi2   =     0.0000
 
                                      (Std. err. adjusted for 34 clusters in practice_id)
@@ -1430,7 +1437,7 @@ Log pseudolikelihood = -13.799769                   Prob > chi2   =     0.0000
             1.diabetes |   1.055478   1.052653     0.05   0.957     .1494604    7.453706
         1.hypertension |   .1508541   .0705659    -4.04   0.000     .0603095    .3773362
     1.immunosuppressed |   .0032182   .0041106    -4.49   0.000     .0002633    .0393407
-     1.non_haem_cancer |   1.89e+11          .        .       .            .           .
+     1.non_haem_cancer |   2.44e+11          .        .       .            .           .
                        |
                smoking |
 Current/former smoker  |   34.01585    14.1488     8.48   0.000     15.05311    76.86634
@@ -1449,7 +1456,7 @@ Strata variable: set_id
 No. of subjects =      3,390                        Number of obs =      3,398
 No. of failures =        192
 Time at risk    = 5,864.1013
-                                                    Wald chi2(18) = 8489083.89
+                                                    Wald chi2(18) = 8489083.84
 Log pseudolikelihood = -13.799769                   Prob > chi2   =     0.0000
 
                                      (Std. err. adjusted for 34 clusters in practice_id)
@@ -1489,7 +1496,7 @@ Log pseudolikelihood = -13.799769                   Prob > chi2   =     0.0000
             1.diabetes |   1.055478   1.052653     0.05   0.957     .1494604    7.453706
         1.hypertension |   .1508541   .0705659    -4.04   0.000     .0603095    .3773362
     1.immunosuppressed |   .0032182   .0041106    -4.49   0.000     .0002633    .0393407
-     1.non_haem_cancer |   1.89e+11          .        .       .            .           .
+     1.non_haem_cancer |   2.44e+11          .        .       .            .           .
                        |
                smoking |
 Current/former smoker  |   34.01585    14.1488     8.48   0.000     15.05311    76.86634
@@ -1506,3 +1513,13 @@ file full_case_death.dta saved
 . 
 end of do-file
 
+. do "C:\Users\lsh1703468\Documents\Repos\analysis\cox_2017_covid_aki.do"
+
+. sysdir set PLUS ./analysis/adofiles
+
+. sysdir set PERSONAL ./analysis/adofiles
+
+. pwd
+C:\Users\lsh1703468\Documents\repos
+
+. cap log close
