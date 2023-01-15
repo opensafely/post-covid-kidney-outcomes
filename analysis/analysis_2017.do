@@ -90,6 +90,7 @@ restore
 ** Exclusions
 * Index of multiple deprivation missing
 * Ordered 1-5 from most deprived to least deprived
+label var imd "Index of multiple deprivation (IMD)"
 label define imd 1 "1 Most deprived" 2 "2" 3 "3" 4 "4" 5 "5 Least deprived"
 label values imd imd
 tab imd, m
@@ -171,6 +172,7 @@ drop deceased
 gen index_year = yofd(index_date)
 gen age = index_year - year_of_birth
 gen sex = 1 if male == "Male"
+label var sex "Sex"
 replace sex = 0 if male == "Female"
 label define sex 0"Female" 1"Male"
 label values sex sex
@@ -473,6 +475,7 @@ label define ethnicity1	1 "White"  					///
 						5 "Other"					///
 						6 "Unknown"	
 label values ethnicity1 ethnicity1
+label var ethnicity1 "Ethnicity"
 safetab ethnicity1, m
 
 * Urban/rural
@@ -515,6 +518,7 @@ label define bmi	1 "Underweight (<18.5)" 	///
 					5 "Obese II (35-39.9)"		///
 					6 "Obese III (40+)"				
 label values bmi bmi
+label var bmi "Body mass index (BMI)"
 safetab bmi, m
 
 * Smoking
@@ -553,15 +557,18 @@ safetab afib
 gen liver = chronic_liver_disease
 drop chronic_liver_disease
 safetab liver
+label var diabetes "Diabetes"
 safetab diabetes
 gen haem_cancer = haematological_cancer
 drop haematological_cancer
 safetab haem_cancer
 safetab heart_failure
 safetab hiv
+label var hypertension "Hypertension"
 safetab hypertension
 gen non_haem_cancer = non_haematological_cancer
 drop non_haematological_cancer
+label var non_haem_cancer "Cancer (non-haematological)"
 safetab non_haem_cancer
 safetab myocardial_infarction
 gen pvd = peripheral_vascular_disease
@@ -581,10 +588,12 @@ replace cardiovascular = 1 if heart_failure==1
 replace cardiovascular = 1 if myocardial_infarction==1
 replace cardiovascular = 1 if pvd==1
 replace cardiovascular = 1 if stroke==1
+label var cardiovascular "Cardiovascular diseases"
 gen immunosuppressed = haem_cancer
 replace immunosuppressed = 1 if hiv==1
 replace immunosuppressed = 1 if rheumatoid==1
 replace immunosuppressed = 1 if lupus==1
+label var immunosuppressed "Immunosuppressive diseases"
 safetab cardiovascular
 safetab immunosuppressed
  

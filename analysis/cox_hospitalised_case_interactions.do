@@ -3,10 +3,10 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_hospitalised_case.log, replace t
+log using ./logs/cox_hospitalised_case_interactions.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/cox_hospitalised_case.txt, write text replace
+file open tablecontent using ./output/cox_hospitalised_case_interactions.txt, write text replace
 file write tablecontent ("Kidney outcomes after COVID-19 hospitalisation compared to a pre-pandemic population hospitalised for pneumonia") _n
 file write tablecontent _n
 file write tablecontent ("Populations restricted to those who survived 28 days after hospital admission") _n
@@ -97,20 +97,20 @@ local lab1: label `interaction' 1
 	local person_year = r(mean)
 	local rate = 100000*(`r_event'/`person_year')
 	file write tablecontent _tab ("Pneumonia pre-pandemic `lab1'") _tab _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
-	cap estimates use "crude_case_`outcome'_`i'" 
-	 cap lincom 0.case##`interaction', eform
+	cap estimates use "crude_case_`outcome'_0" 
+	 cap lincom 0.case#`interaction', eform
 	file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
 	cap estimates clear
-	cap estimates use "minimal_case_`outcome'_`i'" 
-	 cap lincom 0.case##`interaction', eform
+	cap estimates use "minimal_case_`outcome'_0" 
+	 cap lincom 0.case#`interaction', eform
 	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
 	cap estimates clear
-	cap estimates use "additional_case_`outcome'_`i'" 
-	 cap lincom 0.case##`interaction', eform
+	cap estimates use "additional_case_`outcome'_0" 
+	 cap lincom 0.case#`interaction', eform
 	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
 	cap estimates clear
-	cap estimates use "full_case_`outcome'_`i'" 
-	 cap lincom 0.case##`interaction', eform
+	cap estimates use "full_case_`outcome'_0" 
+	 cap lincom 0.case#`interaction', eform
 	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n
 	
 	
@@ -140,20 +140,20 @@ local lab1: label `interaction' 1
 	local person_year = r(mean)
 	local rate = 100000*(`r_event'/`person_year')
 	file write tablecontent _tab ("COVID-19 `lab1'") _tab _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
-	cap estimates use "crude_case_`outcome'_`i'" 
-	 cap lincom 1.case##`interaction', eform
+	cap estimates use "crude_case_`outcome'_1" 
+	 cap lincom 1.case#`interaction', eform
 	file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
 	cap estimates clear
-	cap estimates use "minimal_case_`outcome'_`i'" 
-	 cap lincom 1.case##`interaction', eform
+	cap estimates use "minimal_case_`outcome'_1" 
+	 cap lincom 1.case#`interaction', eform
 	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
 	cap estimates clear
-	cap estimates use "additional_case_`outcome'_`i'" 
-	 cap lincom 1.case##`interaction', eform
+	cap estimates use "additional_case_`outcome'_1" 
+	 cap lincom 1.case#`interaction', eform
 	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
 	cap estimates clear
-	cap estimates use "full_case_`outcome'_`i'" 
-	 cap lincom 1.case##`interaction', eform
+	cap estimates use "full_case_`outcome'_1" 
+	 cap lincom 1.case#`interaction', eform
 	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n
 }
 }

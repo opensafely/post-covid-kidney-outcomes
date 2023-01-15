@@ -243,23 +243,24 @@ label values case_critical_care case_critical_care
 safetab case_critical_care, m
 
 * Acute kidney injury during index admission
-label define acute_kidney_injury	0 "No AKI"	///
-									1 "AKI"
-label values acute_kidney_injury acute_kidney_injury
-label var acute_kidney_injury "Acute kidney injury"
-safetab acute_kidney_injury, m
-gen case_acute_kidney_injury = acute_kidney_injury
-replace case_acute_kidney_injury = 2 if case==1
-replace case_acute_kidney_injury = 3 if case==1 &acute_kidney_injury==1
-label define case_acute_kidney_injury	0 "No AKI pneumonia (pre-pandemic)"	///
+rename acute_kidney_injury adm_aki
+label define adm_aki	0 "No AKI"	///
+						1 "AKI"
+label values adm_aki adm_aki
+label var adm_aki "Acute kidney injury"
+safetab adm_aki, m
+gen case_adm_aki = adm_aki
+replace case_adm_aki = 2 if case==1
+replace case_adm_aki = 3 if case==1 &adm_aki==1
+label define case_adm_aki	0 "No AKI pneumonia (pre-pandemic)"	///
 										1 "AKI pneumonia (pre-pandemic)" 	///
 										2 "No AKI COVID-19" 				///
 										3 "AKI COVID-19"
-label values case_acute_kidney_injury case_acute_kidney_injury
-safetab case_acute_kidney_injury, m
+label values case_adm_aki case_adm_aki
+safetab case_adm_aki, m
 
 * Kidney replacement therapy during index admission
-gen krt = acute_kidney_injury
+gen krt = adm_aki
 replace krt = 2 if krt_icd_10==1
 drop krt_icd_10
 replace krt = 2 if krt_opcs_4==1

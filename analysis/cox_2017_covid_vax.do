@@ -92,10 +92,10 @@ forvalues vax=1/5 {
 	qui su total_follow_up_`outcome' if covid_vax==`vax'
 	local person_year = r(mean)
 	local rate = 100000*(`r_event'/`person_year')
-	file write tablecontent _tab ("`lab`vax''") _tab _tab _tab (`r_denominator') _tab _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab  
+	file write tablecontent _tab ("`lab`vax''") _tab _tab _tab (`r_denominator') _tab _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab _tab
 	cap estimates use "crude_covid_vax_`outcome'" 
 	 cap lincom `vax'.covid_vax, eform
-	file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
 	cap estimates clear
 	cap estimates use "minimal_covid_vax_`outcome'" 
 	 cap lincom `vax'.covid_vax, eform
