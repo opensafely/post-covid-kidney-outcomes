@@ -25,7 +25,7 @@ file write tablecontent ("By SARS-CoV-2 infection") _n
 
 use ./output/analysis_2017.dta, clear
 foreach outcome of varlist esrd egfr_half aki death {
-stset exit_date, fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
+stset exit_date_`outcome', fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
 
 stcox i.case, vce(cluster practice_id) strata(set_id)
 estimates save "crude_case_`outcome'", replace 
@@ -65,10 +65,10 @@ local lab1: label case 1
 	qui safecount if case==0
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
-	
 	qui safecount if case== 0 & `outcome'==1
 	local event = r(N)
 	local r_event = round(`event',5)
+	su 
     bysort case: egen total_follow_up_`outcome' = total(_t)
 	qui su total_follow_up_`outcome' if case==0
 	local person_year = r(mean)
