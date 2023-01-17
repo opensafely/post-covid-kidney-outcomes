@@ -30,7 +30,7 @@ gen covid_`interaction' = 0 if case==1 & `interaction'==0
 replace covid_`interaction' = 1 if case==1 & `interaction'==1
 
 foreach outcome of varlist esrd egfr_half aki death {
-stset exit_date, fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
+stset exit_date_`outcome', fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
 
 forvalues i=0/1 {
 stcox `i'.case##i.`interaction', vce(cluster practice_id)

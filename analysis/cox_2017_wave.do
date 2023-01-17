@@ -25,7 +25,7 @@ file write tablecontent ("By COVID-19 pandemic period") _n
 
 use ./output/analysis_2017.dta, clear
 foreach outcome of varlist esrd egfr_half aki death {
-stset exit_date, fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
+stset exit_date_`outcome', fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
 
 stcox i.wave, vce(cluster practice_id) strata(set_id)
 estimates save "crude_wave_`outcome'", replace 
