@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/cox_2017_case.log
   log type:  text
- opened on:  13 Jan 2023, 20:22:14
+ opened on:  17 Jan 2023, 20:03:43
 
 . 
 . cap file close tablecontent
@@ -14,6 +14,8 @@
 . file write tablecontent _n
 
 . file write tablecontent ("Historical general population matched on age, sex and STP") _n
+
+. file write tablecontent ("Restricted to those who survived 28 days after first recorded SARS-CoV-2 or equivalent date of matching") _n
 
 . file write tablecontent ("All models stratified by matched set and clustering by general practice accounted for using robust standard errors") _n
 
@@ -42,7 +44,7 @@
 . use ./output/analysis_2017.dta, clear
 
 . foreach outcome of varlist esrd egfr_half aki death {
-  2. stset exit_date, fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
+  2. stset exit_date_`outcome', fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
   3. 
 . stcox i.case, vce(cluster practice_id) strata(set_id)
   4. estimates save "crude_case_`outcome'", replace 
@@ -56,7 +58,7 @@
  11. parmest, label eform format(estimate p lb ub) saving("minimal_case_`outcome'", replace) idstr("minimal_case_`outcome'")
  12. local hr "`hr' "minimal_case_`outcome'" "
  13. 
-. stcox i.case i.sex i.ethnicity i.imd i.urban i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
+. stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
  14. if _rc==0{
  15. estimates
  16. estimates save "additional_case_`outcome'", replace 
@@ -66,7 +68,7 @@
  20. }
  21. else di "WARNING MODEL1 DID NOT FIT (`outcome')"
  22. 
-. stcox i.case i.sex i.ethnicity i.imd i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)            
+. stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)           
  23. if _rc==0{
  24. estimates
  25. estimates save "full_case_`outcome'", replace 
@@ -82,51 +84,51 @@
 .         qui safecount if case==0
  34.         local denominator = r(N)
  35.         local r_denominator = round(`denominator',5)
- 36.         
-.         qui safecount if case== 1 & `outcome'==1
+ 36.         qui safecount if case== 0 & `outcome'==1
  37.         local event = r(N)
  38.         local r_event = round(`event',5)
- 39.     bysort case: egen total_follow_up_`outcome' = total(_t)
- 40.         qui su total_follow_up_`outcome' if case==0
- 41.         local person_year = r(mean)
- 42.         local rate = 100000*(`r_event'/`person_year')
- 43.         
+ 39.         su 
+ 40.     bysort case: egen total_follow_up_`outcome' = total(_t)
+ 41.         qui su total_follow_up_`outcome' if case==0
+ 42.         local person_year = r(mean)
+ 43.         local rate = 100000*(`r_event'/`person_year')
+ 44.         
 .         file write tablecontent _n
- 44.         file write tablecontent ("`outcome'") _n
- 45.         file write tablecontent _tab ("`lab0'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
- 46.         
+ 45.         file write tablecontent ("`outcome'") _n
+ 46.         file write tablecontent _tab ("`lab0'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
+ 47.         
 .         qui safecount if case==1
- 47.         local denominator = r(N)
- 48.         local r_denominator = round(`denominator',5)
- 49.         qui safecount if case == 1 & `outcome'==1
- 50.         local event = r(N)
- 51.         local r_event = round(`event',5)
- 52.         qui su total_follow_up_`outcome' if case==1
- 53.         local person_year = r(mean)
- 54.         local rate = 100000*(`r_event'/`person_year')
- 55.         file write tablecontent _tab ("`lab1'") _tab _tab _tab (`r_denominator') _tab _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab  
- 56.         cap estimates use "crude_case_`outcome'" 
- 57.          cap lincom 1.case, eform
- 58.         file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 59.         cap estimates clear
- 60.         cap estimates use "minimal_case_`outcome'" 
- 61.          cap lincom 1.case, eform
- 62.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 63.         cap estimates clear
- 64.         cap estimates use "additional_case_`outcome'" 
- 65.          cap lincom 1.case, eform
- 66.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 67.         cap estimates clear
- 68.         cap estimates use "full_case_`outcome'" 
- 69.          cap lincom 1.case, eform
- 70.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
- 71. }
+ 48.         local denominator = r(N)
+ 49.         local r_denominator = round(`denominator',5)
+ 50.         qui safecount if case == 1 & `outcome'==1
+ 51.         local event = r(N)
+ 52.         local r_event = round(`event',5)
+ 53.         qui su total_follow_up_`outcome' if case==1
+ 54.         local person_year = r(mean)
+ 55.         local rate = 100000*(`r_event'/`person_year')
+ 56.         file write tablecontent _tab ("`lab1'") _tab _tab _tab (`r_denominator') _tab _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab  
+ 57.         cap estimates use "crude_case_`outcome'" 
+ 58.          cap lincom 1.case, eform
+ 59.         file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 60.         cap estimates clear
+ 61.         cap estimates use "minimal_case_`outcome'" 
+ 62.          cap lincom 1.case, eform
+ 63.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 64.         cap estimates clear
+ 65.         cap estimates use "additional_case_`outcome'" 
+ 66.          cap lincom 1.case, eform
+ 67.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
+ 68.         cap estimates clear
+ 69.         cap estimates use "full_case_`outcome'" 
+ 70.          cap lincom 1.case, eform
+ 71.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
+ 72. }
 
 Survival-time data settings
 
            ID variable: patient_id
          Failure event: esrd_date!=0 & esrd_date<.
-Observed time interval: (exit_date[_n-1], exit_date]
+Observed time interval: (exit_date_esrd[_n-1], exit_date_esrd]
      Exit on or before: failure
      Time for analysis: (time-origin)/365.25
                 Origin: time index_date
@@ -145,7 +147,7 @@ Observed time interval: (exit_date[_n-1], exit_date]
                                           Last observed exit t =  5.744011
 
         Failure _d: esrd_date
-  Analysis time _t: (exit_date-origin)/365.25
+  Analysis time _t: (exit_date_esrd-origin)/365.25
             Origin: time index_date
        ID variable: patient_id
 
@@ -172,11 +174,13 @@ Log pseudolikelihood = -3128.8642                       Prob > chi2   = 0.5935
         case |
  SARS-CoV-2  |   1.020595   .0389797     0.53   0.594     .9469858    1.099926
 ------------------------------------------------------------------------------
+(note: file crude_case_esrd.ster not found)
 file crude_case_esrd.ster saved
+(file crude_case_esrd.dta not found)
 file crude_case_esrd.dta saved
 
         Failure _d: esrd_date
-  Analysis time _t: (exit_date-origin)/365.25
+  Analysis time _t: (exit_date_esrd-origin)/365.25
             Origin: time index_date
        ID variable: patient_id
 
@@ -209,70 +213,84 @@ Log pseudolikelihood = -3125.1952                       Prob > chi2   = 0.0000
         age2 |   .9731566   .0134917    -1.96   0.050     .9470695    .9999623
         age3 |   1.046546   .0421301     1.13   0.258     .9671464    1.132465
 ------------------------------------------------------------------------------
+(note: file minimal_case_esrd.ster not found)
 file minimal_case_esrd.ster saved
+(file minimal_case_esrd.dta not found)
 file minimal_case_esrd.dta saved
 
         Failure _d: esrd_date
-  Analysis time _t: (exit_date-origin)/365.25
+  Analysis time _t: (exit_date_esrd-origin)/365.25
             Origin: time index_date
        ID variable: patient_id
 
 Iteration 0:   log pseudolikelihood =  -56.85162
-Iteration 1:   log pseudolikelihood = -47.111293
-Iteration 2:   log pseudolikelihood = -46.802738
-Iteration 3:   log pseudolikelihood = -46.796662
-Iteration 4:   log pseudolikelihood = -46.796656
+Iteration 1:   log pseudolikelihood = -36.508334
+Iteration 2:   log pseudolikelihood = -33.059758
+Iteration 3:   log pseudolikelihood = -31.986127
+Iteration 4:   log pseudolikelihood = -31.784718
+Iteration 5:   log pseudolikelihood = -31.776477
+Iteration 6:   log pseudolikelihood = -31.776464
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -46.796656
+Iteration 0:   log pseudolikelihood = -31.776464
 
 Stratified Cox regression with no ties
 Strata variable: set_id
 
-No. of subjects =      3,390                           Number of obs =   3,397
+No. of subjects =      3,390                        Number of obs =      3,397
 No. of failures =        328
 Time at risk    = 5,856.3696
-                                                       Wald chi2(19) = 1675.15
-Log pseudolikelihood = -46.796656                      Prob > chi2   =  0.0000
+                                                    Wald chi2(19) = 2305108.18
+Log pseudolikelihood = -31.776464                   Prob > chi2   =     0.0000
 
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .7831701    .185763    -1.03   0.303     .4919902    1.246682
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |    .570424   .2134789    -1.50   0.134     .2739297    1.187836
-                Black  |   .4859294   .2032701    -1.73   0.084     .2140452    1.103166
-                Mixed  |   1.479138   .5821178     0.99   0.320      .683938    3.198901
-                Other  |   .4342351   .2692849    -1.35   0.179     .1287846    1.464151
-                       |
-                   imd |
-                    2  |   1.022995   .2829529     0.08   0.934     .5948915    1.759178
-                    3  |   .5494631   .1521373    -2.16   0.031     .3193411    .9454144
-                    4  |   2.253885   1.190658     1.54   0.124     .8003284     6.34739
-     5 Least deprived  |   .5144505   .1567585    -2.18   0.029     .2831219    .9347892
-                       |
-                 urban |
-                Urban  |   1.485944   .3869314     1.52   0.128     .8919787    2.475429
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   5.206705    6.05124     1.42   0.156     .5336976    50.79613
- Overweight (25-29.9)  |   11.16963   12.18217     2.21   0.027     1.317272    94.71141
-    Obese I (30-34.9)  |   8.349981   10.89611     1.63   0.104     .6470387    107.7558
-   Obese II (35-39.9)  |    5.15657   8.563564     0.99   0.323     .1989586     133.647
-      Obese III (40+)  |    2.87536   3.663381     0.83   0.407     .2367067    34.92802
-                       |
-               smoking |
-Current/former smoker  |   1.329844    .549044     0.69   0.490     .5920669    2.986969
-                  age1 |   1.008533   .0550274     0.16   0.876     .9062483    1.122363
-                  age2 |   1.003122    .185557     0.02   0.987     .6980703     1.44148
-                  age3 |   .8906824   .5052354    -0.20   0.838     .2930102    2.707466
-----------------------------------------------------------------------------------------
+                                        (Std. err. adjusted for 34 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+              SARS-CoV-2  |   1.237555   .3232276     0.82   0.414     .7417299    2.064826
+                          |
+                      sex |
+                    Male  |          1  (omitted)
+                          |
+                ethnicity |
+             South Asian  |   .6329331   .6600568    -0.44   0.661     .0819745    4.886937
+                   Black  |   .4792744   .4026343    -0.88   0.381     .0923628    2.486975
+                   Mixed  |   4.876477    3.00439     2.57   0.010     1.457747    16.31286
+                   Other  |   2.116371   1.363465     1.16   0.245     .5986986    7.481273
+                          |
+                      imd |
+                       2  |   2.358942   1.951743     1.04   0.300     .4660685    11.93947
+                       3  |   .3101104   .3278901    -1.11   0.268     .0390402    2.463317
+                       4  |   11.05472   16.40146     1.62   0.105     .6034674    202.5079
+        5 Least deprived  |   .4172505   .3387429    -1.08   0.282     .0849871    2.048524
+                          |
+                    urban |
+                   Urban  |   .4696224   .2794235    -1.27   0.204     .1463145    1.507337
+                          |
+                   region |
+                    East  |   .6629026   1.395954    -0.20   0.845     .0106899    41.10811
+                  London  |   .0325212    .027368    -4.07   0.000     .0062495    .1692351
+              North East  |   .0080803   .0088306    -4.41   0.000     .0009488    .0688121
+              North West  |   .2288454   .1815913    -1.86   0.063     .0483175    1.083877
+              South East  |   2.322214   1.504232     1.30   0.193     .6524239    8.265605
+              South West  |   .0809744   .0779734    -2.61   0.009     .0122657    .5345678
+           West Midlands  |   .0151652   .0199662    -3.18   0.001     .0011486    .2002275
+Yorkshire and The Humber  |   .0722331   .0760572    -2.50   0.013     .0091721    .5688552
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   114.4178   542.8842     1.00   0.318     .0104653     1250940
+    Overweight (25-29.9)  |   462.8175    2375.71     1.20   0.232     .0197727    1.08e+07
+       Obese I (30-34.9)  |   168.4808   902.1137     0.96   0.338     .0046653     6084485
+      Obese II (35-39.9)  |   42.04491   222.0948     0.71   0.479     .0013409     1318364
+         Obese III (40+)  |   676.4161   3441.178     1.28   0.200      .031611    1.45e+07
+                          |
+                  smoking |
+   Current/former smoker  |   1.064828   .7377294     0.09   0.928     .2738761    4.140045
+                     age1 |   .8390805   .0277087    -5.31   0.000     .7864925    .8951847
+                     age2 |   1.783013   .3263639     3.16   0.002     1.245518     2.55246
+                     age3 |   .1571043   .1074282    -2.71   0.007     .0411278    .6001243
+-------------------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 active results
@@ -281,1245 +299,87 @@ active results
 Stratified Cox regression with no ties
 Strata variable: set_id
 
-No. of subjects =      3,390                           Number of obs =   3,397
+No. of subjects =      3,390                        Number of obs =      3,397
 No. of failures =        328
 Time at risk    = 5,856.3696
-                                                       Wald chi2(19) = 1675.15
-Log pseudolikelihood = -46.796656                      Prob > chi2   =  0.0000
+                                                    Wald chi2(19) = 2305108.18
+Log pseudolikelihood = -31.776464                   Prob > chi2   =     0.0000
 
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .7831701    .185763    -1.03   0.303     .4919902    1.246682
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |    .570424   .2134789    -1.50   0.134     .2739297    1.187836
-                Black  |   .4859294   .2032701    -1.73   0.084     .2140452    1.103166
-                Mixed  |   1.479138   .5821178     0.99   0.320      .683938    3.198901
-                Other  |   .4342351   .2692849    -1.35   0.179     .1287846    1.464151
-                       |
-                   imd |
-                    2  |   1.022995   .2829529     0.08   0.934     .5948915    1.759178
-                    3  |   .5494631   .1521373    -2.16   0.031     .3193411    .9454144
-                    4  |   2.253885   1.190658     1.54   0.124     .8003284     6.34739
-     5 Least deprived  |   .5144505   .1567585    -2.18   0.029     .2831219    .9347892
-                       |
-                 urban |
-                Urban  |   1.485944   .3869314     1.52   0.128     .8919787    2.475429
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   5.206705    6.05124     1.42   0.156     .5336976    50.79613
- Overweight (25-29.9)  |   11.16963   12.18217     2.21   0.027     1.317272    94.71141
-    Obese I (30-34.9)  |   8.349981   10.89611     1.63   0.104     .6470387    107.7558
-   Obese II (35-39.9)  |    5.15657   8.563564     0.99   0.323     .1989586     133.647
-      Obese III (40+)  |    2.87536   3.663381     0.83   0.407     .2367067    34.92802
-                       |
-               smoking |
-Current/former smoker  |   1.329844    .549044     0.69   0.490     .5920669    2.986969
-                  age1 |   1.008533   .0550274     0.16   0.876     .9062483    1.122363
-                  age2 |   1.003122    .185557     0.02   0.987     .6980703     1.44148
-                  age3 |   .8906824   .5052354    -0.20   0.838     .2930102    2.707466
-----------------------------------------------------------------------------------------
+                                        (Std. err. adjusted for 34 clusters in practice_id)
+-------------------------------------------------------------------------------------------
+                          |               Robust
+                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+--------------------------+----------------------------------------------------------------
+                     case |
+              SARS-CoV-2  |   1.237555   .3232276     0.82   0.414     .7417299    2.064826
+                          |
+                      sex |
+                    Male  |          1  (omitted)
+                          |
+                ethnicity |
+             South Asian  |   .6329331   .6600568    -0.44   0.661     .0819745    4.886937
+                   Black  |   .4792744   .4026343    -0.88   0.381     .0923628    2.486975
+                   Mixed  |   4.876477    3.00439     2.57   0.010     1.457747    16.31286
+                   Other  |   2.116371   1.363465     1.16   0.245     .5986986    7.481273
+                          |
+                      imd |
+                       2  |   2.358942   1.951743     1.04   0.300     .4660685    11.93947
+                       3  |   .3101104   .3278901    -1.11   0.268     .0390402    2.463317
+                       4  |   11.05472   16.40146     1.62   0.105     .6034674    202.5079
+        5 Least deprived  |   .4172505   .3387429    -1.08   0.282     .0849871    2.048524
+                          |
+                    urban |
+                   Urban  |   .4696224   .2794235    -1.27   0.204     .1463145    1.507337
+                          |
+                   region |
+                    East  |   .6629026   1.395954    -0.20   0.845     .0106899    41.10811
+                  London  |   .0325212    .027368    -4.07   0.000     .0062495    .1692351
+              North East  |   .0080803   .0088306    -4.41   0.000     .0009488    .0688121
+              North West  |   .2288454   .1815913    -1.86   0.063     .0483175    1.083877
+              South East  |   2.322214   1.504232     1.30   0.193     .6524239    8.265605
+              South West  |   .0809744   .0779734    -2.61   0.009     .0122657    .5345678
+           West Midlands  |   .0151652   .0199662    -3.18   0.001     .0011486    .2002275
+Yorkshire and The Humber  |   .0722331   .0760572    -2.50   0.013     .0091721    .5688552
+                          |
+                      bmi |
+      Normal (18.5-24.9)  |   114.4178   542.8842     1.00   0.318     .0104653     1250940
+    Overweight (25-29.9)  |   462.8175    2375.71     1.20   0.232     .0197727    1.08e+07
+       Obese I (30-34.9)  |   168.4808   902.1137     0.96   0.338     .0046653     6084485
+      Obese II (35-39.9)  |   42.04491   222.0948     0.71   0.479     .0013409     1318364
+         Obese III (40+)  |   676.4161   3441.178     1.28   0.200      .031611    1.45e+07
+                          |
+                  smoking |
+   Current/former smoker  |   1.064828   .7377294     0.09   0.928     .2738761    4.140045
+                     age1 |   .8390805   .0277087    -5.31   0.000     .7864925    .8951847
+                     age2 |   1.783013   .3263639     3.16   0.002     1.245518     2.55246
+                     age3 |   .1571043   .1074282    -2.71   0.007     .0411278    .6001243
+-------------------------------------------------------------------------------------------
+(note: file additional_case_esrd.ster not found)
 file additional_case_esrd.ster saved
+(file additional_case_esrd.dta not found)
 file additional_case_esrd.dta saved
 
         Failure _d: esrd_date
-  Analysis time _t: (exit_date-origin)/365.25
+  Analysis time _t: (exit_date_esrd-origin)/365.25
             Origin: time index_date
        ID variable: patient_id
 
 Iteration 0:   log pseudolikelihood =  -56.85162
-Iteration 1:   log pseudolikelihood = -41.525197
-Iteration 2:   log pseudolikelihood = -40.571716
-Iteration 3:   log pseudolikelihood = -40.531183
-Iteration 4:   log pseudolikelihood = -40.531033
-Iteration 5:   log pseudolikelihood = -40.531033
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -40.531033
+Iteration 1:   log pseudolikelihood = -30.886291
+Iteration 2:   log pseudolikelihood = -23.124252
+Iteration 3:   log pseudolikelihood = -17.440884
+Iteration 4:   log pseudolikelihood = -12.840709
+Iteration 5:   log pseudolikelihood =  -11.35283
+Iteration 6:   log pseudolikelihood = -11.164496
+Iteration 7:   log pseudolikelihood = -11.148065  (backed up)
+Iteration 8:   log pseudolikelihood = -11.143951  (backed up)
+Iteration 9:   log pseudolikelihood = -11.141333  (backed up)
+Iteration 10:  log pseudolikelihood = -11.140992  (backed up)
+Iteration 11:  log pseudolikelihood = -11.140909  (backed up)
+flat region resulting in a missing likelihood
+r(430);
 
-Stratified Cox regression with no ties
-Strata variable: set_id
-
-No. of subjects =      3,390                          Number of obs =    3,397
-No. of failures =        328
-Time at risk    = 5,856.3696
-                                                      Wald chi2(19) = 15958.83
-Log pseudolikelihood = -40.531033                     Prob > chi2   =   0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |    .731851   .1887529    -1.21   0.226     .4414564     1.21327
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   .2614249   .1201817    -2.92   0.004      .106178    .6436642
-                Black  |    .261915   .1632568    -2.15   0.032     .0771951     .888651
-                Mixed  |   1.109171    .401611     0.29   0.775     .5454989    2.255296
-                Other  |   .3633141   .1788478    -2.06   0.040     .1384405    .9534572
-                       |
-                   imd |
-                    2  |   1.122358   .4481144     0.29   0.772     .5131917    2.454615
-                    3  |   .6447832   .3060976    -0.92   0.355     .2542865    1.634949
-                    4  |   2.756176   1.798316     1.55   0.120     .7672291    9.901219
-     5 Least deprived  |   .6942265   .3454057    -0.73   0.463     .2618147    1.840807
-                       |
-                 urban |
-                Urban  |   1.679808   .5487658     1.59   0.112     .8854945    3.186642
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   7.021053    4.73745     2.89   0.004     1.870918    26.34813
- Overweight (25-29.9)  |   16.65651   10.59184     4.42   0.000     4.789681    57.92435
-    Obese I (30-34.9)  |   12.46785   10.42671     3.02   0.003     2.420707    64.21569
-   Obese II (35-39.9)  |   7.218954    7.52631     1.90   0.058     .9354741     55.7079
-      Obese III (40+)  |   2.009457   2.016871     0.70   0.487     .2810195    14.36881
-                       |
-      1.cardiovascular |   1.201361   .3429216     0.64   0.520     .6865984    2.102055
-            1.diabetes |    .337071   .1274718    -2.88   0.004     .1606269    .7073338
-        1.hypertension |   .2778221     .15713    -2.26   0.024     .0916951    .8417586
-    1.immunosuppressed |   1.535716   .5542546     1.19   0.235     .7570146    3.115428
-     1.non_haem_cancer |   4.634348   3.719381     1.91   0.056     .9612611    22.34272
-                       |
-               smoking |
-Current/former smoker  |    2.07078   .9449809     1.60   0.111     .8466347     5.06491
-                  age1 |   .9966529   .0526075    -0.06   0.949     .8986984    1.105284
-                  age2 |     1.0017   .2108542     0.01   0.994     .6630751    1.513256
-                  age3 |   .9098929   .6162686    -0.14   0.889     .2412532    3.431684
-----------------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Stratified Cox regression with no ties
-Strata variable: set_id
-
-No. of subjects =      3,390                          Number of obs =    3,397
-No. of failures =        328
-Time at risk    = 5,856.3696
-                                                      Wald chi2(19) = 15958.83
-Log pseudolikelihood = -40.531033                     Prob > chi2   =   0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |    .731851   .1887529    -1.21   0.226     .4414564     1.21327
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   .2614249   .1201817    -2.92   0.004      .106178    .6436642
-                Black  |    .261915   .1632568    -2.15   0.032     .0771951     .888651
-                Mixed  |   1.109171    .401611     0.29   0.775     .5454989    2.255296
-                Other  |   .3633141   .1788478    -2.06   0.040     .1384405    .9534572
-                       |
-                   imd |
-                    2  |   1.122358   .4481144     0.29   0.772     .5131917    2.454615
-                    3  |   .6447832   .3060976    -0.92   0.355     .2542865    1.634949
-                    4  |   2.756176   1.798316     1.55   0.120     .7672291    9.901219
-     5 Least deprived  |   .6942265   .3454057    -0.73   0.463     .2618147    1.840807
-                       |
-                 urban |
-                Urban  |   1.679808   .5487658     1.59   0.112     .8854945    3.186642
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   7.021053    4.73745     2.89   0.004     1.870918    26.34813
- Overweight (25-29.9)  |   16.65651   10.59184     4.42   0.000     4.789681    57.92435
-    Obese I (30-34.9)  |   12.46785   10.42671     3.02   0.003     2.420707    64.21569
-   Obese II (35-39.9)  |   7.218954    7.52631     1.90   0.058     .9354741     55.7079
-      Obese III (40+)  |   2.009457   2.016871     0.70   0.487     .2810195    14.36881
-                       |
-      1.cardiovascular |   1.201361   .3429216     0.64   0.520     .6865984    2.102055
-            1.diabetes |    .337071   .1274718    -2.88   0.004     .1606269    .7073338
-        1.hypertension |   .2778221     .15713    -2.26   0.024     .0916951    .8417586
-    1.immunosuppressed |   1.535716   .5542546     1.19   0.235     .7570146    3.115428
-     1.non_haem_cancer |   4.634348   3.719381     1.91   0.056     .9612611    22.34272
-                       |
-               smoking |
-Current/former smoker  |    2.07078   .9449809     1.60   0.111     .8466347     5.06491
-                  age1 |   .9966529   .0526075    -0.06   0.949     .8986984    1.105284
-                  age2 |     1.0017   .2108542     0.01   0.994     .6630751    1.513256
-                  age3 |   .9098929   .6162686    -0.14   0.889     .2412532    3.431684
-----------------------------------------------------------------------------------------
-file full_case_esrd.ster saved
-file full_case_esrd.dta saved
-
-Survival-time data settings
-
-           ID variable: patient_id
-         Failure event: egfr_half_date!=0 & egfr_half_date<.
-Observed time interval: (exit_date[_n-1], exit_date]
-     Exit on or before: failure
-     Time for analysis: (time-origin)/365.25
-                Origin: time index_date
-
---------------------------------------------------------------------------
-     27,786  total observations
-        126  observations end on or before enter()
-        107  observations begin on or after (first) failure
---------------------------------------------------------------------------
-     27,553  observations remaining, representing
-     27,350  subjects
-      8,586  failures in single-failure-per-subject data
-  46,947.83  total analysis time at risk and under observation
-                                                At risk from t =         0
-                                     Earliest observed entry t =         0
-                                          Last observed exit t =  5.744011
-
-        Failure _d: egfr_half_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -9584.5048
-Iteration 1:   log pseudolikelihood = -9582.5668
-Iteration 2:   log pseudolikelihood = -9582.5667
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -9582.5667
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      27,350                           Number of obs = 27,553
-No. of failures =       8,586
-Time at risk    = 46,947.8303
-                                                        Wald chi2(1)  =   8.39
-Log pseudolikelihood = -9582.5667                       Prob > chi2   = 0.0038
-
-                           (Std. err. adjusted for 39 clusters in practice_id)
-------------------------------------------------------------------------------
-             |               Robust
-          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        case |
- SARS-CoV-2  |   .9504419   .0166808    -2.90   0.004      .918304    .9837046
-------------------------------------------------------------------------------
-file crude_case_egfr_half.ster saved
-file crude_case_egfr_half.dta saved
-
-        Failure _d: egfr_half_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -9584.5048
-Iteration 1:   log pseudolikelihood = -9579.4271
-Iteration 2:   log pseudolikelihood = -9579.4266
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -9579.4266
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      27,350                           Number of obs = 27,553
-No. of failures =       8,586
-Time at risk    = 46,947.8303
-                                                        Wald chi2(4)  =  39.04
-Log pseudolikelihood = -9579.4266                       Prob > chi2   = 0.0000
-
-                           (Std. err. adjusted for 39 clusters in practice_id)
-------------------------------------------------------------------------------
-             |               Robust
-          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        case |
- SARS-CoV-2  |   .9551382   .0176503    -2.48   0.013     .9211632    .9903663
-             |
-         sex |
-       Male  |          1  (omitted)
-        age1 |   .9999837   .0023915    -0.01   0.995     .9953074    1.004682
-        age2 |   1.011295   .0080055     1.42   0.156     .9957252    1.027108
-        age3 |    .952059    .022035    -2.12   0.034     .9098361    .9962413
-------------------------------------------------------------------------------
-file minimal_case_egfr_half.ster saved
-file minimal_case_egfr_half.dta saved
-
-        Failure _d: egfr_half_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -174.29473
-Iteration 1:   log pseudolikelihood = -165.64465
-Iteration 2:   log pseudolikelihood = -165.61485
-Iteration 3:   log pseudolikelihood = -165.61484
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -165.61484
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      3,384                            Number of obs =  3,389
-No. of failures =      1,039
-Time at risk    = 5,833.7769
-                                                        Wald chi2(19) = 804.00
-Log pseudolikelihood = -165.61484                       Prob > chi2   = 0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .8021426   .0557547    -3.17   0.002     .6999821    .9192131
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   .7013627   .1063937    -2.34   0.019     .5209776    .9442048
-                Black  |   .5082879   .1720945    -2.00   0.046     .2617656    .9869768
-                Mixed  |   .9522953   .2163277    -0.22   0.830      .610111    1.486396
-                Other  |   .8825344   .2493468    -0.44   0.658     .5072679    1.535415
-                       |
-                   imd |
-                    2  |   1.277555   .2000092     1.56   0.118     .9399798    1.736363
-                    3  |   .7189106   .0953646    -2.49   0.013     .5543215    .9323696
-                    4  |   1.372305   .2047854     2.12   0.034     1.024302     1.83854
-     5 Least deprived  |   1.011646   .1324824     0.09   0.930     .7826315    1.307674
-                       |
-                 urban |
-                Urban  |   1.325101    .155259     2.40   0.016     1.053212    1.667179
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   .9504378   .2048838    -0.24   0.814     .6229196    1.450158
- Overweight (25-29.9)  |   1.168171   .2412684     0.75   0.452     .7792979    1.751094
-    Obese I (30-34.9)  |   1.300205   .4998634     0.68   0.495     .6120227    2.762205
-   Obese II (35-39.9)  |    .952174   .3019412    -0.15   0.877     .5114394    1.772713
-      Obese III (40+)  |   .6583043   .2069181    -1.33   0.183     .3555307    1.218923
-                       |
-               smoking |
-Current/former smoker  |   1.178952   .1722638     1.13   0.260     .8853644    1.569894
-                  age1 |   .9782621   .0206018    -1.04   0.297     .9387053    1.019486
-                  age2 |   1.072194   .0707212     1.06   0.291     .9421687    1.220164
-                  age3 |   .8041575   .1523817    -1.15   0.250     .5546831    1.165836
-----------------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      3,384                            Number of obs =  3,389
-No. of failures =      1,039
-Time at risk    = 5,833.7769
-                                                        Wald chi2(19) = 804.00
-Log pseudolikelihood = -165.61484                       Prob > chi2   = 0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .8021426   .0557547    -3.17   0.002     .6999821    .9192131
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   .7013627   .1063937    -2.34   0.019     .5209776    .9442048
-                Black  |   .5082879   .1720945    -2.00   0.046     .2617656    .9869768
-                Mixed  |   .9522953   .2163277    -0.22   0.830      .610111    1.486396
-                Other  |   .8825344   .2493468    -0.44   0.658     .5072679    1.535415
-                       |
-                   imd |
-                    2  |   1.277555   .2000092     1.56   0.118     .9399798    1.736363
-                    3  |   .7189106   .0953646    -2.49   0.013     .5543215    .9323696
-                    4  |   1.372305   .2047854     2.12   0.034     1.024302     1.83854
-     5 Least deprived  |   1.011646   .1324824     0.09   0.930     .7826315    1.307674
-                       |
-                 urban |
-                Urban  |   1.325101    .155259     2.40   0.016     1.053212    1.667179
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   .9504378   .2048838    -0.24   0.814     .6229196    1.450158
- Overweight (25-29.9)  |   1.168171   .2412684     0.75   0.452     .7792979    1.751094
-    Obese I (30-34.9)  |   1.300205   .4998634     0.68   0.495     .6120227    2.762205
-   Obese II (35-39.9)  |    .952174   .3019412    -0.15   0.877     .5114394    1.772713
-      Obese III (40+)  |   .6583043   .2069181    -1.33   0.183     .3555307    1.218923
-                       |
-               smoking |
-Current/former smoker  |   1.178952   .1722638     1.13   0.260     .8853644    1.569894
-                  age1 |   .9782621   .0206018    -1.04   0.297     .9387053    1.019486
-                  age2 |   1.072194   .0707212     1.06   0.291     .9421687    1.220164
-                  age3 |   .8041575   .1523817    -1.15   0.250     .5546831    1.165836
-----------------------------------------------------------------------------------------
-file additional_case_egfr_half.ster saved
-file additional_case_egfr_half.dta saved
-
-        Failure _d: egfr_half_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -174.29473
-Iteration 1:   log pseudolikelihood = -161.27091
-Iteration 2:   log pseudolikelihood = -161.17626
-Iteration 3:   log pseudolikelihood = -161.17621
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -161.17621
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      3,384                           Number of obs =   3,389
-No. of failures =      1,039
-Time at risk    = 5,833.7769
-                                                       Wald chi2(23) = 9492.14
-Log pseudolikelihood = -161.17621                      Prob > chi2   =  0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .8173574   .0694862    -2.37   0.018     .6919083    .9655515
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   .6856115   .1054123    -2.45   0.014     .5072318    .9267225
-                Black  |    .455745   .1729596    -2.07   0.038     .2166122    .9588728
-                Mixed  |   .8930998   .1795792    -0.56   0.574     .6022064    1.324508
-                Other  |   .9496281   .2743893    -0.18   0.858     .5390189    1.673028
-                       |
-                   imd |
-                    2  |   1.268616   .1880586     1.61   0.108     .9487434    1.696335
-                    3  |   .7385416   .1054323    -2.12   0.034     .5582897    .9769903
-                    4  |   1.336477   .1918895     2.02   0.043     1.008666    1.770826
-     5 Least deprived  |   1.120883   .1639097     0.78   0.435     .8415629     1.49291
-                       |
-                 urban |
-                Urban  |   1.285745   .1451454     2.23   0.026     1.030538    1.604152
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   .9414161   .1817788    -0.31   0.755     .6447962    1.374487
- Overweight (25-29.9)  |   1.158575   .1688444     1.01   0.313     .8707119    1.541606
-    Obese I (30-34.9)  |   1.213801   .4348123     0.54   0.589     .6014882    2.449447
-   Obese II (35-39.9)  |   .9000089   .2056224    -0.46   0.645     .5751423    1.408375
-      Obese III (40+)  |   .5776777   .2214041    -1.43   0.152     .2725518    1.224396
-                       |
-      1.cardiovascular |   1.059548   .1516691     0.40   0.686     .8003413    1.402704
-            1.diabetes |   .5379966   .0742124    -4.49   0.000     .4105471    .7050112
-        1.hypertension |   .7484773   .1157879    -1.87   0.061     .5527127    1.013579
-    1.immunosuppressed |   1.207712   .2682679     0.85   0.396      .781424    1.866551
-     1.non_haem_cancer |   2.015439   1.088645     1.30   0.194     .6991829    5.809632
-                       |
-               smoking |
-Current/former smoker  |   1.174928   .1345667     1.41   0.159     .9386885    1.470622
-                  age1 |   .9812796   .0231646    -0.80   0.423      .936912    1.027748
-                  age2 |   1.052617   .0733343     0.74   0.462      .918266    1.206626
-                  age3 |   .8626257   .1720199    -0.74   0.459     .5835534    1.275158
-----------------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      3,384                           Number of obs =   3,389
-No. of failures =      1,039
-Time at risk    = 5,833.7769
-                                                       Wald chi2(23) = 9492.14
-Log pseudolikelihood = -161.17621                      Prob > chi2   =  0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .8173574   .0694862    -2.37   0.018     .6919083    .9655515
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   .6856115   .1054123    -2.45   0.014     .5072318    .9267225
-                Black  |    .455745   .1729596    -2.07   0.038     .2166122    .9588728
-                Mixed  |   .8930998   .1795792    -0.56   0.574     .6022064    1.324508
-                Other  |   .9496281   .2743893    -0.18   0.858     .5390189    1.673028
-                       |
-                   imd |
-                    2  |   1.268616   .1880586     1.61   0.108     .9487434    1.696335
-                    3  |   .7385416   .1054323    -2.12   0.034     .5582897    .9769903
-                    4  |   1.336477   .1918895     2.02   0.043     1.008666    1.770826
-     5 Least deprived  |   1.120883   .1639097     0.78   0.435     .8415629     1.49291
-                       |
-                 urban |
-                Urban  |   1.285745   .1451454     2.23   0.026     1.030538    1.604152
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   .9414161   .1817788    -0.31   0.755     .6447962    1.374487
- Overweight (25-29.9)  |   1.158575   .1688444     1.01   0.313     .8707119    1.541606
-    Obese I (30-34.9)  |   1.213801   .4348123     0.54   0.589     .6014882    2.449447
-   Obese II (35-39.9)  |   .9000089   .2056224    -0.46   0.645     .5751423    1.408375
-      Obese III (40+)  |   .5776777   .2214041    -1.43   0.152     .2725518    1.224396
-                       |
-      1.cardiovascular |   1.059548   .1516691     0.40   0.686     .8003413    1.402704
-            1.diabetes |   .5379966   .0742124    -4.49   0.000     .4105471    .7050112
-        1.hypertension |   .7484773   .1157879    -1.87   0.061     .5527127    1.013579
-    1.immunosuppressed |   1.207712   .2682679     0.85   0.396      .781424    1.866551
-     1.non_haem_cancer |   2.015439   1.088645     1.30   0.194     .6991829    5.809632
-                       |
-               smoking |
-Current/former smoker  |   1.174928   .1345667     1.41   0.159     .9386885    1.470622
-                  age1 |   .9812796   .0231646    -0.80   0.423      .936912    1.027748
-                  age2 |   1.052617   .0733343     0.74   0.462      .918266    1.206626
-                  age3 |   .8626257   .1720199    -0.74   0.459     .5835534    1.275158
-----------------------------------------------------------------------------------------
-file full_case_egfr_half.ster saved
-file full_case_egfr_half.dta saved
-
-Survival-time data settings
-
-           ID variable: patient_id
-         Failure event: aki_date!=0 & aki_date<.
-Observed time interval: (exit_date[_n-1], exit_date]
-     Exit on or before: failure
-     Time for analysis: (time-origin)/365.25
-                Origin: time index_date
-
---------------------------------------------------------------------------
-     27,786  total observations
-        126  observations end on or before enter()
-         67  observations begin on or after (first) failure
---------------------------------------------------------------------------
-     27,593  observations remaining, representing
-     27,350  subjects
-      5,085  failures in single-failure-per-subject data
- 47,059.658  total analysis time at risk and under observation
-                                                At risk from t =         0
-                                     Earliest observed entry t =         0
-                                          Last observed exit t =  5.744011
-
-        Failure _d: aki_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -5798.1679
-Iteration 1:   log pseudolikelihood = -5797.1648
-Iteration 2:   log pseudolikelihood = -5797.1648
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -5797.1648
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      27,350                           Number of obs = 27,593
-No. of failures =       5,085
-Time at risk    = 47,059.6578
-                                                        Wald chi2(1)  =   3.23
-Log pseudolikelihood = -5797.1648                       Prob > chi2   = 0.0724
-
-                           (Std. err. adjusted for 39 clusters in practice_id)
-------------------------------------------------------------------------------
-             |               Robust
-          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        case |
- SARS-CoV-2  |   .9541084   .0249488    -1.80   0.072     .9064417    1.004282
-------------------------------------------------------------------------------
-file crude_case_aki.ster saved
-file crude_case_aki.dta saved
-
-        Failure _d: aki_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -5798.1679
-Iteration 1:   log pseudolikelihood = -5795.4633
-Iteration 2:   log pseudolikelihood = -5795.4632
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -5795.4632
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      27,350                           Number of obs = 27,593
-No. of failures =       5,085
-Time at risk    = 47,059.6578
-                                                        Wald chi2(4)  =  17.10
-Log pseudolikelihood = -5795.4632                       Prob > chi2   = 0.0018
-
-                           (Std. err. adjusted for 39 clusters in practice_id)
-------------------------------------------------------------------------------
-             |               Robust
-          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        case |
- SARS-CoV-2  |   .9513799   .0236815    -2.00   0.045     .9060791    .9989457
-             |
-         sex |
-       Male  |          1  (omitted)
-        age1 |   1.009521    .004839     1.98   0.048     1.000081     1.01905
-        age2 |   .9784219   .0148585    -1.44   0.151     .9497289    1.007982
-        age3 |   1.050146   .0457133     1.12   0.261     .9642651    1.143675
-------------------------------------------------------------------------------
-file minimal_case_aki.ster saved
-file minimal_case_aki.dta saved
-
-        Failure _d: aki_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -109.47869
-Iteration 1:   log pseudolikelihood =   -100.962
-Iteration 2:   log pseudolikelihood = -100.85228
-Iteration 3:   log pseudolikelihood = -100.85209
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -100.85209
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      3,388                            Number of obs =  3,395
-No. of failures =        632
-Time at risk    = 5,852.2491
-                                                        Wald chi2(19) = 726.04
-Log pseudolikelihood = -100.85209                       Prob > chi2   = 0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .7617391   .1315793    -1.58   0.115     .5429672    1.068658
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   1.555976   .4594674     1.50   0.134      .872268    2.775594
-                Black  |   .6424319   .2697967    -1.05   0.292     .2820689    1.463184
-                Mixed  |   .5313163   .1365306    -2.46   0.014      .321087    .8791917
-                Other  |   1.154868   .2548557     0.65   0.514     .7493586    1.779816
-                       |
-                   imd |
-                    2  |   .5990986   .1053005    -2.91   0.004     .4245091    .8454922
-                    3  |   .5136128   .1141591    -3.00   0.003     .3322324    .7940168
-                    4  |   1.032238   .3075543     0.11   0.915     .5756587    1.850949
-     5 Least deprived  |   .6357392   .1699007    -1.69   0.090      .376527    1.073401
-                       |
-                 urban |
-                Urban  |   .9482158   .1466495    -0.34   0.731      .700264    1.283963
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   1.885912   .5626868     2.13   0.033     1.050882    3.384454
- Overweight (25-29.9)  |   1.851366   .6998039     1.63   0.103     .8825592    3.883656
-    Obese I (30-34.9)  |   1.906696   .8675566     1.42   0.156     .7815926    4.651389
-   Obese II (35-39.9)  |    1.08372   .4635169     0.19   0.851     .4686521    2.506015
-      Obese III (40+)  |    3.89298   1.720716     3.08   0.002     1.636993    9.258004
-                       |
-               smoking |
-Current/former smoker  |    1.34275   .3220304     1.23   0.219     .8391744    2.148513
-                  age1 |   .9704603   .0258921    -1.12   0.261     .9210167    1.022558
-                  age2 |   1.133407   .1054455     1.35   0.178     .9444849    1.360118
-                  age3 |   .6792215    .198817    -1.32   0.186     .3826957    1.205505
-----------------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      3,388                            Number of obs =  3,395
-No. of failures =        632
-Time at risk    = 5,852.2491
-                                                        Wald chi2(19) = 726.04
-Log pseudolikelihood = -100.85209                       Prob > chi2   = 0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .7617391   .1315793    -1.58   0.115     .5429672    1.068658
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   1.555976   .4594674     1.50   0.134      .872268    2.775594
-                Black  |   .6424319   .2697967    -1.05   0.292     .2820689    1.463184
-                Mixed  |   .5313163   .1365306    -2.46   0.014      .321087    .8791917
-                Other  |   1.154868   .2548557     0.65   0.514     .7493586    1.779816
-                       |
-                   imd |
-                    2  |   .5990986   .1053005    -2.91   0.004     .4245091    .8454922
-                    3  |   .5136128   .1141591    -3.00   0.003     .3322324    .7940168
-                    4  |   1.032238   .3075543     0.11   0.915     .5756587    1.850949
-     5 Least deprived  |   .6357392   .1699007    -1.69   0.090      .376527    1.073401
-                       |
-                 urban |
-                Urban  |   .9482158   .1466495    -0.34   0.731      .700264    1.283963
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   1.885912   .5626868     2.13   0.033     1.050882    3.384454
- Overweight (25-29.9)  |   1.851366   .6998039     1.63   0.103     .8825592    3.883656
-    Obese I (30-34.9)  |   1.906696   .8675566     1.42   0.156     .7815926    4.651389
-   Obese II (35-39.9)  |    1.08372   .4635169     0.19   0.851     .4686521    2.506015
-      Obese III (40+)  |    3.89298   1.720716     3.08   0.002     1.636993    9.258004
-                       |
-               smoking |
-Current/former smoker  |    1.34275   .3220304     1.23   0.219     .8391744    2.148513
-                  age1 |   .9704603   .0258921    -1.12   0.261     .9210167    1.022558
-                  age2 |   1.133407   .1054455     1.35   0.178     .9444849    1.360118
-                  age3 |   .6792215    .198817    -1.32   0.186     .3826957    1.205505
-----------------------------------------------------------------------------------------
-file additional_case_aki.ster saved
-file additional_case_aki.dta saved
-
-        Failure _d: aki_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -109.47869
-Iteration 1:   log pseudolikelihood = -96.245894
-Iteration 2:   log pseudolikelihood = -95.970732
-Iteration 3:   log pseudolikelihood = -95.969495
-Iteration 4:   log pseudolikelihood = -95.969495
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -95.969495
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      3,388                           Number of obs =   3,395
-No. of failures =        632
-Time at risk    = 5,852.2491
-                                                       Wald chi2(23) = 7130.43
-Log pseudolikelihood = -95.969495                      Prob > chi2   =  0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .7826259   .1428907    -1.34   0.179     .5471962    1.119349
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   1.452872   .4360329     1.24   0.213     .8068011    2.616304
-                Black  |   .4927116   .2591355    -1.35   0.178     .1757576    1.381248
-                Mixed  |   .6240594    .183426    -1.60   0.109     .3507821    1.110234
-                Other  |   1.362469   .3187973     1.32   0.186     .8613074    2.155237
-                       |
-                   imd |
-                    2  |    .499854   .1065359    -3.25   0.001     .3291721    .7590375
-                    3  |   .4758422   .1209837    -2.92   0.003      .289097    .7832174
-                    4  |   .9600661   .2875032    -0.14   0.892     .5338247    1.726647
-     5 Least deprived  |   .7018672   .2129548    -1.17   0.243     .3872491    1.272095
-                       |
-                 urban |
-                Urban  |   .9668188    .141109    -0.23   0.817     .7262909    1.287003
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   2.031821   .5557661     2.59   0.010     1.188654    3.473085
- Overweight (25-29.9)  |   1.952506   .6889535     1.90   0.058     .9777795    3.898917
-    Obese I (30-34.9)  |   2.131614   .8316207     1.94   0.052     .9922562    4.579241
-   Obese II (35-39.9)  |   1.050081   .3367295     0.15   0.879     .5601035    1.968691
-      Obese III (40+)  |   3.798588   1.866239     2.72   0.007     1.450202    9.949837
-                       |
-      1.cardiovascular |   1.020697     .20265     0.10   0.918     .6916697    1.506243
-            1.diabetes |   .4556238   .0721875    -4.96   0.000     .3339988    .6215383
-        1.hypertension |   .6333903   .1291763    -2.24   0.025     .4246916     .944646
-    1.immunosuppressed |    1.79726    .320665     3.29   0.001     1.266894    2.549654
-     1.non_haem_cancer |   2.651254   1.408183     1.84   0.066     .9361501    7.508568
-                       |
-               smoking |
-Current/former smoker  |   1.591094   .3739371     1.98   0.048       1.0038    2.521995
-                  age1 |    .969775   .0279143    -1.07   0.286     .9165786    1.026059
-                  age2 |   1.146203    .129978     1.20   0.229     .9177751    1.431485
-                  age3 |   .6458773   .2338976    -1.21   0.227     .3176117     1.31342
-----------------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      3,388                           Number of obs =   3,395
-No. of failures =        632
-Time at risk    = 5,852.2491
-                                                       Wald chi2(23) = 7130.43
-Log pseudolikelihood = -95.969495                      Prob > chi2   =  0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .7826259   .1428907    -1.34   0.179     .5471962    1.119349
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   1.452872   .4360329     1.24   0.213     .8068011    2.616304
-                Black  |   .4927116   .2591355    -1.35   0.178     .1757576    1.381248
-                Mixed  |   .6240594    .183426    -1.60   0.109     .3507821    1.110234
-                Other  |   1.362469   .3187973     1.32   0.186     .8613074    2.155237
-                       |
-                   imd |
-                    2  |    .499854   .1065359    -3.25   0.001     .3291721    .7590375
-                    3  |   .4758422   .1209837    -2.92   0.003      .289097    .7832174
-                    4  |   .9600661   .2875032    -0.14   0.892     .5338247    1.726647
-     5 Least deprived  |   .7018672   .2129548    -1.17   0.243     .3872491    1.272095
-                       |
-                 urban |
-                Urban  |   .9668188    .141109    -0.23   0.817     .7262909    1.287003
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   2.031821   .5557661     2.59   0.010     1.188654    3.473085
- Overweight (25-29.9)  |   1.952506   .6889535     1.90   0.058     .9777795    3.898917
-    Obese I (30-34.9)  |   2.131614   .8316207     1.94   0.052     .9922562    4.579241
-   Obese II (35-39.9)  |   1.050081   .3367295     0.15   0.879     .5601035    1.968691
-      Obese III (40+)  |   3.798588   1.866239     2.72   0.007     1.450202    9.949837
-                       |
-      1.cardiovascular |   1.020697     .20265     0.10   0.918     .6916697    1.506243
-            1.diabetes |   .4556238   .0721875    -4.96   0.000     .3339988    .6215383
-        1.hypertension |   .6333903   .1291763    -2.24   0.025     .4246916     .944646
-    1.immunosuppressed |    1.79726    .320665     3.29   0.001     1.266894    2.549654
-     1.non_haem_cancer |   2.651254   1.408183     1.84   0.066     .9361501    7.508568
-                       |
-               smoking |
-Current/former smoker  |   1.591094   .3739371     1.98   0.048       1.0038    2.521995
-                  age1 |    .969775   .0279143    -1.07   0.286     .9165786    1.026059
-                  age2 |   1.146203    .129978     1.20   0.229     .9177751    1.431485
-                  age3 |   .6458773   .2338976    -1.21   0.227     .3176117     1.31342
-----------------------------------------------------------------------------------------
-file full_case_aki.ster saved
-file full_case_aki.dta saved
-
-Survival-time data settings
-
-           ID variable: patient_id
-         Failure event: death_date!=0 & death_date<.
-Observed time interval: (exit_date[_n-1], exit_date]
-     Exit on or before: failure
-     Time for analysis: (time-origin)/365.25
-                Origin: time index_date
-
---------------------------------------------------------------------------
-     27,786  total observations
-        126  observations end on or before enter()
-         14  observations begin on or after (first) failure
---------------------------------------------------------------------------
-     27,646  observations remaining, representing
-     27,351  subjects
-      1,638  failures in single-failure-per-subject data
- 47,243.838  total analysis time at risk and under observation
-                                                At risk from t =         0
-                                     Earliest observed entry t =         0
-                                          Last observed exit t =  5.744011
-
-        Failure _d: death_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -1954.5146
-Iteration 1:   log pseudolikelihood = -1919.9739
-Iteration 2:   log pseudolikelihood = -1919.5731
-Iteration 3:   log pseudolikelihood =  -1919.573
-Refining estimates:
-Iteration 0:   log pseudolikelihood =  -1919.573
-
-Stratified Cox regression with no ties
-Strata variable: set_id
-
-No. of subjects =      27,351                           Number of obs = 27,646
-No. of failures =       1,638
-Time at risk    = 47,243.8385
-                                                        Wald chi2(1)  = 237.51
-Log pseudolikelihood = -1919.573                        Prob > chi2   = 0.0000
-
-                           (Std. err. adjusted for 39 clusters in practice_id)
-------------------------------------------------------------------------------
-             |               Robust
-          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        case |
- SARS-CoV-2  |    .590037   .0201983   -15.41   0.000     .5517479    .6309832
-------------------------------------------------------------------------------
-file crude_case_death.ster saved
-file crude_case_death.dta saved
-
-        Failure _d: death_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -1954.5146
-Iteration 1:   log pseudolikelihood = -1916.3606
-Iteration 2:   log pseudolikelihood = -1915.9356
-Iteration 3:   log pseudolikelihood = -1915.9354
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -1915.9354
-
-Stratified Cox regression with no ties
-Strata variable: set_id
-
-No. of subjects =      27,351                           Number of obs = 27,646
-No. of failures =       1,638
-Time at risk    = 47,243.8385
-                                                        Wald chi2(4)  = 304.31
-Log pseudolikelihood = -1915.9354                       Prob > chi2   = 0.0000
-
-                           (Std. err. adjusted for 39 clusters in practice_id)
-------------------------------------------------------------------------------
-             |               Robust
-          _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        case |
- SARS-CoV-2  |   .5909896   .0196642   -15.81   0.000     .5536782    .6308153
-             |
-         sex |
-       Male  |          1  (omitted)
-        age1 |   1.014653   .0057314     2.58   0.010     1.003482    1.025949
-        age2 |   .9679676   .0186272    -1.69   0.091     .9321388    1.005173
-        age3 |   1.057953   .0598418     1.00   0.319     .9469328    1.181989
-------------------------------------------------------------------------------
-file minimal_case_death.ster saved
-file minimal_case_death.dta saved
-
-        Failure _d: death_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -36.566902
-Iteration 1:   log pseudolikelihood = -24.069099
-Iteration 2:   log pseudolikelihood = -21.013624
-Iteration 3:   log pseudolikelihood = -19.733307
-Iteration 4:   log pseudolikelihood = -19.481031
-Iteration 5:   log pseudolikelihood = -19.464803
-Iteration 6:   log pseudolikelihood = -19.464701
-Iteration 7:   log pseudolikelihood = -19.464701
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -19.464701
-
-Stratified Cox regression with no ties
-Strata variable: set_id
-
-No. of subjects =      3,390                        Number of obs =      3,398
-No. of failures =        192
-Time at risk    = 5,864.1013
-                                                    Wald chi2(18) = 2681726.72
-Log pseudolikelihood = -19.464701                   Prob > chi2   =     0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |     .14838   .0751483    -3.77   0.000     .0549892    .4003809
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   .0573963   .0652452    -2.51   0.012     .0061841    .5327058
-                Black  |   12.03739    10.1039     2.96   0.003     2.323022    62.37505
-                Mixed  |   7.117338   9.752288     1.43   0.152      .485275    104.3872
-                Other  |   8.434448   6.107519     2.94   0.003     2.040272    34.86786
-                       |
-                   imd |
-                    2  |   11.16853   10.26726     2.62   0.009     1.842826    67.68739
-                    3  |   .2317845   .3582766    -0.95   0.344     .0112035    4.795275
-                    4  |   .2012752   .1704296    -1.89   0.058     .0382856    1.058144
-     5 Least deprived  |    .422978   .2535167    -1.44   0.151     .1306593    1.369289
-                       |
-                 urban |
-                Urban  |   1.065962   .5662819     0.12   0.904     .3763127    3.019494
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   .0115665   .0174615    -2.95   0.003        .0006    .2229617
- Overweight (25-29.9)  |   .1099781   .1160747    -2.09   0.036     .0138969    .8703502
-    Obese I (30-34.9)  |   .0579973   .0570915    -2.89   0.004     .0084237    .3993149
-   Obese II (35-39.9)  |    .002517   .0046903    -3.21   0.001     .0000653    .0970643
-      Obese III (40+)  |   .4446013   .4217508    -0.85   0.393     .0692655    2.853805
-                       |
-               smoking |
-Current/former smoker  |   21.08488   16.82433     3.82   0.000     4.413358    100.7334
-                  age1 |   1.171403   .0674488     2.75   0.006     1.046393    1.311349
-                  age2 |    .584911   .1031538    -3.04   0.002     .4139744      .82643
-                  age3 |   4.353536   2.433941     2.63   0.009     1.455322    13.02343
-----------------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Stratified Cox regression with no ties
-Strata variable: set_id
-
-No. of subjects =      3,390                        Number of obs =      3,398
-No. of failures =        192
-Time at risk    = 5,864.1013
-                                                    Wald chi2(18) = 2681726.72
-Log pseudolikelihood = -19.464701                   Prob > chi2   =     0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |     .14838   .0751483    -3.77   0.000     .0549892    .4003809
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   .0573963   .0652452    -2.51   0.012     .0061841    .5327058
-                Black  |   12.03739    10.1039     2.96   0.003     2.323022    62.37505
-                Mixed  |   7.117338   9.752288     1.43   0.152      .485275    104.3872
-                Other  |   8.434448   6.107519     2.94   0.003     2.040272    34.86786
-                       |
-                   imd |
-                    2  |   11.16853   10.26726     2.62   0.009     1.842826    67.68739
-                    3  |   .2317845   .3582766    -0.95   0.344     .0112035    4.795275
-                    4  |   .2012752   .1704296    -1.89   0.058     .0382856    1.058144
-     5 Least deprived  |    .422978   .2535167    -1.44   0.151     .1306593    1.369289
-                       |
-                 urban |
-                Urban  |   1.065962   .5662819     0.12   0.904     .3763127    3.019494
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   .0115665   .0174615    -2.95   0.003        .0006    .2229617
- Overweight (25-29.9)  |   .1099781   .1160747    -2.09   0.036     .0138969    .8703502
-    Obese I (30-34.9)  |   .0579973   .0570915    -2.89   0.004     .0084237    .3993149
-   Obese II (35-39.9)  |    .002517   .0046903    -3.21   0.001     .0000653    .0970643
-      Obese III (40+)  |   .4446013   .4217508    -0.85   0.393     .0692655    2.853805
-                       |
-               smoking |
-Current/former smoker  |   21.08488   16.82433     3.82   0.000     4.413358    100.7334
-                  age1 |   1.171403   .0674488     2.75   0.006     1.046393    1.311349
-                  age2 |    .584911   .1031538    -3.04   0.002     .4139744      .82643
-                  age3 |   4.353536   2.433941     2.63   0.009     1.455322    13.02343
-----------------------------------------------------------------------------------------
-file additional_case_death.ster saved
-file additional_case_death.dta saved
-
-        Failure _d: death_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
-       ID variable: patient_id
-
-Iteration 0:   log pseudolikelihood = -36.566902
-Iteration 1:   log pseudolikelihood = -20.901359
-Iteration 2:   log pseudolikelihood = -16.408258
-Iteration 3:   log pseudolikelihood =  -14.32839
-Iteration 4:   log pseudolikelihood = -13.850766
-Iteration 5:   log pseudolikelihood = -13.802872
-Iteration 6:   log pseudolikelihood = -13.800515
-Iteration 7:   log pseudolikelihood = -13.800042
-Iteration 8:   log pseudolikelihood = -13.799869
-Iteration 9:   log pseudolikelihood = -13.799806
-Iteration 10:  log pseudolikelihood = -13.799782
-Iteration 11:  log pseudolikelihood = -13.799774
-Iteration 12:  log pseudolikelihood =  -13.79977
-Iteration 13:  log pseudolikelihood = -13.799769
-Iteration 14:  log pseudolikelihood = -13.799769
-Iteration 15:  log pseudolikelihood = -13.799769
-Iteration 16:  log pseudolikelihood = -13.799769
-Iteration 17:  log pseudolikelihood = -13.799769
-Iteration 18:  log pseudolikelihood = -13.799769
-Iteration 19:  log pseudolikelihood = -13.799769
-Iteration 20:  log pseudolikelihood = -13.799769
-Iteration 21:  log pseudolikelihood = -13.799769
-Iteration 22:  log pseudolikelihood = -13.799769
-Iteration 23:  log pseudolikelihood = -13.799769
-Iteration 24:  log pseudolikelihood = -13.799769
-Iteration 25:  log pseudolikelihood = -13.799769
-Iteration 26:  log pseudolikelihood = -13.799769
-Iteration 27:  log pseudolikelihood = -13.799769
-Iteration 28:  log pseudolikelihood = -13.799769
-Iteration 29:  log pseudolikelihood = -13.799769
-Iteration 30:  log pseudolikelihood = -13.799769
-Iteration 31:  log pseudolikelihood = -13.799769  (backed up)
-Iteration 32:  log pseudolikelihood = -13.799769  (backed up)
-Iteration 33:  log pseudolikelihood = -13.799769  (backed up)
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -13.799769
-Iteration 1:   log pseudolikelihood = -13.799769
-Iteration 2:   log pseudolikelihood = -13.799769
-Iteration 3:   log pseudolikelihood = -13.799769
-Iteration 4:   log pseudolikelihood = -13.799769
-Iteration 5:   log pseudolikelihood = -13.799769
-Iteration 6:   log pseudolikelihood = -13.799769
-Iteration 7:   log pseudolikelihood = -13.799769
-Iteration 8:   log pseudolikelihood = -13.799769
-Iteration 9:   log pseudolikelihood = -13.799769
-
-Stratified Cox regression with no ties
-Strata variable: set_id
-
-No. of subjects =      3,390                        Number of obs =      3,398
-No. of failures =        192
-Time at risk    = 5,864.1013
-                                                    Wald chi2(18) = 8489083.84
-Log pseudolikelihood = -13.799769                   Prob > chi2   =     0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .2404639   .0758594    -4.52   0.000     .1295748    .4462513
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   .2295173   .2681808    -1.26   0.208     .0232394    2.266765
-                Black  |   9.011475    8.69913     2.28   0.023     1.358619    59.77149
-                Mixed  |   643.6137   1046.398     3.98   0.000     26.59057     15578.4
-                Other  |   46.24902   39.18373     4.53   0.000     8.788931    243.3712
-                       |
-                   imd |
-                    2  |   2.789622   3.112602     0.92   0.358     .3131789    24.84839
-                    3  |   .0212392   .0538024    -1.52   0.128     .0001482     3.04348
-                    4  |   .1055594   .0887431    -2.67   0.007     .0203187    .5483992
-     5 Least deprived  |   .1026301   .0737482    -3.17   0.002     .0250967    .4196946
-                       |
-                 urban |
-                Urban  |   3.050898   1.432795     2.38   0.018     1.215283    7.659102
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   .0140358   .0155471    -3.85   0.000      .001601    .1230533
- Overweight (25-29.9)  |   .0923603   .1469133    -1.50   0.134     .0040881    2.086664
-    Obese I (30-34.9)  |   .0620053   .0616788    -2.80   0.005     .0088249    .4356602
-   Obese II (35-39.9)  |   .0010692     .00105    -6.97   0.000      .000156    .0073281
-      Obese III (40+)  |   .0447631   .0519731    -2.68   0.007     .0045985    .4357374
-                       |
-      1.cardiovascular |   .5233669   .3168384    -1.07   0.285     .1597724    1.714395
-            1.diabetes |   1.055478   1.052653     0.05   0.957     .1494604    7.453706
-        1.hypertension |   .1508541   .0705659    -4.04   0.000     .0603095    .3773362
-    1.immunosuppressed |   .0032182   .0041106    -4.49   0.000     .0002633    .0393407
-     1.non_haem_cancer |   2.44e+11          .        .       .            .           .
-                       |
-               smoking |
-Current/former smoker  |   34.01585    14.1488     8.48   0.000     15.05311    76.86634
-                  age1 |   1.240634   .1022669     2.62   0.009     1.055548    1.458174
-                  age2 |   .3856591   .1035485    -3.55   0.000     .2278547    .6527533
-                  age3 |   20.39088   18.20639     3.38   0.001     3.543433    117.3404
-----------------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Stratified Cox regression with no ties
-Strata variable: set_id
-
-No. of subjects =      3,390                        Number of obs =      3,398
-No. of failures =        192
-Time at risk    = 5,864.1013
-                                                    Wald chi2(18) = 8489083.84
-Log pseudolikelihood = -13.799769                   Prob > chi2   =     0.0000
-
-                                     (Std. err. adjusted for 34 clusters in practice_id)
-----------------------------------------------------------------------------------------
-                       |               Robust
-                    _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-                  case |
-           SARS-CoV-2  |   .2404639   .0758594    -4.52   0.000     .1295748    .4462513
-                       |
-                   sex |
-                 Male  |          1  (omitted)
-                       |
-             ethnicity |
-          South Asian  |   .2295173   .2681808    -1.26   0.208     .0232394    2.266765
-                Black  |   9.011475    8.69913     2.28   0.023     1.358619    59.77149
-                Mixed  |   643.6137   1046.398     3.98   0.000     26.59057     15578.4
-                Other  |   46.24902   39.18373     4.53   0.000     8.788931    243.3712
-                       |
-                   imd |
-                    2  |   2.789622   3.112602     0.92   0.358     .3131789    24.84839
-                    3  |   .0212392   .0538024    -1.52   0.128     .0001482     3.04348
-                    4  |   .1055594   .0887431    -2.67   0.007     .0203187    .5483992
-     5 Least deprived  |   .1026301   .0737482    -3.17   0.002     .0250967    .4196946
-                       |
-                 urban |
-                Urban  |   3.050898   1.432795     2.38   0.018     1.215283    7.659102
-                       |
-                   bmi |
-   Normal (18.5-24.9)  |   .0140358   .0155471    -3.85   0.000      .001601    .1230533
- Overweight (25-29.9)  |   .0923603   .1469133    -1.50   0.134     .0040881    2.086664
-    Obese I (30-34.9)  |   .0620053   .0616788    -2.80   0.005     .0088249    .4356602
-   Obese II (35-39.9)  |   .0010692     .00105    -6.97   0.000      .000156    .0073281
-      Obese III (40+)  |   .0447631   .0519731    -2.68   0.007     .0045985    .4357374
-                       |
-      1.cardiovascular |   .5233669   .3168384    -1.07   0.285     .1597724    1.714395
-            1.diabetes |   1.055478   1.052653     0.05   0.957     .1494604    7.453706
-        1.hypertension |   .1508541   .0705659    -4.04   0.000     .0603095    .3773362
-    1.immunosuppressed |   .0032182   .0041106    -4.49   0.000     .0002633    .0393407
-     1.non_haem_cancer |   2.44e+11          .        .       .            .           .
-                       |
-               smoking |
-Current/former smoker  |   34.01585    14.1488     8.48   0.000     15.05311    76.86634
-                  age1 |   1.240634   .1022669     2.62   0.009     1.055548    1.458174
-                  age2 |   .3856591   .1035485    -3.55   0.000     .2278547    .6527533
-                  age3 |   20.39088   18.20639     3.38   0.001     3.543433    117.3404
-----------------------------------------------------------------------------------------
-file full_case_death.ster saved
-file full_case_death.dta saved
-
-. 
-. file close tablecontent
-
-. 
 end of do-file
 
-. do "C:\Users\lsh1703468\Documents\Repos\analysis\cox_2017_covid_aki.do"
+r(430);
 
-. sysdir set PLUS ./analysis/adofiles
-
-. sysdir set PERSONAL ./analysis/adofiles
-
-. pwd
-C:\Users\lsh1703468\Documents\repos
-
-. cap log close

@@ -1,61 +1,84 @@
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/descriptive_2017_table.log
   log type:  text
- opened on:  10 Jan 2023, 17:14:24
+ opened on:  15 Jan 2023, 14:32:49
 
 . 
-. global covariates follow_up_time age agegroup sex imd ethnicity1 region stp urban bmi smoking baseline_egfr egfr_group ckd_stage cardiovascular diabetes hypertension immunosuppressed non_haem_cancer
+. * Open Stata dataset
+. use ./output/analysis_2017, clear
 
 . 
-. use ./output/analysis_2017.dta, clear
-
+.  /* PROGRAMS TO AUTOMATE TABULATIONS===========================================*/ 
+. 
+. ********************************************************************************
+. * All below code from K Baskharan 
+. * Generic code to output one row of table
 . 
 . cap prog drop generaterow
 
 . program define generaterow
   1. syntax, variable(varname) condition(string) 
   2.         
-.         cou
+.         qui cou
   3.         local overalldenom=r(N)
-  4.         
-.         sum `variable' if `variable' `condition'
-  5.         **K Wing additional code to output variable category labels**
-.         local level=substr("`condition'",3,.)
-  6.         local lab: label `variable' `level'
-  7.         file write tablecontent (" `lab'") _tab
-  8.         
-.         *local lab: label hhRiskCatExp_5catsLabel 4
-. 
-.         
-.         /*this is the overall column - had to edit this so that the row totals are the SUM OF THE ROUNDED COUNTS FOR EXPOSED AND UNEXPOSED, not the rounded total (as these may not match)*/
-.         /*old code
->         cou if `variable' `condition'
->         local rowdenom = round(r(N),5)
->         local colpct = 100*(r(N)/`overalldenom')
->         */
-.         *updated code where the row totals (i.e. the "Total" column) is the sum of the two rounded values for the exposed (COVID case) and unexposed (comparator) columns
-.         /*this is the overall column - had to edit this so that the row totals are the SUM OF THE ROUNDED COUNTS FOR EXPOSED AND UNEXPOSED, not the rounded total (as these may not match)*/
+  4.         local r_overalldenom = round(`overalldenom',5)
+  5.         
+.         qui sum `variable' if `variable' `condition'
+  6.         file write tablecontent (r(max)) _tab
+  7.         
+.         qui cou   if `variable' `condition'
+  8.         local rowdenom = r(N)
+  9.         local r_rowdenom = round(`rowdenom',5)
+ 10.         local colpct = 100*(`r_rowdenom'/`r_overalldenom')
+ 11.         file write tablecontent %9.0gc (`r_rowdenom')  (" (") %3.1f (`colpct') (")") _tab
+ 12. 
 .         forvalues i=0/1{
-  9.                 cou if case == `i' & `variable' `condition'
- 10.                 local subtotal_`i'=round(r(N),5)
- 11.         }
- 12.         local rowdenom = `subTotal_0' + `subTotal_1'
- 13.         local colpct = 100*(`rowdenom'/`overalldenom')
- 14.         file write tablecontent %9.0f (`rowdenom')  (" (") %3.1f (`colpct') (")") _tab
- 15. 
-.         /*this loops through groups*/
-.         forvalues i=0/1{
- 16.                 safecount if case==`i'
- 17.                 local coldenom=r(N)
- 18.                 cou if case == `i' & `variable' `condition'
- 19.                 local pct = 100*(r(N)/`coldenom')
- 20.                 *file write tablecontent %9.0gc (r(N)) (" (") %3.1f (`pct') (")") _tab
-.                 file write tablecontent %9.0f (round(r(N),5)) (" (") %3.1f (`pct') (")") _tab
+ 13.         qui cou if case == `i'
+ 14.         local rowdenom = r(N)
+ 15.         local r_rowdenom = round(`rowdenom',5)
+ 16.         qui cou if case == `i' & `variable' `condition'
+ 17.         local numerator = r(N)
+ 18.         local r_numerator = round(`numerator',5)
+ 19.         local pct = 100*(`r_numerator'/`rowdenom') 
+ 20.         file write tablecontent %9.0gc (`r_numerator') (" (") %3.1f (`pct') (")") _tab
  21.         }
  22.         
 .         file write tablecontent _n
  23. end
+
+. 
+. 
+. * Output one row of table for co-morbidities and meds
+. 
+. cap prog drop generaterow2
+
+. program define generaterow2
+  1. syntax, variable(varname) condition(string) 
+  2.         
+.         qui cou
+  3.         local overalldenom=r(N)
+  4.         local r_overalldenom = round(`overalldenom',5)
+  5.         
+.         qui cou if `variable' `condition'
+  6.         local rowdenom = r(N)
+  7.         local r_rowdenom = round(`rowdenom',5)
+  8.         local colpct = 100*(`r_rowdenom'/`r_overalldenom')
+  9.         file write tablecontent %9.0gc (`r_rowdenom')  (" (") %3.1f (`colpct') (")") _tab
+ 10. 
+.         forvalues i=0/1{
+ 11.         qui cou if case == `i'
+ 12.         local rowdenom = r(N)
+ 13.         local r_rowdenom = round(`rowdenom',5)
+ 14.         qui cou if case == `i' & `variable' `condition'
+ 15.         local numerator = r(N)
+ 16.         local r_numerator = round(`numerator',5)
+ 17.         local pct = 100*(`r_numerator'/`rowdenom') 
+ 18.         file write tablecontent %9.0gc (`r_numerator') (" (") %3.1f (`pct') (")") _tab
+ 19.         }
+ 20.         
+.         file write tablecontent _n
+ 21. end
 
 . 
 . 
@@ -121,29 +144,30 @@
   3.         file write tablecontent ("`lab'") _n 
   4. 
 . 
-.         qui summarize `variable', d
-  5.         file write tablecontent ("Mean (SD)") _tab 
-  6.         file write tablecontent  %3.1f (r(mean)) (" (") %3.1f (r(sd)) (")") _tab
-  7.         
-.         forvalues i=0/1{                                                        
-  8.                 qui summarize `variable' if case == `i', d
-  9.                 file write tablecontent  %3.1f (r(mean)) (" (") %3.1f (r(sd)) (")") _tab
- 10.         }
- 11. 
-. file write tablecontent _n
- 12. 
+.         * Means for continuous variables
+.         /*qui summarize `variable', d
+>         file write tablecontent ("Mean (SD)") _tab 
+>         file write tablecontent  %3.1f (r(mean)) (" (") %3.1f (r(sd)) (")") _tab
+>         
+>         forvalues i=0/1{                                                        
+>         qui summarize `variable' if case == `i', d
+>         file write tablecontent  %3.1f (r(mean)) (" (") %3.1f (r(sd)) (")") _tab
+>         }*/
+. 
+. file write tablecontent
+  5. 
 .         
 .         qui summarize `variable', d
- 13.         file write tablecontent ("Median (IQR)") _tab 
- 14.         file write tablecontent %3.1f (r(p50)) (" (") %3.1f (r(p25)) ("-") %3.1f (r(p75)) (")") _tab
- 15.         
+  6.         file write tablecontent ("Median (IQR)") _tab 
+  7.         file write tablecontent %3.1f (r(p50)) (" (") %3.1f (r(p25)) ("-") %3.1f (r(p75)) (")") _tab
+  8.         
 .         forvalues i=0/1{
- 16.                 qui summarize `variable' if case == `i', d
- 17.                 file write tablecontent %3.1f (r(p50)) (" (") %3.1f (r(p25)) ("-") %3.1f (r(p75)) (")") _tab
- 18.         }
- 19.         
+  9.         qui summarize `variable' if case == `i', d
+ 10.         file write tablecontent %3.1f (r(p50)) (" (") %3.1f (r(p25)) ("-") %3.1f (r(p75)) (")") _tab
+ 11.         }
+ 12.         
 . file write tablecontent _n
- 20.         
+ 13.         
 . end
 
 . 
@@ -152,184 +176,125 @@
 . *Set up output file
 . cap file close tablecontent
 
-. file open tablecontent using ./output/descriptive_2017_table.txt, write text replace
+. file open tablecontent using ./output/descriptive_2017_table.csv, write text replace
 
 . 
-. file write tablecontent ("Table 1: Demographic and clinical characteristics for SARS-CoV-2 infection and matched historical comparators") _n
+. file write tablecontent ("Table 1: Demographic and Clinical Characteristics") _n
 
-. 
-. 
-. 
-. 
-. * eth5 labelled columns *THESE WOULD BE HOUSEHOLD LABELS, eth5 is the equivalent of the hh size variable
-. *these are NOT ROUNDED - will do this manually in excel, am keeping them unrounded as a sanity check
 . 
 . local lab0: label case 0
 
-. local lab1: label case 1   
-
-. *for display n values
-. safecount if case==0
-  19,825
-
-. local comparator=r(N)
-
-. safecount if case==1
-  7,961
-
-. local case=r(N)
-
-. safecount
-  27,786
-
-. local total=r(N)
+. local lab1: label case 1
 
 . 
-. file write tablecontent _tab ("Total")  _tab ///                         
->                                                          ("Matched historical comparator")      _tab ///
->                                                          ("SARS-CoV-2 infection")                       _n      
+. 
+. file write tablecontent _tab ("Total")                                                    _tab ///
+>                                                          ("`lab0'")                                               _tab ///
+>                                                          ("`lab1'")                                               _n                                                     
+
+.                                                          
+. 
+. 
+. * DEMOGRAPHICS (more than one level, potentially missing) 
+. 
+. format age baseline_egfr follow_up_time %9.2f
 
 . 
-.                                                          
-. file write tablecontent _tab ("n=`total'")                                                _tab ///
->                                                          ("n=`comparator'")                                     _tab ///
->                                                          ("n=`case'")                             _n
+. gen byte Denominator=1
 
-.                                                          
-. **DEMOGRAPHICS AND PREVIOUS COMRBIDITIES (more than one level, potentially missing)**
-. *Follow-up time
-. sum follow_up_time, detail
+. qui tabulatevariable, variable(Denominator) min(1) max(1) 
 
-                    Follow-up time (Days)
--------------------------------------------------------------
-      Percentiles      Smallest
- 1%           11              0
- 5%           93              0
-10%          180              0       Obs              27,786
-25%          407              0       Sum of wgt.      27,786
+. file write tablecontent _n 
 
-50%          673                      Mean           616.2238
-                        Largest       Std. dev.      279.6627
-75%          858           1004
-90%          948           1004       Variance       78211.23
-95%          975           1004       Skewness      -.5106984
-99%          998           1004       Kurtosis       2.136767
-
-. qui summarizevariable, variable(follow_up_time)
+. 
+. qui summarizevariable, variable(follow_up_time) 
 
 . file write tablecontent _n
 
 . 
-. *continous
-. sum age, detail
-
-                             Age
--------------------------------------------------------------
-      Percentiles      Smallest
- 1%           19             18
- 5%           21             18
-10%           24             18       Obs              27,786
-25%           31             18       Sum of wgt.      27,786
-
-50%           44                      Mean            43.7995
-                        Largest       Std. dev.      14.52293
-75%           56             72
-90%           64             72       Variance       210.9155
-95%           66             72       Skewness       .0043386
-99%           69             72       Kurtosis       1.825855
-
 . qui summarizevariable, variable(age) 
 
 . file write tablecontent _n
 
 . 
-end of do-file
+. qui tabulatevariable, variable(sex) min(0) max(1) 
 
-. do "C:\Users\LSH170~1\AppData\Local\Temp\STD1a44_000000.tmp"
-
-. *Sex
-. tab sex case, col
-
-+-------------------+
-| Key               |
-|-------------------|
-|     frequency     |
-| column percentage |
-+-------------------+
-
-           |         case
-       sex | Comparato   COVID-19 |     Total
------------+----------------------+----------
-    Female |    10,230      4,083 |    14,313 
-           |     51.60      51.29 |     51.51 
------------+----------------------+----------
-      Male |     9,595      3,878 |    13,473 
-           |     48.40      48.71 |     48.49 
------------+----------------------+----------
-     Total |    19,825      7,961 |    27,786 
-           |    100.00     100.00 |    100.00 
-
-. tabulatevariable, variable(sex) min(0) max(1) 
-  27,786
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-         sex |     14,313           0           0          0          0
-  10,230
-  4,083
-invalid syntax
-r(198);
-
-end of do-file
-
-r(198);
-
-. clear
-
-. do "C:\Users\LSH170~1\AppData\Local\Temp\STD1a44_000000.tmp"
+. file write tablecontent _n 
 
 . 
-. *set filepaths
-.     global projectdir `c(pwd)'
+. qui tabulatevariable, variable(imd) min(1) max(5) 
 
-.     dis "$projectdir"
-C:\Users\lsh1703468\Documents\repos
-
-.     global outdir $projectdir/output
-
-.     dis "$outdir"
-C:\Users\lsh1703468\Documents\repos/output
-
-.     cap mkdir $projectdir/output/tables
-
-.     global tables $projectdir/output/tables
-
-.     dis "$tables"
-C:\Users\lsh1703468\Documents\repos/output/tables
-
-.     global logs $projectdir/logs
-
-.     dis "$logs"
-C:\Users\lsh1703468\Documents\repos/logs
+. file write tablecontent _n 
 
 . 
-end of do-file
+. qui tabulatevariable, variable(ethnicity1) min(1) max(6)
 
-. do "C:\Users\LSH170~1\AppData\Local\Temp\STD1a44_000000.tmp"
-
-. use ./output/analysis_2017.dta, clear
+. file write tablecontent _n 
 
 . 
-end of do-file
+. qui tabulatevariable, variable(region) min(1) max(9)
 
-. do "C:\Users\lsh1703468\Documents\Repos\analysis\analysis_2017.do"
-
-. sysdir set PLUS ./analysis/adofiles
-
-. sysdir set PERSONAL ./analysis/adofiles
-
-. pwd
-C:\Users\lsh1703468\Documents\repos
+. file write tablecontent _n 
 
 . 
-. cap log close
+. qui tabulatevariable, variable(stp) min(1) max(35)
+
+. file write tablecontent _n 
+
+. 
+. qui tabulatevariable, variable(urban) min(0) max(1)
+
+. file write tablecontent _n 
+
+. 
+. qui tabulatevariable, variable(bmi) min(1) max(6)
+
+. file write tablecontent _n 
+
+. 
+. qui tabulatevariable, variable(smoking) min(0) max(1)
+
+. file write tablecontent _n 
+
+. 
+. qui summarizevariable, variable(baseline_egfr) 
+
+. file write tablecontent _n 
+
+. 
+. qui tabulatevariable, variable(egfr_group) min(1) max(7)  
+
+. file write tablecontent _n 
+
+. 
+. qui tabulatevariable, variable(ckd_stage) min(1) max(6)  
+
+. file write tablecontent _n 
+
+. 
+. * COMORBIDITIES (binary)
+. foreach comorb of varlist               ///
+>         cardiovascular          ///
+>         diabetes                        ///
+>         hypertension            ///
+>         immunosuppressed        ///
+>         non_haem_cancer { 
+  2.         local comorb: subinstr local comorb "i." ""
+  3.         local lab: variable label `comorb'
+  4.         file write tablecontent ("`lab'") _tab
+  5.                                                                 
+.         generaterow2, variable(`comorb') condition("==1")
+  6.         file write tablecontent _n _n
+  7. }
+
+. 
+. file close tablecontent
+
+. 
+. * Close log file 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/descriptive_2017_table.log
+  log type:  text
+ closed on:  15 Jan 2023, 14:32:50
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
