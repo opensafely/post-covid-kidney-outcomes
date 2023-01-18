@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_hospitalised.log
   log type:  text
- opened on:  18 Jan 2023, 14:02:10
+ opened on:  18 Jan 2023, 14:39:47
 
 . 
 . capture noisily import delimited ./output/input_covid_hospitalised.csv, clear
@@ -3874,7 +3874,7 @@ immunosuppr |
 
 . label var esrd "Kidney failure"
 
-. gen esrd_time = (esrd_date - index_date)
+. gen esrd_time = (esrd_date - index_date_esrd)
 (24,553 missing values generated)
 
 . label var esrd_time "Time to ESRD (Days)"
@@ -4240,6 +4240,13 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 ----------------------+---------------------------------+----------
                 Total |    10,553      8,981      5,897 |    25,431 
 
+. gen time_zero_esrd = date("2000-01-01", "YMD")
+
+. gen time_end_esrd = time_zero_esrd + follow_up_time_esrd
+
+. gen time_esrd = time_zero_esrd + esrd_time
+(23,391 missing values generated)
+
 . 
 . * 50% eGFR reduction (earliest month) (or ESRD)
 . gen egfr_half_date=.
@@ -4335,6 +4342,9 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 . replace index_date_egfr_half =. if baseline_egfr==.
 (11,326 real changes made, 11,326 to missing)
 
+. gen egfr_half_time = (egfr_half_date - index_date_egfr_half)
+(19,629 missing values generated)
+
 . * Exit date (50% eGFR reduction)
 . gen exit_date_egfr_half = egfr_half_date
 (18,741 missing values generated)
@@ -4350,6 +4360,14 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 . label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
 
 . gen egfr_half_denominator = 0
+
+. gen time_zero_egfr_half = date("2000-01-01", "YMD")
+
+. gen time_end_egfr_half = time_zero_egfr_half + follow_up_time_egfr_half
+(11,326 missing values generated)
+
+. gen time_egfr_half = time_zero_egfr_half + egfr_half_time
+(19,629 missing values generated)
 
 . 
 . * AKI (or ESRD)
@@ -4372,6 +4390,9 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 
 . label var aki "Acute kidney injury"
 
+. gen aki_time = (aki_date - index_date_aki)
+(21,055 missing values generated)
+
 . * Exit date (AKI)
 . gen exit_date_aki = aki_date
 (21,055 missing values generated)
@@ -4387,6 +4408,13 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 
 . label var follow_up_time_aki "Follow-up time (AKI) (Days)"
 
+. gen time_zero_aki = date("2000-01-01", "YMD")
+
+. gen time_end_aki = time_zero_aki + follow_up_time_aki
+
+. gen time_aki = time_zero_aki + aki_time
+(21,055 missing values generated)
+
 . 
 . * Exit date (death)
 . gen index_date_death = index_date
@@ -4401,6 +4429,9 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 
 . label var death "Death"
 
+. gen death_time = (death_date - index_date_death)
+(24,377 missing values generated)
+
 . format exit_date_death %td
 
 . replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
@@ -4412,6 +4443,13 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 
 . label var follow_up_time_death "Follow-up time (death) (Days)"
 
+. gen time_zero_death = date("2000-01-01", "YMD")
+
+. gen time_end_death = time_zero_death + follow_up_time_death
+
+. gen time_death = time_zero_death + death_time
+(24,377 missing values generated)
+
 . 
 . save ./output/analysis_hospitalised.dta, replace
 file ./output/analysis_hospitalised.dta saved
@@ -4420,5 +4458,5 @@ file ./output/analysis_hospitalised.dta saved
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_hospitalised.log
   log type:  text
- closed on:  18 Jan 2023, 14:02:35
+ closed on:  18 Jan 2023, 14:40:05
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
