@@ -25,7 +25,7 @@ file write tablecontent ("By SARS-CoV-2 infection") _n
 
 use ./output/analysis_2017.dta, clear
 foreach outcome of varlist esrd egfr_half aki death {
-stset exit_date_`outcome', fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
+stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(patient_id) scale(365.25)
 
 stcox i.case, vce(cluster practice_id) strata(set_id)
 estimates save "crude_case_`outcome'", replace 
@@ -39,7 +39,7 @@ eststo model2
 parmest, label eform format(estimate p lb ub) saving("minimal_case_`outcome'", replace) idstr("minimal_case_`outcome'")
 local hr "`hr' "minimal_case_`outcome'" "
 
-stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
+stcox i.case i.sex i.ethnicity i.imd i.urban /*i.region*/ i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
 if _rc==0{
 estimates
 estimates save "additional_case_`outcome'", replace 
@@ -49,7 +49,7 @@ local hr "`hr' "additional_case_`outcome'" "
 }
 else di "WARNING MODEL1 DID NOT FIT (`outcome')"
 
-stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)		
+stcox i.case i.sex i.ethnicity i.imd i.urban /*i.region*/ i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)		
 if _rc==0{
 estimates
 estimates save "full_case_`outcome'", replace 
@@ -62,13 +62,12 @@ else di "WARNING MODEL2 DID NOT FIT (`outcome')"
 local lab0: label case 0
 local lab1: label case 1
 
-	qui safecount if case==0
+	qui safecount if case==0 & `outcome'_denominator==1
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
 	qui safecount if case== 0 & `outcome'==1
 	local event = r(N)
 	local r_event = round(`event',5)
-	su 
     bysort case: egen total_follow_up_`outcome' = total(_t)
 	qui su total_follow_up_`outcome' if case==0
 	local person_year = r(mean)
@@ -78,7 +77,7 @@ local lab1: label case 1
 	file write tablecontent ("`outcome'") _n
 	file write tablecontent _tab ("`lab0'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 	
-	qui safecount if case==1
+	qui safecount if case==1  & `outcome'_denominator==1
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
 	qui safecount if case == 1 & `outcome'==1

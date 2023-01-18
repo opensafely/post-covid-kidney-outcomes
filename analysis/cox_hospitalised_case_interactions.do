@@ -30,7 +30,7 @@ gen covid_`interaction' = 0 if case==1 & `interaction'==0
 replace covid_`interaction' = 1 if case==1 & `interaction'==1
 
 foreach outcome of varlist esrd egfr_half aki death {
-stset exit_date_`outcome', fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
+stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(patient_id) scale(365.25)
 
 forvalues i=0/1 {
 stcox `i'.case##i.`interaction', vce(cluster practice_id)
@@ -70,7 +70,7 @@ local lab1: label `interaction' 1
 
 
 	
-	qui safecount if pneumonia_`interaction'==0
+	qui safecount if pneumonia_`interaction'==0 & `outcome'_denominator==1
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
 	qui safecount if pneumonia_`interaction'==0 & `outcome'==1
@@ -87,7 +87,7 @@ local lab1: label `interaction' 1
 	file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 	
 
-	qui safecount if pneumonia_`interaction'==1
+	qui safecount if pneumonia_`interaction'==1 & `outcome'_denominator==1
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
 	qui safecount if pneumonia_`interaction'==1 & `outcome'==1
@@ -114,7 +114,7 @@ local lab1: label `interaction' 1
 	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n
 	
 	
-	qui safecount if covid_`interaction'==0
+	qui safecount if covid_`interaction'==0 & `outcome'_denominator==1
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
 	qui safecount if covid_`interaction'==0 & `outcome'==1
@@ -130,7 +130,7 @@ local lab1: label `interaction' 1
 	file write tablecontent _tab ("COVID-19 `lab0'") _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab
 	file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 	
-	qui safecount if covid_`interaction'==1
+	qui safecount if covid_`interaction'==1 & `outcome'_denominator==1
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
 	qui safecount if covid_`interaction'==1 & `outcome'==1

@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2017.log
   log type:  text
- opened on:  17 Jan 2023, 19:58:55
+ opened on:  18 Jan 2023, 01:51:52
 
 . 
 . ** Analysis cohort selection
@@ -3948,6 +3948,8 @@ Immunosuppr |
 
 . 
 . * ESRD date
+. gen index_date_esrd = index_date
+
 . gen esrd_date = egfr15_date
 (27,817 missing values generated)
 
@@ -4328,6 +4330,8 @@ Immunosuppr |
 . replace exit_date_esrd = min(deregistered_date, death_date, end_date) if esrd_date==.
 (25,040 real changes made)
 
+. gen esrd_denominator = 1
+
 . gen follow_up_time = (exit_date_esrd - index_date)
 
 . label var follow_up_time "Follow-up time (Days)"
@@ -4512,8 +4516,15 @@ KRT hospitalised COVI |       157        268        332 |       757
 
 . label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
 
+. gen egfr_half_denominator = 0
+
+. replace egfr_half_denominator = 1 if index_date_egfr_half!=.
+(15,450 real changes made)
+
 . 
 . * AKI (or ESRD)
+. gen index_date_aki = index_date
+
 . gen aki_date = date(acute_kidney_injury_outcome, "YMD")
 (25,054 missing values generated)
 
@@ -4540,12 +4551,16 @@ KRT hospitalised COVI |       157        268        332 |       757
 . replace exit_date_aki = min(deregistered_date,death_date,end_date)  if aki_date==.
 (22,564 real changes made)
 
+. gen aki_denominator = 1
+
 . gen follow_up_time_aki = (exit_date_aki - index_date)
 
 . label var follow_up_time_aki "Follow-up time (AKI) (Days)"
 
 . 
 . * Exit date (death)
+. gen index_date_death = index_date
+
 . gen exit_date_death = death_date
 (26,137 missing values generated)
 
@@ -4561,6 +4576,8 @@ KRT hospitalised COVI |       157        268        332 |       757
 . replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
 (26,137 real changes made)
 
+. gen death_denominator = 1
+
 . gen follow_up_time_death = (exit_date_death - index_date)
 
 . label var follow_up_time_death "Follow-up time (death) (Days)"
@@ -4573,5 +4590,5 @@ file ./output/analysis_2017.dta saved
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2017.log
   log type:  text
- closed on:  17 Jan 2023, 19:59:21
+ closed on:  18 Jan 2023, 01:52:17
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

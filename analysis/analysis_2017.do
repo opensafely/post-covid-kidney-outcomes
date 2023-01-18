@@ -739,6 +739,7 @@ gen end_date = date("2022-11-30", "YMD") if case==1
 replace end_date = date("2019-11-30", "YMD") if case==0
 format end_date %td
 replace exit_date_esrd = min(deregistered_date, death_date, end_date) if esrd_date==.
+gen esrd_denominator = 1
 gen follow_up_time = (exit_date_esrd - index_date)
 label var follow_up_time "Follow-up time (Days)"
 gen follow_up_cat = follow_up_time
@@ -783,6 +784,8 @@ format exit_date_egfr_half %td
 replace exit_date_egfr_half = min(deregistered_date,death_date,end_date) if egfr_half_date==. & index_date_egfr_half!=.
 gen follow_up_time_egfr_half = (exit_date_egfr_half - index_date_egfr_half)
 label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
+gen egfr_half_denominator = 0
+replace egfr_half_denominator = 1 if index_date_egfr_half!=.
 
 * AKI (or ESRD)
 gen aki_date = date(acute_kidney_injury_outcome, "YMD")
@@ -796,6 +799,7 @@ label var aki "Acute kidney injury"
 gen exit_date_aki = aki_date
 format exit_date_aki %td
 replace exit_date_aki = min(deregistered_date,death_date,end_date)  if aki_date==.
+gen aki_denominator = 1
 gen follow_up_time_aki = (exit_date_aki - index_date)
 label var follow_up_time_aki "Follow-up time (AKI) (Days)"
 
@@ -806,6 +810,7 @@ replace death = 1 if death_date!=.
 label var death "Death"
 format exit_date_death %td
 replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
+gen death_denominator = 1
 gen follow_up_time_death = (exit_date_death - index_date)
 label var follow_up_time_death "Follow-up time (death) (Days)"
 

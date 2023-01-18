@@ -23,7 +23,7 @@ file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _
 
 use ./output/analysis_hospitalised.dta, clear
 foreach outcome of varlist esrd egfr_half aki death {
-stset exit_date_`outcome', fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
+stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(patient_id) scale(365.25)
 
 stcox i.covid_vax, vce(cluster practice_id)
 estimates save "crude_covid_vax_`outcome'", replace 
@@ -64,7 +64,7 @@ local lab3: label covid_vax 3
 local lab4: label covid_vax 4
 local lab5: label covid_vax 5
 
-	qui safecount if covid_vax==0
+	qui safecount if covid_vax==0 & `outcome'_denominator==1
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
 	qui safecount if covid_vax== 0 & `outcome'==1
@@ -81,7 +81,7 @@ local lab5: label covid_vax 5
 	file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 
 forvalues i=1/5 {
-	qui safecount if covid_vax==`i'
+	qui safecount if covid_vax==`i' & `outcome'_denominator==1
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
 	qui safecount if covid_vax ==`i' & `outcome'==1

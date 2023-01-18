@@ -24,7 +24,7 @@ file write tablecontent ("By COVID-19 AKI") _n
 
 use ./output/analysis_2017.dta, clear
 foreach outcome of varlist esrd egfr_half aki death {
-stset exit_date_`outcome', fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
+stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(patient_id) scale(365.25)
 
 stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
 estimates save "crude_covid_vax_`outcome'", replace 
@@ -65,7 +65,7 @@ local lab3: label covid_vax 3
 local lab4: label covid_vax 3
 local lab5: label covid_vax 3
 
-	qui safecount if covid_vax==0
+	qui safecount if covid_vax==0 & `outcome'_denominator==1
 	local denominator = r(N)
 	qui safecount if covid_vax== 1 & `outcome'==1
 	local event = r(N)
@@ -80,7 +80,7 @@ local lab5: label covid_vax 3
 	file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 	
 forvalues vax=1/5 {
-	qui safecount if covid_vax==`vax'
+	qui safecount if covid_vax==`vax' & `outcome'_denominator==1
 	local denominator = r(N)
 	qui safecount if covid_vax == `vax' & `outcome'==1
 	local event = r(N)
