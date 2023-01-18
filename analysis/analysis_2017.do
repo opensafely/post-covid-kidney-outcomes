@@ -697,6 +697,7 @@ foreach x of local month_year  {
 format egfr15_date %td
 
 * ESRD date
+gen index_date_esrd = index_date
 gen esrd_date = egfr15_date
 format esrd_date %td
 replace esrd_date = krt_date if esrd_date==.
@@ -788,6 +789,7 @@ gen egfr_half_denominator = 0
 replace egfr_half_denominator = 1 if index_date_egfr_half!=.
 
 * AKI (or ESRD)
+gen index_date_aki = index_date
 gen aki_date = date(acute_kidney_injury_outcome, "YMD")
 format aki_date %td
 drop acute_kidney_injury_outcome
@@ -804,6 +806,7 @@ gen follow_up_time_aki = (exit_date_aki - index_date)
 label var follow_up_time_aki "Follow-up time (AKI) (Days)"
 
 * Exit date (death)
+gen index_date_death = index_date
 gen exit_date_death = death_date
 gen death = 0
 replace death = 1 if death_date!=.
