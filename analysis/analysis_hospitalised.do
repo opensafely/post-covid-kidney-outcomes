@@ -744,6 +744,7 @@ replace exit_date_egfr_half = min(deregistered_date,death_date,end_date) if egfr
 gen follow_up_time_egfr_half = (exit_date_egfr_half - index_date_egfr_half)
 label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
 gen egfr_half_denominator = 0
+replace egfr_half_denominator = 1 if index_date_egfr_half!=.
 gen time_zero_egfr_half = date("2000-01-01", "YMD")
 gen time_end_egfr_half = time_zero_egfr_half + follow_up_time_egfr_half
 gen time_egfr_half = time_zero_egfr_half + egfr_half_time
