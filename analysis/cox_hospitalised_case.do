@@ -60,7 +60,7 @@ else di "WARNING MODEL2 DID NOT FIT (`outcome')"
 local lab0: label case 0
 local lab1: label case 1
 
-	qui safecount if case==0 & `outcome'_denominator==1
+	qui safecount if case==0
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
 	qui safecount if case== 0 & `outcome'==1
@@ -76,7 +76,7 @@ local lab1: label case 1
 	file write tablecontent _tab ("`lab0'") _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
 	file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 	
-	qui safecount if case==1 & `outcome'_denominator==1
+	qui safecount if case==1
 	local denominator = r(N)
 	local r_denominator = round(`denominator',5)
 	qui safecount if case == 1 & `outcome'==1

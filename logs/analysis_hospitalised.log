@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_hospitalised.log
   log type:  text
- opened on:  17 Jan 2023, 20:27:42
+ opened on:  18 Jan 2023, 14:02:10
 
 . 
 . capture noisily import delimited ./output/input_covid_hospitalised.csv, clear
@@ -3856,6 +3856,9 @@ immunosuppr |
 
 . 
 . * ESRD date
+. gen index_date_esrd = index_date
+(1,074 missing values generated)
+
 . gen esrd_date = egfr15_date
 (26,592 missing values generated)
 
@@ -4182,34 +4185,36 @@ immunosuppr |
 . replace exit_date_esrd = min(deregistered_date, death_date, end_date) if esrd_date==.
 (24,553 real changes made)
 
-. gen follow_up_time = (exit_date_esrd - index_date)
+. gen esrd_denominator = 1
+
+. gen follow_up_time_esrd = (exit_date_esrd - index_date_esrd)
 (1,074 missing values generated)
 
-. label var follow_up_time "Follow-up time (Days)"
+. label var follow_up_time_esrd "Follow-up time (ESRD) (Days)"
 
-. gen follow_up_cat = follow_up_time
+. gen follow_up_cat_esrd = follow_up_time_esrd
 (1,074 missing values generated)
 
-. recode follow_up_cat    min/-29=1       ///
+. recode follow_up_cat_esrd       min/-29=1       ///
 >                                                 -28/-1=2        ///
 >                                                 0/365=3         ///
 >                                                 366/730=4       ///
 >                                                 731/1040=5      ///                                     
 >                                                 1041/max=6
-(25486 changes made to follow_up_cat)
+(25486 changes made to follow_up_cat_esrd)
 
-. label define follow_up_cat      1 "<-29 days"           ///
+. label define follow_up_cat_esrd         1 "<-29 days"           ///
 >                                                         2 "-28 to -1 days"      ///
 >                                                         3 "0 to 365 days"       ///
 >                                                         4 "366 to 730 days" ///
 >                                                         5 "731 to 1040 days"    ///
 >                                                         6 ">1040 days"
 
-. label values follow_up_cat follow_up_cat
+. label values follow_up_cat_esrd follow_up_cat_esrd
 
-. label var follow_up_cat "Follow_up time"
+. label var follow_up_cat_esrd "Follow_up time"
 
-. tab case follow_up_cat
+. tab case follow_up_cat_esrd
 
                       |               Follow_up time
                  case | -28 to -1  0 to 365   366 to 73  731 to 10 |     Total
@@ -4219,13 +4224,13 @@ Pneumonia (pre-pandem |        49      5,518      4,655      2,980 |    13,202
 ----------------------+--------------------------------------------+----------
                 Total |        88     10,553      8,981      5,897 |    25,519 
 
-. drop if follow_up_time<0
+. drop if follow_up_time_esrd<0
 (88 observations deleted)
 
-. drop if follow_up_time>1040
+. drop if follow_up_time_esrd>1040
 (1,074 observations deleted)
 
-. tab case follow_up_cat
+. tab case follow_up_cat_esrd
 
                       |          Follow_up time
                  case | 0 to 365   366 to 73  731 to 10 |     Total
@@ -4344,8 +4349,12 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 
 . label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
 
+. gen egfr_half_denominator = 0
+
 . 
 . * AKI (or ESRD)
+. gen index_date_aki = index_date
+
 . gen aki_date = date(acute_kidney_injury_outcome, "YMD")
 (22,888 missing values generated)
 
@@ -4372,12 +4381,16 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 . replace exit_date_aki = min(deregistered_date,death_date,end_date)  if aki_date==.
 (21,055 real changes made)
 
-. gen follow_up_time_aki = (exit_date_aki - index_date)
+. gen aki_denominator = 1
+
+. gen follow_up_time_aki = (exit_date_aki - index_date_aki)
 
 . label var follow_up_time_aki "Follow-up time (AKI) (Days)"
 
 . 
 . * Exit date (death)
+. gen index_date_death = index_date
+
 . gen exit_date_death = death_date
 (24,377 missing values generated)
 
@@ -4393,7 +4406,9 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 . replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
 (24,377 real changes made)
 
-. gen follow_up_time_death = (exit_date_death - index_date)
+. gen death_denominator = 1
+
+. gen follow_up_time_death = (exit_date_death - index_date_death)
 
 . label var follow_up_time_death "Follow-up time (death) (Days)"
 
@@ -4405,5 +4420,5 @@ file ./output/analysis_hospitalised.dta saved
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_hospitalised.log
   log type:  text
- closed on:  17 Jan 2023, 20:28:06
+ closed on:  18 Jan 2023, 14:02:35
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

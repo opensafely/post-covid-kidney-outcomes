@@ -697,27 +697,27 @@ replace end_date = date("2019-11-30", "YMD") if case==0
 format end_date %td
 replace exit_date_esrd = min(deregistered_date, death_date, end_date) if esrd_date==.
 gen esrd_denominator = 1
-gen follow_up_time = (exit_date_esrd - index_date)
-label var follow_up_time "Follow-up time (Days)"
-gen follow_up_cat = follow_up_time
-recode follow_up_cat	min/-29=1 	///
+gen follow_up_time_esrd = (exit_date_esrd - index_date_esrd)
+label var follow_up_time_esrd "Follow-up time (ESRD) (Days)"
+gen follow_up_cat_esrd = follow_up_time_esrd
+recode follow_up_cat_esrd	min/-29=1 	///
 						-28/-1=2 	///
 						0/365=3 	///
 						366/730=4 	///
 						731/1040=5	///					
 						1041/max=6
-label define follow_up_cat 	1 "<-29 days" 		///
+label define follow_up_cat_esrd 	1 "<-29 days" 		///
 							2 "-28 to -1 days" 	///
 							3 "0 to 365 days" 	///
 							4 "366 to 730 days" ///
 							5 "731 to 1040 days"	///
 							6 ">1040 days"
-label values follow_up_cat follow_up_cat
-label var follow_up_cat "Follow_up time"
-tab case follow_up_cat
-drop if follow_up_time<0
-drop if follow_up_time>1040
-tab case follow_up_cat
+label values follow_up_cat_esrd follow_up_cat_esrd
+label var follow_up_cat_esrd "Follow_up time"
+tab case follow_up_cat_esrd
+drop if follow_up_time_esrd<0
+drop if follow_up_time_esrd>1040
+tab case follow_up_cat_esrd
 
 * 50% eGFR reduction (earliest month) (or ESRD)
 gen egfr_half_date=.
@@ -740,7 +740,6 @@ replace exit_date_egfr_half = min(deregistered_date,death_date,end_date) if egfr
 gen follow_up_time_egfr_half = (exit_date_egfr_half - index_date_egfr_half)
 label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
 gen egfr_half_denominator = 0
-replace egfr_half_denominator = 1 if index_date_egfr_half!=.
 
 * AKI (or ESRD)
 gen index_date_aki = index_date
@@ -756,7 +755,7 @@ gen exit_date_aki = aki_date
 format exit_date_aki %td
 replace exit_date_aki = min(deregistered_date,death_date,end_date)  if aki_date==.
 gen aki_denominator = 1
-gen follow_up_time_aki = (exit_date_aki - index_date)
+gen follow_up_time_aki = (exit_date_aki - index_date_aki)
 label var follow_up_time_aki "Follow-up time (AKI) (Days)"
 
 * Exit date (death)
@@ -768,7 +767,7 @@ label var death "Death"
 format exit_date_death %td
 replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
 gen death_denominator = 1
-gen follow_up_time_death = (exit_date_death - index_date)
+gen follow_up_time_death = (exit_date_death - index_date_death)
 label var follow_up_time_death "Follow-up time (death) (Days)"
 
 save ./output/analysis_hospitalised.dta, replace
