@@ -23,7 +23,7 @@ file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _
 
 use ./output/analysis_hospitalised.dta, clear
 foreach outcome of varlist esrd egfr_half aki death {
-stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(patient_id) scale(365.25)
+stset time_end_`outcome', fail(time_`outcome') origin(time_zero_`outcome') id(patient_id) scale(365.25)
 
 stcox i.covid_vax, vce(cluster practice_id)
 estimates save "crude_covid_vax_`outcome'", replace 

@@ -39,7 +39,7 @@ eststo model2
 parmest, label eform format(estimate p lb ub) saving("minimal_case_`outcome'", replace) idstr("minimal_case_`outcome'")
 local hr "`hr' "minimal_case_`outcome'" "
 
-stcox i.case i.sex i.ethnicity i.imd i.urban /*i.region*/ i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
+stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
 if _rc==0{
 estimates
 estimates save "additional_case_`outcome'", replace 
@@ -49,7 +49,7 @@ local hr "`hr' "additional_case_`outcome'" "
 }
 else di "WARNING MODEL1 DID NOT FIT (`outcome')"
 
-stcox i.case i.sex i.ethnicity i.imd i.urban /*i.region*/ i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)		
+stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)		
 if _rc==0{
 estimates
 estimates save "full_case_`outcome'", replace 
