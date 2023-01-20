@@ -4697,3 +4697,582 @@ Yorkshire and The Humber  |   .9589332   .1514018    -0.27   0.791     .7037135 
 . 
 end of do-file
 
+. stset time_end_esrd, fail(time_esrd) origin(time_zero_esrd) id(patient_id) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: patient_id
+         Failure event: time_esrd!=0 & time_esrd<.
+Observed time interval: (time_end_esrd[_n-1], time_end_esrd]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time time_zero_esrd
+
+--------------------------------------------------------------------------
+     25,431  total observations
+        107  observations end on or before enter()
+         34  observations begin on or after (first) failure
+--------------------------------------------------------------------------
+     25,290  observations remaining, representing
+     25,025  subjects
+      1,931  failures in single-failure-per-subject data
+ 32,222.513  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  2.748802
+
+. stcox 1.case##i.crtical_care, vce(cluster practice_id) base
+variable crtical_care not found
+r(111);
+
+. 
+. . stcox 1.case##i.critical_care, vce(cluster practice_id) base
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.634
+Iteration 2:   log pseudolikelihood = -18428.633
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.633
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(3)  =   3.93
+Log pseudolikelihood = -18428.633                       Prob > chi2   = 0.2695
+
+                                      (Std. err. adjusted for 38 clusters in practice_id)
+-----------------------------------------------------------------------------------------
+                        |               Robust
+                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+                   case |
+              COVID-19  |   1.005079   .0333831     0.15   0.879     .9417332    1.072685
+                        |
+          critical_care |
+            Ward-based  |          1  (base)
+         Critical care  |    1.07014   .0622804     1.16   0.244     .9547773    1.199442
+                        |
+     case#critical_care |
+COVID-19#Critical care  |   .8575988   .0738139    -1.78   0.074     .7244707     1.01519
+-----------------------------------------------------------------------------------------
+
+. stcox 1.case##1.critical_care, vce(cluster practice_id) base
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.634
+Iteration 2:   log pseudolikelihood = -18428.633
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.633
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(3)  =   3.93
+Log pseudolikelihood = -18428.633                       Prob > chi2   = 0.2695
+
+                                      (Std. err. adjusted for 38 clusters in practice_id)
+-----------------------------------------------------------------------------------------
+                        |               Robust
+                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+                   case |
+              COVID-19  |   1.005079   .0333831     0.15   0.879     .9417332    1.072685
+                        |
+          critical_care |
+         Critical care  |    1.07014   .0622804     1.16   0.244     .9547773    1.199442
+                        |
+     case#critical_care |
+COVID-19#Critical care  |   .8575988   .0738139    -1.78   0.074     .7244707     1.01519
+-----------------------------------------------------------------------------------------
+
+. stcox 1.case##1.critical_care, vce(cluster practice_id) base(1.case##0.critical_care)
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+option base() not allowed
+r(198);
+
+. stcox 1.case##1.critical_care, vce(cluster practice_id) allbase
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.634
+Iteration 2:   log pseudolikelihood = -18428.633
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.633
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(3)  =   3.93
+Log pseudolikelihood = -18428.633                       Prob > chi2   = 0.2695
+
+                                      (Std. err. adjusted for 38 clusters in practice_id)
+-----------------------------------------------------------------------------------------
+                        |               Robust
+                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+                   case |
+              COVID-19  |   1.005079   .0333831     0.15   0.879     .9417332    1.072685
+                        |
+          critical_care |
+         Critical care  |    1.07014   .0622804     1.16   0.244     .9547773    1.199442
+                        |
+     case#critical_care |
+COVID-19#Critical care  |   .8575988   .0738139    -1.78   0.074     .7244707     1.01519
+-----------------------------------------------------------------------------------------
+
+. stcox 1.case##1.critical_care, vce(cluster practice_id) allbase noomit
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.634
+Iteration 2:   log pseudolikelihood = -18428.633
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.633
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(3)  =   3.93
+Log pseudolikelihood = -18428.633                       Prob > chi2   = 0.2695
+
+                                      (Std. err. adjusted for 38 clusters in practice_id)
+-----------------------------------------------------------------------------------------
+                        |               Robust
+                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+                   case |
+              COVID-19  |   1.005079   .0333831     0.15   0.879     .9417332    1.072685
+                        |
+          critical_care |
+         Critical care  |    1.07014   .0622804     1.16   0.244     .9547773    1.199442
+                        |
+     case#critical_care |
+COVID-19#Critical care  |   .8575988   .0738139    -1.78   0.074     .7244707     1.01519
+-----------------------------------------------------------------------------------------
+
+. stcox 1.case##0.critical_care, vce(cluster practice_id)
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.634
+Iteration 2:   log pseudolikelihood = -18428.633
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.633
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(3)  =   3.93
+Log pseudolikelihood = -18428.633                       Prob > chi2   = 0.2695
+
+                                   (Std. err. adjusted for 38 clusters in practice_id)
+--------------------------------------------------------------------------------------
+                     |               Robust
+                  _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+---------------------+----------------------------------------------------------------
+                case |
+           COVID-19  |   .8619542   .0802427    -1.60   0.111     .7181951    1.034489
+                     |
+       critical_care |
+         Ward-based  |   .9344572   .0543839    -1.16   0.244     .8337213    1.047365
+                     |
+  case#critical_care |
+COVID-19#Ward-based  |   1.166046   .1003622     1.78   0.074      .985037    1.380318
+--------------------------------------------------------------------------------------
+
+. stcox 1.case##1.critical_care, vce(cluster practice_id)  base
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.634
+Iteration 2:   log pseudolikelihood = -18428.633
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.633
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(3)  =   3.93
+Log pseudolikelihood = -18428.633                       Prob > chi2   = 0.2695
+
+                                      (Std. err. adjusted for 38 clusters in practice_id)
+-----------------------------------------------------------------------------------------
+                        |               Robust
+                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+                   case |
+              COVID-19  |   1.005079   .0333831     0.15   0.879     .9417332    1.072685
+                        |
+          critical_care |
+         Critical care  |    1.07014   .0622804     1.16   0.244     .9547773    1.199442
+                        |
+     case#critical_care |
+COVID-19#Critical care  |   .8575988   .0738139    -1.78   0.074     .7244707     1.01519
+-----------------------------------------------------------------------------------------
+
+. stcox 1.case##1.critical_care, vce(cluster practice_id) allbase
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.634
+Iteration 2:   log pseudolikelihood = -18428.633
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.633
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(3)  =   3.93
+Log pseudolikelihood = -18428.633                       Prob > chi2   = 0.2695
+
+                                      (Std. err. adjusted for 38 clusters in practice_id)
+-----------------------------------------------------------------------------------------
+                        |               Robust
+                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+                   case |
+              COVID-19  |   1.005079   .0333831     0.15   0.879     .9417332    1.072685
+                        |
+          critical_care |
+         Critical care  |    1.07014   .0622804     1.16   0.244     .9547773    1.199442
+                        |
+     case#critical_care |
+COVID-19#Critical care  |   .8575988   .0738139    -1.78   0.074     .7244707     1.01519
+-----------------------------------------------------------------------------------------
+
+. stcox 1.case##1.critical_care, vce(cluster practice_id) efron
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -18429.004
+Iteration 1:   log pseudolikelihood = -18428.478
+Iteration 2:   log pseudolikelihood = -18428.477
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.477
+
+Cox regression with Efron method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(3)  =   3.93
+Log pseudolikelihood = -18428.477                       Prob > chi2   = 0.2696
+
+                                      (Std. err. adjusted for 38 clusters in practice_id)
+-----------------------------------------------------------------------------------------
+                        |               Robust
+                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+                   case |
+              COVID-19  |    1.00508   .0333881     0.15   0.879     .9417252    1.072697
+                        |
+          critical_care |
+         Critical care  |    1.07015   .0622895     1.16   0.244     .9547716    1.199472
+                        |
+     case#critical_care |
+COVID-19#Critical care  |   .8575898   .0738221    -1.78   0.074     .7244484      1.0152
+-----------------------------------------------------------------------------------------
+
+. stcox 1.case#i.critical_care, vce(cluster practice_id)
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.842
+Iteration 2:   log pseudolikelihood = -18428.841
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.841
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(2)  =   0.86
+Log pseudolikelihood = -18428.841                       Prob > chi2   = 0.6508
+
+                                      (Std. err. adjusted for 38 clusters in practice_id)
+-----------------------------------------------------------------------------------------
+                        |               Robust
+                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+     case#critical_care |
+   COVID-19#Ward-based  |   .9982462   .0309733    -0.06   0.955     .9393487    1.060837
+COVID-19#Critical care  |   .9161406   .0969794    -0.83   0.408     .7444868    1.127372
+-----------------------------------------------------------------------------------------
+
+. stcox 1.case#i.critical_care, vce(cluster practice_id) efron
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood = -18429.004
+Iteration 1:   log pseudolikelihood = -18428.686
+Iteration 2:   log pseudolikelihood = -18428.685
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.685
+
+Cox regression with Efron method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(2)  =   0.86
+Log pseudolikelihood = -18428.685                       Prob > chi2   = 0.6508
+
+                                      (Std. err. adjusted for 38 clusters in practice_id)
+-----------------------------------------------------------------------------------------
+                        |               Robust
+                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+     case#critical_care |
+   COVID-19#Ward-based  |   .9982464   .0309776    -0.06   0.955     .9393409    1.060846
+COVID-19#Critical care  |   .9161401   .0969877    -0.83   0.408     .7444729    1.127392
+-----------------------------------------------------------------------------------------
+
+. stcox 1.case#i.critical_care, vce(cluster practice_id) base
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.842
+Iteration 2:   log pseudolikelihood = -18428.841
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.841
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(2)  =   0.86
+Log pseudolikelihood = -18428.841                       Prob > chi2   = 0.6508
+
+                                      (Std. err. adjusted for 38 clusters in practice_id)
+-----------------------------------------------------------------------------------------
+                        |               Robust
+                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+     case#critical_care |
+   COVID-19#Ward-based  |   .9982462   .0309733    -0.06   0.955     .9393487    1.060837
+COVID-19#Critical care  |   .9161406   .0969794    -0.83   0.408     .7444868    1.127372
+-----------------------------------------------------------------------------------------
+
+. stcox 1.case#i.critical_care, vce(cluster practice_id) allbase
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.842
+Iteration 2:   log pseudolikelihood = -18428.841
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.841
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(2)  =   0.86
+Log pseudolikelihood = -18428.841                       Prob > chi2   = 0.6508
+
+                                      (Std. err. adjusted for 38 clusters in practice_id)
+-----------------------------------------------------------------------------------------
+                        |               Robust
+                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+     case#critical_care |
+   COVID-19#Ward-based  |   .9982462   .0309733    -0.06   0.955     .9393487    1.060837
+COVID-19#Critical care  |   .9161406   .0969794    -0.83   0.408     .7444868    1.127372
+-----------------------------------------------------------------------------------------
+
+. stcox 0.case#i.critical_care, vce(cluster practice_id)
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.928
+Iteration 2:   log pseudolikelihood = -18428.927
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.927
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(2)  =   1.98
+Log pseudolikelihood = -18428.927                       Prob > chi2   = 0.3711
+
+                                                      (Std. err. adjusted for 38 clusters in practice_id)
+---------------------------------------------------------------------------------------------------------
+                                        |               Robust
+                                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+----------------------------------------+----------------------------------------------------------------
+                     case#critical_care |
+   Pneumonia (pre-pandemic)#Ward-based  |   1.003123   .0368947     0.08   0.932     .9333557    1.078105
+Pneumonia (pre-pandemic)#Critical care  |   1.073483     .05423     1.40   0.160     .9722864    1.185212
+---------------------------------------------------------------------------------------------------------
+
+. stcox 1.case#0.critical_care, vce(cluster practice_id)
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18429.152
+Iteration 2:   log pseudolikelihood = -18429.152
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18429.152
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(1)  =   0.04
+Log pseudolikelihood = -18429.152                       Prob > chi2   = 0.8425
+
+                                   (Std. err. adjusted for 38 clusters in practice_id)
+--------------------------------------------------------------------------------------
+                     |               Robust
+                  _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+---------------------+----------------------------------------------------------------
+  case#critical_care |
+COVID-19#Ward-based  |    1.00553   .0278972     0.20   0.842     .9523121    1.061721
+--------------------------------------------------------------------------------------
+
+. stcox 1.case##0.critical_care, vce(cluster practice_id)
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18428.634
+Iteration 2:   log pseudolikelihood = -18428.633
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18428.633
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(3)  =   3.93
+Log pseudolikelihood = -18428.633                       Prob > chi2   = 0.2695
+
+                                   (Std. err. adjusted for 38 clusters in practice_id)
+--------------------------------------------------------------------------------------
+                     |               Robust
+                  _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+---------------------+----------------------------------------------------------------
+                case |
+           COVID-19  |   .8619542   .0802427    -1.60   0.111     .7181951    1.034489
+                     |
+       critical_care |
+         Ward-based  |   .9344572   .0543839    -1.16   0.244     .8337213    1.047365
+                     |
+  case#critical_care |
+COVID-19#Ward-based  |   1.166046   .1003622     1.78   0.074      .985037    1.380318
+--------------------------------------------------------------------------------------
+
+. stcox 1.case#i.adm_aki, vce(cluster practice_id)
+
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
+       ID variable: patient_id
+
+Iteration 0:   log pseudolikelihood =  -18429.16
+Iteration 1:   log pseudolikelihood = -18429.136
+Iteration 2:   log pseudolikelihood = -18429.136
+Refining estimates:
+Iteration 0:   log pseudolikelihood = -18429.136
+
+Cox regression with Breslow method for ties
+
+No. of subjects =      25,025                           Number of obs = 25,290
+No. of failures =       1,931
+Time at risk    = 32,222.5133
+                                                        Wald chi2(2)  =   0.12
+Log pseudolikelihood = -18429.136                       Prob > chi2   = 0.9434
+
+                               (Std. err. adjusted for 38 clusters in practice_id)
+----------------------------------------------------------------------------------
+                 |               Robust
+              _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
+-----------------+----------------------------------------------------------------
+    case#adm_aki |
+COVID-19#No AKI  |    .990241   .0285373    -0.34   0.734     .9358592    1.047783
+   COVID-19#AKI  |    .989912   .0557739    -0.18   0.857     .8864167    1.105491
+----------------------------------------------------------------------------------
+

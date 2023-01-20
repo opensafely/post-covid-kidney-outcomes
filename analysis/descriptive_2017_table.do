@@ -176,7 +176,8 @@ file write tablecontent _tab ("Total")				  			  _tab ///
 							 ("`lab0'")  						  _tab ///
 							 ("`lab1'")  						  _n 							 
 							 
-
+** Need to add line 95 from Kevin's
+** wherever label ensure same name
 
 * DEMOGRAPHICS (more than one level, potentially missing) 
 

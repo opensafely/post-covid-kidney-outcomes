@@ -740,7 +740,8 @@ gen end_date = date("2022-11-30", "YMD") if case==1
 replace end_date = date("2019-11-30", "YMD") if case==0
 format end_date %td
 replace exit_date_esrd = min(deregistered_date, death_date, end_date) if esrd_date==.
-gen esrd_denominator = 1/365.25
+gen esrd_denominator = 1
+gen follow_up_time_esrd = (exit_date_esrd - index_date_esrd)
 label var follow_up_time_esrd "Follow-up time (Days)"
 gen follow_up_cat_esrd = follow_up_time_esrd
 recode follow_up_cat_esrd	min/-29=1 	///
