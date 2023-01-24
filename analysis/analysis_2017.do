@@ -159,7 +159,7 @@ drop krt_outcome_date
 drop if krt_date < index_date
 gen index_date_28 = index_date + 28
 format index_date_28 %td
-replace krt_date = index_date_28 if krt_date < index_date_28
+replace krt_date = index_date_28 + 1 if krt_date < index_date_28 + 1
 
 * Death before index_date + 28 days (i.e. only include people who survived 28 days after index_date)
 gen death_date1 = date(death_date, "YMD")
@@ -167,7 +167,7 @@ format death_date1 %td
 drop death_date
 rename death_date1 death_date
 gen deceased = 0
-replace deceased = 1 if death_date < index_date_28
+replace deceased = 1 if death_date < index_date_28 + 1
 label define deceased 0 "Alive at 28 days after index date" 1 "Deceased within 28 days of index date"
 label values deceased deceased
 tab case deceased
@@ -828,30 +828,30 @@ label var follow_up_time_death "Follow-up time (death) (Days)"
 gen follow_up_years_death = follow_up_time_death/365.25
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
-
+tab _st follow_up_cat_esrd
 foreach outcome of varlist esrd egfr_half aki death {
 	bysort case: egen total_follow_up_`outcome' = total(_t)
-	forvalues i=0/1
-	di Denominator case=`i' `outcome':
+	forvalues i=0/1 {
+	di "Denominator case=`i' `outcome':"
 	count if case==`i' & `outcome'_denominator==1
 	local denominator = r(N)
-	di Denominator(_st=1) case=`i' `outcome':
+	di "Denominator(_st=1) case=`i' `outcome':"
 	count if case==`i' & `outcome'_denominator==1 & _st==1
 	local st_denominator = r(N)
-	di Events case=`i' `outcome':
+	di "Events case=`i' `outcome':"
 	count if case==`i' & `outcome'==1
 	local event = r(N)
-	di Events (_st=1) case=`i' `outcome':
+	di "Events (_st=1) case=`i' `outcome':"
 	count if case==`i' & `outcome'==1 & _st==1
 	local st_event = r(N)
-	di Total follow_up case=`i' `outcome':
+	di "Total follow_up case=`i' `outcome':"
 	su total_follow_up_`outcome' if case==`i'
 	local person_year = r(mean)
 	local rate = 100000*(`event'/`person_year')
-	di Rate case=`i' `outcome':
+	di "Rate case=`i' `outcome':"
 	di `rate'
 	local st_rate = 100000*(`st_event'/`person_year')
-	di Rate (_st=1) case=`i' `outcome':
+	di "Rate (_st=1) case=`i' `outcome':"
 	di `st_rate'
 	}
 }

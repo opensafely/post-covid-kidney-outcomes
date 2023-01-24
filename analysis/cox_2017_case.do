@@ -74,7 +74,7 @@ local lab1: label case 1
 	
 	file write tablecontent _n
 	file write tablecontent ("`outcome'") _n
-	file write tablecontent _tab ("`lab0'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
+	file write tablecontent _tab ("`lab0'") _tab _tab (`r_denominator') _tab _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 	
 	qui safecount if case==1  & `outcome'_denominator==1
 	local denominator = r(N)
