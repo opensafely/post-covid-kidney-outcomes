@@ -87,6 +87,12 @@ preserve
 	safecount
 restore
 
+**ID
+* Need to create unique identifiers as individuals may be in both covid_2017_matched and 2017_matched so will have the same patient_id
+gen unique = _n
+label var unique "Unique ID"
+
+
 ** Exclusions
 * Index of multiple deprivation missing
 * Ordered 1-5 from most deprived to least deprived
@@ -732,8 +738,6 @@ foreach exposure of varlist 	case			///
 								by `exposure',sort: sum esrd_time, de
 								tab esrd_time_cat `exposure', m col chi
 								}
-	
-* Exit date
 gen exit_date_esrd = esrd_date
 format exit_date_esrd %td
 gen end_date = date("2022-11-30", "YMD") if case==1
@@ -746,16 +750,18 @@ label var follow_up_time_esrd "Follow-up time (Days)"
 gen follow_up_cat_esrd = follow_up_time_esrd
 recode follow_up_cat_esrd	min/-29=1 	///
 						-28/-1=2 	///
-						0/365=3 	///
-						366/730=4 	///
-						731/1040=5	///					
-						1041/max=6
-label define follow_up_cat_esrd 	1 "<-29 days" 		///
-							2 "-28 to -1 days" 	///
-							3 "0 to 365 days" 	///
-							4 "366 to 730 days" ///
-							5 "731 to 1040 days"	///
-							6 ">1040 days"
+						0=3			///
+						1/365=4 	///
+						366/730=5	///
+						731/1040=6	///					
+						1041/max=7
+label define follow_up_cat_esrd 	1 "<-29 days" 	///
+							2 "-28 to -1 days" 		///
+							3 "0 days"				///
+							4 "1 to 365 days"		///
+							5 "366 to 730 days" 	///
+							6 "731 to 1040 days"	///
+							7 ">1040 days"
 label values follow_up_cat_esrd follow_up_cat_esrd
 label var follow_up_cat_esrd "Follow_up time"
 tab case follow_up_cat_esrd
@@ -820,6 +826,35 @@ gen death_denominator = 1
 gen follow_up_time_death = (exit_date_death - index_date_death)
 label var follow_up_time_death "Follow-up time (death) (Days)"
 gen follow_up_years_death = follow_up_time_death/365.25
+
+stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+
+foreach outcome of varlist esrd egfr_half aki death {
+	bysort case: egen total_follow_up_`outcome' = total(_t)
+	forvalues i=0/1
+	di Denominator case=`i' `outcome':
+	count if case==`i' & `outcome'_denominator==1
+	local denominator = r(N)
+	di Denominator(_st=1) case=`i' `outcome':
+	count if case==`i' & `outcome'_denominator==1 & _st==1
+	local st_denominator = r(N)
+	di Events case=`i' `outcome':
+	count if case==`i' & `outcome'==1
+	local event = r(N)
+	di Events (_st=1) case=`i' `outcome':
+	count if case==`i' & `outcome'==1 & _st==1
+	local st_event = r(N)
+	di Total follow_up case=`i' `outcome':
+	su total_follow_up_`outcome' if case==`i'
+	local person_year = r(mean)
+	local rate = 100000*(`event'/`person_year')
+	di Rate case=`i' `outcome':
+	di `rate'
+	local st_rate = 100000*(`st_event'/`person_year')
+	di Rate (_st=1) case=`i' `outcome':
+	di `st_rate'
+	}
+}
 
 save ./output/analysis_2017.dta, replace
 log close
