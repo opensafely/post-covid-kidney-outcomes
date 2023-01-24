@@ -28,79 +28,56 @@ foreach outcome of varlist esrd egfr_half aki death {
 stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
 
 stcox i.case, vce(cluster set_id) strata(practice_id)
-estimates save "crude_case_`outcome'", replace 
-eststo model1
-parmest, label eform format(estimate p lb ub) saving("crude_case_`outcome'", replace) idstr("crude_case_`outcome'") 
-local hr "`hr' "crude_case_`outcome'" "
+matrix table = r(table)
+local crude_case_`outcome'_b: display %4.2f table[1,2]
+local crude_case_`outcome'_ll: display %4.2f table[5,2]
+local crude_case_`outcome'_ul: display %4.2f table[6,2]
 
 stcox i.case i.sex age1 age2 age3, vce(cluster set_id) strata(practice_id)
-estimates save "minimal_case_`outcome'", replace 
-eststo model2
-parmest, label eform format(estimate p lb ub) saving("minimal_case_`outcome'", replace) idstr("minimal_case_`outcome'")
-local hr "`hr' "minimal_case_`outcome'" "
+matrix table = r(table)
+local minimal_case_`outcome'_b: display %4.2f table[1,2]
+local minimal_case_`outcome'_ll: display %4.2f table[5,2]
+local minimal_case_`outcome'_ul: display %4.2f table[6,2]
 
 stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3, vce(cluster set_id) strata(practice_id)
-if _rc==0{
-estimates
-estimates save "additional_case_`outcome'", replace 
-eststo model3
-parmest, label eform format(estimate p lb ub) saving("additional_case_`outcome'", replace) idstr("additional_case_`outcome'") 
-local hr "`hr' "additional_case_`outcome'" "
-}
-else di "WARNING MODEL1 DID NOT FIT (`outcome')"
+matrix table = r(table)
+local additional_case_`outcome'_b: display %4.2f table[1,2]
+local additional_case_`outcome'_ll: display %4.2f table[5,2]
+local additional_case_`outcome'_ul: display %4.2f table[6,2]
 
 stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster set_id) strata(practice_id)		
-if _rc==0{
-estimates
-estimates save "full_case_`outcome'", replace 
-eststo model4
-parmest, label eform format(estimate p lb ub) saving("full_case_`outcome'", replace) idstr("full_case_`outcome'") 
-local hr "`hr' "full_case_`outcome'" "
-}
-else di "WARNING MODEL2 DID NOT FIT (`outcome')"				
+matrix table = r(table)
+local full_case_`outcome'_b: display %4.2f table[1,2]
+local full_case_`outcome'_ll: display %4.2f table[5,2]
+local full_case_`outcome'_ul: display %4.2f table[6,2]			
 								
 local lab0: label case 0
 local lab1: label case 1
 
-	qui safecount if case==0 & `outcome'_denominator==1
-	local denominator = r(N)
-	local r_denominator = round(`denominator',5)
-	qui safecount if case== 0 & `outcome'==1
-	local event = r(N)
-	local r_event = round(`event',5)
+	qui safecount if case==0 & `outcome'_denominator==1 & _st==1
+	local denominator = round(r(N),5)
+	qui safecount if case== 0 & `outcome'==1 & _st==1
+	local event = round(r(N),5)
 	qui su total_follow_up_`outcome' if case==0
 	local person_year = r(mean)
-	local rate = 100000*(`r_event'/`person_year')
+	local rate = 100000*(`event'/`person_year')
 	
 	file write tablecontent _n
 	file write tablecontent ("`outcome'") _n
-	file write tablecontent _tab ("`lab0'") _tab _tab (`r_denominator') _tab _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
+	file write tablecontent _tab ("`lab0'") _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 	
-	qui safecount if case==1  & `outcome'_denominator==1
-	local denominator = r(N)
-	local r_denominator = round(`denominator',5)
-	qui safecount if case == 1 & `outcome'==1
-	local event = r(N)
-	local r_event = round(`event',5)
+	qui safecount if case==1  & `outcome'_denominator==1 & _st==1
+	local denominator = round(r(N),5)
+	qui safecount if case == 1 & `outcome'==1 &  _st==1
+	local event = round(r(N),5)
 	qui su total_follow_up_`outcome' if case==1
 	local person_year = r(mean)
-	local rate = 100000*(`r_event'/`person_year')
-	file write tablecontent _tab ("`lab1'") _tab _tab _tab (`r_denominator') _tab _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab  
-	cap estimates use "crude_case_`outcome'" 
-	 cap lincom 1.case, eform
-	file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
-	cap estimates clear
-	cap estimates use "minimal_case_`outcome'" 
-	 cap lincom 1.case, eform
-	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
-	cap estimates clear
-	cap estimates use "additional_case_`outcome'" 
-	 cap lincom 1.case, eform
-	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
-	cap estimates clear
-	cap estimates use "full_case_`outcome'" 
-	 cap lincom 1.case, eform
-	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
+	local rate = 100000*(`event'/`person_year')
+	file write tablecontent _tab ("`lab1'") _tab _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab  
+	file write tablecontent  _tab %4.2f (`crude_case_`outcome'_b') _tab ("(") %4.2f (`crude_case_`outcome'_ll') (" - ") %4.2f (`crude_case_`outcome'_ul') (")")
+	file write tablecontent  _tab %4.2f (`minimal_case_`outcome'_b') _tab ("(") %4.2f (`minimal_case_`outcome'_ll') (" - ") %4.2f (`minimal_case_`outcome'_ul') (")")
+	file write tablecontent  _tab %4.2f (`additional_case_`outcome'_b') _tab ("(") %4.2f (`additional_case_`outcome'_ll') (" - ") %4.2f (`additional_case_`outcome'_ul') (")")
+	file write tablecontent  _tab %4.2f (`full_case_`outcome'_b') _tab ("(") %4.2f (`full_case_`outcome'_ll') (" - ") %4.2f (`full_case_`outcome'_ul') (")") _tab _n
 }
 
 file close tablecontent
