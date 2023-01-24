@@ -829,7 +829,9 @@ gen follow_up_years_death = follow_up_time_death/365.25
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 tab _st follow_up_cat_esrd
+
 foreach outcome of varlist esrd egfr_half aki death {
+	stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
 	bysort case: egen total_follow_up_`outcome' = total(_t)
 	forvalues i=0/1 {
 	di "Denominator case=`i' `outcome':"
@@ -854,6 +856,7 @@ foreach outcome of varlist esrd egfr_half aki death {
 	di "Rate (_st=1) case=`i' `outcome':"
 	di `st_rate'
 	}
+	drop total_follow_up_`outcome'
 }
 
 save ./output/analysis_2017.dta, replace

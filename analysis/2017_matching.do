@@ -2,7 +2,16 @@ cap log close
 log using ./logs/2017_matching, replace t
 clear
 
-import delimited ./output/input_2017_matching.csv, delimiter(comma) varnames(1) case(preserve) 
+capture noisily import delimited ./output/covid_matching_2017.csv, clear
+keep patient_id covid_date
+tempfile covid_list_2017
+save `covid_list_2017', replace
+
+capture noisily import delimited ./output/input_2017_matching.csv, delimiter(comma) varnames(1) case(preserve) clear
+append using `covid_list_2017', force
+duplicates drop patient_id, force
+drop if covid_date!=""
+drop covid_date
 
 **Exclusions
 * Age <18

@@ -25,87 +25,88 @@ file write tablecontent ("By COVID-19 AKI") _n
 
 use ./output/analysis_2017.dta, clear
 foreach outcome of varlist esrd egfr_half aki death {
-stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(patient_id) scale(365.25)
+stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
+bysort covid_aki: egen total_follow_up_`outcome' = total(_t)
 
 stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
-estimates save "crude_covid_aki_`outcome'", replace 
-eststo model1
-parmest, label eform format(estimate p lb ub) saving("crude_covid_aki_`outcome'", replace) idstr("crude_covid_aki_`outcome'") 
-local hr "`hr' "crude_covid_aki_`outcome'" "
+matrix table = r(table)
+local crude_`outcome'_1b: display %4.2f table[1,2]
+local crude_`outcome'_1ll: display %4.2f table[5,2]
+local crude_`outcome'_1ul: display %4.2f table[6,2]
+local crude_`outcome'_2b: display %4.2f table[1,3]
+local crude_`outcome'_2ll: display %4.2f table[5,3]
+local crude_`outcome'_2ul: display %4.2f table[6,3]
+local crude_`outcome'_3b: display %4.2f table[1,4]
+local crude_`outcome'_3ll: display %4.2f table[5,4]
+local crude_`outcome'_3ul: display %4.2f table[6,4]
 
 stcox i.covid_aki i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id)
-estimates save "minimal_covid_aki_`outcome'", replace 
-eststo model2
-parmest, label eform format(estimate p lb ub) saving("minimal_covid_aki_`outcome'", replace) idstr("minimal_covid_aki_`outcome'")
-local hr "`hr' "minimal_covid_aki_`outcome'" "
+matrix table = r(table)
+local minimal_`outcome'_1b: display %4.2f table[1,2]
+local minimal_`outcome'_1ll: display %4.2f table[5,2]
+local minimal_`outcome'_1ul: display %4.2f table[6,2]
+local minimal_`outcome'_2b: display %4.2f table[1,3]
+local minimal_`outcome'_2ll: display %4.2f table[5,3]
+local minimal_`outcome'_2ul: display %4.2f table[6,3]
+local minimal_`outcome'_3b: display %4.2f table[1,4]
+local minimal_`outcome'_3ll: display %4.2f table[5,4]
+local minimal_`outcome'_3ul: display %4.2f table[6,4]
 
 stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
-if _rc==0{
-estimates
-estimates save "additional_covid_aki_`outcome'", replace 
-eststo model3
-parmest, label eform format(estimate p lb ub) saving("additional_covid_aki_`outcome'", replace) idstr("additional_covid_aki_`outcome'") 
-local hr "`hr' "additional_covid_aki_`outcome'" "
-}
-else di "WARNING MODEL1 DID NOT FIT (`outcome')"
+matrix table = r(table)
+local additional_`outcome'_1b: display %4.2f table[1,2]
+local additional_`outcome'_1ll: display %4.2f table[5,2]
+local additional_`outcome'_1ul: display %4.2f table[6,2]
+local additional_`outcome'_2b: display %4.2f table[1,3]
+local additional_`outcome'_2ll: display %4.2f table[5,3]
+local additional_`outcome'_2ul: display %4.2f table[6,3]
+local additional_`outcome'_3b: display %4.2f table[1,4]
+local additional_`outcome'_3ll: display %4.2f table[5,4]
+local additional_`outcome'_3ul: display %4.2f table[6,4]
 
 stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.region i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)		
-if _rc==0{
-estimates
-estimates save "full_covid_aki_`outcome'", replace 
-eststo model4
-parmest, label eform format(estimate p lb ub) saving("full_covid_aki_`outcome'", replace) idstr("full_covid_aki_`outcome'") 
-local hr "`hr' "full_covid_aki_`outcome'" "
-}
-else di "WARNING MODEL2 DID NOT FIT (`outcome')"
+matrix table = r(table)
+local full_`outcome'_1b: display %4.2f table[1,2]
+local full_`outcome'_1ll: display %4.2f table[5,2]
+local full_`outcome'_1ul: display %4.2f table[6,2]
+local full_`outcome'_2b: display %4.2f table[1,3]
+local full_`outcome'_2ll: display %4.2f table[5,3]
+local full_`outcome'_2ul: display %4.2f table[6,3]
+local full_`outcome'_3b: display %4.2f table[1,4]
+local full_`outcome'_3ll: display %4.2f table[5,4]
+local full_`outcome'_3ul: display %4.2f table[6,4]
 										
 local lab0: label covid_aki 0
 local lab1: label covid_aki 1
 local lab2: label covid_aki 2
 local lab3: label covid_aki 3
 
-	qui safecount if covid_aki==0 & `outcome'_denominator==1
-	local denominator = r(N)
-	local r_denominator = round(`denominator',5)
-	qui safecount if covid_aki== 0 & `outcome'==1
-	local event = r(N)
-	local r_event = round(`event',5)
-    bysort covid_aki: egen total_follow_up_`outcome' = total(_t)
+	qui safecount if covid_aki==0 & `outcome'_denominator==1 & _st==1
+	local denominator = round(r(N),5)
+	qui safecount if covid_aki== 0 & `outcome'==1 & _st==1
+	local event = round(r(N),5)
 	qui su total_follow_up_`outcome' if covid_aki==0
 	local person_year = r(mean)
-	local rate = 100000*(`r_event'/`person_year')
+	local rate = 100000*(`event'/`person_year')
 	
 	file write tablecontent _n
 	file write tablecontent ("`outcome'") _n
-	file write tablecontent _tab ("`lab0'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
+	file write tablecontent _tab ("`lab0'") _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
 	file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 	
 forvalues severity=1/3 {
-	qui safecount if covid_aki==`severity' & `outcome'_denominator==1
-	local denominator = r(N)
-	local r_denominator = round(`denominator',5)
-	qui safecount if covid_aki == `severity' & `outcome'==1
-	local event = r(N)
-	local r_event = round(`event',5)
+	qui safecount if covid_aki==`severity'  & `outcome'_denominator==1 & _st==1
+	local denominator = round(r(N),5)
+	qui safecount if covid_aki==`severity' & `outcome'==1 &  _st==1
+	local event = round(r(N),5)
 	qui su total_follow_up_`outcome' if covid_aki==`severity'
 	local person_year = r(mean)
-	local rate = 100000*(`r_event'/`person_year')
-	file write tablecontent _tab ("`lab`severity''") _tab _tab (`r_denominator') _tab _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab 
-	cap estimates use "crude_covid_aki_`outcome'" 
-	 cap lincom `severity'.covid_aki, eform
-	file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
-	cap estimates clear
-	cap estimates use "minimal_covid_aki_`outcome'" 
-	 cap lincom `severity'.covid_aki, eform
-	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
-	cap estimates clear
-	cap estimates use "additional_covid_aki_`outcome'" 
-	 cap lincom `severity'.covid_aki, eform
-	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
-	cap estimates clear
-	cap estimates use "full_covid_aki_`outcome'" 
-	 cap lincom `severity'.covid_aki, eform
-	file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
+	local rate = 100000*(`event'/`person_year')
+	file write tablecontent _tab ("`lab`severity''") _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab
+	file write tablecontent  _tab %4.2f (`crude_`outcome'_`severity'b') _tab ("(") %4.2f (`crude_`outcome'_`severity'll') (" - ") %4.2f (`crude_`outcome'_`severity'ul') (")")
+	file write tablecontent  _tab %4.2f (`minimal_`outcome'_`severity'b') _tab ("(") %4.2f (`minimal_`outcome'_`severity'll') (" - ") %4.2f (`minimal_`outcome'_`severity'ul') (")")
+	file write tablecontent  _tab %4.2f (`additional_`outcome'_`severity'b') _tab ("(") %4.2f (`additional_`outcome'_`severity'll') (" - ") %4.2f (`additional_`outcome'_`severity'ul') (")")
+	file write tablecontent  _tab %4.2f (`full_`outcome'_`severity'b') _tab ("(") %4.2f (`full_`outcome'_`severity'll') (" - ") %4.2f (`full_`outcome'_`severity'ul') (")") _tab _n
 	}
 }
 

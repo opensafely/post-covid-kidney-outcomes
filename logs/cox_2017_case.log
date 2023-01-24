@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/cox_2017_case.log
   log type:  text
- opened on:  24 Jan 2023, 16:06:41
+ opened on:  24 Jan 2023, 17:26:52
 
 . 
 . cap file close tablecontent
@@ -45,59 +45,60 @@
 
 . foreach outcome of varlist esrd egfr_half aki death {
   2. stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
-  3. 
+  3. bysort case: egen total_follow_up_`outcome' = total(_t)
+  4. 
 . stcox i.case, vce(cluster set_id) strata(practice_id)
-  4. matrix table = r(table)
-  5. local crude_case_`outcome'_b: display %4.2f table[1,2]
-  6. local crude_case_`outcome'_ll: display %4.2f table[5,2]
-  7. local crude_case_`outcome'_ul: display %4.2f table[6,2]
-  8. 
+  5. matrix table = r(table)
+  6. local crude_`outcome'_b: display %4.2f table[1,2]
+  7. local crude_`outcome'_ll: display %4.2f table[5,2]
+  8. local crude_`outcome'_ul: display %4.2f table[6,2]
+  9. 
 . stcox i.case i.sex age1 age2 age3, vce(cluster set_id) strata(practice_id)
-  9. matrix table = r(table)
- 10. local minimal_case_`outcome'_b: display %4.2f table[1,2]
- 11. local minimal_case_`outcome'_ll: display %4.2f table[5,2]
- 12. local minimal_case_`outcome'_ul: display %4.2f table[6,2]
- 13. 
+ 10. matrix table = r(table)
+ 11. local minimal_`outcome'_b: display %4.2f table[1,2]
+ 12. local minimal_`outcome'_ll: display %4.2f table[5,2]
+ 13. local minimal_`outcome'_ul: display %4.2f table[6,2]
+ 14. 
 . stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3, vce(cluster set_id) strata(practice_id)
- 14. matrix table = r(table)
- 15. local additional_case_`outcome'_b: display %4.2f table[1,2]
- 16. local additional_case_`outcome'_ll: display %4.2f table[5,2]
- 17. local additional_case_`outcome'_ul: display %4.2f table[6,2]
- 18. 
+ 15. matrix table = r(table)
+ 16. local additional_`outcome'_b: display %4.2f table[1,2]
+ 17. local additional_`outcome'_ll: display %4.2f table[5,2]
+ 18. local additional_`outcome'_ul: display %4.2f table[6,2]
+ 19. 
 . stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster set_id) strata(practice_id)           
- 19. matrix table = r(table)
- 20. local full_case_`outcome'_b: display %4.2f table[1,2]
- 21. local full_case_`outcome'_ll: display %4.2f table[5,2]
- 22. local full_case_`outcome'_ul: display %4.2f table[6,2]                  
- 23.                                                                 
+ 20. matrix table = r(table)
+ 21. local full_`outcome'_b: display %4.2f table[1,2]
+ 22. local full_`outcome'_ll: display %4.2f table[5,2]
+ 23. local full_`outcome'_ul: display %4.2f table[6,2]                       
+ 24.                                                                 
 . local lab0: label case 0
- 24. local lab1: label case 1
- 25. 
+ 25. local lab1: label case 1
+ 26. 
 .         qui safecount if case==0 & `outcome'_denominator==1 & _st==1
- 26.         local denominator = round(r(N),5)
- 27.         qui safecount if case== 0 & `outcome'==1 & _st==1
- 28.         local event = round(r(N),5)
- 29.         qui su total_follow_up_`outcome' if case==0
- 30.         local person_year = r(mean)
- 31.         local rate = 100000*(`event'/`person_year')
- 32.         
+ 27.         local denominator = round(r(N),5)
+ 28.         qui safecount if case== 0 & `outcome'==1 & _st==1
+ 29.         local event = round(r(N),5)
+ 30.         qui su total_follow_up_`outcome' if case==0
+ 31.         local person_year = r(mean)
+ 32.         local rate = 100000*(`event'/`person_year')
+ 33.         
 .         file write tablecontent _n
- 33.         file write tablecontent ("`outcome'") _n
- 34.         file write tablecontent _tab ("`lab0'") _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
- 35.         
+ 34.         file write tablecontent ("`outcome'") _n
+ 35.         file write tablecontent _tab ("`lab0'") _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
+ 36.         
 .         qui safecount if case==1  & `outcome'_denominator==1 & _st==1
- 36.         local denominator = round(r(N),5)
- 37.         qui safecount if case == 1 & `outcome'==1 &  _st==1
- 38.         local event = round(r(N),5)
- 39.         qui su total_follow_up_`outcome' if case==1
- 40.         local person_year = r(mean)
- 41.         local rate = 100000*(`event'/`person_year')
- 42.         file write tablecontent _tab ("`lab1'") _tab _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab  
- 43.         file write tablecontent  _tab %4.2f (`crude_case_`outcome'_b') _tab ("(") %4.2f (`crude_case_`outcome'_ll') (" - ") %4.2f (`crude_case_`outcome'_ul') (")")
- 44.         file write tablecontent  _tab %4.2f (`minimal_case_`outcome'_b') _tab ("(") %4.2f (`minimal_case_`outcome'_ll') (" - ") %4.2f (`minimal_case_`outcome'_ul') (")")
- 45.         file write tablecontent  _tab %4.2f (`additional_case_`outcome'_b') _tab ("(") %4.2f (`additional_case_`outcome'_ll') (" - ") %4.2f (`additional_case_`outcome'_ul') (")")
- 46.         file write tablecontent  _tab %4.2f (`full_case_`outcome'_b') _tab ("(") %4.2f (`full_case_`outcome'_ll') (" - ") %4.2f (`full_case_`outcome'_ul') (")") _tab _n
- 47. }
+ 37.         local denominator = round(r(N),5)
+ 38.         qui safecount if case == 1 & `outcome'==1 &  _st==1
+ 39.         local event = round(r(N),5)
+ 40.         qui su total_follow_up_`outcome' if case==1
+ 41.         local person_year = r(mean)
+ 42.         local rate = 100000*(`event'/`person_year')
+ 43.         file write tablecontent _tab ("`lab1'") _tab _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab  
+ 44.         file write tablecontent  _tab %4.2f (`crude_`outcome'_b') _tab ("(") %4.2f (`crude_`outcome'_ll') (" - ") %4.2f (`crude_`outcome'_ul') (")")
+ 45.         file write tablecontent  _tab %4.2f (`minimal_`outcome'_b') _tab ("(") %4.2f (`minimal_`outcome'_ll') (" - ") %4.2f (`minimal_`outcome'_ul') (")")
+ 46.         file write tablecontent  _tab %4.2f (`additional_`outcome'_b') _tab ("(") %4.2f (`additional_`outcome'_ll') (" - ") %4.2f (`additional_`outcome'_ul') (")")
+ 47.         file write tablecontent  _tab %4.2f (`full_`outcome'_b') _tab ("(") %4.2f (`full_`outcome'_ll') (" - ") %4.2f (`full_`outcome'_ul') (")") _tab _n
+ 48. }
 
 Survival-time data settings
 
@@ -1042,281 +1043,13 @@ Yorkshire and The Humber  |   1.064964   .3097476     0.22   0.829     .6022278 
 . 
 end of do-file
 
-. stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
-
-Survival-time data settings
-
-           ID variable: unique
-         Failure event: esrd_date!=0 & esrd_date<.
-Observed time interval: (exit_date_esrd[_n-1], exit_date_esrd]
-     Exit on or before: failure
-     Time for analysis: (time-origin)/365.25
-                Origin: time index_date_esrd
-
---------------------------------------------------------------------------
-     27,786  total observations
-          0  exclusions
---------------------------------------------------------------------------
-     27,786  observations remaining, representing
-     27,786  subjects
-      2,777  failures in single-failure-per-subject data
- 46,878.905  total analysis time at risk and under observation
-                                                At risk from t =         0
-                                     Earliest observed entry t =         0
-                                          Last observed exit t =  2.748802
-
 . do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
 
-. stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
+. sysdir set PLUS ./analysis/adofiles
 
-        Failure _d: esrd_date
-  Analysis time _t: (exit_date_esrd-origin)/365.25
-            Origin: time index_date_esrd
-       ID variable: unique
+. sysdir set PERSONAL ./analysis/adofiles
 
-Iteration 0:   log pseudolikelihood = -3335.2492
-Iteration 1:   log pseudolikelihood = -3332.7365
-Iteration 2:   log pseudolikelihood = -3332.7306
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -3332.7306
+. pwd
+C:\Users\lsh1703468\Documents\repos
 
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      27,786                           Number of obs = 27,786
-No. of failures =       2,777
-Time at risk    = 46,878.9049
-                                                        Wald chi2(3)  =  10.39
-Log pseudolikelihood = -3332.7306                       Prob > chi2   = 0.0155
-
-                                      (Std. err. adjusted for 39 clusters in practice_id)
------------------------------------------------------------------------------------------
-                        |               Robust
-                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
-------------------------+----------------------------------------------------------------
-         covid_severity |
-Non-hospitalised COVID  |   .9829235   .0360232    -0.47   0.638     .9147954    1.056125
-    Hospitalised COVID  |   1.115047    .116617     1.04   0.298     .9083862    1.368725
-   Critical care COVID  |   1.319622   .1262612     2.90   0.004     1.093974    1.591815
------------------------------------------------------------------------------------------
-
-. 
-end of do-file
-
-. do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
-
-. matrix table = r(table)
-
-. 
-end of do-file
-
-. matrix list table
-
-table[9,4]
-                  0b.            1.            2.            3.
-        covid_seve~y  covid_seve~y  covid_seve~y  covid_seve~y
-     b             1     .98292349     1.1150473     1.3196223
-    se             .     .03602325     .11661704     .12626125
-     z             .    -.46997079     1.0412297     2.8986839
-pvalue             .     .63837589     .29776894     .00374732
-    ll             .     .91479536     .90838619     1.0939736
-    ul             .     1.0561254     1.3687246     1.5918146
-    df             .             .             .             .
-  crit      1.959964      1.959964      1.959964      1.959964
- eform             1             1             1             1
-
-. do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
-
-. stcox i.covid_severity i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id)
-
-        Failure _d: esrd_date
-  Analysis time _t: (exit_date_esrd-origin)/365.25
-            Origin: time index_date_esrd
-       ID variable: unique
-
-Iteration 0:   log pseudolikelihood = -3335.2492
-Iteration 1:   log pseudolikelihood = -3329.6775
-Iteration 2:   log pseudolikelihood = -3329.6719
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -3329.6719
-
-Stratified Cox regression with Breslow method for ties
-Strata variable: set_id
-
-No. of subjects =      27,786                           Number of obs = 27,786
-No. of failures =       2,777
-Time at risk    = 46,878.9049
-                                                        Wald chi2(6)  =  29.54
-Log pseudolikelihood = -3329.6719                       Prob > chi2   = 0.0000
-
-                                      (Std. err. adjusted for 39 clusters in practice_id)
------------------------------------------------------------------------------------------
-                        |               Robust
-                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
-------------------------+----------------------------------------------------------------
-         covid_severity |
-Non-hospitalised COVID  |   .9818036   .0372408    -0.48   0.628     .9114603    1.057576
-    Hospitalised COVID  |   1.122214   .1151662     1.12   0.261     .9177444    1.372238
-   Critical care COVID  |   1.314462   .1291447     2.78   0.005     1.084222    1.593594
-                        |
-                    sex |
-                  Male  |          1  (omitted)
-                   age1 |   1.013048   .0047124     2.79   0.005     1.003854    1.022326
-                   age2 |   .9747797   .0142738    -1.74   0.081     .9472012    1.003161
-                   age3 |   1.045913   .0439106     1.07   0.285     .9632957    1.135617
------------------------------------------------------------------------------------------
-
-. 
-end of do-file
-
-. do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
-
-. matrix table = r(table)
-
-. 
-end of do-file
-
-. matrix list table
-
-table[9,9]
-                  0b.            1.            2.            3.           0b.            1.                                          
-        covid_seve~y  covid_seve~y  covid_seve~y  covid_seve~y           sex           sex          age1          age2          age3
-     b             1     .98180361     1.1222137     1.3144618             1             1     1.0130478     .97477975     1.0459133
-    se             .     .03724075     .11516617     .12914474             .             .     .00471245     .01427381     .04391064
-     z             .    -.48414227      1.123549         2.783             .             .     2.7867908      -1.74442      1.069252
-pvalue             .      .6282849      .2612044     .00538588             .             .     .00532328     .08108588     .28495614
-    ll             .     .91146025     .91774442     1.0842219             .             .     1.0038536     .94720124     .96329574
-    ul             .     1.0575758     1.3722377     1.5935944             .             .     1.0223263     1.0031612     1.1356166
-    df             .             .             .             .             .             .             .             .             .
-  crit      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964
- eform             1             1             1             1             1             1             1             1             1
-
-. do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
-
-. stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
-
-        Failure _d: esrd_date
-  Analysis time _t: (exit_date_esrd-origin)/365.25
-            Origin: time index_date_esrd
-       ID variable: unique
-
-Iteration 0:   log pseudolikelihood = -63.783092
-Iteration 1:   log pseudolikelihood = -42.986823
-Iteration 2:   log pseudolikelihood = -40.096855
-Iteration 3:   log pseudolikelihood = -39.527383
-Iteration 4:   log pseudolikelihood = -39.488724
-Iteration 5:   log pseudolikelihood = -39.488482
-Iteration 6:   log pseudolikelihood = -39.488482
-Refining estimates:
-Iteration 0:   log pseudolikelihood = -39.488482
-
-Stratified Cox regression with no ties
-Strata variable: set_id
-
-No. of subjects =      3,419                           Number of obs =   3,419
-No. of failures =        347
-Time at risk    = 5,811.5346
-                                                       Wald chi2(19) = 1088.48
-Log pseudolikelihood = -39.488482                      Prob > chi2   =  0.0000
-
-                                        (Std. err. adjusted for 34 clusters in practice_id)
--------------------------------------------------------------------------------------------
-                          |               Robust
-                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
---------------------------+----------------------------------------------------------------
-           covid_severity |
-  Non-hospitalised COVID  |   1.396584   .5466399     0.85   0.393       .64848    3.007722
-      Hospitalised COVID  |   5.278537   3.157042     2.78   0.005     1.634625    17.04547
-     Critical care COVID  |   .8691117   .7752352    -0.16   0.875      .151292    4.992697
-                          |
-                      sex |
-                    Male  |          1  (omitted)
-                          |
-                ethnicity |
-             South Asian  |   .8947303   .3994813    -0.25   0.803     .3729457    2.146538
-                   Black  |   .6271144   .3372858    -0.87   0.386     .2185438    1.799514
-                   Mixed  |   6.725206   2.814074     4.55   0.000     2.961634    15.27143
-                   Other  |   4.721669   3.109618     2.36   0.018     1.298695    17.16658
-                          |
-                      imd |
-                       2  |   .9197343   .3254875    -0.24   0.813     .4596509    1.840334
-                       3  |    .292496   .1506009    -2.39   0.017     .1066232    .8023949
-                       4  |   2.935479   1.609018     1.96   0.049     1.002563    8.595009
-        5 Least deprived  |   .2031069   .1125609    -2.88   0.004     .0685476    .6018064
-                          |
-                    urban |
-                   Urban  |   .5594634   .2011853    -1.62   0.106     .2764879    1.132054
-                          |
-                   region |
-                    East  |   2.082586   2.179559     0.70   0.483     .2677727    16.19719
-                  London  |   .1554318   .1393001    -2.08   0.038     .0268337    .9003233
-              North East  |   .0353891    .031643    -3.74   0.000     .0061344    .2041581
-              North West  |   .6865338   .5974196    -0.43   0.666     .1247237    3.778982
-              South East  |   2.887532   2.827856     1.08   0.279     .4235619    19.68506
-              South West  |   .2499285   .2532335    -1.37   0.171     .0343051    1.820846
-           West Midlands  |   .1034744   .0784214    -2.99   0.003     .0234273    .4570282
-Yorkshire and The Humber  |   .1966456   .1642979    -1.95   0.052     .0382387    1.011266
-                          |
-                      bmi |
-      Normal (18.5-24.9)  |   8.799993   8.069024     2.37   0.018     1.458766    53.08588
-    Overweight (25-29.9)  |   29.65954   29.92025     3.36   0.001     4.106585    214.2141
-       Obese I (30-34.9)  |   14.21082   14.34653     2.63   0.009     1.964666    102.7896
-      Obese II (35-39.9)  |   5.639697   8.931506     1.09   0.275      .253058    125.6873
-         Obese III (40+)  |   30.52427    31.3531     3.33   0.001     4.076906    228.5387
-                          |
-                  smoking |
-   Current/former smoker  |   .7041989   .2269057    -1.09   0.276     .3744749    1.324244
-                     age1 |   .8985399   .0387122    -2.48   0.013     .8257805    .9777101
-                     age2 |   1.360593   .1388342     3.02   0.003     1.113966    1.661822
-                     age3 |   .3859133   .1172726    -3.13   0.002     .2127276    .7000928
--------------------------------------------------------------------------------------------
-
-. 
-end of do-file
-
-. do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
-
-. matrix table = r(table)
-
-. 
-end of do-file
-
-. matrix list table
-
-table[9,38]
-                  0b.            1.            2.            3.           0b.            1.           1b.            2.            3.            4.            5.           1b.            2.            3.            4.            5.           0b.
-        covid_seve~y  covid_seve~y  covid_seve~y  covid_seve~y           sex           sex     ethnicity     ethnicity     ethnicity     ethnicity     ethnicity           imd           imd           imd           imd           imd         urban
-     b             1     1.3965843     5.2785369     .86911172             1             1             1     .89473029     .62711441     6.7252057     4.7216689             1     .91973426     .29249602     2.9354789     .20310686             1
-    se             .     .54663991     3.1570424      .7752352             .             .             .      .3994813     .33728581     2.8140741     3.1096184             .     .32548749     .15060089      1.609018     .11256094             .
-     z             .     .85339596      2.781601    -.15727113             .             .             .     -.2491318    -.86759673     4.5547193     2.3568154             .    -.23642881    -2.3875463     1.9646337     -2.876282             .
-pvalue             .     .39343976     .00540915     .87503117             .             .             .     .80325883     .38561514     5.246e-06     .01843241             .     .81309994     .01696127     .04945665      .0040239             .
-    ll             .     .64848004     1.6346247     .15129202             .             .             .     .37294575     .21854378     2.9616345     1.2986954             .      .4596509     .10662321     1.0025629     .06854762             .
-    ul             .      3.007722     17.045473     4.9926967             .             .             .     2.1465382     1.7995135     15.271429     17.166579             .     1.8403338     .80239492     8.5950086     .60180641             .
-    df             .             .             .             .             .             .             .             .             .             .             .             .             .             .             .             .             .
-  crit      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964
- eform             1             1             1             1             1             1             1             1             1             1             1             1             1             1             1             1             1
-
-                   1.           1b.            2.            3.            4.            5.            6.            7.            8.            9.           1b.            2.            3.            4.            5.            6.           0b.
-               urban        region        region        region        region        region        region        region        region        region           bmi           bmi           bmi           bmi           bmi           bmi       smoking
-     b     .55946336             1     2.0825861     .15543175     .03538913     .68653375     2.8875318     .24992848     .10347438     .19664558             1      8.799993     29.659542     14.210817     5.6396967     30.524266             1
-    se     .20118531             .      2.179559     .13930011     .03164298     .59741956     2.8278556     .25323346     .07842135     .16429789             .     8.0690236     29.920251     14.346527     8.9315065     31.353102             .
-     z    -1.6150463             .     .70097063     -2.077125    -3.7369264    -.43220089     1.0827797    -1.3684841    -2.9931199    -1.9465556             .     2.3717607     3.3602471      2.628898     1.0922814     3.3281515             .
-pvalue     .10630066             .     .48332134     .03779002     .00018628     .66559541     .27890621     .17116061     .00276141     .05158803             .     .01770355     .00077873     .00856621     .27470945     .00087424             .
-    ll     .27648788             .     .26777271     .02683373     .00613441     .12472368     .42356189     .03430506     .02342732      .0382387             .      1.458766     4.1065846     1.9646658     .25305802      4.076906             .
-    ul     1.1320541             .     16.197187     .90032331     .20415813     3.7789823     19.685057     1.8208465     .45702823     1.0112657             .     53.085879     214.21412     102.78965      125.6873      228.5387             .
-    df             .             .             .             .             .             .             .             .             .             .             .             .             .             .             .             .             .
-  crit      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964      1.959964
- eform             1             1             1             1             1             1             1             1             1             1             1             1             1             1             1             1             1
-
-                   1.                                          
-             smoking          age1          age2          age3
-     b     .70419887     .89853991     1.3605931     .38591329
-    se     .22690571     .03871224     .13883419     .11727258
-     z    -1.0883757    -2.4831821     3.0176631    -3.1332514
-pvalue     .27642931     .01302145     .00254732     .00172881
-    ll     .37447487     .82578052     1.1139665     .21272761
-    ul     1.3242439     .97771011     1.6618217      .7000928
-    df             .             .             .             .
-  crit      1.959964      1.959964      1.959964      1.959964
- eform             1             1             1             1
-
+. cap log close

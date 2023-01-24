@@ -26,30 +26,31 @@ file write tablecontent ("By SARS-CoV-2 infection") _n
 use ./output/analysis_2017.dta, clear
 foreach outcome of varlist esrd egfr_half aki death {
 stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
+bysort case: egen total_follow_up_`outcome' = total(_t)
 
 stcox i.case, vce(cluster set_id) strata(practice_id)
 matrix table = r(table)
-local crude_case_`outcome'_b: display %4.2f table[1,2]
-local crude_case_`outcome'_ll: display %4.2f table[5,2]
-local crude_case_`outcome'_ul: display %4.2f table[6,2]
+local crude_`outcome'_b: display %4.2f table[1,2]
+local crude_`outcome'_ll: display %4.2f table[5,2]
+local crude_`outcome'_ul: display %4.2f table[6,2]
 
 stcox i.case i.sex age1 age2 age3, vce(cluster set_id) strata(practice_id)
 matrix table = r(table)
-local minimal_case_`outcome'_b: display %4.2f table[1,2]
-local minimal_case_`outcome'_ll: display %4.2f table[5,2]
-local minimal_case_`outcome'_ul: display %4.2f table[6,2]
+local minimal_`outcome'_b: display %4.2f table[1,2]
+local minimal_`outcome'_ll: display %4.2f table[5,2]
+local minimal_`outcome'_ul: display %4.2f table[6,2]
 
 stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3, vce(cluster set_id) strata(practice_id)
 matrix table = r(table)
-local additional_case_`outcome'_b: display %4.2f table[1,2]
-local additional_case_`outcome'_ll: display %4.2f table[5,2]
-local additional_case_`outcome'_ul: display %4.2f table[6,2]
+local additional_`outcome'_b: display %4.2f table[1,2]
+local additional_`outcome'_ll: display %4.2f table[5,2]
+local additional_`outcome'_ul: display %4.2f table[6,2]
 
 stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster set_id) strata(practice_id)		
 matrix table = r(table)
-local full_case_`outcome'_b: display %4.2f table[1,2]
-local full_case_`outcome'_ll: display %4.2f table[5,2]
-local full_case_`outcome'_ul: display %4.2f table[6,2]			
+local full_`outcome'_b: display %4.2f table[1,2]
+local full_`outcome'_ll: display %4.2f table[5,2]
+local full_`outcome'_ul: display %4.2f table[6,2]			
 								
 local lab0: label case 0
 local lab1: label case 1
@@ -73,11 +74,11 @@ local lab1: label case 1
 	qui su total_follow_up_`outcome' if case==1
 	local person_year = r(mean)
 	local rate = 100000*(`event'/`person_year')
-	file write tablecontent _tab ("`lab1'") _tab _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab  
-	file write tablecontent  _tab %4.2f (`crude_case_`outcome'_b') _tab ("(") %4.2f (`crude_case_`outcome'_ll') (" - ") %4.2f (`crude_case_`outcome'_ul') (")")
-	file write tablecontent  _tab %4.2f (`minimal_case_`outcome'_b') _tab ("(") %4.2f (`minimal_case_`outcome'_ll') (" - ") %4.2f (`minimal_case_`outcome'_ul') (")")
-	file write tablecontent  _tab %4.2f (`additional_case_`outcome'_b') _tab ("(") %4.2f (`additional_case_`outcome'_ll') (" - ") %4.2f (`additional_case_`outcome'_ul') (")")
-	file write tablecontent  _tab %4.2f (`full_case_`outcome'_b') _tab ("(") %4.2f (`full_case_`outcome'_ll') (" - ") %4.2f (`full_case_`outcome'_ul') (")") _tab _n
+	file write tablecontent _tab ("`lab1'") _tab _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab  
+	file write tablecontent  _tab %4.2f (`crude_`outcome'_b') _tab ("(") %4.2f (`crude_`outcome'_ll') (" - ") %4.2f (`crude_`outcome'_ul') (")")
+	file write tablecontent  _tab %4.2f (`minimal_`outcome'_b') _tab ("(") %4.2f (`minimal_`outcome'_ll') (" - ") %4.2f (`minimal_`outcome'_ul') (")")
+	file write tablecontent  _tab %4.2f (`additional_`outcome'_b') _tab ("(") %4.2f (`additional_`outcome'_ll') (" - ") %4.2f (`additional_`outcome'_ul') (")")
+	file write tablecontent  _tab %4.2f (`full_`outcome'_b') _tab ("(") %4.2f (`full_`outcome'_ll') (" - ") %4.2f (`full_`outcome'_ul') (")") _tab _n
 }
 
 file close tablecontent
