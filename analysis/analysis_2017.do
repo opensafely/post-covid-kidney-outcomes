@@ -766,7 +766,7 @@ label values follow_up_cat_esrd follow_up_cat_esrd
 label var follow_up_cat_esrd "Follow_up time"
 tab case follow_up_cat_esrd
 tab covid_krt follow_up_cat_esrd
-drop if follow_up_time_esrd<0
+drop if follow_up_time_esrd<1
 drop if follow_up_time_esrd>1040
 tab case follow_up_cat_esrd
 tab covid_krt follow_up_cat_esrd
