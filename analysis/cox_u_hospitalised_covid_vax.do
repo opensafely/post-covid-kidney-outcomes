@@ -3,10 +3,10 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_hospitalised_covid_vax.log, replace t
+log using ./logs/cox_u_hospitalised_covid_vax.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/cox_hospitalised_covid_vax.txt, write text replace
+file open tablecontent using ./output/cox_u_hospitalised_covid_vax.txt, write text replace
 file write tablecontent ("Kidney outcomes after COVID-19 hospitalisation by vaccination status compared to a pre-pandemic population hospitalised for pneumonia") _n
 file write tablecontent _n
 file write tablecontent ("Populations restricted to those who survived 28 days after hospital admission") _n
