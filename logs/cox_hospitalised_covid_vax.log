@@ -1,8 +1,8 @@
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/cox_hospitalised_covid_vax.log
   log type:  text
- opened on:  13 Jan 2023, 21:41:44
+ opened on:  25 Jan 2023, 11:18:04
 
 . 
 . cap file close tablecontent
@@ -31,144 +31,165 @@
 
 . file write tablecontent _n
 
-. file write tablecontent _tab _tab _tab _tab _tab ("Number") _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally adjusted") 
-> _tab ("Fully adjusted") _tab _tab _n
+. file write tablecontent _tab _tab _tab _tab _tab ("Number") _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally adjusted") _tab ("Fully adjusted") _tab _tab _n
 
-. file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _t
-> ab _tab _n
+. file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab _n
 
 . 
 . use ./output/analysis_hospitalised.dta, clear
 
 . foreach outcome of varlist esrd egfr_half aki death {
-  2. stset exit_date, fail(`outcome'_date) origin(index_date) id(patient_id) scale(365.25)
-  3. 
+  2. stset time_end_`outcome', fail(time_`outcome') origin(time_zero_`outcome') id(patient_id) scale(365.25)
+  3. bysort covid_vax: egen total_follow_up_`outcome' = total(_t)
+  4. 
 . stcox i.covid_vax, vce(cluster practice_id)
-  4. estimates save "crude_covid_vax_`outcome'", replace 
-  5. eststo model1
-  6. parmest, label eform format(estimate p lb ub) saving("crude_covid_vax_`outcome'", replace) idstr("crude_covid_vax_`outcome'") 
-  7. local hr "`hr' "crude_covid_vax_`outcome'" "
-  8. 
+  5. matrix table = r(table)
+  6. local crude_`outcome'_1b: display %4.2f table[1,2]
+  7. local crude_`outcome'_1ll: display %4.2f table[5,2]
+  8. local crude_`outcome'_1ul: display %4.2f table[6,2]
+  9. local crude_`outcome'_2b: display %4.2f table[1,3]
+ 10. local crude_`outcome'_2ll: display %4.2f table[5,3]
+ 11. local crude_`outcome'_2ul: display %4.2f table[6,3]
+ 12. local crude_`outcome'_3b: display %4.2f table[1,4]
+ 13. local crude_`outcome'_3ll: display %4.2f table[5,4]
+ 14. local crude_`outcome'_3ul: display %4.2f table[6,4]
+ 15. local crude_`outcome'_4b: display %4.2f table[1,5]
+ 16. local crude_`outcome'_4ll: display %4.2f table[5,5]
+ 17. local crude_`outcome'_4ul: display %4.2f table[6,5]
+ 18. local crude_`outcome'_5b: display %4.2f table[1,6]
+ 19. local crude_`outcome'_5ll: display %4.2f table[5,6]
+ 20. local crude_`outcome'_5ul: display %4.2f table[6,6]
+ 21. 
 . stcox i.covid_vax i.sex age1 age2 age3 i.month, vce(cluster practice_id)
-  9. estimates save "minimal_covid_vax_`outcome'", replace 
- 10. eststo model2
- 11. parmest, label eform format(estimate p lb ub) saving("minimal_covid_vax_`outcome'", replace) idstr("minimal_covid_vax_`outcome'")
- 12. local hr "`hr' "minimal_covid_vax_`outcome'" "
- 13. 
+ 22. matrix table = r(table)
+ 23. local minimal_`outcome'_1b: display %4.2f table[1,2]
+ 24. local minimal_`outcome'_1ll: display %4.2f table[5,2]
+ 25. local minimal_`outcome'_1ul: display %4.2f table[6,2]
+ 26. local minimal_`outcome'_2b: display %4.2f table[1,3]
+ 27. local minimal_`outcome'_2ll: display %4.2f table[5,3]
+ 28. local minimal_`outcome'_2ul: display %4.2f table[6,3]
+ 29. local minimal_`outcome'_3b: display %4.2f table[1,4]
+ 30. local minimal_`outcome'_3ll: display %4.2f table[5,4]
+ 31. local minimal_`outcome'_3ul: display %4.2f table[6,4]
+ 32. local minimal_`outcome'_4b: display %4.2f table[1,5]
+ 33. local minimal_`outcome'_4ll: display %4.2f table[5,5]
+ 34. local minimal_`outcome'_4ul: display %4.2f table[6,5]
+ 35. local minimal_`outcome'_5b: display %4.2f table[1,6]
+ 36. local minimal_`outcome'_5ll: display %4.2f table[5,6]
+ 37. local minimal_`outcome'_5ul: display %4.2f table[6,6]
+ 38. 
 . stcox i.covid_vax i.sex i.ethnicity i.imd i.region i.urban i.bmi i.smoking age1 age2 age3 i.month, vce(cluster practice_id)
- 14. if _rc==0{
- 15. estimates
- 16. estimates save "additional_covid_vax_`outcome'", replace 
- 17. eststo model3
- 18. parmest, label eform format(estimate p lb ub) saving("additional_covid_vax_`outcome'", replace) idstr("additional_covid_vax_`outcome'") 
- 19. local hr "`hr' "additional_covid_vax_`outcome'" "
- 20. }
- 21. else di "WARNING MODEL1 DID NOT FIT (`outcome')"
- 22. 
-. stcox i.covid_vax i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 i.month, vce(cluster practice_id)          
->    
- 23. if _rc==0{
- 24. estimates
- 25. estimates save "full_covid_vax_`outcome'", replace 
- 26. eststo model4
- 27. parmest, label eform format(estimate p lb ub) saving("full_covid_vax_`outcome'", replace) idstr("full_covid_vax_`outcome'") 
- 28. local hr "`hr' "full_covid_vax_`outcome'" "
- 29. }
- 30. else di "WARNING MODEL2 DID NOT FIT (`outcome')"
- 31.                                                                                 
+ 39. matrix table = r(table)
+ 40. local additional_`outcome'_1b: display %4.2f table[1,2]
+ 41. local additional_`outcome'_1ll: display %4.2f table[5,2]
+ 42. local additional_`outcome'_1ul: display %4.2f table[6,2]
+ 43. local additional_`outcome'_2b: display %4.2f table[1,3]
+ 44. local additional_`outcome'_2ll: display %4.2f table[5,3]
+ 45. local additional_`outcome'_2ul: display %4.2f table[6,3]
+ 46. local additional_`outcome'_3b: display %4.2f table[1,4]
+ 47. local additional_`outcome'_3ll: display %4.2f table[5,4]
+ 48. local additional_`outcome'_3ul: display %4.2f table[6,4]
+ 49. local additional_`outcome'_4b: display %4.2f table[1,5]
+ 50. local additional_`outcome'_4ll: display %4.2f table[5,5]
+ 51. local additional_`outcome'_4ul: display %4.2f table[6,5]
+ 52. local additional_`outcome'_5b: display %4.2f table[1,6]
+ 53. local additional_`outcome'_5ll: display %4.2f table[5,6]
+ 54. local additional_`outcome'_5ul: display %4.2f table[6,6]
+ 55. 
+. stcox i.covid_vax i.sex i.ethnicity i.imd i.region i.urban i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 i.month, vce(cluster practice_id)             
+ 56. matrix table = r(table)
+ 57. local full_`outcome'_1b: display %4.2f table[1,2]
+ 58. local full_`outcome'_1ll: display %4.2f table[5,2]
+ 59. local full_`outcome'_1ul: display %4.2f table[6,2]
+ 60. local full_`outcome'_2b: display %4.2f table[1,3]
+ 61. local full_`outcome'_2ll: display %4.2f table[5,3]
+ 62. local full_`outcome'_2ul: display %4.2f table[6,3]
+ 63. local full_`outcome'_3b: display %4.2f table[1,4]
+ 64. local full_`outcome'_3ll: display %4.2f table[5,4]
+ 65. local full_`outcome'_3ul: display %4.2f table[6,4]
+ 66. local full_`outcome'_4b: display %4.2f table[1,5]
+ 67. local full_`outcome'_4ll: display %4.2f table[5,5]
+ 68. local full_`outcome'_4ul: display %4.2f table[6,5]
+ 69. local full_`outcome'_5b: display %4.2f table[1,6]
+ 70. local full_`outcome'_5ll: display %4.2f table[5,6]
+ 71. local full_`outcome'_5ul: display %4.2f table[6,6]
+ 72.                                                                                 
 . local lab0: label covid_vax 0
- 32. local lab1: label covid_vax 1
- 33. local lab2: label covid_vax 2
- 34. local lab3: label covid_vax 3
- 35. local lab4: label covid_vax 4
- 36. local lab5: label covid_vax 5
- 37. 
-.         qui safecount if covid_vax==0
- 38.         local denominator = r(N)
- 39.         local r_denominator = round(`denominator',5)
- 40.         qui safecount if covid_vax== 1 & `outcome'==1
- 41.         local event = r(N)
- 42.         local r_event = round(`event',5)
- 43.     bysort covid_vax: egen total_follow_up_`outcome' = total(_t)
- 44.         qui su total_follow_up_`outcome' if covid_vax==0
- 45.         local person_year = r(mean)
- 46.         local rate = 100000*(`r_event'/`person_year')
- 47.         
+ 73. local lab1: label covid_vax 1
+ 74. local lab2: label covid_vax 2
+ 75. local lab3: label covid_vax 3
+ 76. local lab4: label covid_vax 4
+ 77. local lab5: label covid_vax 5
+ 78. 
+.         qui safecount if covid_vax==0 & `outcome'_denominator==1 & _st==1
+ 79.         local denominator = round(r(N),5)
+ 80.         qui safecount if covid_vax== 0 & `outcome'==1 & _st==1
+ 81.         local event = round(r(N),5)
+ 82.         qui su total_follow_up_`outcome' if covid_vax==0
+ 83.         local person_year = r(mean)
+ 84.         local rate = 100000*(`event'/`person_year')
+ 85.         
 .         file write tablecontent _n
- 48.         file write tablecontent ("`outcome'") _n
- 49.         file write tablecontent _tab ("`lab0'") _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
- 50.         file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
- 51. 
-. forvalues i=1/5 {
- 52.         qui safecount if covid_vax==`i'
- 53.         local denominator = r(N)
- 54.         local r_denominator = round(`denominator',5)
- 55.         qui safecount if covid_vax ==`i' & `outcome'==1
- 56.         local event = r(N)
- 57.         local r_event = round(`event',5)
- 58.         qui su total_follow_up_`outcome' if covid_vax==`i'
- 59.         local person_year = r(mean)
- 60.         local rate = 100000*(`r_event'/`person_year')
- 61.         file write tablecontent _tab ("`lab`i''") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab 
- 62.         cap estimates use "crude_covid_vax_`outcome'" 
- 63.          cap lincom `i'.covid_vax, eform
- 64.         file write tablecontent  _tab %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 65.         cap estimates clear
- 66.         cap estimates use "minimal_covid_vax_`outcome'" 
- 67.          cap lincom `i'.covid_vax, eform
- 68.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 69.         cap estimates clear
- 70.         cap estimates use "additional_covid_vax_`outcome'" 
- 71.          cap lincom `i'.covid_vax, eform
- 72.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab 
- 73.         cap estimates clear
- 74.         cap estimates use "full_covid_vax_`outcome'" 
- 75.          cap lincom `i'.covid_vax, eform
- 76.         file write tablecontent  %4.2f (r(estimate)) _tab ("(") %4.2f (r(lb)) (" - ") %4.2f (r(ub)) (")") _tab _n 
- 77. }
- 78. }
+ 86.         file write tablecontent ("`outcome'") _n
+ 87.         file write tablecontent _tab ("`lab0'") _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
+ 88.         file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
+ 89.         
+. forvalues vax=1/5 {
+ 90.         qui safecount if covid_vax==`vax'  & `outcome'_denominator==1 & _st==1
+ 91.         local denominator = round(r(N),5)
+ 92.         qui safecount if covid_vax==`vax' & `outcome'==1 &  _st==1
+ 93.         local event = round(r(N),5)
+ 94.         qui su total_follow_up_`outcome' if covid_vax==`vax'
+ 95.         local person_year = r(mean)
+ 96.         local rate = 100000*(`event'/`person_year')
+ 97.         file write tablecontent _tab ("`lab`vax''") _tab _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab
+ 98.         file write tablecontent  _tab %4.2f (`crude_`outcome'_`vax'b') _tab ("(") %4.2f (`crude_`outcome'_`vax'll') (" - ") %4.2f (`crude_`outcome'_`vax'ul') (")")
+ 99.         file write tablecontent  _tab %4.2f (`minimal_`outcome'_`vax'b') _tab ("(") %4.2f (`minimal_`outcome'_`vax'll') (" - ") %4.2f (`minimal_`outcome'_`vax'ul') (")")
+100.         file write tablecontent  _tab %4.2f (`additional_`outcome'_`vax'b') _tab ("(") %4.2f (`additional_`outcome'_`vax'll') (" - ") %4.2f (`additional_`outcome'_`vax'ul') (")")
+101.         file write tablecontent  _tab %4.2f (`full_`outcome'_`vax'b') _tab ("(") %4.2f (`full_`outcome'_`vax'll') (" - ") %4.2f (`full_`outcome'_`vax'ul') (")") _tab _n
+102.         }
+103. }
 
 Survival-time data settings
 
            ID variable: patient_id
-         Failure event: esrd_date!=0 & esrd_date<.
-Observed time interval: (exit_date[_n-1], exit_date]
+         Failure event: time_esrd!=0 & time_esrd<.
+Observed time interval: (time_end_esrd[_n-1], time_end_esrd]
      Exit on or before: failure
      Time for analysis: (time-origin)/365.25
-                Origin: time index_date
+                Origin: time time_zero_esrd
 
 --------------------------------------------------------------------------
-     25,431  total observations
-        106  observations end on or before enter()
-         28  observations begin on or after (first) failure
+     25,430  total observations
+         34  observations begin on or after (first) failure
 --------------------------------------------------------------------------
-     25,297  observations remaining, representing
-     25,026  subjects
-      1,932  failures in single-failure-per-subject data
- 32,911.888  total analysis time at risk and under observation
+     25,396  observations remaining, representing
+     25,131  subjects
+      2,037  failures in single-failure-per-subject data
+ 32,222.804  total analysis time at risk and under observation
                                                 At risk from t =         0
                                      Earliest observed entry t =         0
-                                          Last observed exit t =  5.730322
+                                          Last observed exit t =  2.748802
 
-        Failure _d: esrd_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -18376.041
-Iteration 1:   log pseudolikelihood = -18372.783
-Iteration 2:   log pseudolikelihood = -18372.745
-Iteration 3:   log pseudolikelihood = -18372.745
+Iteration 0:   log pseudolikelihood = -19503.145
+Iteration 1:   log pseudolikelihood = -19499.473
+Iteration 2:   log pseudolikelihood = -19499.426
+Iteration 3:   log pseudolikelihood = -19499.426
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -18372.745
+Iteration 0:   log pseudolikelihood = -19499.426
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      25,026                           Number of obs = 25,297
-No. of failures =       1,932
-Time at risk    = 32,911.8877
-                                                        Wald chi2(5)  =  12.03
-Log pseudolikelihood = -18372.745                       Prob > chi2   = 0.0343
+No. of subjects =      25,131                           Number of obs = 25,396
+No. of failures =       2,037
+Time at risk    = 32,222.8036
+                                                        Wald chi2(5)  =  14.84
+Log pseudolikelihood = -19499.426                       Prob > chi2   = 0.0111
 
                                      (Std. err. adjusted for 38 clusters in practice_id)
 ----------------------------------------------------------------------------------------
@@ -176,34 +197,32 @@ Log pseudolikelihood = -18372.745                       Prob > chi2   = 0.0343
                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 -----------------------+----------------------------------------------------------------
              covid_vax |
-COVID pre-vaccination  |   1.219367   .3663837     0.66   0.509     .6766652     2.19733
- COVID 1 vaccine dose  |   .7347221   .1417193    -1.60   0.110     .5034268    1.072284
-COVID 2 vaccine doses  |   .7537505   .0668089    -3.19   0.001     .6335504    .8967556
-COVID 3 vaccine doses  |   1.055862   .0584774     0.98   0.326     .9472499    1.176928
-COVID 4 vaccine doses  |   .9728945   .0387883    -0.69   0.491     .8997653    1.051967
+COVID pre-vaccination  |   1.186038    .360917     0.56   0.575     .6532417    2.153393
+ COVID 1 vaccine dose  |   .7575958   .1600779    -1.31   0.189     .5007039    1.146289
+COVID 2 vaccine doses  |   .7387485   .0654292    -3.42   0.001      .621023    .8787909
+COVID 3 vaccine doses  |   1.076206   .0621478     1.27   0.203     .9610393    1.205175
+COVID 4 vaccine doses  |   .9923494   .0346034    -0.22   0.826     .9267937    1.062542
 ----------------------------------------------------------------------------------------
-file crude_covid_vax_esrd.ster saved
-file crude_covid_vax_esrd.dta saved
 
-        Failure _d: esrd_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -18376.041
-Iteration 1:   log pseudolikelihood = -18360.159
-Iteration 2:   log pseudolikelihood = -18360.084
-Iteration 3:   log pseudolikelihood = -18360.084
+Iteration 0:   log pseudolikelihood = -19503.145
+Iteration 1:   log pseudolikelihood = -19487.605
+Iteration 2:   log pseudolikelihood = -19487.522
+Iteration 3:   log pseudolikelihood = -19487.522
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -18360.084
+Iteration 0:   log pseudolikelihood = -19487.522
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      25,026                           Number of obs = 25,297
-No. of failures =       1,932
-Time at risk    = 32,911.8877
-                                                        Wald chi2(20) = 441.26
-Log pseudolikelihood = -18360.084                       Prob > chi2   = 0.0000
+No. of subjects =      25,131                           Number of obs = 25,396
+No. of failures =       2,037
+Time at risk    = 32,222.8036
+                                                        Wald chi2(20) = 449.62
+Log pseudolikelihood = -19487.522                       Prob > chi2   = 0.0000
 
                                      (Std. err. adjusted for 38 clusters in practice_id)
 ----------------------------------------------------------------------------------------
@@ -211,53 +230,51 @@ Log pseudolikelihood = -18360.084                       Prob > chi2   = 0.0000
                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 -----------------------+----------------------------------------------------------------
              covid_vax |
-COVID pre-vaccination  |   1.241996   .3779356     0.71   0.476     .6840723    2.254957
- COVID 1 vaccine dose  |   .7302001   .1390765    -1.65   0.099     .5027117    1.060632
-COVID 2 vaccine doses  |   .7536813   .0660607    -3.23   0.001     .6347159    .8949446
-COVID 3 vaccine doses  |   1.049509   .0601689     0.84   0.399     .9379642    1.174319
-COVID 4 vaccine doses  |    .971035   .0388398    -0.73   0.462     .8978178    1.050223
+COVID pre-vaccination  |   1.205082   .3704058     0.61   0.544     .6597553    2.201153
+ COVID 1 vaccine dose  |   .7538193   .1580147    -1.35   0.178     .4998497    1.136829
+COVID 2 vaccine doses  |   .7385628   .0642979    -3.48   0.000     .6227066    .8759744
+COVID 3 vaccine doses  |   1.070454   .0635001     1.15   0.251     .9529591    1.202436
+COVID 4 vaccine doses  |   .9908823   .0347644    -0.26   0.794     .9250352    1.061417
                        |
                    sex |
-                 Male  |   .9639898   .0444015    -0.80   0.426      .880777    1.055064
-                  age1 |   1.004453   .0041203     1.08   0.279       .99641    1.012561
-                  age2 |   .9947423   .0155091    -0.34   0.735     .9648047    1.025609
-                  age3 |   1.007766   .0512196     0.15   0.879      .912216    1.113325
+                 Male  |   .9557476   .0370995    -1.17   0.244     .8857311    1.031299
+                  age1 |   1.004544   .0042304     1.08   0.282     .9962869     1.01287
+                  age2 |   .9944203   .0171604    -0.32   0.746     .9613489    1.028629
+                  age3 |   1.008561   .0575438     0.15   0.881     .9018548    1.127893
                        |
                  month |
-             February  |   .7883534   .0936543    -2.00   0.045     .6245977    .9950421
-                March  |   .9285818   .0773132    -0.89   0.373     .7887685    1.093178
-                April  |   1.062858   .0850089     0.76   0.446     .9086461    1.243241
-                  May  |   .7868952    .062686    -3.01   0.003     .6731443    .9198684
-                 June  |   .8791864   .0833964    -1.36   0.175     .7300273    1.058822
-                 July  |   .8965979   .0863787    -1.13   0.257     .7423224    1.082936
-               August  |   .9037218    .075112    -1.22   0.223     .7678704    1.063608
-            September  |   .8992967   .1095828    -0.87   0.384     .7082405    1.141892
-              October  |    .738827    .058226    -3.84   0.000      .633083    .8622336
-             November  |   .8557502   .0694754    -1.92   0.055     .7298622    1.003351
-             December  |   1.038229   .1012455     0.38   0.700     .8576025    1.256898
+             February  |   .8332758   .0884639    -1.72   0.086       .67674     1.02602
+                March  |   .9568507   .0813029    -0.52   0.604     .8100619    1.130239
+                April  |   1.075229   .0837634     0.93   0.352     .9229753    1.252599
+                  May  |   .8423102   .0665569    -2.17   0.030     .7214605    .9834031
+                 June  |   .9002719   .0824893    -1.15   0.252     .7522818    1.077375
+                 July  |   .9261131   .0897866    -0.79   0.429     .7658436    1.119923
+               August  |   .9587036   .0849368    -0.48   0.634     .8058826    1.140504
+            September  |   .9108096   .1127125    -0.75   0.450     .7146471    1.160817
+              October  |   .7649374   .0544055    -3.77   0.000     .6654034    .8793602
+             November  |   .8743847   .0688058    -1.71   0.088     .7494127    1.020197
+             December  |    1.10516   .1126636     0.98   0.327     .9050046    1.349582
 ----------------------------------------------------------------------------------------
-file minimal_covid_vax_esrd.ster saved
-file minimal_covid_vax_esrd.dta saved
 
-        Failure _d: esrd_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -6704.6907
-Iteration 1:   log pseudolikelihood = -6686.1695
-Iteration 2:   log pseudolikelihood = -6686.0877
-Iteration 3:   log pseudolikelihood = -6686.0877
+Iteration 0:   log pseudolikelihood =  -7130.939
+Iteration 1:   log pseudolikelihood = -7111.3016
+Iteration 2:   log pseudolikelihood = -7111.2179
+Iteration 3:   log pseudolikelihood = -7111.2179
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -6686.0877
+Iteration 0:   log pseudolikelihood = -7111.2179
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      10,609                       Number of obs =     10,656
-No. of failures =         777
-Time at risk    = 13,941.3333
-                                                    Wald chi2(35) = 2067274.01
-Log pseudolikelihood = -6686.0877                   Prob > chi2   =     0.0000
+No. of subjects =      10,648                        Number of obs =    10,693
+No. of failures =         820
+Time at risk    = 13,654.5161
+                                                     Wald chi2(35) = 628829.19
+Log pseudolikelihood = -7111.2179                    Prob > chi2   =    0.0000
 
                                         (Std. err. adjusted for 36 clusters in practice_id)
 -------------------------------------------------------------------------------------------
@@ -265,167 +282,86 @@ Log pseudolikelihood = -6686.0877                   Prob > chi2   =     0.0000
                        _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 --------------------------+----------------------------------------------------------------
                 covid_vax |
-   COVID pre-vaccination  |   .6422437   .5208195    -0.55   0.585     .1310474    3.147539
-    COVID 1 vaccine dose  |   1.071175   .4563672     0.16   0.872     .4647416    2.468933
-   COVID 2 vaccine doses  |   .7156131   .1027434    -2.33   0.020     .5400922    .9481753
-   COVID 3 vaccine doses  |   1.039467   .0907552     0.44   0.658     .8759775     1.23347
-   COVID 4 vaccine doses  |    1.00269   .0730544     0.04   0.971     .8692596    1.156602
+   COVID pre-vaccination  |   .6275383   .5032359    -0.58   0.561     .1303299    3.021595
+    COVID 1 vaccine dose  |    1.17513   .4733353     0.40   0.689     .5336134    2.587884
+   COVID 2 vaccine doses  |   .6908249   .0958709    -2.67   0.008     .5263085    .9067668
+   COVID 3 vaccine doses  |   1.041517   .0910363     0.47   0.642     .8775363     1.23614
+   COVID 4 vaccine doses  |   1.008393   .0672786     0.13   0.900     .8847872    1.149267
                           |
                       sex |
-                    Male  |    1.00236   .0624341     0.04   0.970     .8871663    1.132512
+                    Male  |   .9993907   .0533773    -0.01   0.991     .9000626     1.10968
                           |
                 ethnicity |
-             South Asian  |   .9537303   .1333784    -0.34   0.735     .7250798    1.254485
-                   Black  |   .7268916   .1012901    -2.29   0.022     .5531685    .9551727
-                   Mixed  |    1.08693     .13058     0.69   0.488     .8588974    1.375504
-                   Other  |   .8908615   .1594961    -0.65   0.519     .6272124    1.265336
+             South Asian  |   .9401137   .1423777    -0.41   0.683     .6986638    1.265006
+                   Black  |   .7969489   .0994629    -1.82   0.069     .6240172    1.017805
+                   Mixed  |   1.093191   .1245125     0.78   0.434     .8744718    1.366616
+                   Other  |   .8645511   .1528442    -0.82   0.410     .6113735    1.222573
                           |
                       imd |
-                       2  |   .9512668   .1474886    -0.32   0.747     .7019858     1.28907
-                       3  |    1.04123   .0750379     0.56   0.575     .9040726    1.199195
-                       4  |   1.050866   .1121585     0.46   0.642     .8525087    1.295375
-        5 Least deprived  |   1.033993   .0713851     0.48   0.628     .9031338    1.183813
+                       2  |   .9289075   .1470453    -0.47   0.641     .6811268    1.266826
+                       3  |   .9992379   .0735715    -0.01   0.992     .8649619    1.154359
+                       4  |      1.001    .119353     0.01   0.993     .7923957    1.264521
+        5 Least deprived  |   1.050071   .0873897     0.59   0.557     .8920294    1.236112
                           |
                    region |
-                    East  |   1.133418   .1089571     1.30   0.193      .938778    1.368413
-                  London  |   .9580598     .13795    -0.30   0.766     .7224853    1.270446
-              North East  |   .8982754   .0966789    -1.00   0.319     .7274398    1.109231
-              North West  |    .875197   .0932318    -1.25   0.211      .710281    1.078404
-              South East  |   1.008274   .1351931     0.06   0.951     .7752584    1.311327
-              South West  |   1.192073   .1239401     1.69   0.091     .9723068    1.461513
-           West Midlands  |    .879996   .1430819    -0.79   0.432     .6398536    1.210266
-Yorkshire and The Humber  |   .9814113   .1421213    -0.13   0.897     .7389004    1.303516
+                    East  |    1.11557   .1150357     1.06   0.289     .9114279    1.365436
+                  London  |   .9559937   .1229667    -0.35   0.726     .7429634    1.230106
+              North East  |   .8949304   .0894599    -1.11   0.267     .7356998    1.088624
+              North West  |   .8636319   .0929175    -1.36   0.173     .6994369    1.066372
+              South East  |   1.032734   .1054198     0.32   0.752     .8454719    1.261472
+              South West  |   1.197231    .131519     1.64   0.101     .9653198    1.484857
+           West Midlands  |    .848575   .1328938    -1.05   0.294     .6242882    1.153441
+Yorkshire and The Humber  |   1.025622   .1370317     0.19   0.850     .7893321    1.332647
                           |
                     urban |
-                   Urban  |   1.142114   .0629726     2.41   0.016     1.025125    1.272453
+                   Urban  |    1.16219   .0598273     2.92   0.004     1.050652    1.285569
                           |
                       bmi |
-      Normal (18.5-24.9)  |   .9800179   .0923167    -0.21   0.830     .8148013    1.178735
-    Overweight (25-29.9)  |   1.092143   .1280203     0.75   0.452     .8679652    1.374222
-       Obese I (30-34.9)  |   .9715579    .114804    -0.24   0.807     .7707022    1.224759
-      Obese II (35-39.9)  |   .8147781   .1487641    -1.12   0.262     .5696721    1.165343
-         Obese III (40+)  |   .8407082   .1284518    -1.14   0.256     .6231465    1.134228
+      Normal (18.5-24.9)  |    1.02792   .0913994     0.31   0.757     .8635218    1.223617
+    Overweight (25-29.9)  |   1.141224   .1296898     1.16   0.245     .9133549    1.425943
+       Obese I (30-34.9)  |    1.02174   .1130975     0.19   0.846     .8224694     1.26929
+      Obese II (35-39.9)  |   .8404678   .1401861    -1.04   0.297     .6061004     1.16546
+         Obese III (40+)  |   .8922457   .1283942    -0.79   0.428     .6729713    1.182966
                           |
                   smoking |
-   Current/former smoker  |   1.063785   .0856174     0.77   0.442     .9085436    1.245551
-                     age1 |   1.003758    .006025     0.62   0.532     .9920187    1.015637
-                     age2 |    .991253   .0239497    -0.36   0.716     .9454066    1.039323
-                     age3 |   1.020661   .0773357     0.27   0.787     .8798037     1.18407
+   Current/former smoker  |   1.054465   .0779014     0.72   0.473     .9123209    1.218757
+                     age1 |   1.003726   .0063753     0.59   0.558     .9913079    1.016299
+                     age2 |   .9914408   .0266039    -0.32   0.749     .9406456    1.044979
+                     age3 |   1.020138   .0864529     0.24   0.814      .864018    1.204468
                           |
                     month |
-                February  |   .8282112   .1068976    -1.46   0.144     .6430965    1.066611
-                   March  |   1.058824   .1282145     0.47   0.637     .8351233    1.342447
-                   April  |   1.035973   .1234703     0.30   0.767     .8201618     1.30857
-                     May  |   .7615428   .0968226    -2.14   0.032     .5935708    .9770484
-                    June  |   1.065818   .1416924     0.48   0.632     .8213384    1.383069
-                    July  |   .9488007   .1215841    -0.41   0.682     .7380704    1.219698
-                  August  |   .7960136   .1145287    -1.59   0.113     .6004148    1.055333
-               September  |   .8237885   .1001325    -1.59   0.111     .6491591    1.045395
-                 October  |   .9134283   .1192221    -0.69   0.488     .7072522    1.179708
-                November  |   1.014746   .1746278     0.09   0.932     .7242261    1.421808
-                December  |   1.104708   .1452348     0.76   0.449     .8537703    1.429401
+                February  |   .8997204    .104175    -0.91   0.361     .7170516    1.128924
+                   March  |   1.126975   .1334822     1.01   0.313     .8935019    1.421455
+                   April  |   1.045161   .1232161     0.37   0.708     .8295323     1.31684
+                     May  |   .8027042   .0975455    -1.81   0.071     .6325817    1.018578
+                    June  |   1.102932   .1469266     0.74   0.462     .8494861    1.431994
+                    July  |   .9860702   .1262789    -0.11   0.913     .7671859    1.267404
+                  August  |   .8823536    .144311    -0.77   0.444     .6403636     1.21579
+               September  |     .82209   .1045931    -1.54   0.124     .6406524    1.054912
+                 October  |   .9254446   .1193444    -0.60   0.548      .718754    1.191573
+                November  |   1.012286   .1819038     0.07   0.946     .7117797    1.439663
+                December  |   1.139485   .1522964     0.98   0.329     .8768849    1.480727
 -------------------------------------------------------------------------------------------
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Cox regression with Breslow method for ties
-
-No. of subjects =      10,609                       Number of obs =     10,656
-No. of failures =         777
-Time at risk    = 13,941.3333
-                                                    Wald chi2(35) = 2067274.01
-Log pseudolikelihood = -6686.0877                   Prob > chi2   =     0.0000
-
-                                        (Std. err. adjusted for 36 clusters in practice_id)
--------------------------------------------------------------------------------------------
-                          |               Robust
-                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
---------------------------+----------------------------------------------------------------
-                covid_vax |
-   COVID pre-vaccination  |   .6422437   .5208195    -0.55   0.585     .1310474    3.147539
-    COVID 1 vaccine dose  |   1.071175   .4563672     0.16   0.872     .4647416    2.468933
-   COVID 2 vaccine doses  |   .7156131   .1027434    -2.33   0.020     .5400922    .9481753
-   COVID 3 vaccine doses  |   1.039467   .0907552     0.44   0.658     .8759775     1.23347
-   COVID 4 vaccine doses  |    1.00269   .0730544     0.04   0.971     .8692596    1.156602
-                          |
-                      sex |
-                    Male  |    1.00236   .0624341     0.04   0.970     .8871663    1.132512
-                          |
-                ethnicity |
-             South Asian  |   .9537303   .1333784    -0.34   0.735     .7250798    1.254485
-                   Black  |   .7268916   .1012901    -2.29   0.022     .5531685    .9551727
-                   Mixed  |    1.08693     .13058     0.69   0.488     .8588974    1.375504
-                   Other  |   .8908615   .1594961    -0.65   0.519     .6272124    1.265336
-                          |
-                      imd |
-                       2  |   .9512668   .1474886    -0.32   0.747     .7019858     1.28907
-                       3  |    1.04123   .0750379     0.56   0.575     .9040726    1.199195
-                       4  |   1.050866   .1121585     0.46   0.642     .8525087    1.295375
-        5 Least deprived  |   1.033993   .0713851     0.48   0.628     .9031338    1.183813
-                          |
-                   region |
-                    East  |   1.133418   .1089571     1.30   0.193      .938778    1.368413
-                  London  |   .9580598     .13795    -0.30   0.766     .7224853    1.270446
-              North East  |   .8982754   .0966789    -1.00   0.319     .7274398    1.109231
-              North West  |    .875197   .0932318    -1.25   0.211      .710281    1.078404
-              South East  |   1.008274   .1351931     0.06   0.951     .7752584    1.311327
-              South West  |   1.192073   .1239401     1.69   0.091     .9723068    1.461513
-           West Midlands  |    .879996   .1430819    -0.79   0.432     .6398536    1.210266
-Yorkshire and The Humber  |   .9814113   .1421213    -0.13   0.897     .7389004    1.303516
-                          |
-                    urban |
-                   Urban  |   1.142114   .0629726     2.41   0.016     1.025125    1.272453
-                          |
-                      bmi |
-      Normal (18.5-24.9)  |   .9800179   .0923167    -0.21   0.830     .8148013    1.178735
-    Overweight (25-29.9)  |   1.092143   .1280203     0.75   0.452     .8679652    1.374222
-       Obese I (30-34.9)  |   .9715579    .114804    -0.24   0.807     .7707022    1.224759
-      Obese II (35-39.9)  |   .8147781   .1487641    -1.12   0.262     .5696721    1.165343
-         Obese III (40+)  |   .8407082   .1284518    -1.14   0.256     .6231465    1.134228
-                          |
-                  smoking |
-   Current/former smoker  |   1.063785   .0856174     0.77   0.442     .9085436    1.245551
-                     age1 |   1.003758    .006025     0.62   0.532     .9920187    1.015637
-                     age2 |    .991253   .0239497    -0.36   0.716     .9454066    1.039323
-                     age3 |   1.020661   .0773357     0.27   0.787     .8798037     1.18407
-                          |
-                    month |
-                February  |   .8282112   .1068976    -1.46   0.144     .6430965    1.066611
-                   March  |   1.058824   .1282145     0.47   0.637     .8351233    1.342447
-                   April  |   1.035973   .1234703     0.30   0.767     .8201618     1.30857
-                     May  |   .7615428   .0968226    -2.14   0.032     .5935708    .9770484
-                    June  |   1.065818   .1416924     0.48   0.632     .8213384    1.383069
-                    July  |   .9488007   .1215841    -0.41   0.682     .7380704    1.219698
-                  August  |   .7960136   .1145287    -1.59   0.113     .6004148    1.055333
-               September  |   .8237885   .1001325    -1.59   0.111     .6491591    1.045395
-                 October  |   .9134283   .1192221    -0.69   0.488     .7072522    1.179708
-                November  |   1.014746   .1746278     0.09   0.932     .7242261    1.421808
-                December  |   1.104708   .1452348     0.76   0.449     .8537703    1.429401
--------------------------------------------------------------------------------------------
-file additional_covid_vax_esrd.ster saved
-file additional_covid_vax_esrd.dta saved
-
-        Failure _d: esrd_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_esrd
+  Analysis time _t: (time_end_esrd-origin)/365.25
+            Origin: time time_zero_esrd
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -6704.6907
-Iteration 1:   log pseudolikelihood = -6684.7487
-Iteration 2:   log pseudolikelihood = -6684.6658
-Iteration 3:   log pseudolikelihood = -6684.6658
+Iteration 0:   log pseudolikelihood =  -7130.939
+Iteration 1:   log pseudolikelihood = -7109.4201
+Iteration 2:   log pseudolikelihood = -7109.3349
+Iteration 3:   log pseudolikelihood = -7109.3348
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -6684.6658
+Iteration 0:   log pseudolikelihood = -7109.3348
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      10,609                        Number of obs =    10,656
-No. of failures =         777
-Time at risk    = 13,941.3333
-                                                     Wald chi2(35) = 770270.49
-Log pseudolikelihood = -6684.6658                    Prob > chi2   =    0.0000
+No. of subjects =      10,648                        Number of obs =    10,693
+No. of failures =         820
+Time at risk    = 13,654.5161
+                                                     Wald chi2(35) = 180275.24
+Log pseudolikelihood = -7109.3348                    Prob > chi2   =    0.0000
 
                                         (Std. err. adjusted for 36 clusters in practice_id)
 -------------------------------------------------------------------------------------------
@@ -433,660 +369,401 @@ Log pseudolikelihood = -6684.6658                    Prob > chi2   =    0.0000
                        _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 --------------------------+----------------------------------------------------------------
                 covid_vax |
-   COVID pre-vaccination  |   .6360166   .5238624    -0.55   0.583     .1265804    3.195732
-    COVID 1 vaccine dose  |   1.074344   .4607834     0.17   0.867     .4635167    2.490127
-   COVID 2 vaccine doses  |   .7169642   .1018239    -2.34   0.019     .5427616    .9470783
-   COVID 3 vaccine doses  |   1.043521   .0939133     0.47   0.636     .8747738    1.244819
-   COVID 4 vaccine doses  |   1.002716   .0720267     0.04   0.970     .8710334    1.154307
+   COVID pre-vaccination  |   .6198957   .5048517    -0.59   0.557     .1256285    3.058785
+    COVID 1 vaccine dose  |   1.175302   .4761591     0.40   0.690     .5312457    2.600179
+   COVID 2 vaccine doses  |   .6926885   .0953111    -2.67   0.008     .5289518    .9071096
+   COVID 3 vaccine doses  |   1.044166   .0945664     0.48   0.633     .8743377    1.246981
+   COVID 4 vaccine doses  |   1.008336   .0662115     0.13   0.899     .8865678    1.146829
                           |
                       sex |
-                    Male  |   1.002304   .0628309     0.04   0.971     .8864225    1.133335
+                    Male  |   .9991728    .053865    -0.02   0.988     .8989854    1.110526
                           |
                 ethnicity |
-             South Asian  |   .9464245   .1347488    -0.39   0.699     .7159697    1.251058
-                   Black  |   .7288465   .1006466    -2.29   0.022      .556024    .9553856
-                   Mixed  |   1.087703   .1296802     0.71   0.481     .8610467    1.374023
-                   Other  |   .8921712   .1595982    -0.64   0.524     .6283172    1.266827
+             South Asian  |   .9306732   .1433332    -0.47   0.641     .6881822    1.258609
+                   Black  |   .7985015   .0984086    -1.83   0.068     .6271513    1.016668
+                   Mixed  |   1.095368   .1238199     0.81   0.420     .8776887    1.367034
+                   Other  |   .8647863   .1527144    -0.82   0.411     .6117773    1.222431
                           |
                       imd |
-                       2  |   .9503241   .1456845    -0.33   0.740     .7036921    1.283396
-                       3  |   1.044045   .0750908     0.60   0.549     .9067728    1.202099
-                       4  |   1.048468   .1124193     0.44   0.659      .849742    1.293668
-        5 Least deprived  |   1.033766   .0710774     0.48   0.629     .9034354    1.182898
+                       2  |   .9273403     .14469    -0.48   0.629     .6830128    1.259069
+                       3  |   1.002172   .0735763     0.03   0.976     .8678598     1.15727
+                       4  |   .9987255   .1186602    -0.01   0.991     .7912496    1.260604
+        5 Least deprived  |    1.05093   .0872565     0.60   0.550     .8931004    1.236651
                           |
                    region |
-                    East  |    1.12869   .1108909     1.23   0.218     .9309932    1.368369
-                  London  |   .9533962   .1385585    -0.33   0.743      .717079    1.267593
-              North East  |   .8919252   .0947384    -1.08   0.282     .7242952    1.098351
-              North West  |   .8716665   .0917497    -1.30   0.192     .7091771    1.071386
-              South East  |   1.005327   .1369785     0.04   0.969     .7697127    1.313063
-              South West  |   1.189324    .123881     1.66   0.096     .9697017    1.458687
-           West Midlands  |    .874658   .1426893    -0.82   0.412     .6352953    1.204206
-Yorkshire and The Humber  |   .9799282   .1443563    -0.14   0.891     .7341775    1.307939
+                    East  |   1.109032   .1172534     0.98   0.328      .901467    1.364388
+                  London  |   .9519903   .1229897    -0.38   0.703     .7390331    1.226312
+              North East  |   .8855532    .088605    -1.21   0.224     .7278582    1.077414
+              North West  |   .8598282   .0904891    -1.44   0.151     .6995689      1.0568
+              South East  |   1.029016    .106273     0.28   0.782     .8404524    1.259885
+              South West  |   1.195015   .1321727     1.61   0.107     .9621166    1.484292
+           West Midlands  |    .842952   .1317789    -1.09   0.274     .6204894    1.145174
+Yorkshire and The Humber  |   1.021839   .1381899     0.16   0.873     .7839147    1.331974
                           |
                     urban |
-                   Urban  |   1.141994   .0623251     2.43   0.015     1.026146    1.270922
+                   Urban  |   1.163242   .0595615     2.95   0.003      1.05217    1.286039
                           |
                       bmi |
-      Normal (18.5-24.9)  |   .9794679   .0918674    -0.22   0.825      .814992    1.177137
-    Overweight (25-29.9)  |   1.088729   .1259755     0.73   0.463     .8678171    1.365876
-       Obese I (30-34.9)  |   .9688949   .1139151    -0.27   0.788      .769483    1.219984
-      Obese II (35-39.9)  |   .8138817   .1472262    -1.14   0.255     .5709316    1.160215
-         Obese III (40+)  |   .8413283   .1293134    -1.12   0.261     .6224931    1.137094
+      Normal (18.5-24.9)  |   1.026518   .0909023     0.30   0.768     .8629569    1.221079
+    Overweight (25-29.9)  |   1.137078   .1279383     1.14   0.254     .9120471    1.417631
+       Obese I (30-34.9)  |   1.018933    .113044     0.17   0.866      .819805    1.266429
+      Obese II (35-39.9)  |   .8399337    .139127    -1.05   0.292      .607088    1.162086
+         Obese III (40+)  |   .8918937   .1294191    -0.79   0.430     .6711176    1.185298
                           |
-         1.cardiovascular |   .9027907    .050432    -1.83   0.067     .8091648     1.00725
-               1.diabetes |   1.052761   .0998144     0.54   0.588     .8742303    1.267751
-           1.hypertension |   .9481962   .0786603    -0.64   0.521     .8059059    1.115609
-       1.immunosuppressed |   1.112651   .1095345     1.08   0.278     .9174082    1.349445
-        1.non_haem_cancer |   .9089021   .2672391    -0.32   0.745     .5107912    1.617301
-                          |
-                  smoking |
-   Current/former smoker  |   1.065075   .0845754     0.79   0.427     .9115657    1.244435
-                     age1 |   1.003723   .0059586     0.63   0.531     .9921123     1.01547
-                     age2 |   .9917128   .0237214    -0.35   0.728     .9462927    1.039313
-                     age3 |   1.018965   .0765882     0.25   0.803     .8793881    1.180695
-                          |
-                    month |
-                February  |   .8275128   .1063586    -1.47   0.141     .6432377    1.064579
-                   March  |   1.058622   .1285243     0.47   0.639     .8344473    1.343021
-                   April  |   1.035579   .1245886     0.29   0.771     .8180444    1.310961
-                     May  |   .7627299   .0973822    -2.12   0.034     .5938721    .9795997
-                    June  |   1.068098   .1446605     0.49   0.627     .8190808    1.392823
-                    July  |   .9540926   .1235343    -0.36   0.717       .74025     1.22971
-                  August  |   .7937682   .1157033    -1.58   0.113     .5965113    1.056255
-               September  |   .8225624    .101944    -1.58   0.115     .6451719    1.048726
-                 October  |   .9120084   .1220588    -0.69   0.491     .7015815    1.185549
-                November  |   1.013612   .1737137     0.08   0.937     .7244226    1.418245
-                December  |   1.103624   .1462393     0.74   0.457     .8511965     1.43091
--------------------------------------------------------------------------------------------
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Cox regression with Breslow method for ties
-
-No. of subjects =      10,609                        Number of obs =    10,656
-No. of failures =         777
-Time at risk    = 13,941.3333
-                                                     Wald chi2(35) = 770270.49
-Log pseudolikelihood = -6684.6658                    Prob > chi2   =    0.0000
-
-                                        (Std. err. adjusted for 36 clusters in practice_id)
--------------------------------------------------------------------------------------------
-                          |               Robust
-                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
---------------------------+----------------------------------------------------------------
-                covid_vax |
-   COVID pre-vaccination  |   .6360166   .5238624    -0.55   0.583     .1265804    3.195732
-    COVID 1 vaccine dose  |   1.074344   .4607834     0.17   0.867     .4635167    2.490127
-   COVID 2 vaccine doses  |   .7169642   .1018239    -2.34   0.019     .5427616    .9470783
-   COVID 3 vaccine doses  |   1.043521   .0939133     0.47   0.636     .8747738    1.244819
-   COVID 4 vaccine doses  |   1.002716   .0720267     0.04   0.970     .8710334    1.154307
-                          |
-                      sex |
-                    Male  |   1.002304   .0628309     0.04   0.971     .8864225    1.133335
-                          |
-                ethnicity |
-             South Asian  |   .9464245   .1347488    -0.39   0.699     .7159697    1.251058
-                   Black  |   .7288465   .1006466    -2.29   0.022      .556024    .9553856
-                   Mixed  |   1.087703   .1296802     0.71   0.481     .8610467    1.374023
-                   Other  |   .8921712   .1595982    -0.64   0.524     .6283172    1.266827
-                          |
-                      imd |
-                       2  |   .9503241   .1456845    -0.33   0.740     .7036921    1.283396
-                       3  |   1.044045   .0750908     0.60   0.549     .9067728    1.202099
-                       4  |   1.048468   .1124193     0.44   0.659      .849742    1.293668
-        5 Least deprived  |   1.033766   .0710774     0.48   0.629     .9034354    1.182898
-                          |
-                   region |
-                    East  |    1.12869   .1108909     1.23   0.218     .9309932    1.368369
-                  London  |   .9533962   .1385585    -0.33   0.743      .717079    1.267593
-              North East  |   .8919252   .0947384    -1.08   0.282     .7242952    1.098351
-              North West  |   .8716665   .0917497    -1.30   0.192     .7091771    1.071386
-              South East  |   1.005327   .1369785     0.04   0.969     .7697127    1.313063
-              South West  |   1.189324    .123881     1.66   0.096     .9697017    1.458687
-           West Midlands  |    .874658   .1426893    -0.82   0.412     .6352953    1.204206
-Yorkshire and The Humber  |   .9799282   .1443563    -0.14   0.891     .7341775    1.307939
-                          |
-                    urban |
-                   Urban  |   1.141994   .0623251     2.43   0.015     1.026146    1.270922
-                          |
-                      bmi |
-      Normal (18.5-24.9)  |   .9794679   .0918674    -0.22   0.825      .814992    1.177137
-    Overweight (25-29.9)  |   1.088729   .1259755     0.73   0.463     .8678171    1.365876
-       Obese I (30-34.9)  |   .9688949   .1139151    -0.27   0.788      .769483    1.219984
-      Obese II (35-39.9)  |   .8138817   .1472262    -1.14   0.255     .5709316    1.160215
-         Obese III (40+)  |   .8413283   .1293134    -1.12   0.261     .6224931    1.137094
-                          |
-         1.cardiovascular |   .9027907    .050432    -1.83   0.067     .8091648     1.00725
-               1.diabetes |   1.052761   .0998144     0.54   0.588     .8742303    1.267751
-           1.hypertension |   .9481962   .0786603    -0.64   0.521     .8059059    1.115609
-       1.immunosuppressed |   1.112651   .1095345     1.08   0.278     .9174082    1.349445
-        1.non_haem_cancer |   .9089021   .2672391    -0.32   0.745     .5107912    1.617301
+         1.cardiovascular |   .8864581   .0455268    -2.35   0.019     .8015713    .9803345
+               1.diabetes |   1.071886   .0930579     0.80   0.424     .9041693    1.270712
+           1.hypertension |   .9429526   .0750379    -0.74   0.460     .8067765    1.102114
+       1.immunosuppressed |    1.09648   .0991606     1.02   0.308     .9183788     1.30912
+        1.non_haem_cancer |   1.114754   .2902571     0.42   0.677     .6691829    1.857004
                           |
                   smoking |
-   Current/former smoker  |   1.065075   .0845754     0.79   0.427     .9115657    1.244435
-                     age1 |   1.003723   .0059586     0.63   0.531     .9921123     1.01547
-                     age2 |   .9917128   .0237214    -0.35   0.728     .9462927    1.039313
-                     age3 |   1.018965   .0765882     0.25   0.803     .8793881    1.180695
+   Current/former smoker  |   1.054493   .0770312     0.73   0.468     .9138252    1.216815
+                     age1 |   1.003748   .0062902     0.60   0.551     .9914946    1.016152
+                     age2 |   .9916912   .0263306    -0.31   0.753     .9414041    1.044665
+                     age3 |   1.019111   .0856379     0.23   0.822     .8643574    1.201572
                           |
                     month |
-                February  |   .8275128   .1063586    -1.47   0.141     .6432377    1.064579
-                   March  |   1.058622   .1285243     0.47   0.639     .8344473    1.343021
-                   April  |   1.035579   .1245886     0.29   0.771     .8180444    1.310961
-                     May  |   .7627299   .0973822    -2.12   0.034     .5938721    .9795997
-                    June  |   1.068098   .1446605     0.49   0.627     .8190808    1.392823
-                    July  |   .9540926   .1235343    -0.36   0.717       .74025     1.22971
-                  August  |   .7937682   .1157033    -1.58   0.113     .5965113    1.056255
-               September  |   .8225624    .101944    -1.58   0.115     .6451719    1.048726
-                 October  |   .9120084   .1220588    -0.69   0.491     .7015815    1.185549
-                November  |   1.013612   .1737137     0.08   0.937     .7244226    1.418245
-                December  |   1.103624   .1462393     0.74   0.457     .8511965     1.43091
+                February  |    .898509   .1045556    -0.92   0.358     .7152729    1.128686
+                   March  |   1.125073   .1342248     0.99   0.323     .8904914    1.421451
+                   April  |   1.041902   .1245698     0.34   0.731     .8242465    1.317032
+                     May  |   .8029615   .0985036    -1.79   0.074     .6313545    1.021213
+                    June  |   1.101725   .1496296     0.71   0.476      .844244    1.437733
+                    July  |   .9919596   .1277029    -0.06   0.950     .7707473    1.276662
+                  August  |   .8791955   .1463604    -0.77   0.439     .6344322    1.218388
+               September  |   .8194133   .1063363    -1.53   0.125     .6353916    1.056731
+                 October  |     .92309   .1221033    -0.61   0.545     .7122787    1.196295
+                November  |   1.011595   .1808164     0.06   0.949     .7126226    1.435997
+                December  |   1.136437   .1530824     0.95   0.342     .8727408    1.479809
 -------------------------------------------------------------------------------------------
-file full_covid_vax_esrd.ster saved
-file full_covid_vax_esrd.dta saved
 
 Survival-time data settings
 
            ID variable: patient_id
-         Failure event: egfr_half_date!=0 & egfr_half_date<.
-Observed time interval: (exit_date[_n-1], exit_date]
+         Failure event: time_egfr_half!=0 & time_egfr_half<.
+Observed time interval: (time_end_egfr_half[_n-1], time_end_egfr_half]
      Exit on or before: failure
      Time for analysis: (time-origin)/365.25
-                Origin: time index_date
+                Origin: time time_zero_egfr_half
 
 --------------------------------------------------------------------------
-     25,431  total observations
-        106  observations end on or before enter()
-         71  observations begin on or after (first) failure
+     25,430  total observations
+     11,325  event time missing (time_end_egfr_half>=.)     PROBABLE ERROR
+         52  observations begin on or after (first) failure
 --------------------------------------------------------------------------
-     25,254  observations remaining, representing
-     25,026  subjects
-      6,566  failures in single-failure-per-subject data
- 32,777.993  total analysis time at risk and under observation
+     14,053  observations remaining, representing
+     14,013  subjects
+      5,788  failures in single-failure-per-subject data
+ 13,153.832  total analysis time at risk and under observation
                                                 At risk from t =         0
                                      Earliest observed entry t =         0
-                                          Last observed exit t =  5.730322
+                                          Last observed exit t =  2.748802
 
-        Failure _d: egfr_half_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_egfr_half
+  Analysis time _t: (time_end_egfr_half-origin)/365.25
+            Origin: time time_zero_egfr_half
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -59379.212
-Iteration 1:   log pseudolikelihood = -59377.508
-Iteration 2:   log pseudolikelihood = -59377.482
-Iteration 3:   log pseudolikelihood = -59377.482
+Iteration 0:   log pseudolikelihood = -52046.848
+Iteration 1:   log pseudolikelihood = -52039.583
+Iteration 2:   log pseudolikelihood = -52039.473
+Iteration 3:   log pseudolikelihood = -52039.473
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -59377.482
+Iteration 0:   log pseudolikelihood = -52039.473
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      25,026                           Number of obs = 25,254
-No. of failures =       6,566
-Time at risk    = 32,777.9932
-                                                        Wald chi2(5)  =  13.40
-Log pseudolikelihood = -59377.482                       Prob > chi2   = 0.0199
+No. of subjects =      14,013                           Number of obs = 14,053
+No. of failures =       5,788
+Time at risk    = 13,153.8316
+                                                        Wald chi2(5)  =  38.70
+Log pseudolikelihood = -52039.473                       Prob > chi2   = 0.0000
 
-                                     (Std. err. adjusted for 38 clusters in practice_id)
+                                     (Std. err. adjusted for 36 clusters in practice_id)
 ----------------------------------------------------------------------------------------
                        |               Robust
                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 -----------------------+----------------------------------------------------------------
              covid_vax |
-COVID pre-vaccination  |   1.301817   .2283408     1.50   0.133     .9230983    1.835913
- COVID 1 vaccine dose  |   .9764802   .1043301    -0.22   0.824     .7919878     1.20395
-COVID 2 vaccine doses  |   .9897676   .0491185    -0.21   0.836     .8980308    1.090876
-COVID 3 vaccine doses  |   .9635145   .0331437    -1.08   0.280     .9006955    1.030715
-COVID 4 vaccine doses  |   .9727856   .0273517    -0.98   0.326     .9206276    1.027899
+COVID pre-vaccination  |   1.554534   .2054372     3.34   0.001     1.199806    2.014139
+ COVID 1 vaccine dose  |   1.039014    .138345     0.29   0.774     .8003572    1.348836
+COVID 2 vaccine doses  |   1.157553   .0593325     2.85   0.004     1.046914    1.279885
+COVID 3 vaccine doses  |   1.074966   .0279594     2.78   0.005     1.021539    1.131186
+COVID 4 vaccine doses  |   1.087113   .0402978     2.25   0.024     1.010931    1.169035
 ----------------------------------------------------------------------------------------
-file crude_covid_vax_egfr_half.ster saved
-file crude_covid_vax_egfr_half.dta saved
 
-        Failure _d: egfr_half_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_egfr_half
+  Analysis time _t: (time_end_egfr_half-origin)/365.25
+            Origin: time time_zero_egfr_half
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -59379.212
-Iteration 1:   log pseudolikelihood = -59185.273
-Iteration 2:   log pseudolikelihood = -59182.035
-Iteration 3:   log pseudolikelihood = -59182.034
+Iteration 0:   log pseudolikelihood = -52046.848
+Iteration 1:   log pseudolikelihood = -52014.839
+Iteration 2:   log pseudolikelihood = -52014.718
+Iteration 3:   log pseudolikelihood = -52014.718
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -59182.034
+Iteration 0:   log pseudolikelihood = -52014.718
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      25,026                         Number of obs =   25,254
-No. of failures =       6,566
-Time at risk    = 32,777.9932
-                                                      Wald chi2(20) = 10372.36
-Log pseudolikelihood = -59182.034                     Prob > chi2   =   0.0000
+No. of subjects =      14,013                           Number of obs = 14,053
+No. of failures =       5,788
+Time at risk    = 13,153.8316
+                                                        Wald chi2(20) = 710.32
+Log pseudolikelihood = -52014.718                       Prob > chi2   = 0.0000
 
-                                     (Std. err. adjusted for 38 clusters in practice_id)
+                                     (Std. err. adjusted for 36 clusters in practice_id)
 ----------------------------------------------------------------------------------------
                        |               Robust
                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 -----------------------+----------------------------------------------------------------
              covid_vax |
-COVID pre-vaccination  |   1.389653   .2132403     2.14   0.032     1.028705     1.87725
- COVID 1 vaccine dose  |    .972334    .105398    -0.26   0.796     .7862269    1.202494
-COVID 2 vaccine doses  |   .9908663   .0513478    -0.18   0.859     .8951686    1.096795
-COVID 3 vaccine doses  |    .947663   .0328054    -1.55   0.120     .8854984    1.014192
-COVID 4 vaccine doses  |   .9588406    .028566    -1.41   0.158     .9044556    1.016496
+COVID pre-vaccination  |   1.562356   .2028528     3.44   0.001     1.211328    2.015107
+ COVID 1 vaccine dose  |   1.035806   .1382201     0.26   0.792     .7974299    1.345441
+COVID 2 vaccine doses  |   1.153517   .0606475     2.72   0.007      1.04057    1.278724
+COVID 3 vaccine doses  |   1.081075   .0288841     2.92   0.004      1.02592    1.139195
+COVID 4 vaccine doses  |   1.089471   .0422923     2.21   0.027     1.009654    1.175597
                        |
                    sex |
-                 Male  |   .9243171   .0198744    -3.66   0.000     .8861734    .9641026
-                  age1 |   1.003501   .0019251     1.82   0.069     .9997346    1.007281
-                  age2 |   .9936018   .0063906    -1.00   0.318      .981155    1.006206
-                  age3 |    1.01269   .0192045     0.66   0.506     .9757409    1.051039
+                 Male  |    .860434   .0168484    -7.68   0.000     .8280374    .8940981
+                  age1 |   1.002754   .0026686     1.03   0.301     .9975375    1.007998
+                  age2 |   .9953092   .0092376    -0.51   0.612     .9773675     1.01358
+                  age3 |   1.006042   .0294495     0.21   0.837     .9499472     1.06545
                        |
                  month |
-             February  |   .4091584   .0206775   -17.68   0.000     .3705738    .4517606
-                March  |   .4950089   .0288846   -12.05   0.000     .4415134    .5549861
-                April  |   .6434439   .0340405    -8.33   0.000     .5800682    .7137438
-                  May  |   .6174874   .0249099   -11.95   0.000     .5705452    .6682918
-                 June  |   .6660104   .0267444   -10.12   0.000     .6156021    .7205463
-                 July  |   .7407928   .0241214    -9.21   0.000     .6949928     .789611
-               August  |   .7952073   .0487248    -3.74   0.000     .7052201     .896677
-            September  |   .7836796   .0439611    -4.35   0.000      .702085     .874757
-              October  |   .7710846   .0319358    -6.28   0.000     .7109647    .8362883
-             November  |    .843597   .0347319    -4.13   0.000     .7781978    .9144923
-             December  |   1.034897   .0378031     0.94   0.348     .9633945    1.111707
+             February  |      1.036   .0435243     0.84   0.400     .9541111    1.124916
+                March  |   1.026798   .0339935     0.80   0.424     .9622872    1.095633
+                April  |   1.031974   .0456587     0.71   0.477     .9462545    1.125458
+                  May  |   1.060637   .0372669     1.68   0.094     .9900537    1.136253
+                 June  |   1.040134   .0432336     0.95   0.344     .9587572    1.128418
+                 July  |   1.074492   .0335397     2.30   0.021     1.010726    1.142281
+               August  |   1.007227   .0540686     0.13   0.893     .9066391    1.118975
+            September  |   .9490278   .0423467    -1.17   0.241     .8695555    1.035763
+              October  |   .9884494   .0333629    -0.34   0.731     .9251752    1.056051
+             November  |   .9502147   .0464685    -1.04   0.296     .8633668    1.045799
+             December  |   1.158282   .0534078     3.19   0.001     1.058195    1.267835
 ----------------------------------------------------------------------------------------
-file minimal_covid_vax_egfr_half.ster saved
-file minimal_covid_vax_egfr_half.dta saved
 
-        Failure _d: egfr_half_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_egfr_half
+  Analysis time _t: (time_end_egfr_half-origin)/365.25
+            Origin: time time_zero_egfr_half
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -22595.671
-Iteration 1:   log pseudolikelihood = -22502.635
-Iteration 2:   log pseudolikelihood = -22500.378
-Iteration 3:   log pseudolikelihood = -22500.376
+Iteration 0:   log pseudolikelihood = -20020.183
+Iteration 1:   log pseudolikelihood = -19986.556
+Iteration 2:   log pseudolikelihood = -19986.498
+Iteration 3:   log pseudolikelihood = -19986.498
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -22500.376
+Iteration 0:   log pseudolikelihood = -19986.498
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      10,598                         Number of obs =   10,639
-No. of failures =       2,762
-Time at risk    = 13,889.6674
-                                                      Wald chi2(35) = 7.26e+07
-Log pseudolikelihood = -22500.376                     Prob > chi2   =   0.0000
+No. of subjects =      5,936                          Number of obs =    5,943
+No. of failures =      2,462
+Time at risk    = 5,546.4285
+                                                      Wald chi2(34) = 14617.19
+Log pseudolikelihood = -19986.498                     Prob > chi2   =   0.0000
 
-                                        (Std. err. adjusted for 36 clusters in practice_id)
+                                        (Std. err. adjusted for 35 clusters in practice_id)
 -------------------------------------------------------------------------------------------
                           |               Robust
                        _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 --------------------------+----------------------------------------------------------------
                 covid_vax |
-   COVID pre-vaccination  |   .9897404    .328508    -0.03   0.975     .5164119    1.896909
-    COVID 1 vaccine dose  |   .8867389   .1645074    -0.65   0.517     .6164264    1.275588
-   COVID 2 vaccine doses  |   .9740282   .0675492    -0.38   0.704     .8502377    1.115842
-   COVID 3 vaccine doses  |   .9504591   .0751799    -0.64   0.521     .8139629    1.109845
-   COVID 4 vaccine doses  |    .950154   .0310201    -1.57   0.117     .8912601     1.01294
+   COVID pre-vaccination  |   1.253005   .2835368     1.00   0.319     .8041525    1.952394
+    COVID 1 vaccine dose  |   .9201771   .1589947    -0.48   0.630     .6558354    1.291065
+   COVID 2 vaccine doses  |   1.237254   .0993956     2.65   0.008     1.057005     1.44824
+   COVID 3 vaccine doses  |   1.114721     .07545     1.60   0.109     .9762308    1.272858
+   COVID 4 vaccine doses  |   1.042437   .0268885     1.61   0.107     .9910464    1.096492
                           |
                       sex |
-                    Male  |   .8952578   .0272604    -3.63   0.000     .8433915    .9503138
+                    Male  |   .8344036   .0276558    -5.46   0.000     .7819224    .8904073
                           |
                 ethnicity |
-             South Asian  |   .9725868   .1425904    -0.19   0.850     .7296831    1.296351
-                   Black  |   .9564491   .0665703    -0.64   0.522      .834482    1.096243
-                   Mixed  |   .9469983   .0603942    -0.85   0.393     .8357269    1.073085
-                   Other  |   .9712221   .0597382    -0.47   0.635     .8609197    1.095657
+             South Asian  |   .9760621   .1248754    -0.19   0.850     .7595851    1.254234
+                   Black  |   1.009678   .1104802     0.09   0.930     .8147862    1.251188
+                   Mixed  |   .8289596   .0560955    -2.77   0.006     .7259935     .946529
+                   Other  |   .9703354   .0889383    -0.33   0.743     .8107801     1.16129
                           |
                       imd |
-                       2  |   1.057957   .0739442     0.81   0.420      .922518    1.213281
-                       3  |   1.044338   .0462901     0.98   0.328     .9574404    1.139122
-                       4  |   .9941022   .0665696    -0.09   0.930     .8718278    1.133526
-        5 Least deprived  |   .9745933   .0692498    -0.36   0.717     .8478933    1.120226
+                       2  |   1.087627   .0609855     1.50   0.134     .9744318    1.213972
+                       3  |   .9950506   .0439957    -0.11   0.911     .9124513    1.085127
+                       4  |   1.068967   .0646985     1.10   0.270     .9493929    1.203602
+        5 Least deprived  |   .9593003   .0599449    -0.66   0.506     .8487203    1.084288
                           |
                    region |
-                    East  |   1.032559   .0658748     0.50   0.616     .9111923     1.17009
-                  London  |   1.033549   .0568425     0.60   0.549     .9279346    1.151185
-              North East  |   .9837204   .0652709    -0.25   0.805     .8637609     1.12034
-              North West  |   1.003255   .0656879     0.05   0.960      .882428    1.140627
-              South East  |   1.017793   .0636552     0.28   0.778     .9003747    1.150524
-              South West  |   1.119879   .0638382     1.99   0.047     1.001495    1.252257
-           West Midlands  |   1.078137   .0684637     1.18   0.236     .9519655    1.221032
-Yorkshire and The Humber  |   1.117733   .0916972     1.36   0.175      .951715    1.312712
+                    East  |   .9562552   .0644625    -0.66   0.507     .8379018    1.091326
+                  London  |    1.11657   .0612473     2.01   0.044     1.002755    1.243303
+              North East  |   1.002779   .0883615     0.03   0.975     .8437237    1.191819
+              North West  |   .9741346   .0715878    -0.36   0.721     .8434617    1.125052
+              South East  |   .9382088   .0555433    -1.08   0.281     .8354244    1.053639
+              South West  |   1.178343   .0742962     2.60   0.009     1.041363    1.333341
+           West Midlands  |   1.110779   .0742549     1.57   0.116     .9743733    1.266281
+Yorkshire and The Humber  |   1.083671   .0827606     1.05   0.293      .933019    1.258648
                           |
                     urban |
-                   Urban  |   .9830904   .0352533    -0.48   0.634     .9163675    1.054671
+                   Urban  |   .9711039   .0550099    -0.52   0.605     .8690562    1.085134
                           |
                       bmi |
-      Normal (18.5-24.9)  |   1.060557   .0645447     0.97   0.334     .9413049    1.194916
-    Overweight (25-29.9)  |   1.080387   .0837157     1.00   0.318     .9281593    1.257582
-       Obese I (30-34.9)  |   1.125279    .077687     1.71   0.087     .9828673    1.288325
-      Obese II (35-39.9)  |   1.036664   .0849188     0.44   0.660     .8829003    1.217208
-         Obese III (40+)  |   1.100938   .0764209     1.39   0.166     .9608982    1.261387
+      Normal (18.5-24.9)  |   1.034943   .0543385     0.65   0.513     .9337384    1.147118
+    Overweight (25-29.9)  |   1.005571    .062952     0.09   0.929      .889457    1.136844
+       Obese I (30-34.9)  |   1.138043   .0561675     2.62   0.009     1.033114     1.25363
+      Obese II (35-39.9)  |   .9788983    .062266    -0.34   0.737     .8641599    1.108871
+         Obese III (40+)  |   1.051807    .084865     0.63   0.531     .8979601    1.232013
                           |
                   smoking |
-   Current/former smoker  |    1.02673   .0617776     0.44   0.661     .9125154    1.155241
-                     age1 |   1.003661   .0023173     1.58   0.113     .9991293    1.008213
-                     age2 |   .9881838   .0082192    -1.43   0.153      .972205    1.004425
-                     age3 |   1.036637   .0274011     1.36   0.173      .984299    1.091757
+   Current/former smoker  |   1.001884   .0442988     0.04   0.966     .9187155    1.092581
+                     age1 |   1.001639   .0035217     0.47   0.641     .9947604    1.008565
+                     age2 |   .9979352   .0111985    -0.18   0.854     .9762262    1.020127
+                     age3 |   1.001221   .0324562     0.04   0.970     .9395869    1.066899
                           |
                     month |
-                February  |   .4131676   .0314274   -11.62   0.000     .3559425    .4795927
-                   March  |   .4987276   .0343051   -10.11   0.000     .4358261    .5707074
-                   April  |   .6462852   .0396177    -7.12   0.000     .5731194    .7287917
-                     May  |   .5921966   .0334529    -9.27   0.000     .5301295    .6615305
-                    June  |   .6809914   .0499676    -5.24   0.000      .589773    .7863183
-                    July  |   .7061205   .0520094    -4.72   0.000     .6112002     .815782
-                  August  |   .6853496   .0503438    -5.14   0.000     .5934518    .7914781
-               September  |   .7378507   .0608319    -3.69   0.000     .6277567    .8672526
-                 October  |    .792636   .0612468    -3.01   0.003     .6812424    .9222442
-                November  |    .885473   .0638371    -1.69   0.092     .7687923    1.019862
-                December  |   1.144117   .0791855     1.95   0.052      .998982    1.310336
+                February  |   .9718951   .0445429    -0.62   0.534     .8883989    1.063239
+                   March  |   .9751758   .0691393    -0.35   0.723     .8486591    1.120553
+                   April  |   1.002476   .0597243     0.04   0.967     .8919941    1.126642
+                     May  |   .9302236   .0502066    -1.34   0.180     .8368465     1.03402
+                    June  |    1.01173   .0713947     0.17   0.869     .8810445      1.1618
+                    July  |   .9877155   .0558012    -0.22   0.827     .8841848    1.103369
+                  August  |     .85551   .0706972    -1.89   0.059     .7275852    1.005927
+               September  |   .8721248   .0758238    -1.57   0.116     .7354851     1.03415
+                 October  |   .9565789    .068045    -0.62   0.533     .8320925    1.099689
+                November  |   1.016453   .0686335     0.24   0.809     .8904551    1.160279
+                December  |   1.136911   .0725195     2.01   0.044     1.003301    1.288313
 -------------------------------------------------------------------------------------------
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Cox regression with Breslow method for ties
-
-No. of subjects =      10,598                         Number of obs =   10,639
-No. of failures =       2,762
-Time at risk    = 13,889.6674
-                                                      Wald chi2(35) = 7.26e+07
-Log pseudolikelihood = -22500.376                     Prob > chi2   =   0.0000
-
-                                        (Std. err. adjusted for 36 clusters in practice_id)
--------------------------------------------------------------------------------------------
-                          |               Robust
-                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
---------------------------+----------------------------------------------------------------
-                covid_vax |
-   COVID pre-vaccination  |   .9897404    .328508    -0.03   0.975     .5164119    1.896909
-    COVID 1 vaccine dose  |   .8867389   .1645074    -0.65   0.517     .6164264    1.275588
-   COVID 2 vaccine doses  |   .9740282   .0675492    -0.38   0.704     .8502377    1.115842
-   COVID 3 vaccine doses  |   .9504591   .0751799    -0.64   0.521     .8139629    1.109845
-   COVID 4 vaccine doses  |    .950154   .0310201    -1.57   0.117     .8912601     1.01294
-                          |
-                      sex |
-                    Male  |   .8952578   .0272604    -3.63   0.000     .8433915    .9503138
-                          |
-                ethnicity |
-             South Asian  |   .9725868   .1425904    -0.19   0.850     .7296831    1.296351
-                   Black  |   .9564491   .0665703    -0.64   0.522      .834482    1.096243
-                   Mixed  |   .9469983   .0603942    -0.85   0.393     .8357269    1.073085
-                   Other  |   .9712221   .0597382    -0.47   0.635     .8609197    1.095657
-                          |
-                      imd |
-                       2  |   1.057957   .0739442     0.81   0.420      .922518    1.213281
-                       3  |   1.044338   .0462901     0.98   0.328     .9574404    1.139122
-                       4  |   .9941022   .0665696    -0.09   0.930     .8718278    1.133526
-        5 Least deprived  |   .9745933   .0692498    -0.36   0.717     .8478933    1.120226
-                          |
-                   region |
-                    East  |   1.032559   .0658748     0.50   0.616     .9111923     1.17009
-                  London  |   1.033549   .0568425     0.60   0.549     .9279346    1.151185
-              North East  |   .9837204   .0652709    -0.25   0.805     .8637609     1.12034
-              North West  |   1.003255   .0656879     0.05   0.960      .882428    1.140627
-              South East  |   1.017793   .0636552     0.28   0.778     .9003747    1.150524
-              South West  |   1.119879   .0638382     1.99   0.047     1.001495    1.252257
-           West Midlands  |   1.078137   .0684637     1.18   0.236     .9519655    1.221032
-Yorkshire and The Humber  |   1.117733   .0916972     1.36   0.175      .951715    1.312712
-                          |
-                    urban |
-                   Urban  |   .9830904   .0352533    -0.48   0.634     .9163675    1.054671
-                          |
-                      bmi |
-      Normal (18.5-24.9)  |   1.060557   .0645447     0.97   0.334     .9413049    1.194916
-    Overweight (25-29.9)  |   1.080387   .0837157     1.00   0.318     .9281593    1.257582
-       Obese I (30-34.9)  |   1.125279    .077687     1.71   0.087     .9828673    1.288325
-      Obese II (35-39.9)  |   1.036664   .0849188     0.44   0.660     .8829003    1.217208
-         Obese III (40+)  |   1.100938   .0764209     1.39   0.166     .9608982    1.261387
-                          |
-                  smoking |
-   Current/former smoker  |    1.02673   .0617776     0.44   0.661     .9125154    1.155241
-                     age1 |   1.003661   .0023173     1.58   0.113     .9991293    1.008213
-                     age2 |   .9881838   .0082192    -1.43   0.153      .972205    1.004425
-                     age3 |   1.036637   .0274011     1.36   0.173      .984299    1.091757
-                          |
-                    month |
-                February  |   .4131676   .0314274   -11.62   0.000     .3559425    .4795927
-                   March  |   .4987276   .0343051   -10.11   0.000     .4358261    .5707074
-                   April  |   .6462852   .0396177    -7.12   0.000     .5731194    .7287917
-                     May  |   .5921966   .0334529    -9.27   0.000     .5301295    .6615305
-                    June  |   .6809914   .0499676    -5.24   0.000      .589773    .7863183
-                    July  |   .7061205   .0520094    -4.72   0.000     .6112002     .815782
-                  August  |   .6853496   .0503438    -5.14   0.000     .5934518    .7914781
-               September  |   .7378507   .0608319    -3.69   0.000     .6277567    .8672526
-                 October  |    .792636   .0612468    -3.01   0.003     .6812424    .9222442
-                November  |    .885473   .0638371    -1.69   0.092     .7687923    1.019862
-                December  |   1.144117   .0791855     1.95   0.052      .998982    1.310336
--------------------------------------------------------------------------------------------
-file additional_covid_vax_egfr_half.ster saved
-file additional_covid_vax_egfr_half.dta saved
-
-        Failure _d: egfr_half_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_egfr_half
+  Analysis time _t: (time_end_egfr_half-origin)/365.25
+            Origin: time time_zero_egfr_half
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -22595.671
-Iteration 1:   log pseudolikelihood = -22497.727
-Iteration 2:   log pseudolikelihood = -22495.457
-Iteration 3:   log pseudolikelihood = -22495.455
+Iteration 0:   log pseudolikelihood = -20020.183
+Iteration 1:   log pseudolikelihood = -19978.749
+Iteration 2:   log pseudolikelihood = -19978.675
+Iteration 3:   log pseudolikelihood = -19978.675
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -22495.455
+Iteration 0:   log pseudolikelihood = -19978.675
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      10,598                         Number of obs =   10,639
-No. of failures =       2,762
-Time at risk    = 13,889.6674
-                                                      Wald chi2(35) = 7.69e+07
-Log pseudolikelihood = -22495.455                     Prob > chi2   =   0.0000
+No. of subjects =      5,936                          Number of obs =    5,943
+No. of failures =      2,462
+Time at risk    = 5,546.4285
+                                                      Wald chi2(34) = 88959.93
+Log pseudolikelihood = -19978.675                     Prob > chi2   =   0.0000
 
-                                        (Std. err. adjusted for 36 clusters in practice_id)
+                                        (Std. err. adjusted for 35 clusters in practice_id)
 -------------------------------------------------------------------------------------------
                           |               Robust
                        _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 --------------------------+----------------------------------------------------------------
                 covid_vax |
-   COVID pre-vaccination  |   1.007632   .3425488     0.02   0.982      .517526    1.961876
-    COVID 1 vaccine dose  |   .8808036   .1661328    -0.67   0.501     .6085968     1.27476
-   COVID 2 vaccine doses  |   .9755209   .0685169    -0.35   0.724     .8500635    1.119494
-   COVID 3 vaccine doses  |   .9529945   .0749126    -0.61   0.540     .8169199    1.111735
-   COVID 4 vaccine doses  |   .9531406   .0305024    -1.50   0.134     .8951933    1.014839
+   COVID pre-vaccination  |   1.269514   .2998275     1.01   0.312      .799107    2.016833
+    COVID 1 vaccine dose  |   .9138451   .1571545    -0.52   0.600     .6523654    1.280131
+   COVID 2 vaccine doses  |   1.232587   .1011325     2.55   0.011     1.049488    1.447631
+   COVID 3 vaccine doses  |   1.117799   .0749479     1.66   0.097     .9801469    1.274783
+   COVID 4 vaccine doses  |   1.044684   .0266691     1.71   0.087        .9937    1.098285
                           |
                       sex |
-                    Male  |   .8954575   .0271684    -3.64   0.000     .8437608    .9503217
+                    Male  |    .833179    .027037    -5.62   0.000     .7818375     .887892
                           |
                 ethnicity |
-             South Asian  |   .9659781   .1454027    -0.23   0.818     .7191859    1.297458
-                   Black  |   .9649011   .0657278    -0.52   0.600     .8443063    1.102721
-                   Mixed  |   .9480082   .0600085    -0.84   0.399     .8373971     1.07323
-                   Other  |    .972518   .0583871    -0.46   0.643     .8645577     1.09396
+             South Asian  |   .9651761   .1217807    -0.28   0.779     .7537139    1.235966
+                   Black  |   1.018558   .1107844     0.17   0.866      .823008    1.260571
+                   Mixed  |   .8282556   .0572521    -2.73   0.006     .7233128    .9484241
+                   Other  |   .9653059   .0881987    -0.39   0.699     .8070339    1.154617
                           |
                       imd |
-                       2  |   1.056753   .0728164     0.80   0.423     .9232531    1.209557
-                       3  |   1.047308   .0467643     1.04   0.301     .9595483    1.143095
-                       4  |   .9928882   .0645562    -0.11   0.913     .8740906    1.127832
-        5 Least deprived  |   .9727737   .0660916    -0.41   0.685     .8514909    1.111332
+                       2  |   1.084217   .0596702     1.47   0.142     .9733523    1.207709
+                       3  |   .9940676   .0424161    -0.14   0.889     .9143149    1.080777
+                       4  |   1.064591   .0630712     1.06   0.291     .9478807    1.195671
+        5 Least deprived  |   .9576469   .0570121    -0.73   0.467     .8521781    1.076169
                           |
                    region |
-                    East  |   1.032216   .0650974     0.50   0.615     .9121977    1.168025
-                  London  |   1.029956   .0565066     0.54   0.591     .9249521    1.146881
-              North East  |   .9832665   .0651938    -0.25   0.799     .8634433    1.119718
-              North West  |   1.002146   .0651562     0.03   0.974     .8822442    1.138344
-              South East  |   1.018308    .066136     0.28   0.780     .8965952    1.156544
-              South West  |   1.115685   .0643036     1.90   0.058     .9965105    1.249113
-           West Midlands  |   1.076427   .0694192     1.14   0.253     .9486161     1.22146
-Yorkshire and The Humber  |   1.116585   .0888658     1.39   0.166     .9553166    1.305078
+                    East  |   .9532497   .0665986    -0.69   0.493     .8312614     1.09314
+                  London  |   1.113616   .0629295     1.90   0.057      .996861    1.244045
+              North East  |   .9979644   .0910083    -0.02   0.982     .8346236    1.193272
+              North West  |   .9775579    .073837    -0.30   0.764     .8430425    1.133537
+              South East  |   .9361938    .057695    -1.07   0.285     .8296762    1.056387
+              South West  |   1.175322   .0773912     2.45   0.014     1.033018    1.337229
+           West Midlands  |   1.102285   .0741499     1.45   0.148     .9661271    1.257632
+Yorkshire and The Humber  |   1.079823   .0810387     1.02   0.306     .9321196    1.250932
                           |
                     urban |
-                   Urban  |   .9825191   .0346152    -0.50   0.617     .9169641    1.052761
+                   Urban  |   .9733254   .0535372    -0.49   0.623     .8738528    1.084121
                           |
                       bmi |
-      Normal (18.5-24.9)  |    1.06173   .0642332     0.99   0.322     .9430125    1.195393
-    Overweight (25-29.9)  |   1.079692   .0842225     0.98   0.326     .9266186    1.258053
-       Obese I (30-34.9)  |   1.125161   .0760268     1.75   0.081     .9855963    1.284488
-      Obese II (35-39.9)  |   1.035843   .0840351     0.43   0.664     .8835645    1.214366
-         Obese III (40+)  |   1.103298   .0768579     1.41   0.158     .9624903    1.264705
+      Normal (18.5-24.9)  |   1.035591   .0541583     0.67   0.504      .934702     1.14737
+    Overweight (25-29.9)  |   1.004823   .0628309     0.08   0.939     .8889234    1.135833
+       Obese I (30-34.9)  |    1.14186   .0562948     2.69   0.007     1.036687    1.257703
+      Obese II (35-39.9)  |   .9805275   .0622708    -0.31   0.757     .8657691    1.110497
+         Obese III (40+)  |   1.053756   .0859568     0.64   0.521     .8980616    1.236443
                           |
-         1.cardiovascular |   .9046603   .0429956    -2.11   0.035     .8241962    .9929798
-               1.diabetes |   .9581588   .0347052    -1.18   0.238     .8924962    1.028652
-           1.hypertension |   .9928953   .0338044    -0.21   0.834      .928802    1.061411
-       1.immunosuppressed |   1.117647   .0620836     2.00   0.045     1.002355    1.246199
-        1.non_haem_cancer |   .8265136    .098517    -1.60   0.110     .6543202    1.044022
-                          |
-                  smoking |
-   Current/former smoker  |   1.027495    .061677     0.45   0.651     .9134508    1.155778
-                     age1 |   1.003447   .0022616     1.53   0.127     .9990246     1.00789
-                     age2 |   .9891069   .0080006    -1.35   0.176     .9735496    1.004913
-                     age3 |   1.033665    .026607     1.29   0.198     .9828102    1.087152
-                          |
-                    month |
-                February  |    .412923   .0315025   -11.59   0.000     .3555737     .479522
-                   March  |   .5009343   .0345916   -10.01   0.000     .4375238    .5735349
-                   April  |   .6486675   .0395103    -7.11   0.000     .5756725    .7309181
-                     May  |   .5948038   .0337599    -9.15   0.000     .5321832    .6647927
-                    June  |   .6861797   .0503871    -5.13   0.000     .5942005    .7923967
-                    July  |   .7112591   .0522086    -4.64   0.000     .6159523    .8213128
-                  August  |   .6834255   .0491447    -5.29   0.000     .5935835    .7868655
-               September  |   .7377013   .0618659    -3.63   0.000     .6258873    .8694907
-                 October  |   .7969379   .0618911    -2.92   0.003     .6844146    .9279609
-                November  |    .888341   .0634829    -1.66   0.098     .7722375      1.0219
-                December  |    1.14626   .0799918     1.96   0.050     .9997282    1.314269
--------------------------------------------------------------------------------------------
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Cox regression with Breslow method for ties
-
-No. of subjects =      10,598                         Number of obs =   10,639
-No. of failures =       2,762
-Time at risk    = 13,889.6674
-                                                      Wald chi2(35) = 7.69e+07
-Log pseudolikelihood = -22495.455                     Prob > chi2   =   0.0000
-
-                                        (Std. err. adjusted for 36 clusters in practice_id)
--------------------------------------------------------------------------------------------
-                          |               Robust
-                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
---------------------------+----------------------------------------------------------------
-                covid_vax |
-   COVID pre-vaccination  |   1.007632   .3425488     0.02   0.982      .517526    1.961876
-    COVID 1 vaccine dose  |   .8808036   .1661328    -0.67   0.501     .6085968     1.27476
-   COVID 2 vaccine doses  |   .9755209   .0685169    -0.35   0.724     .8500635    1.119494
-   COVID 3 vaccine doses  |   .9529945   .0749126    -0.61   0.540     .8169199    1.111735
-   COVID 4 vaccine doses  |   .9531406   .0305024    -1.50   0.134     .8951933    1.014839
-                          |
-                      sex |
-                    Male  |   .8954575   .0271684    -3.64   0.000     .8437608    .9503217
-                          |
-                ethnicity |
-             South Asian  |   .9659781   .1454027    -0.23   0.818     .7191859    1.297458
-                   Black  |   .9649011   .0657278    -0.52   0.600     .8443063    1.102721
-                   Mixed  |   .9480082   .0600085    -0.84   0.399     .8373971     1.07323
-                   Other  |    .972518   .0583871    -0.46   0.643     .8645577     1.09396
-                          |
-                      imd |
-                       2  |   1.056753   .0728164     0.80   0.423     .9232531    1.209557
-                       3  |   1.047308   .0467643     1.04   0.301     .9595483    1.143095
-                       4  |   .9928882   .0645562    -0.11   0.913     .8740906    1.127832
-        5 Least deprived  |   .9727737   .0660916    -0.41   0.685     .8514909    1.111332
-                          |
-                   region |
-                    East  |   1.032216   .0650974     0.50   0.615     .9121977    1.168025
-                  London  |   1.029956   .0565066     0.54   0.591     .9249521    1.146881
-              North East  |   .9832665   .0651938    -0.25   0.799     .8634433    1.119718
-              North West  |   1.002146   .0651562     0.03   0.974     .8822442    1.138344
-              South East  |   1.018308    .066136     0.28   0.780     .8965952    1.156544
-              South West  |   1.115685   .0643036     1.90   0.058     .9965105    1.249113
-           West Midlands  |   1.076427   .0694192     1.14   0.253     .9486161     1.22146
-Yorkshire and The Humber  |   1.116585   .0888658     1.39   0.166     .9553166    1.305078
-                          |
-                    urban |
-                   Urban  |   .9825191   .0346152    -0.50   0.617     .9169641    1.052761
-                          |
-                      bmi |
-      Normal (18.5-24.9)  |    1.06173   .0642332     0.99   0.322     .9430125    1.195393
-    Overweight (25-29.9)  |   1.079692   .0842225     0.98   0.326     .9266186    1.258053
-       Obese I (30-34.9)  |   1.125161   .0760268     1.75   0.081     .9855963    1.284488
-      Obese II (35-39.9)  |   1.035843   .0840351     0.43   0.664     .8835645    1.214366
-         Obese III (40+)  |   1.103298   .0768579     1.41   0.158     .9624903    1.264705
-                          |
-         1.cardiovascular |   .9046603   .0429956    -2.11   0.035     .8241962    .9929798
-               1.diabetes |   .9581588   .0347052    -1.18   0.238     .8924962    1.028652
-           1.hypertension |   .9928953   .0338044    -0.21   0.834      .928802    1.061411
-       1.immunosuppressed |   1.117647   .0620836     2.00   0.045     1.002355    1.246199
-        1.non_haem_cancer |   .8265136    .098517    -1.60   0.110     .6543202    1.044022
+         1.cardiovascular |   .8301753   .0357562    -4.32   0.000     .7629711    .9032991
+               1.diabetes |   .9600471   .0301949    -1.30   0.195     .9026533     1.02109
+           1.hypertension |   .9890754   .0402654    -0.27   0.787     .9132231    1.071228
+       1.immunosuppressed |   1.012437    .081505     0.15   0.878     .8646559    1.185477
+        1.non_haem_cancer |   .8427387   .0979694    -1.47   0.141     .6710265    1.058391
                           |
                   smoking |
-   Current/former smoker  |   1.027495    .061677     0.45   0.651     .9134508    1.155778
-                     age1 |   1.003447   .0022616     1.53   0.127     .9990246     1.00789
-                     age2 |   .9891069   .0080006    -1.35   0.176     .9735496    1.004913
-                     age3 |   1.033665    .026607     1.29   0.198     .9828102    1.087152
+   Current/former smoker  |    1.00261   .0451173     0.06   0.954     .9179692    1.095055
+                     age1 |   1.001292   .0035419     0.37   0.715     .9943744    1.008259
+                     age2 |   .9992194    .011332    -0.07   0.945     .9772542    1.021678
+                     age3 |   .9972992   .0326585    -0.08   0.934     .9353007    1.063407
                           |
                     month |
-                February  |    .412923   .0315025   -11.59   0.000     .3555737     .479522
-                   March  |   .5009343   .0345916   -10.01   0.000     .4375238    .5735349
-                   April  |   .6486675   .0395103    -7.11   0.000     .5756725    .7309181
-                     May  |   .5948038   .0337599    -9.15   0.000     .5321832    .6647927
-                    June  |   .6861797   .0503871    -5.13   0.000     .5942005    .7923967
-                    July  |   .7112591   .0522086    -4.64   0.000     .6159523    .8213128
-                  August  |   .6834255   .0491447    -5.29   0.000     .5935835    .7868655
-               September  |   .7377013   .0618659    -3.63   0.000     .6258873    .8694907
-                 October  |   .7969379   .0618911    -2.92   0.003     .6844146    .9279609
-                November  |    .888341   .0634829    -1.66   0.098     .7722375      1.0219
-                December  |    1.14626   .0799918     1.96   0.050     .9997282    1.314269
+                February  |   .9621424   .0439525    -0.84   0.398     .8797411    1.052262
+                   March  |   .9746668    .067124    -0.37   0.709     .8515989     1.11552
+                   April  |   1.004427   .0620467     0.07   0.943      .889891    1.133704
+                     May  |   .9270877    .049275    -1.42   0.154     .8353706    1.028875
+                    June  |   1.015353   .0733296     0.21   0.833     .8813381    1.169746
+                    July  |   .9884585   .0561176    -0.20   0.838     .8843685      1.1048
+                  August  |   .8520653   .0699043    -1.95   0.051     .7255034    1.000705
+               September  |   .8659332   .0748101    -1.67   0.096     .7310499    1.025703
+                 October  |   .9508925   .0664567    -0.72   0.471     .8291669    1.090488
+                November  |   1.019512   .0682718     0.29   0.773     .8941116    1.162501
+                December  |   1.125035   .0734732     1.80   0.071     .9898659    1.278663
 -------------------------------------------------------------------------------------------
-file full_covid_vax_egfr_half.ster saved
-file full_covid_vax_egfr_half.dta saved
 
 Survival-time data settings
 
            ID variable: patient_id
-         Failure event: aki_date!=0 & aki_date<.
-Observed time interval: (exit_date[_n-1], exit_date]
+         Failure event: time_aki!=0 & time_aki<.
+Observed time interval: (time_end_aki[_n-1], time_end_aki]
      Exit on or before: failure
      Time for analysis: (time-origin)/365.25
-                Origin: time index_date
+                Origin: time time_zero_aki
 
 --------------------------------------------------------------------------
-     25,431  total observations
-        106  observations end on or before enter()
-         53  observations begin on or after (first) failure
+     25,430  total observations
+      1,192  observations end on or before enter()
+         77  observations begin on or after (first) failure
 --------------------------------------------------------------------------
-     25,272  observations remaining, representing
-     25,026  subjects
-      4,258  failures in single-failure-per-subject data
- 32,839.058  total analysis time at risk and under observation
+     24,161  observations remaining, representing
+     23,940  subjects
+      3,172  failures in single-failure-per-subject data
+  30,144.03  total analysis time at risk and under observation
                                                 At risk from t =         0
                                      Earliest observed entry t =         0
-                                          Last observed exit t =  5.730322
+                                          Last observed exit t =  2.748802
 
-        Failure _d: aki_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_aki
+  Analysis time _t: (time_end_aki-origin)/365.25
+            Origin: time time_zero_aki
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -39553.345
-Iteration 1:   log pseudolikelihood = -39550.682
-Iteration 2:   log pseudolikelihood = -39550.679
-Iteration 3:   log pseudolikelihood = -39550.679
+Iteration 0:   log pseudolikelihood = -30191.052
+Iteration 1:   log pseudolikelihood = -30188.412
+Iteration 2:   log pseudolikelihood = -30188.412
+Iteration 3:   log pseudolikelihood = -30188.412
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -39550.679
+Iteration 0:   log pseudolikelihood = -30188.412
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      25,026                           Number of obs = 25,272
-No. of failures =       4,258
-Time at risk    = 32,839.0582
-                                                        Wald chi2(5)  =  15.30
-Log pseudolikelihood = -39550.679                       Prob > chi2   = 0.0091
+No. of subjects =      23,940                           Number of obs = 24,161
+No. of failures =       3,172
+Time at risk    = 30,144.0301
+                                                        Wald chi2(5)  =   8.60
+Log pseudolikelihood = -30188.412                       Prob > chi2   = 0.1261
 
                                      (Std. err. adjusted for 38 clusters in practice_id)
 ----------------------------------------------------------------------------------------
@@ -1094,34 +771,32 @@ Log pseudolikelihood = -39550.679                       Prob > chi2   = 0.0091
                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 -----------------------+----------------------------------------------------------------
              covid_vax |
-COVID pre-vaccination  |   .9023895   .1207765    -0.77   0.443     .6941743    1.173058
- COVID 1 vaccine dose  |   .8650762   .1738623    -0.72   0.471     .5834189    1.282709
-COVID 2 vaccine doses  |   .8650465     .05697    -2.20   0.028     .7602934    .9842325
-COVID 3 vaccine doses  |   .9709188   .0384486    -0.75   0.456     .8984112    1.049278
-COVID 4 vaccine doses  |   .9431444   .0283722    -1.95   0.052     .8891435    1.000425
+COVID pre-vaccination  |   1.090412   .1912935     0.49   0.622      .773148    1.537868
+ COVID 1 vaccine dose  |   .9280307   .2009348    -0.34   0.730      .607103    1.418608
+COVID 2 vaccine doses  |   1.008594   .0791997     0.11   0.913     .8647213    1.176405
+COVID 3 vaccine doses  |   1.090745   .0541698     1.75   0.080     .9895781    1.202255
+COVID 4 vaccine doses  |   1.080554   .0333294     2.51   0.012     1.017166    1.147894
 ----------------------------------------------------------------------------------------
-file crude_covid_vax_aki.ster saved
-file crude_covid_vax_aki.dta saved
 
-        Failure _d: aki_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_aki
+  Analysis time _t: (time_end_aki-origin)/365.25
+            Origin: time time_zero_aki
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -39553.345
-Iteration 1:   log pseudolikelihood = -39483.173
-Iteration 2:   log pseudolikelihood = -39482.574
-Iteration 3:   log pseudolikelihood = -39482.574
+Iteration 0:   log pseudolikelihood = -30191.052
+Iteration 1:   log pseudolikelihood = -30180.373
+Iteration 2:   log pseudolikelihood = -30180.363
+Iteration 3:   log pseudolikelihood = -30180.363
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -39482.574
+Iteration 0:   log pseudolikelihood = -30180.363
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      25,026                          Number of obs =  25,272
-No. of failures =       4,258
-Time at risk    = 32,839.0582
-                                                       Wald chi2(20) = 1826.72
-Log pseudolikelihood = -39482.574                      Prob > chi2   =  0.0000
+No. of subjects =      23,940                           Number of obs = 24,161
+No. of failures =       3,172
+Time at risk    = 30,144.0301
+                                                        Wald chi2(20) = 191.15
+Log pseudolikelihood = -30180.363                       Prob > chi2   = 0.0000
 
                                      (Std. err. adjusted for 38 clusters in practice_id)
 ----------------------------------------------------------------------------------------
@@ -1129,424 +804,254 @@ Log pseudolikelihood = -39482.574                      Prob > chi2   =  0.0000
                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 -----------------------+----------------------------------------------------------------
              covid_vax |
-COVID pre-vaccination  |   .9407241   .1276182    -0.45   0.652     .7210886    1.227258
- COVID 1 vaccine dose  |   .8610807   .1778516    -0.72   0.469     .5744242    1.290788
-COVID 2 vaccine doses  |   .8693364    .057575    -2.11   0.034     .7635086    .9898328
-COVID 3 vaccine doses  |   .9642785   .0366209    -0.96   0.338     .8951092    1.038793
-COVID 4 vaccine doses  |   .9366789   .0287457    -2.13   0.033     .8819993    .9947483
+COVID pre-vaccination  |   1.102723   .1950383     0.55   0.580     .7796765    1.559618
+ COVID 1 vaccine dose  |   .9239603   .1984885    -0.37   0.713     .6064501    1.407705
+COVID 2 vaccine doses  |   1.007806   .0768129     0.10   0.919     .8679607    1.170183
+COVID 3 vaccine doses  |   1.085173   .0532349     1.67   0.096     .9856936    1.194692
+COVID 4 vaccine doses  |   1.080081   .0337979     2.46   0.014     1.015829    1.148398
                        |
                    sex |
-                 Male  |   .9810863   .0216694    -0.86   0.387     .9395212     1.02449
-                  age1 |   1.004221     .00234     1.81   0.071     .9996451    1.008818
-                  age2 |   .9951987   .0087205    -0.55   0.583     .9782527    1.012438
-                  age3 |   1.007972   .0278944     0.29   0.774     .9547568    1.064154
+                 Male  |   .9764522   .0224249    -1.04   0.299     .9334747    1.021408
+                  age1 |   1.004163   .0037375     1.12   0.264     .9968643    1.011515
+                  age2 |   .9944644   .0146403    -0.38   0.706       .96618    1.023577
+                  age3 |    1.00975   .0471918     0.21   0.836     .9213652    1.106612
                        |
                  month |
-             February  |   .5291856   .0274052   -12.29   0.000     .4781084    .5857194
-                March  |   .6368938   .0389994    -7.37   0.000     .5648651    .7181072
-                April  |   .7833165   .0529858    -3.61   0.000      .686056    .8943655
-                  May  |   .7444206   .0394579    -5.57   0.000     .6709661    .8259167
-                 June  |    .760514   .0495229    -4.20   0.000     .6693897    .8640432
-                 July  |    .852865   .0704511    -1.93   0.054     .7253817    1.002753
-               August  |   .8857624    .048936    -2.20   0.028       .79486    .9870606
-            September  |   .9341231   .0620943    -1.03   0.305     .8200151     1.06411
-              October  |   .9445781   .0713375    -0.75   0.450      .814615    1.095275
-             November  |   .8350331   .0556188    -2.71   0.007      .732838    .9514795
-             December  |   .9551113   .0699274    -0.63   0.530     .8274356    1.102488
+             February  |   .8891516    .047683    -2.19   0.028     .8004385    .9876969
+                March  |    .931475   .0659528    -1.00   0.316     .8107784    1.070139
+                April  |   1.006082   .0771477     0.08   0.937     .8656896    1.169243
+                  May  |   .9194511   .0455906    -1.69   0.090     .8342998    1.013293
+                 June  |   .8785209   .0571088    -1.99   0.046     .7734267    .9978953
+                 July  |   .8940279   .0816407    -1.23   0.220     .7475172    1.069254
+               August  |   .9486498   .0601015    -0.83   0.405     .8378731    1.074072
+            September  |   .9197106   .0755791    -1.02   0.308     .7828921    1.080439
+              October  |   .8167264   .0570294    -2.90   0.004     .7122622    .9365119
+             November  |   .8873116   .0590693    -1.80   0.073     .7787727    1.010978
+             December  |   1.038345   .0844793     0.46   0.644     .8852959    1.217854
 ----------------------------------------------------------------------------------------
-file minimal_covid_vax_aki.ster saved
-file minimal_covid_vax_aki.dta saved
 
-        Failure _d: aki_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_aki
+  Analysis time _t: (time_end_aki-origin)/365.25
+            Origin: time time_zero_aki
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -14583.191
-Iteration 1:   log pseudolikelihood = -14539.484
-Iteration 2:   log pseudolikelihood = -14539.222
-Iteration 3:   log pseudolikelihood = -14539.222
+Iteration 0:   log pseudolikelihood = -10942.316
+Iteration 1:   log pseudolikelihood = -10924.538
+Iteration 2:   log pseudolikelihood = -10924.489
+Iteration 3:   log pseudolikelihood = -10924.489
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -14539.222
+Iteration 0:   log pseudolikelihood = -10924.489
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      10,604                        Number of obs =    10,645
-No. of failures =       1,731
-Time at risk    = 13,907.4168
-                                                     Wald chi2(35) = 579992.23
-Log pseudolikelihood = -14539.222                    Prob > chi2   =    0.0000
+No. of subjects =     10,129                          Number of obs =   10,166
+No. of failures =      1,265
+Time at risk    = 12,797.306
+                                                      Wald chi2(34) = 18067.00
+Log pseudolikelihood = -10924.489                     Prob > chi2   =   0.0000
 
-                                        (Std. err. adjusted for 36 clusters in practice_id)
+                                        (Std. err. adjusted for 35 clusters in practice_id)
 -------------------------------------------------------------------------------------------
                           |               Robust
                        _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 --------------------------+----------------------------------------------------------------
                 covid_vax |
-   COVID pre-vaccination  |   .5738309   .3374134    -0.94   0.345     .1812492    1.816736
-    COVID 1 vaccine dose  |   .8824267   .2235178    -0.49   0.621     .5371186     1.44973
-   COVID 2 vaccine doses  |   .7426209   .0798081    -2.77   0.006     .6015755    .9167359
-   COVID 3 vaccine doses  |   .9605803   .0822653    -0.47   0.639      .812149    1.136139
-   COVID 4 vaccine doses  |   .9100774   .0418772    -2.05   0.041      .831592    .9959703
+   COVID pre-vaccination  |   .8378619   .4903131    -0.30   0.762      .266105    2.638104
+    COVID 1 vaccine dose  |    1.08247    .409873     0.21   0.834      .515361    2.273631
+   COVID 2 vaccine doses  |   .7886305   .0921362    -2.03   0.042     .6272305    .9915624
+   COVID 3 vaccine doses  |   .9930217   .0917897    -0.08   0.940     .8284725    1.190253
+   COVID 4 vaccine doses  |   1.040598   .0530018     0.78   0.435     .9417331    1.149842
                           |
                       sex |
-                    Male  |    1.00412   .0508251     0.08   0.935     .9092861    1.108844
+                    Male  |   1.006433   .0465195     0.14   0.890     .9192646    1.101867
                           |
                 ethnicity |
-             South Asian  |   .9957351   .0871123    -0.05   0.961     .8388342    1.181984
-                   Black  |   .8425161   .0846052    -1.71   0.088     .6919915    1.025783
-                   Mixed  |   1.072475   .0867774     0.86   0.387     .9151947    1.256784
-                   Other  |    .941287   .1164607    -0.49   0.625     .7385964    1.199601
+             South Asian  |   .9306682   .0616648    -1.08   0.278     .8173262    1.059728
+                   Black  |   .7741788   .0917028    -2.16   0.031     .6137831    .9764895
+                   Mixed  |   1.092518   .0876428     1.10   0.270     .9335648    1.278536
+                   Other  |   .8482122   .1205561    -1.16   0.247     .6419831     1.12069
                           |
                       imd |
-                       2  |   1.094633   .0762247     1.30   0.194     .9549821    1.254706
-                       3  |   1.119051   .0877154     1.44   0.151     .9596867    1.304879
-                       4  |   .9880981    .039021    -0.30   0.762     .9145033    1.067615
-        5 Least deprived  |    1.05105   .0481914     1.09   0.278     .9607168    1.149878
+                       2  |     1.0338   .0792171     0.43   0.664     .8896343    1.201329
+                       3  |   1.105049    .101742     1.08   0.278     .9225958    1.323585
+                       4  |   .9859038   .0616546    -0.23   0.820     .8721751    1.114462
+        5 Least deprived  |   1.036449   .0709043     0.52   0.601     .9063932    1.185166
                           |
                    region |
-                    East  |    1.10343   .0731279     1.49   0.138     .9690202    1.256483
-                  London  |   1.028598   .0710029     0.41   0.683     .8984388    1.177615
-              North East  |   1.041673   .0817185     0.52   0.603     .8932135    1.214808
-              North West  |   .9702833   .0918078    -0.32   0.750      .806043    1.167989
-              South East  |    1.04792   .0725784     0.68   0.499     .9149019    1.200278
-              South West  |   1.220645    .113792     2.14   0.032     1.016806    1.465348
-           West Midlands  |   .9757746   .0807655    -0.30   0.767     .8296502    1.147636
-Yorkshire and The Humber  |   1.089922   .1251101     0.75   0.453     .8703368    1.364907
+                    East  |   1.076397   .1220704     0.65   0.516     .8618679    1.344325
+                  London  |   1.102685   .1001874     1.08   0.282      .922812    1.317618
+              North East  |   .9516322   .1079134    -0.44   0.662     .7619814    1.188485
+              North West  |   .9069297   .1028817    -0.86   0.389     .7261288    1.132749
+              South East  |   1.020757   .1180575     0.18   0.859     .8137197     1.28047
+              South West  |   1.200072   .1502036     1.46   0.145     .9390073    1.533718
+           West Midlands  |   .9354285   .1460629    -0.43   0.669     .6888099    1.270345
+Yorkshire and The Humber  |   1.107668   .1496555     0.76   0.449     .8499723    1.443491
                           |
                     urban |
-                   Urban  |   1.067022   .0317232     2.18   0.029     1.006622    1.131045
+                   Urban  |   1.114241   .0443543     2.72   0.007     1.030612    1.204655
                           |
                       bmi |
-      Normal (18.5-24.9)  |   .9552128   .0716588    -0.61   0.541     .8246016    1.106512
-    Overweight (25-29.9)  |   1.026178   .1035648     0.26   0.798     .8420094    1.250629
-       Obese I (30-34.9)  |   .9985282   .0912106    -0.02   0.987     .8348478      1.1943
-      Obese II (35-39.9)  |   .8664848   .1250724    -0.99   0.321     .6529721    1.149813
-         Obese III (40+)  |   .9235336   .1147473    -0.64   0.522     .7239233    1.178183
+      Normal (18.5-24.9)  |   .8872868   .0819147    -1.30   0.195     .7404244    1.063279
+    Overweight (25-29.9)  |   .9913165   .1358783    -0.06   0.949     .7577735    1.296837
+       Obese I (30-34.9)  |   .9341045   .0977992    -0.65   0.515     .7608097    1.146872
+      Obese II (35-39.9)  |   .8306941   .1364113    -1.13   0.259     .6020911    1.146093
+         Obese III (40+)  |    .867328   .1285008    -0.96   0.337     .6487417    1.159565
                           |
                   smoking |
-   Current/former smoker  |    1.02976   .0437626     0.69   0.490     .9474617    1.119206
-                     age1 |   1.001433   .0045367     0.32   0.752     .9925802    1.010364
-                     age2 |   .9992379   .0166561    -0.05   0.964       .96712    1.032422
-                     age3 |   .9997846   .0501927    -0.00   0.997     .9060939    1.103163
+   Current/former smoker  |   1.026823   .0476798     0.57   0.569     .9374988    1.124658
+                     age1 |   1.001348   .0050695     0.27   0.790     .9914606    1.011333
+                     age2 |   1.001574   .0190585     0.08   0.934     .9649082    1.039633
+                     age3 |   .9910898   .0581813    -0.15   0.879     .8833722    1.111942
                           |
                     month |
-                February  |   .5592394   .0554387    -5.86   0.000     .4604857    .6791713
-                   March  |   .6519961   .0447022    -6.24   0.000     .5700132    .7457703
-                   April  |   .8113486   .0588586    -2.88   0.004     .7038138    .9353136
-                     May  |   .6392444   .0561848    -5.09   0.000     .5380872    .7594185
-                    June  |   .8548736    .068811    -1.95   0.051      .730107    1.000961
-                    July  |   .9130426   .0954933    -0.87   0.384     .7438161     1.12077
-                  August  |   .8327549   .1007976    -1.51   0.131     .6568812    1.055717
-               September  |   .9136638   .0623282    -1.32   0.186     .7993174    1.044368
-                 October  |   1.001471   .1236982     0.01   0.991      .786142     1.27578
-                November  |   .9384932   .0861301    -0.69   0.489     .7839931     1.12344
-                December  |   1.052618   .1077677     0.50   0.616     .8612399    1.286522
+                February  |   .9188129   .0970075    -0.80   0.423     .7470643    1.130046
+                   March  |   .9309283   .0865342    -0.77   0.441     .7758772    1.116965
+                   April  |   .9404317   .0972046    -0.59   0.552     .7679725    1.151619
+                     May  |    .774353   .0851922    -2.32   0.020     .6241544    .9606958
+                    June  |   1.022149   .1025827     0.22   0.827     .8396298    1.244345
+                    July  |   .8674388   .1281768    -0.96   0.336     .6493238    1.158821
+                  August  |   .8623925    .127636    -1.00   0.317     .6452459    1.152616
+               September  |   .9182904   .0763842    -1.02   0.305     .7801468    1.080896
+                 October  |   .8832287   .0845578    -1.30   0.195     .7321187    1.065528
+                November  |   .9310696   .1127679    -0.59   0.555     .7343238    1.180529
+                December  |   1.027263   .1471651     0.19   0.851     .7757807    1.360267
 -------------------------------------------------------------------------------------------
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Cox regression with Breslow method for ties
-
-No. of subjects =      10,604                        Number of obs =    10,645
-No. of failures =       1,731
-Time at risk    = 13,907.4168
-                                                     Wald chi2(35) = 579992.23
-Log pseudolikelihood = -14539.222                    Prob > chi2   =    0.0000
-
-                                        (Std. err. adjusted for 36 clusters in practice_id)
--------------------------------------------------------------------------------------------
-                          |               Robust
-                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
---------------------------+----------------------------------------------------------------
-                covid_vax |
-   COVID pre-vaccination  |   .5738309   .3374134    -0.94   0.345     .1812492    1.816736
-    COVID 1 vaccine dose  |   .8824267   .2235178    -0.49   0.621     .5371186     1.44973
-   COVID 2 vaccine doses  |   .7426209   .0798081    -2.77   0.006     .6015755    .9167359
-   COVID 3 vaccine doses  |   .9605803   .0822653    -0.47   0.639      .812149    1.136139
-   COVID 4 vaccine doses  |   .9100774   .0418772    -2.05   0.041      .831592    .9959703
-                          |
-                      sex |
-                    Male  |    1.00412   .0508251     0.08   0.935     .9092861    1.108844
-                          |
-                ethnicity |
-             South Asian  |   .9957351   .0871123    -0.05   0.961     .8388342    1.181984
-                   Black  |   .8425161   .0846052    -1.71   0.088     .6919915    1.025783
-                   Mixed  |   1.072475   .0867774     0.86   0.387     .9151947    1.256784
-                   Other  |    .941287   .1164607    -0.49   0.625     .7385964    1.199601
-                          |
-                      imd |
-                       2  |   1.094633   .0762247     1.30   0.194     .9549821    1.254706
-                       3  |   1.119051   .0877154     1.44   0.151     .9596867    1.304879
-                       4  |   .9880981    .039021    -0.30   0.762     .9145033    1.067615
-        5 Least deprived  |    1.05105   .0481914     1.09   0.278     .9607168    1.149878
-                          |
-                   region |
-                    East  |    1.10343   .0731279     1.49   0.138     .9690202    1.256483
-                  London  |   1.028598   .0710029     0.41   0.683     .8984388    1.177615
-              North East  |   1.041673   .0817185     0.52   0.603     .8932135    1.214808
-              North West  |   .9702833   .0918078    -0.32   0.750      .806043    1.167989
-              South East  |    1.04792   .0725784     0.68   0.499     .9149019    1.200278
-              South West  |   1.220645    .113792     2.14   0.032     1.016806    1.465348
-           West Midlands  |   .9757746   .0807655    -0.30   0.767     .8296502    1.147636
-Yorkshire and The Humber  |   1.089922   .1251101     0.75   0.453     .8703368    1.364907
-                          |
-                    urban |
-                   Urban  |   1.067022   .0317232     2.18   0.029     1.006622    1.131045
-                          |
-                      bmi |
-      Normal (18.5-24.9)  |   .9552128   .0716588    -0.61   0.541     .8246016    1.106512
-    Overweight (25-29.9)  |   1.026178   .1035648     0.26   0.798     .8420094    1.250629
-       Obese I (30-34.9)  |   .9985282   .0912106    -0.02   0.987     .8348478      1.1943
-      Obese II (35-39.9)  |   .8664848   .1250724    -0.99   0.321     .6529721    1.149813
-         Obese III (40+)  |   .9235336   .1147473    -0.64   0.522     .7239233    1.178183
-                          |
-                  smoking |
-   Current/former smoker  |    1.02976   .0437626     0.69   0.490     .9474617    1.119206
-                     age1 |   1.001433   .0045367     0.32   0.752     .9925802    1.010364
-                     age2 |   .9992379   .0166561    -0.05   0.964       .96712    1.032422
-                     age3 |   .9997846   .0501927    -0.00   0.997     .9060939    1.103163
-                          |
-                    month |
-                February  |   .5592394   .0554387    -5.86   0.000     .4604857    .6791713
-                   March  |   .6519961   .0447022    -6.24   0.000     .5700132    .7457703
-                   April  |   .8113486   .0588586    -2.88   0.004     .7038138    .9353136
-                     May  |   .6392444   .0561848    -5.09   0.000     .5380872    .7594185
-                    June  |   .8548736    .068811    -1.95   0.051      .730107    1.000961
-                    July  |   .9130426   .0954933    -0.87   0.384     .7438161     1.12077
-                  August  |   .8327549   .1007976    -1.51   0.131     .6568812    1.055717
-               September  |   .9136638   .0623282    -1.32   0.186     .7993174    1.044368
-                 October  |   1.001471   .1236982     0.01   0.991      .786142     1.27578
-                November  |   .9384932   .0861301    -0.69   0.489     .7839931     1.12344
-                December  |   1.052618   .1077677     0.50   0.616     .8612399    1.286522
--------------------------------------------------------------------------------------------
-file additional_covid_vax_aki.ster saved
-file additional_covid_vax_aki.dta saved
-
-        Failure _d: aki_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_aki
+  Analysis time _t: (time_end_aki-origin)/365.25
+            Origin: time time_zero_aki
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -14583.191
-Iteration 1:   log pseudolikelihood = -14536.009
-Iteration 2:   log pseudolikelihood = -14535.727
-Iteration 3:   log pseudolikelihood = -14535.727
+Iteration 0:   log pseudolikelihood = -10942.316
+Iteration 1:   log pseudolikelihood = -10921.547
+Iteration 2:   log pseudolikelihood = -10921.492
+Iteration 3:   log pseudolikelihood = -10921.492
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -14535.727
+Iteration 0:   log pseudolikelihood = -10921.492
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      10,604                         Number of obs =   10,645
-No. of failures =       1,731
-Time at risk    = 13,907.4168
-                                                      Wald chi2(35) = 14798.95
-Log pseudolikelihood = -14535.727                     Prob > chi2   =   0.0000
+No. of subjects =     10,129                          Number of obs =   10,166
+No. of failures =      1,265
+Time at risk    = 12,797.306
+                                                      Wald chi2(34) = 13892.39
+Log pseudolikelihood = -10921.492                     Prob > chi2   =   0.0000
 
-                                        (Std. err. adjusted for 36 clusters in practice_id)
+                                        (Std. err. adjusted for 35 clusters in practice_id)
 -------------------------------------------------------------------------------------------
                           |               Robust
                        _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 --------------------------+----------------------------------------------------------------
                 covid_vax |
-   COVID pre-vaccination  |   .5708949   .3409755    -0.94   0.348     .1770775    1.840556
-    COVID 1 vaccine dose  |   .8851184    .223707    -0.48   0.629      .539345    1.452567
-   COVID 2 vaccine doses  |   .7439701   .0795219    -2.77   0.006     .6033534    .9173586
-   COVID 3 vaccine doses  |   .9653252   .0823503    -0.41   0.679     .8166935    1.141007
-   COVID 4 vaccine doses  |   .9108853   .0421848    -2.02   0.044     .8318461    .9974345
+   COVID pre-vaccination  |   .8372541   .4982971    -0.30   0.765      .260771    2.688161
+    COVID 1 vaccine dose  |    1.07982   .4096153     0.20   0.840     .5134039    2.271137
+   COVID 2 vaccine doses  |   .7888273   .0919492    -2.03   0.042     .6277145    .9912924
+   COVID 3 vaccine doses  |   .9963455   .0924955    -0.04   0.969     .8305942    1.195174
+   COVID 4 vaccine doses  |   1.039948   .0530685     0.77   0.443     .9409681     1.14934
                           |
                       sex |
-                    Male  |   1.004444   .0507161     0.09   0.930     .9098028    1.108931
+                    Male  |    1.00589   .0466091     0.13   0.899     .9185634    1.101519
                           |
                 ethnicity |
-             South Asian  |   .9889071   .0885077    -0.12   0.901     .8297983    1.178524
-                   Black  |   .8467806   .0853694    -1.65   0.099     .6949535    1.031777
-                   Mixed  |   1.072092   .0859087     0.87   0.385     .9162706    1.254413
-                   Other  |   .9425945   .1188122    -0.47   0.639     .7362623     1.20675
+             South Asian  |   .9209364    .060698    -1.25   0.211      .809334    1.047928
+                   Black  |   .7777647   .0918537    -2.13   0.033     .6170518    .9803358
+                   Mixed  |   1.094452    .087692     1.13   0.260     .9353944    1.280556
+                   Other  |   .8478706   .1214116    -1.15   0.249     .6403848    1.122582
                           |
                       imd |
-                       2  |   1.093807   .0762182     1.29   0.198     .9541745    1.253874
-                       3  |   1.122059   .0872975     1.48   0.139     .9633654    1.306893
-                       4  |   .9863852   .0391209    -0.35   0.730     .9126141     1.06612
-        5 Least deprived  |   1.051748    .046639     1.14   0.255     .9641976    1.147249
+                       2  |   1.031369   .0785331     0.41   0.685     .8883822     1.19737
+                       3  |   1.107184   .1007133     1.12   0.263     .9263852    1.323269
+                       4  |   .9820311   .0616649    -0.29   0.773     .8683114    1.110644
+        5 Least deprived  |   1.036245   .0692028     0.53   0.594     .9091119    1.181157
                           |
                    region |
-                    East  |   1.100772   .0737385     1.43   0.152     .9653329    1.255213
-                  London  |   1.026409   .0700015     0.38   0.702     .8979833    1.173202
-              North East  |     1.0372   .0807219     0.47   0.639      .890464    1.208117
-              North West  |    .967745   .0901928    -0.35   0.725     .8061761    1.161695
-              South East  |   1.049066   .0713799     0.70   0.481      .918091    1.198725
-              South West  |   1.219587   .1132541     2.14   0.033     1.016642    1.463045
-           West Midlands  |   .9747496   .0794993    -0.31   0.754     .8307497     1.14371
-Yorkshire and The Humber  |   1.093829   .1269648     0.77   0.440     .8712591    1.373256
+                    East  |    1.07142   .1222945     0.60   0.546     .8566459     1.34004
+                  London  |   1.098402    .100022     1.03   0.303     .9188609    1.313025
+              North East  |   .9442126   .1063309    -0.51   0.610     .7572044    1.177407
+              North West  |   .9031857    .100894    -0.91   0.362      .725588    1.124253
+              South East  |    1.01918   .1167082     0.17   0.868     .8142884    1.275627
+              South West  |   1.197975   .1492784     1.45   0.147     .9383835    1.529379
+           West Midlands  |   .9326368   .1455956    -0.45   0.655     .6867994    1.266471
+Yorkshire and The Humber  |   1.106426   .1506504     0.74   0.458     .8472726    1.444846
                           |
                     urban |
-                   Urban  |   1.065109   .0324855     2.07   0.039     1.003304    1.130721
+                   Urban  |   1.114016   .0445722     2.70   0.007     1.029994    1.204893
                           |
                       bmi |
-      Normal (18.5-24.9)  |   .9532257   .0714379    -0.64   0.523     .8230077    1.104047
-    Overweight (25-29.9)  |   1.022584   .1028239     0.22   0.824     .8396689    1.245346
-       Obese I (30-34.9)  |   .9949277   .0912125    -0.06   0.956     .8312956    1.190769
-      Obese II (35-39.9)  |   .8640681   .1248974    -1.01   0.312     .6508942    1.147058
-         Obese III (40+)  |     .92247   .1147392    -0.65   0.516     .7228989    1.177137
+      Normal (18.5-24.9)  |   .8849914   .0809309    -1.34   0.182     .7397725    1.058717
+    Overweight (25-29.9)  |   .9868664   .1345412    -0.10   0.923      .755462    1.289152
+       Obese I (30-34.9)  |   .9320809    .097642    -0.67   0.502     .7590742    1.144519
+      Obese II (35-39.9)  |   .8288019   .1353113    -1.15   0.250     .6018419    1.141351
+         Obese III (40+)  |   .8671762   .1285267    -0.96   0.336     .6485573    1.159488
                           |
-         1.cardiovascular |    .926023   .0232649    -3.06   0.002      .881529    .9727627
-               1.diabetes |   1.016682   .0616701     0.27   0.785     .9027193    1.145031
-           1.hypertension |   1.018861   .0483503     0.39   0.694       .92837    1.118173
-       1.immunosuppressed |   1.187025   .0734498     2.77   0.006     1.051453    1.340077
-        1.non_haem_cancer |    .884733   .1621499    -0.67   0.504      .617743    1.267117
-                          |
-                  smoking |
-   Current/former smoker  |   1.032255   .0439133     0.75   0.456     .9496773    1.122014
-                     age1 |   1.001412   .0046037     0.31   0.759     .9924292    1.010476
-                     age2 |   .9997589   .0169026    -0.01   0.989     .9671733    1.033442
-                     age3 |   .9977402   .0508065    -0.04   0.965     .9029692    1.102458
-                          |
-                    month |
-                February  |    .558959   .0559476    -5.81   0.000     .4593895    .6801096
-                   March  |   .6536172   .0440555    -6.31   0.000     .5727304    .7459277
-                   April  |   .8149748   .0588744    -2.83   0.005       .70738    .9389352
-                     May  |   .6412939   .0564742    -5.04   0.000     .5396322    .7621077
-                    June  |   .8587372   .0674959    -1.94   0.053     .7361336    1.001761
-                    July  |    .919671   .0954349    -0.81   0.420     .7504171      1.1271
-                  August  |   .8323598   .1017285    -1.50   0.133     .6550581    1.057651
-               September  |   .9157003   .0610645    -1.32   0.187     .8035077    1.043558
-                 October  |   1.006248   .1253983     0.05   0.960     .7881861     1.28464
-                November  |    .939271   .0859955    -0.68   0.494     .7849801    1.123888
-                December  |   1.053545    .107895     0.51   0.611     .8619469    1.287733
--------------------------------------------------------------------------------------------
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Cox regression with Breslow method for ties
-
-No. of subjects =      10,604                         Number of obs =   10,645
-No. of failures =       1,731
-Time at risk    = 13,907.4168
-                                                      Wald chi2(35) = 14798.95
-Log pseudolikelihood = -14535.727                     Prob > chi2   =   0.0000
-
-                                        (Std. err. adjusted for 36 clusters in practice_id)
--------------------------------------------------------------------------------------------
-                          |               Robust
-                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
---------------------------+----------------------------------------------------------------
-                covid_vax |
-   COVID pre-vaccination  |   .5708949   .3409755    -0.94   0.348     .1770775    1.840556
-    COVID 1 vaccine dose  |   .8851184    .223707    -0.48   0.629      .539345    1.452567
-   COVID 2 vaccine doses  |   .7439701   .0795219    -2.77   0.006     .6033534    .9173586
-   COVID 3 vaccine doses  |   .9653252   .0823503    -0.41   0.679     .8166935    1.141007
-   COVID 4 vaccine doses  |   .9108853   .0421848    -2.02   0.044     .8318461    .9974345
-                          |
-                      sex |
-                    Male  |   1.004444   .0507161     0.09   0.930     .9098028    1.108931
-                          |
-                ethnicity |
-             South Asian  |   .9889071   .0885077    -0.12   0.901     .8297983    1.178524
-                   Black  |   .8467806   .0853694    -1.65   0.099     .6949535    1.031777
-                   Mixed  |   1.072092   .0859087     0.87   0.385     .9162706    1.254413
-                   Other  |   .9425945   .1188122    -0.47   0.639     .7362623     1.20675
-                          |
-                      imd |
-                       2  |   1.093807   .0762182     1.29   0.198     .9541745    1.253874
-                       3  |   1.122059   .0872975     1.48   0.139     .9633654    1.306893
-                       4  |   .9863852   .0391209    -0.35   0.730     .9126141     1.06612
-        5 Least deprived  |   1.051748    .046639     1.14   0.255     .9641976    1.147249
-                          |
-                   region |
-                    East  |   1.100772   .0737385     1.43   0.152     .9653329    1.255213
-                  London  |   1.026409   .0700015     0.38   0.702     .8979833    1.173202
-              North East  |     1.0372   .0807219     0.47   0.639      .890464    1.208117
-              North West  |    .967745   .0901928    -0.35   0.725     .8061761    1.161695
-              South East  |   1.049066   .0713799     0.70   0.481      .918091    1.198725
-              South West  |   1.219587   .1132541     2.14   0.033     1.016642    1.463045
-           West Midlands  |   .9747496   .0794993    -0.31   0.754     .8307497     1.14371
-Yorkshire and The Humber  |   1.093829   .1269648     0.77   0.440     .8712591    1.373256
-                          |
-                    urban |
-                   Urban  |   1.065109   .0324855     2.07   0.039     1.003304    1.130721
-                          |
-                      bmi |
-      Normal (18.5-24.9)  |   .9532257   .0714379    -0.64   0.523     .8230077    1.104047
-    Overweight (25-29.9)  |   1.022584   .1028239     0.22   0.824     .8396689    1.245346
-       Obese I (30-34.9)  |   .9949277   .0912125    -0.06   0.956     .8312956    1.190769
-      Obese II (35-39.9)  |   .8640681   .1248974    -1.01   0.312     .6508942    1.147058
-         Obese III (40+)  |     .92247   .1147392    -0.65   0.516     .7228989    1.177137
-                          |
-         1.cardiovascular |    .926023   .0232649    -3.06   0.002      .881529    .9727627
-               1.diabetes |   1.016682   .0616701     0.27   0.785     .9027193    1.145031
-           1.hypertension |   1.018861   .0483503     0.39   0.694       .92837    1.118173
-       1.immunosuppressed |   1.187025   .0734498     2.77   0.006     1.051453    1.340077
-        1.non_haem_cancer |    .884733   .1621499    -0.67   0.504      .617743    1.267117
+         1.cardiovascular |   .8756786   .0336436    -3.46   0.001     .8121599    .9441652
+               1.diabetes |    1.05526   .0708606     0.80   0.423     .9251268    1.203698
+           1.hypertension |   .9875299   .0631698    -0.20   0.844     .8711662    1.119437
+       1.immunosuppressed |   1.135605   .0797358     1.81   0.070     .9896028    1.303149
+        1.non_haem_cancer |   .9944983   .1588714    -0.03   0.972     .7271505     1.36014
                           |
                   smoking |
-   Current/former smoker  |   1.032255   .0439133     0.75   0.456     .9496773    1.122014
-                     age1 |   1.001412   .0046037     0.31   0.759     .9924292    1.010476
-                     age2 |   .9997589   .0169026    -0.01   0.989     .9671733    1.033442
-                     age3 |   .9977402   .0508065    -0.04   0.965     .9029692    1.102458
+   Current/former smoker  |   1.028339   .0476891     0.60   0.547     .9389922    1.126188
+                     age1 |   1.001226   .0051222     0.24   0.811     .9912366    1.011316
+                     age2 |   1.002351   .0192933     0.12   0.903     .9652413    1.040888
+                     age3 |   .9885579   .0587942    -0.19   0.847     .8797863    1.110777
                           |
                     month |
-                February  |    .558959   .0559476    -5.81   0.000     .4593895    .6801096
-                   March  |   .6536172   .0440555    -6.31   0.000     .5727304    .7459277
-                   April  |   .8149748   .0588744    -2.83   0.005       .70738    .9389352
-                     May  |   .6412939   .0564742    -5.04   0.000     .5396322    .7621077
-                    June  |   .8587372   .0674959    -1.94   0.053     .7361336    1.001761
-                    July  |    .919671   .0954349    -0.81   0.420     .7504171      1.1271
-                  August  |   .8323598   .1017285    -1.50   0.133     .6550581    1.057651
-               September  |   .9157003   .0610645    -1.32   0.187     .8035077    1.043558
-                 October  |   1.006248   .1253983     0.05   0.960     .7881861     1.28464
-                November  |    .939271   .0859955    -0.68   0.494     .7849801    1.123888
-                December  |   1.053545    .107895     0.51   0.611     .8619469    1.287733
+                February  |     .91833   .0982009    -0.80   0.426     .7446911    1.132456
+                   March  |   .9303086   .0864844    -0.78   0.437      .775348    1.116239
+                   April  |   .9417174    .097699    -0.58   0.563      .768444    1.154062
+                     May  |   .7766482   .0854887    -2.30   0.022      .625935    .9636503
+                    June  |   1.023671   .1031496     0.23   0.816     .8402134    1.247186
+                    July  |   .8743468   .1292456    -0.91   0.364     .6544243    1.168175
+                  August  |    .860583   .1295948    -1.00   0.319     .6406351    1.156045
+               September  |   .9173053   .0748611    -1.06   0.290     .7817133    1.076416
+                 October  |   .8844297    .087872    -1.24   0.216     .7279351    1.074568
+                November  |   .9322568   .1131593    -0.58   0.563     .7348774     1.18265
+                December  |   1.026368   .1475264     0.18   0.856     .7743802    1.360353
 -------------------------------------------------------------------------------------------
-file full_covid_vax_aki.ster saved
-file full_covid_vax_aki.dta saved
 
 Survival-time data settings
 
            ID variable: patient_id
-         Failure event: death_date!=0 & death_date<.
-Observed time interval: (exit_date[_n-1], exit_date]
+         Failure event: time_death!=0 & time_death<.
+Observed time interval: (time_end_death[_n-1], time_end_death]
      Exit on or before: failure
      Time for analysis: (time-origin)/365.25
-                Origin: time index_date
+                Origin: time time_zero_death
 
 --------------------------------------------------------------------------
-     25,431  total observations
-        106  observations end on or before enter()
-         15  observations begin on or after (first) failure
+     25,430  total observations
+          6  observations end on or before enter()
+         17  observations begin on or after (first) failure
 --------------------------------------------------------------------------
-     25,310  observations remaining, representing
-     25,027  subjects
-      1,053  failures in single-failure-per-subject data
-  32,956.06  total analysis time at risk and under observation
+     25,407  observations remaining, representing
+     25,125  subjects
+      1,054  failures in single-failure-per-subject data
+ 34,006.804  total analysis time at risk and under observation
                                                 At risk from t =         0
                                      Earliest observed entry t =         0
-                                          Last observed exit t =  5.730322
+                                          Last observed exit t =  2.748802
 
-        Failure _d: death_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_death
+  Analysis time _t: (time_end_death-origin)/365.25
+            Origin: time time_zero_death
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -10080.841
-Iteration 1:   log pseudolikelihood = -10043.291
-Iteration 2:   log pseudolikelihood = -10042.765
-Iteration 3:   log pseudolikelihood = -10042.758
-Iteration 4:   log pseudolikelihood = -10042.758
+Iteration 0:   log pseudolikelihood = -10143.167
+Iteration 1:   log pseudolikelihood = -10106.761
+Iteration 2:   log pseudolikelihood = -10106.237
+Iteration 3:   log pseudolikelihood =  -10106.23
+Iteration 4:   log pseudolikelihood =  -10106.23
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -10042.758
+Iteration 0:   log pseudolikelihood =  -10106.23
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      25,027                           Number of obs = 25,310
-No. of failures =       1,053
-Time at risk    = 32,956.0602
-                                                        Wald chi2(5)  = 320.00
-Log pseudolikelihood = -10042.758                       Prob > chi2   = 0.0000
+No. of subjects =      25,125                           Number of obs = 25,407
+No. of failures =       1,054
+Time at risk    = 34,006.8036
+                                                        Wald chi2(5)  = 315.62
+Log pseudolikelihood = -10106.23                        Prob > chi2   = 0.0000
 
                                      (Std. err. adjusted for 38 clusters in practice_id)
 ----------------------------------------------------------------------------------------
@@ -1554,35 +1059,33 @@ Log pseudolikelihood = -10042.758                       Prob > chi2   = 0.0000
                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 -----------------------+----------------------------------------------------------------
              covid_vax |
-COVID pre-vaccination  |   .2285587   .1398368    -2.41   0.016     .0688994    .7581933
- COVID 1 vaccine dose  |   .4744114    .223142    -1.59   0.113     .1887069    1.192676
-COVID 2 vaccine doses  |   .8583459   .1063102    -1.23   0.217      .673344    1.094177
-COVID 3 vaccine doses  |    .456748   .0713223    -5.02   0.000     .3363253    .6202885
-COVID 4 vaccine doses  |   .6274215    .032445    -9.01   0.000     .5669468    .6943468
+COVID pre-vaccination  |   .2328493   .1468703    -2.31   0.021     .0676359    .8016275
+ COVID 1 vaccine dose  |   .4823872   .2262284    -1.55   0.120     .1923987    1.209454
+COVID 2 vaccine doses  |   .8839144   .1100892    -0.99   0.322      .692461    1.128301
+COVID 3 vaccine doses  |   .4606125   .0720782    -4.95   0.000     .3389509    .6259428
+COVID 4 vaccine doses  |     .63651   .0321447    -8.95   0.000     .5765251     .702736
 ----------------------------------------------------------------------------------------
-file crude_covid_vax_death.ster saved
-file crude_covid_vax_death.dta saved
 
-        Failure _d: death_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_death
+  Analysis time _t: (time_end_death-origin)/365.25
+            Origin: time time_zero_death
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -10080.841
-Iteration 1:   log pseudolikelihood = -10032.583
-Iteration 2:   log pseudolikelihood = -10032.009
-Iteration 3:   log pseudolikelihood = -10032.002
-Iteration 4:   log pseudolikelihood = -10032.002
+Iteration 0:   log pseudolikelihood = -10143.167
+Iteration 1:   log pseudolikelihood = -10096.586
+Iteration 2:   log pseudolikelihood =  -10096.02
+Iteration 3:   log pseudolikelihood = -10096.013
+Iteration 4:   log pseudolikelihood = -10096.013
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -10032.002
+Iteration 0:   log pseudolikelihood = -10096.013
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      25,027                          Number of obs =  25,310
-No. of failures =       1,053
-Time at risk    = 32,956.0602
-                                                       Wald chi2(20) = 1696.05
-Log pseudolikelihood = -10032.002                      Prob > chi2   =  0.0000
+No. of subjects =      25,125                          Number of obs =  25,407
+No. of failures =       1,054
+Time at risk    = 34,006.8036
+                                                       Wald chi2(20) = 2370.10
+Log pseudolikelihood = -10096.013                      Prob > chi2   =  0.0000
 
                                      (Std. err. adjusted for 38 clusters in practice_id)
 ----------------------------------------------------------------------------------------
@@ -1590,53 +1093,51 @@ Log pseudolikelihood = -10032.002                      Prob > chi2   =  0.0000
                     _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 -----------------------+----------------------------------------------------------------
              covid_vax |
-COVID pre-vaccination  |   .2254928    .139329    -2.41   0.016     .0671717    .7569702
- COVID 1 vaccine dose  |   .4747828   .2200244    -1.61   0.108     .1914389    1.177497
-COVID 2 vaccine doses  |   .8548127    .107925    -1.24   0.214      .667424    1.094813
-COVID 3 vaccine doses  |   .4539247   .0710626    -5.05   0.000     .3339849     .616937
-COVID 4 vaccine doses  |   .6255151   .0324387    -9.05   0.000     .5650608    .6924372
+COVID pre-vaccination  |   .2289505   .1464343    -2.30   0.021     .0653615    .8019751
+ COVID 1 vaccine dose  |   .4831113   .2245754    -1.57   0.118     .1942514    1.201518
+COVID 2 vaccine doses  |   .8813743   .1119604    -0.99   0.320     .6871203    1.130545
+COVID 3 vaccine doses  |   .4573998   .0717812    -4.98   0.000     .3362902     .622125
+COVID 4 vaccine doses  |   .6343169   .0322075    -8.97   0.000     .5742308    .7006904
                        |
                    sex |
-                 Male  |   .9989606   .0383439    -0.03   0.978     .9265652    1.077012
-                  age1 |   1.010531   .0061519     1.72   0.085     .9985451    1.022661
-                  age2 |   .9696188   .0209505    -1.43   0.153     .9294138    1.011563
-                  age3 |   1.090442   .0714063     1.32   0.186     .9590969    1.239774
+                 Male  |   1.005954   .0382131     0.16   0.876      .933778    1.083709
+                  age1 |   1.010315   .0060755     1.71   0.088     .9984775    1.022293
+                  age2 |   .9694166   .0208518    -1.44   0.149     .9293972    1.011159
+                  age3 |    1.09211    .071452     1.35   0.178     .9606737    1.241529
                        |
                  month |
-             February  |   1.357937   .2151837     1.93   0.054     .9953942    1.852525
-                March  |   1.381183    .224191     1.99   0.047     1.004815    1.898527
-                April  |     1.3312   .2209465     1.72   0.085     .9615344    1.842985
-                  May  |   1.088564     .17797     0.52   0.604     .7901156    1.499745
-                 June  |   1.442983   .2412172     2.19   0.028     1.039847    2.002409
-                 July  |   1.488041   .1935161     3.06   0.002     1.153236    1.920046
-               August  |   1.349562   .2528125     1.60   0.110     .9348408    1.948264
-            September  |    1.07844   .1748836     0.47   0.641      .784806    1.481937
-              October  |   1.127404   .1957739     0.69   0.490     .8021731    1.584495
-             November  |   1.447711   .2191402     2.44   0.015     1.076057    1.947728
-             December  |    1.66141   .2862137     2.95   0.003     1.185329    2.328706
+             February  |   1.332966   .2036495     1.88   0.060     .9880367    1.798311
+                March  |   1.363703   .2165758     1.95   0.051     .9989332    1.861671
+                April  |   1.300767   .2085415     1.64   0.101     .9500212    1.781008
+                  May  |   1.072679   .1664251     0.45   0.651     .7914196    1.453895
+                 June  |   1.426457   .2340852     2.16   0.030     1.034128    1.967628
+                 July  |   1.452965   .1847543     2.94   0.003      1.13245    1.864194
+               August  |   1.330764   .2431418     1.56   0.118     .9302065    1.903806
+            September  |   1.071761   .1669398     0.44   0.656     .7897927    1.454397
+              October  |   1.133179   .1909268     0.74   0.458     .8144823    1.576579
+             November  |   1.448265   .2149561     2.50   0.013     1.082705    1.937252
+             December  |   1.635859   .2796571     2.88   0.004     1.170117     2.28698
 ----------------------------------------------------------------------------------------
-file minimal_covid_vax_death.ster saved
-file minimal_covid_vax_death.dta saved
 
-        Failure _d: death_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_death
+  Analysis time _t: (time_end_death-origin)/365.25
+            Origin: time time_zero_death
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -3906.2426
-Iteration 1:   log pseudolikelihood = -3870.9311
-Iteration 2:   log pseudolikelihood =  -3870.659
-Iteration 3:   log pseudolikelihood = -3870.6586
+Iteration 0:   log pseudolikelihood = -3933.5765
+Iteration 1:   log pseudolikelihood = -3898.1062
+Iteration 2:   log pseudolikelihood = -3897.8425
+Iteration 3:   log pseudolikelihood = -3897.8421
 Refining estimates:
-Iteration 0:   log pseudolikelihood = -3870.6586
+Iteration 0:   log pseudolikelihood = -3897.8421
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      10,613                         Number of obs =   10,664
-No. of failures =         447
-Time at risk    = 13,971.0554
-                                                      Wald chi2(35) = 2.81e+07
-Log pseudolikelihood = -3870.6586                     Prob > chi2   =   0.0000
+No. of subjects =      10,648                         Number of obs =   10,699
+No. of failures =         448
+Time at risk    = 14,357.8672
+                                                      Wald chi2(35) = 1.18e+07
+Log pseudolikelihood = -3897.8421                     Prob > chi2   =   0.0000
 
                                         (Std. err. adjusted for 36 clusters in practice_id)
 -------------------------------------------------------------------------------------------
@@ -1644,167 +1145,86 @@ Log pseudolikelihood = -3870.6586                     Prob > chi2   =   0.0000
                        _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 --------------------------+----------------------------------------------------------------
                 covid_vax |
-   COVID pre-vaccination  |   .4238685   .2531583    -1.44   0.151     .1314757    1.366523
-    COVID 1 vaccine dose  |   .4181712    .178653    -2.04   0.041      .181009    .9660692
-   COVID 2 vaccine doses  |   .8258065   .1677215    -0.94   0.346     .5546245    1.229582
-   COVID 3 vaccine doses  |   .4176447   .1048004    -3.48   0.001     .2553956    .6829685
-   COVID 4 vaccine doses  |   .5577697   .0787721    -4.13   0.000     .4229045    .7356436
+   COVID pre-vaccination  |    .440012   .2889629    -1.25   0.211     .1214694    1.593904
+    COVID 1 vaccine dose  |   .4214662   .1851513    -1.97   0.049     .1781671    .9970064
+   COVID 2 vaccine doses  |   .8604051   .1781635    -0.73   0.468     .5733837    1.291102
+   COVID 3 vaccine doses  |   .4185356   .1038193    -3.51   0.000     .2573883     .680575
+   COVID 4 vaccine doses  |   .5586073   .0786409    -4.14   0.000     .4239105    .7361037
                           |
                       sex |
-                    Male  |   1.067644   .1155865     0.60   0.545     .8635209     1.32002
+                    Male  |     1.0749   .1150484     0.67   0.500     .8714901    1.325787
                           |
                 ethnicity |
-             South Asian  |   1.153952   .3056309     0.54   0.589     .6866602    1.939248
-                   Black  |   1.176513   .1825657     1.05   0.295     .8679828    1.594711
-                   Mixed  |   .8804583   .1675913    -0.67   0.504     .6062984     1.27859
-                   Other  |   .6967635   .1917284    -1.31   0.189     .4063126    1.194842
+             South Asian  |   1.188531   .3295803     0.62   0.533     .6901948    2.046676
+                   Black  |   1.181896   .1857767     1.06   0.288     .8685264    1.608332
+                   Mixed  |    .873088    .167087    -0.71   0.478     .6000115    1.270447
+                   Other  |   .7015746   .1960278    -1.27   0.205     .4057314    1.213135
                           |
                       imd |
-                       2  |   1.346901    .153033     2.62   0.009     1.078011     1.68286
-                       3  |   1.105581   .1149904     0.97   0.335     .9016914    1.355574
-                       4  |   1.347386   .1172752     3.43   0.001     1.136068    1.598011
-        5 Least deprived  |    1.14235    .102983     1.48   0.140     .9573339    1.363124
+                       2  |   1.346887   .1478605     2.71   0.007     1.086142    1.670227
+                       3  |   1.102015   .1140035     0.94   0.348     .8997683    1.349722
+                       4  |   1.342138   .1136558     3.47   0.001     1.136881    1.584452
+        5 Least deprived  |   1.149725   .1028966     1.56   0.119     .9647493    1.370168
                           |
                    region |
-                    East  |   .7775628   .1811728    -1.08   0.280     .4924983    1.227626
-                  London  |   .8836165   .1827941    -0.60   0.550     .5890816    1.325416
-              North East  |    .735318   .1077977    -2.10   0.036     .5516822    .9800798
-              North West  |   .6980553   .0981351    -2.56   0.011     .5299378    .9195065
-              South East  |   .9853981   .1381636    -0.10   0.916     .7486244    1.297058
-              South West  |   .9083737   .1290365    -0.68   0.499     .6876216    1.199995
-           West Midlands  |   .8957786   .1040308    -0.95   0.343     .7134224    1.124746
-Yorkshire and The Humber  |   .9388243    .139485    -0.42   0.671     .7016456    1.256177
+                    East  |   .7810276   .1900947    -1.02   0.310     .4847212    1.258464
+                  London  |   .8894386   .1874256    -0.56   0.578     .5885018    1.344263
+              North East  |   .7361174   .1088176    -2.07   0.038     .5509561    .9835064
+              North West  |   .7070791   .1019917    -2.40   0.016     .5329512    .9380986
+              South East  |   .9912679   .1419545    -0.06   0.951     .7486775    1.312464
+              South West  |   .9096789   .1309377    -0.66   0.511     .6860686    1.206171
+           West Midlands  |   .8999139   .1026917    -0.92   0.355     .7195617     1.12547
+Yorkshire and The Humber  |   .9424863   .1450211    -0.38   0.700     .6971079    1.274237
                           |
                     urban |
-                   Urban  |   .9237818   .1170394    -0.63   0.531      .720652    1.184168
+                   Urban  |   .9111383   .1196886    -0.71   0.479     .7043184     1.17869
                           |
                       bmi |
-      Normal (18.5-24.9)  |   1.075444   .1564981     0.50   0.617     .8085771    1.430389
-    Overweight (25-29.9)  |   1.131177    .177252     0.79   0.432     .8320507     1.53784
-       Obese I (30-34.9)  |   1.079103   .1680911     0.49   0.625     .7951921    1.464381
-      Obese II (35-39.9)  |   1.116679   .1868895     0.66   0.510     .8043952    1.550197
-         Obese III (40+)  |   1.022988   .1967259     0.12   0.906     .7017462    1.491286
+      Normal (18.5-24.9)  |   1.094567   .1565207     0.63   0.527     .8270323    1.448646
+    Overweight (25-29.9)  |    1.13499   .1816069     0.79   0.429     .8294566    1.553069
+       Obese I (30-34.9)  |   1.088416   .1629884     0.57   0.572      .811576    1.459691
+      Obese II (35-39.9)  |   1.140924   .1883075     0.80   0.424      .825596    1.576689
+         Obese III (40+)  |   1.060129   .2058892     0.30   0.764     .7245121    1.551215
                           |
                   smoking |
-   Current/former smoker  |    1.08511   .0726125     1.22   0.222     .9517298    1.237182
-                     age1 |   .9986921   .0044444    -0.29   0.769      .990019    1.007441
-                     age2 |   .9895506   .0162971    -0.64   0.524     .9581189    1.022013
-                     age3 |    1.05122   .0564729     0.93   0.352     .9461635    1.167942
+   Current/former smoker  |   1.072502   .0733341     1.02   0.306     .9379847     1.22631
+                     age1 |   .9984701   .0044058    -0.35   0.729     .9898721    1.007143
+                     age2 |   .9897419   .0164073    -0.62   0.534      .958101    1.022428
+                     age3 |   1.051381   .0572583     0.92   0.358     .9449382    1.169813
                           |
                     month |
-                February  |    1.62926   .3121741     2.55   0.011      1.11917    2.371836
-                   March  |   1.415208   .3210989     1.53   0.126     .9071726    2.207755
-                   April  |   1.364738   .2958555     1.43   0.151     .8923207    2.087264
-                     May  |   1.322355   .2531363     1.46   0.144     .9086654    1.924386
-                    June  |   1.547521   .3684079     1.83   0.067     .9705026    2.467609
-                    July  |   1.293277    .219628     1.51   0.130     .9271248    1.804035
-                  August  |   1.558334   .3823989     1.81   0.071     .9633513    2.520789
-               September  |   1.116394   .2436152     0.50   0.614     .7278997    1.712235
-                 October  |   1.536871   .3144121     2.10   0.036     1.029198    2.294963
-                November  |   1.222832   .2959695     0.83   0.406     .7609306    1.965116
-                December  |   1.734127   .5016009     1.90   0.057     .9837132    3.056984
+                February  |   1.626964   .3031826     2.61   0.009     1.129166    2.344219
+                   March  |    1.42527   .3239052     1.56   0.119     .9129645    2.225052
+                   April  |    1.35024   .2848273     1.42   0.155     .8930043    2.041589
+                     May  |   1.304064   .2445874     1.42   0.157     .9029198    1.883425
+                    June  |   1.489476   .3550621     1.67   0.095     .9335201    2.376531
+                    July  |   1.247621   .2037154     1.35   0.175     .9059328    1.718184
+                  August  |   1.530515   .3835235     1.70   0.089     .9365685    2.501126
+               September  |   1.097605   .2386174     0.43   0.668     .7167972    1.680722
+                 October  |   1.511707   .3091701     2.02   0.043     1.012471    2.257112
+                November  |   1.213484    .300048     0.78   0.434     .7474199    1.970169
+                December  |   1.696697   .4865801     1.84   0.065     .9671553    2.976546
 -------------------------------------------------------------------------------------------
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Cox regression with Breslow method for ties
-
-No. of subjects =      10,613                         Number of obs =   10,664
-No. of failures =         447
-Time at risk    = 13,971.0554
-                                                      Wald chi2(35) = 2.81e+07
-Log pseudolikelihood = -3870.6586                     Prob > chi2   =   0.0000
-
-                                        (Std. err. adjusted for 36 clusters in practice_id)
--------------------------------------------------------------------------------------------
-                          |               Robust
-                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
---------------------------+----------------------------------------------------------------
-                covid_vax |
-   COVID pre-vaccination  |   .4238685   .2531583    -1.44   0.151     .1314757    1.366523
-    COVID 1 vaccine dose  |   .4181712    .178653    -2.04   0.041      .181009    .9660692
-   COVID 2 vaccine doses  |   .8258065   .1677215    -0.94   0.346     .5546245    1.229582
-   COVID 3 vaccine doses  |   .4176447   .1048004    -3.48   0.001     .2553956    .6829685
-   COVID 4 vaccine doses  |   .5577697   .0787721    -4.13   0.000     .4229045    .7356436
-                          |
-                      sex |
-                    Male  |   1.067644   .1155865     0.60   0.545     .8635209     1.32002
-                          |
-                ethnicity |
-             South Asian  |   1.153952   .3056309     0.54   0.589     .6866602    1.939248
-                   Black  |   1.176513   .1825657     1.05   0.295     .8679828    1.594711
-                   Mixed  |   .8804583   .1675913    -0.67   0.504     .6062984     1.27859
-                   Other  |   .6967635   .1917284    -1.31   0.189     .4063126    1.194842
-                          |
-                      imd |
-                       2  |   1.346901    .153033     2.62   0.009     1.078011     1.68286
-                       3  |   1.105581   .1149904     0.97   0.335     .9016914    1.355574
-                       4  |   1.347386   .1172752     3.43   0.001     1.136068    1.598011
-        5 Least deprived  |    1.14235    .102983     1.48   0.140     .9573339    1.363124
-                          |
-                   region |
-                    East  |   .7775628   .1811728    -1.08   0.280     .4924983    1.227626
-                  London  |   .8836165   .1827941    -0.60   0.550     .5890816    1.325416
-              North East  |    .735318   .1077977    -2.10   0.036     .5516822    .9800798
-              North West  |   .6980553   .0981351    -2.56   0.011     .5299378    .9195065
-              South East  |   .9853981   .1381636    -0.10   0.916     .7486244    1.297058
-              South West  |   .9083737   .1290365    -0.68   0.499     .6876216    1.199995
-           West Midlands  |   .8957786   .1040308    -0.95   0.343     .7134224    1.124746
-Yorkshire and The Humber  |   .9388243    .139485    -0.42   0.671     .7016456    1.256177
-                          |
-                    urban |
-                   Urban  |   .9237818   .1170394    -0.63   0.531      .720652    1.184168
-                          |
-                      bmi |
-      Normal (18.5-24.9)  |   1.075444   .1564981     0.50   0.617     .8085771    1.430389
-    Overweight (25-29.9)  |   1.131177    .177252     0.79   0.432     .8320507     1.53784
-       Obese I (30-34.9)  |   1.079103   .1680911     0.49   0.625     .7951921    1.464381
-      Obese II (35-39.9)  |   1.116679   .1868895     0.66   0.510     .8043952    1.550197
-         Obese III (40+)  |   1.022988   .1967259     0.12   0.906     .7017462    1.491286
-                          |
-                  smoking |
-   Current/former smoker  |    1.08511   .0726125     1.22   0.222     .9517298    1.237182
-                     age1 |   .9986921   .0044444    -0.29   0.769      .990019    1.007441
-                     age2 |   .9895506   .0162971    -0.64   0.524     .9581189    1.022013
-                     age3 |    1.05122   .0564729     0.93   0.352     .9461635    1.167942
-                          |
-                    month |
-                February  |    1.62926   .3121741     2.55   0.011      1.11917    2.371836
-                   March  |   1.415208   .3210989     1.53   0.126     .9071726    2.207755
-                   April  |   1.364738   .2958555     1.43   0.151     .8923207    2.087264
-                     May  |   1.322355   .2531363     1.46   0.144     .9086654    1.924386
-                    June  |   1.547521   .3684079     1.83   0.067     .9705026    2.467609
-                    July  |   1.293277    .219628     1.51   0.130     .9271248    1.804035
-                  August  |   1.558334   .3823989     1.81   0.071     .9633513    2.520789
-               September  |   1.116394   .2436152     0.50   0.614     .7278997    1.712235
-                 October  |   1.536871   .3144121     2.10   0.036     1.029198    2.294963
-                November  |   1.222832   .2959695     0.83   0.406     .7609306    1.965116
-                December  |   1.734127   .5016009     1.90   0.057     .9837132    3.056984
--------------------------------------------------------------------------------------------
-file additional_covid_vax_death.ster saved
-file additional_covid_vax_death.dta saved
-
-        Failure _d: death_date
-  Analysis time _t: (exit_date-origin)/365.25
-            Origin: time index_date
+        Failure _d: time_death
+  Analysis time _t: (time_end_death-origin)/365.25
+            Origin: time time_zero_death
        ID variable: patient_id
 
-Iteration 0:   log pseudolikelihood = -3906.2426
-Iteration 1:   log pseudolikelihood =  -3866.214
-Iteration 2:   log pseudolikelihood = -3865.9104
-Iteration 3:   log pseudolikelihood =   -3865.91
+Iteration 0:   log pseudolikelihood = -3933.5765
+Iteration 1:   log pseudolikelihood = -3893.1828
+Iteration 2:   log pseudolikelihood = -3892.8849
+Iteration 3:   log pseudolikelihood = -3892.8845
 Refining estimates:
-Iteration 0:   log pseudolikelihood =   -3865.91
+Iteration 0:   log pseudolikelihood = -3892.8845
 
 Cox regression with Breslow method for ties
 
-No. of subjects =      10,613                         Number of obs =   10,664
-No. of failures =         447
-Time at risk    = 13,971.0554
-                                                      Wald chi2(35) = 9.21e+07
-Log pseudolikelihood = -3865.91                       Prob > chi2   =   0.0000
+No. of subjects =      10,648                         Number of obs =   10,699
+No. of failures =         448
+Time at risk    = 14,357.8672
+                                                      Wald chi2(35) = 1.65e+07
+Log pseudolikelihood = -3892.8845                     Prob > chi2   =   0.0000
 
                                         (Std. err. adjusted for 36 clusters in practice_id)
 -------------------------------------------------------------------------------------------
@@ -1812,159 +1232,72 @@ Log pseudolikelihood = -3865.91                       Prob > chi2   =   0.0000
                        _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
 --------------------------+----------------------------------------------------------------
                 covid_vax |
-   COVID pre-vaccination  |   .4266684   .2502637    -1.45   0.146     .1351498    1.346993
-    COVID 1 vaccine dose  |   .4268282   .1790417    -2.03   0.042     .1875856    .9711957
-   COVID 2 vaccine doses  |   .8305405   .1689241    -0.91   0.361     .5574866    1.237335
-   COVID 3 vaccine doses  |   .4180284    .104282    -3.50   0.000      .256368    .6816286
-   COVID 4 vaccine doses  |   .5611739   .0796267    -4.07   0.000     .4249304    .7411005
+   COVID pre-vaccination  |   .4468604   .2948965    -1.22   0.222     .1225853    1.628941
+    COVID 1 vaccine dose  |   .4277355   .1855168    -1.96   0.050     .1828073    1.000823
+   COVID 2 vaccine doses  |   .8665603   .1805767    -0.69   0.492     .5760001    1.303692
+   COVID 3 vaccine doses  |   .4185668   .1030969    -3.54   0.000      .258289    .6783028
+   COVID 4 vaccine doses  |   .5624596    .079962    -4.05   0.000     .4256772    .7431941
                           |
                       sex |
-                    Male  |   1.072562   .1146087     0.66   0.512     .8698955    1.322445
+                    Male  |   1.079542   .1140889     0.72   0.469     .8775714    1.327997
                           |
                 ethnicity |
-             South Asian  |   1.153623   .3175917     0.52   0.604     .6725563    1.978788
-                   Black  |   1.181193   .1819955     1.08   0.280     .8733121    1.597614
-                   Mixed  |   .8814049    .167172    -0.67   0.506     .6077598    1.278259
-                   Other  |   .7001151   .1953382    -1.28   0.201      .405207    1.209656
+             South Asian  |   1.189444   .3417304     0.60   0.546     .6773165    2.088798
+                   Black  |   1.190094    .185939     1.11   0.265     .8761737    1.616486
+                   Mixed  |   .8744599   .1667542    -0.70   0.482     .6017566    1.270746
+                   Other  |   .7034926     .19885    -1.24   0.213     .4042574    1.224225
                           |
                       imd |
-                       2  |   1.351603   .1573268     2.59   0.010     1.075894    1.697967
-                       3  |   1.109609   .1159328     1.00   0.320     .9041404    1.361771
-                       4  |   1.350453   .1177719     3.45   0.001     1.138274    1.602183
-        5 Least deprived  |   1.150138   .1044662     1.54   0.124      .962578    1.374244
+                       2  |   1.351457   .1527169     2.67   0.008     1.082966    1.686512
+                       3  |   1.106123    .114326     0.98   0.329     .9032864    1.354507
+                       4  |   1.344672   .1139535     3.49   0.000      1.13889    1.587636
+        5 Least deprived  |   1.155828   .1038988     1.61   0.107     .9691201    1.378506
                           |
                    region |
-                    East  |   .7770359    .180408    -1.09   0.277     .4929623    1.224809
-                  London  |   .8939189   .1822956    -0.55   0.582      .599396     1.33316
-              North East  |   .7400603   .1055455    -2.11   0.035     .5595912     .978731
-              North West  |   .7055266   .0973066    -2.53   0.011     .5384125    .9245099
-              South East  |   .9913948   .1417968    -0.06   0.952     .7490337    1.312175
-              South West  |   .9109131   .1286838    -0.66   0.509     .6906031    1.201504
-           West Midlands  |   .9082135   .1087301    -0.80   0.421     .7182625    1.148399
-Yorkshire and The Humber  |   .9518895   .1441004    -0.33   0.745     .7075035    1.280691
+                    East  |   .7800543   .1895763    -1.02   0.307     .4844596    1.256007
+                  London  |   .9004112   .1875446    -0.50   0.615     .5986129    1.354365
+              North East  |    .742562   .1075574    -2.05   0.040     .5590354    .9863389
+              North West  |   .7164951   .1012684    -2.36   0.018     .5431322    .9451938
+              South East  |    .997136   .1452414    -0.02   0.984     .7494965    1.326598
+              South West  |   .9115154   .1307486    -0.65   0.518     .6881243    1.207428
+           West Midlands  |   .9125131   .1066552    -0.78   0.433     .7256881    1.147435
+Yorkshire and The Humber  |   .9583448   .1498243    -0.27   0.786     .7054202    1.301954
                           |
                     urban |
-                   Urban  |   .9214631   .1181984    -0.64   0.524     .7166253    1.184851
+                   Urban  |   .9087399   .1207603    -0.72   0.471     .7003666    1.179109
                           |
                       bmi |
-      Normal (18.5-24.9)  |   1.064639   .1558241     0.43   0.669     .7991301    1.418361
-    Overweight (25-29.9)  |   1.125215   .1788785     0.74   0.458      .823982    1.536574
-       Obese I (30-34.9)  |   1.077748   .1676735     0.48   0.630     .7944919    1.461993
-      Obese II (35-39.9)  |   1.110537   .1877359     0.62   0.535     .7973296     1.54678
-         Obese III (40+)  |   1.008079   .1935097     0.04   0.967     .6919888    1.468556
+      Normal (18.5-24.9)  |   1.087204   .1556796     0.58   0.559     .8211554    1.439451
+    Overweight (25-29.9)  |   1.132978   .1830867     0.77   0.440     .8254087    1.555155
+       Obese I (30-34.9)  |   1.089325   .1618977     0.58   0.565      .814048    1.457688
+      Obese II (35-39.9)  |   1.135981   .1888354     0.77   0.443     .8201148    1.573502
+         Obese III (40+)  |   1.047144   .2033278     0.24   0.812     .7156909    1.532101
                           |
-         1.cardiovascular |   1.214358   .1296908     1.82   0.069     .9850087    1.497108
-               1.diabetes |   .7964931   .1069695    -1.69   0.090     .6121604    1.036332
-           1.hypertension |   1.073525   .1284363     0.59   0.553     .8491308    1.357218
-       1.immunosuppressed |   1.284918   .1030823     3.12   0.002     1.097964    1.503706
-        1.non_haem_cancer |   .9112852   .2078481    -0.41   0.684     .5827875    1.424946
-                          |
-                  smoking |
-   Current/former smoker  |   1.093888   .0737949     1.33   0.183     .9584065    1.248521
-                     age1 |   .9989297   .0046931    -0.23   0.820     .9897736     1.00817
-                     age2 |   .9885609   .0168792    -0.67   0.500     .9560257    1.022203
-                     age3 |   1.054152   .0584006     0.95   0.341     .9456847    1.175061
-                          |
-                    month |
-                February  |   1.645476    .313041     2.62   0.009     1.133329     2.38906
-                   March  |   1.435733   .3234261     1.61   0.108     .9232608    2.232662
-                   April  |    1.37831   .2985919     1.48   0.139     .9014582    2.107405
-                     May  |    1.32086    .252731     1.45   0.146      .907798    1.921871
-                    June  |   1.558606   .3748195     1.85   0.065     .9728287    2.497104
-                    July  |   1.283289   .2205067     1.45   0.147     .9163537    1.797157
-                  August  |   1.571458   .3848613     1.85   0.065     .9723831    2.539616
-               September  |   1.131141   .2448015     0.57   0.569     .7401162    1.728756
-                 October  |   1.557378   .3143405     2.19   0.028     1.048547    2.313131
-                November  |   1.214211   .2943171     0.80   0.423      .755037     1.95263
-                December  |   1.753897    .504794     1.95   0.051     .9977404    3.083123
--------------------------------------------------------------------------------------------
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-active results
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Cox regression with Breslow method for ties
-
-No. of subjects =      10,613                         Number of obs =   10,664
-No. of failures =         447
-Time at risk    = 13,971.0554
-                                                      Wald chi2(35) = 9.21e+07
-Log pseudolikelihood = -3865.91                       Prob > chi2   =   0.0000
-
-                                        (Std. err. adjusted for 36 clusters in practice_id)
--------------------------------------------------------------------------------------------
-                          |               Robust
-                       _t | Haz. ratio   std. err.      z    P>|z|     [95% conf. interval]
---------------------------+----------------------------------------------------------------
-                covid_vax |
-   COVID pre-vaccination  |   .4266684   .2502637    -1.45   0.146     .1351498    1.346993
-    COVID 1 vaccine dose  |   .4268282   .1790417    -2.03   0.042     .1875856    .9711957
-   COVID 2 vaccine doses  |   .8305405   .1689241    -0.91   0.361     .5574866    1.237335
-   COVID 3 vaccine doses  |   .4180284    .104282    -3.50   0.000      .256368    .6816286
-   COVID 4 vaccine doses  |   .5611739   .0796267    -4.07   0.000     .4249304    .7411005
-                          |
-                      sex |
-                    Male  |   1.072562   .1146087     0.66   0.512     .8698955    1.322445
-                          |
-                ethnicity |
-             South Asian  |   1.153623   .3175917     0.52   0.604     .6725563    1.978788
-                   Black  |   1.181193   .1819955     1.08   0.280     .8733121    1.597614
-                   Mixed  |   .8814049    .167172    -0.67   0.506     .6077598    1.278259
-                   Other  |   .7001151   .1953382    -1.28   0.201      .405207    1.209656
-                          |
-                      imd |
-                       2  |   1.351603   .1573268     2.59   0.010     1.075894    1.697967
-                       3  |   1.109609   .1159328     1.00   0.320     .9041404    1.361771
-                       4  |   1.350453   .1177719     3.45   0.001     1.138274    1.602183
-        5 Least deprived  |   1.150138   .1044662     1.54   0.124      .962578    1.374244
-                          |
-                   region |
-                    East  |   .7770359    .180408    -1.09   0.277     .4929623    1.224809
-                  London  |   .8939189   .1822956    -0.55   0.582      .599396     1.33316
-              North East  |   .7400603   .1055455    -2.11   0.035     .5595912     .978731
-              North West  |   .7055266   .0973066    -2.53   0.011     .5384125    .9245099
-              South East  |   .9913948   .1417968    -0.06   0.952     .7490337    1.312175
-              South West  |   .9109131   .1286838    -0.66   0.509     .6906031    1.201504
-           West Midlands  |   .9082135   .1087301    -0.80   0.421     .7182625    1.148399
-Yorkshire and The Humber  |   .9518895   .1441004    -0.33   0.745     .7075035    1.280691
-                          |
-                    urban |
-                   Urban  |   .9214631   .1181984    -0.64   0.524     .7166253    1.184851
-                          |
-                      bmi |
-      Normal (18.5-24.9)  |   1.064639   .1558241     0.43   0.669     .7991301    1.418361
-    Overweight (25-29.9)  |   1.125215   .1788785     0.74   0.458      .823982    1.536574
-       Obese I (30-34.9)  |   1.077748   .1676735     0.48   0.630     .7944919    1.461993
-      Obese II (35-39.9)  |   1.110537   .1877359     0.62   0.535     .7973296     1.54678
-         Obese III (40+)  |   1.008079   .1935097     0.04   0.967     .6919888    1.468556
-                          |
-         1.cardiovascular |   1.214358   .1296908     1.82   0.069     .9850087    1.497108
-               1.diabetes |   .7964931   .1069695    -1.69   0.090     .6121604    1.036332
-           1.hypertension |   1.073525   .1284363     0.59   0.553     .8491308    1.357218
-       1.immunosuppressed |   1.284918   .1030823     3.12   0.002     1.097964    1.503706
-        1.non_haem_cancer |   .9112852   .2078481    -0.41   0.684     .5827875    1.424946
+         1.cardiovascular |   1.226193    .130459     1.92   0.055      .995397    1.510501
+               1.diabetes |   .7872876   .1020774    -1.84   0.065     .6106173    1.015074
+           1.hypertension |   1.077081   .1263503     0.63   0.527     .8558455    1.355505
+       1.immunosuppressed |   1.264369   .1000475     2.96   0.003     1.082729    1.476482
+        1.non_haem_cancer |   .8902664   .2067299    -0.50   0.617     .5647566    1.403391
                           |
                   smoking |
-   Current/former smoker  |   1.093888   .0737949     1.33   0.183     .9584065    1.248521
-                     age1 |   .9989297   .0046931    -0.23   0.820     .9897736     1.00817
-                     age2 |   .9885609   .0168792    -0.67   0.500     .9560257    1.022203
-                     age3 |   1.054152   .0584006     0.95   0.341     .9456847    1.175061
+   Current/former smoker  |   1.082199   .0747848     1.14   0.253     .9451166    1.239165
+                     age1 |   .9985453    .004632    -0.31   0.754     .9895079    1.007665
+                     age2 |   .9893319   .0170059    -0.62   0.533     .9565562    1.023231
+                     age3 |   1.052463   .0591491     0.91   0.363     .9426899    1.175019
                           |
                     month |
-                February  |   1.645476    .313041     2.62   0.009     1.133329     2.38906
-                   March  |   1.435733   .3234261     1.61   0.108     .9232608    2.232662
-                   April  |    1.37831   .2985919     1.48   0.139     .9014582    2.107405
-                     May  |    1.32086    .252731     1.45   0.146      .907798    1.921871
-                    June  |   1.558606   .3748195     1.85   0.065     .9728287    2.497104
-                    July  |   1.283289   .2205067     1.45   0.147     .9163537    1.797157
-                  August  |   1.571458   .3848613     1.85   0.065     .9723831    2.539616
-               September  |   1.131141   .2448015     0.57   0.569     .7401162    1.728756
-                 October  |   1.557378   .3143405     2.19   0.028     1.048547    2.313131
-                November  |   1.214211   .2943171     0.80   0.423      .755037     1.95263
-                December  |   1.753897    .504794     1.95   0.051     .9977404    3.083123
+                February  |   1.644369    .303622     2.69   0.007     1.145066    2.361392
+                   March  |   1.445797    .325616     1.64   0.102     .9298296    2.248077
+                   April  |   1.367871   .2880151     1.49   0.137     .9053544    2.066673
+                     May  |   1.303898   .2447602     1.41   0.157     .9025287    1.883763
+                    June  |    1.49871   .3599473     1.68   0.092     .9360158    2.399672
+                    July  |   1.238149   .2046798     1.29   0.196     .8954877     1.71193
+                  August  |   1.543554    .385514     1.74   0.082     .9460798    2.518347
+               September  |   1.111243    .239451     0.49   0.624     .7284365     1.69522
+                 October  |   1.531152   .3085107     2.11   0.034     1.031597    2.272617
+                November  |    1.20612   .2983678     0.76   0.449     .7427145    1.958661
+                December  |   1.718785   .4907735     1.90   0.058     .9821402    3.007942
 -------------------------------------------------------------------------------------------
-file full_covid_vax_death.ster saved
-file full_covid_vax_death.dta saved
 
 . 
 . file close tablecontent
@@ -1972,7 +1305,7 @@ file full_covid_vax_death.dta saved
 . 
 end of do-file
 
-. do "C:\Users\lsh1703468\Documents\Repos\analysis\cox_hospitalised_wave.do"
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
 
 . sysdir set PLUS ./analysis/adofiles
 

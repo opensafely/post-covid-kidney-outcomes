@@ -1,8 +1,8 @@
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_hospitalised.log
   log type:  text
- opened on:  19 Jan 2023, 10:34:55
+ opened on:  25 Jan 2023, 10:36:13
 
 . 
 . capture noisily import delimited ./output/input_covid_hospitalised.csv, clear
@@ -12,8 +12,8 @@
 . tempfile covid_hospitalised
 
 . save `covid_hospitalised', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3190_000001.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_3190_000001.tmp saved as .dta format
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_5158_000001.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_5158_000001.tmp saved as .dta format
 
 . di "COVID-19 hospitalised:"
 COVID-19 hospitalised:
@@ -29,8 +29,8 @@ COVID-19 hospitalised:
 . tempfile pneumonia_hospitalised
 
 . save `pneumonia_hospitalised', replace
-(file C:\Users\LSH170~1\AppData\Local\Temp\ST_3190_000002.tmp not found)
-file C:\Users\LSH170~1\AppData\Local\Temp\ST_3190_000002.tmp saved as .dta format
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_5158_000002.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_5158_000002.tmp saved as .dta format
 
 . di "Pneumonia hospitalised:"
 Pneumonia hospitalised:
@@ -40,6 +40,13 @@ Pneumonia hospitalised:
 
 . 
 . append using `covid_hospitalised', force
+
+. 
+. **ID
+. * Need to create unique identifiers as individuals may be in both covid_hospitalised and pneumonia_hospitalised so will have the same patient_id
+. gen unique = _n
+
+. label var unique "Unique ID"
 
 . 
 . ** Exclusions
@@ -224,8 +231,8 @@ Yorkshire and The Humber |      9,391        9.90      100.00
 
 . format index_date_28 %td
 
-. replace krt_date = index_date_28 if krt_date < index_date_28
-(110 real changes made)
+. replace krt_date = index_date_28 + 1 if krt_date < index_date_28 + 1
+(114 real changes made)
 
 . 
 . * Death before index_date + 28 days (i.e. only include people who survived 28 days after index_date)
@@ -245,7 +252,7 @@ Yorkshire and The Humber |      9,391        9.90      100.00
 
 . gen deceased = 0
 
-. replace deceased = 1 if death_date < index_date_28
+. replace deceased = 1 if death_date < index_date_28 + 1
 (1,789 real changes made)
 
 . label define deceased 0 "Alive at 28 days after index date" 1 "Deceased within 28 days of index date"
@@ -1426,9 +1433,9 @@ Yorkshire and The Humber |      9,391        9.90      100.00
 . gen baseline_egfr=.
 (26,593 missing values generated)
 
-. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb
-> 2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 
-> sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 
+> jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 ju
+> n2022 jul2022 aug2022 sep2022 oct2022"
 
 . foreach x of local month_year  {
   2. replace baseline_egfr=egfr_baseline_creatinine_`x' if index_month=="`x'"
@@ -3779,9 +3786,9 @@ immunosuppr |
 . gen egfr15_date=.
 (26,593 missing values generated)
 
-. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb
-> 2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 
-> sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 
+> jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 ju
+> n2022 jul2022 aug2022 sep2022 oct2022"
 
 . foreach x of local month_year  {
   2.   replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatinine_`x'<15 & date("01`x'", "DMY")>=index_date
@@ -3912,41 +3919,41 @@ immunosuppr |
   3.                                                                 tab esrd_time_cat `exposure', m col chi
   4.                                                                 }
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> case = Pneumonia (pre-pandemic)
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            0              0
- 5%            0              0
-10%           37              0       Obs               1,050
-25%          136              0       Sum of wgt.       1,050
+ 1%            1              1
+ 5%            1              1
+10%           37              1       Obs               1,050
+25%          136              1       Sum of wgt.       1,050
 
-50%        290.5                      Mean           334.3762
-                        Largest       Std. dev.      241.5693
+50%        290.5                      Mean           334.4286
+                        Largest       Std. dev.      241.4968
 75%          516            963
-90%        687.5            969       Variance       58355.72
-95%          773            970       Skewness       .5323196
-99%          904            978       Kurtosis        2.38398
+90%        687.5            969       Variance       58320.71
+95%          773            970       Skewness       .5333936
+99%          904            978       Kurtosis       2.384083
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> case = COVID-19
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            0              0
- 5%            0              0
-10%           25              0       Obs                 990
-25%          112              0       Sum of wgt.         990
+ 1%            1              1
+ 5%            1              1
+10%           25              1       Obs                 990
+25%          112              1       Sum of wgt.         990
 
-50%        282.5                      Mean           320.9576
-                        Largest       Std. dev.      239.8143
+50%        282.5                      Mean           321.0091
+                        Largest       Std. dev.      239.7453
 75%          508            923
-90%          673            926       Variance       57510.88
-95%          752            933       Skewness        .484885
-99%          891            949       Kurtosis       2.240991
+90%          673            926       Variance       57477.82
+95%          752            933       Skewness       .4858118
+99%          891            949       Kurtosis       2.241094
 
 
 +-------------------+
@@ -3959,11 +3966,8 @@ immunosuppr |
                 |         case
   esrd_time_cat | Pneumonia   COVID-19 |     Total
 ----------------+----------------------+----------
-         0 days |        55         51 |       106 
-                |      0.41       0.39 |      0.40 
-----------------+----------------------+----------
-   1 to 28 days |        38         58 |        96 
-                |      0.28       0.44 |      0.36 
+   1 to 28 days |        93        109 |       202 
+                |      0.69       0.83 |      0.76 
 ----------------+----------------------+----------
   20 to 90 days |        88        105 |       193 
                 |      0.65       0.80 |      0.73 
@@ -3989,43 +3993,43 @@ immunosuppr |
           Total |    13,534     13,059 |    26,593 
                 |    100.00     100.00 |    100.00 
 
-          Pearson chi2(8) =  12.6753   Pr = 0.124
+          Pearson chi2(7) =   9.6240   Pr = 0.211
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> critical_care = Ward-based
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            0              0
- 5%            0              0
-10%           33              0       Obs               1,837
-25%          125              0       Sum of wgt.       1,837
+ 1%            1              1
+ 5%            1              1
+10%           33              1       Obs               1,837
+25%          125              1       Sum of wgt.       1,837
 
-50%          286                      Mean            327.521
-                        Largest       Std. dev.      240.8131
+50%          286                      Mean           327.5716
+                        Largest       Std. dev.      240.7443
 75%          511            963
-90%          680            969       Variance       57990.93
-95%          766            970       Skewness       .5223131
-99%          894            978       Kurtosis       2.329626
+90%          680            969       Variance        57957.8
+95%          766            970       Skewness        .523295
+99%          894            978       Kurtosis       2.329739
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> critical_care = Critical care
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            0              0
- 5%            0              0
-10%           15              0       Obs                 203
-25%          138              0       Sum of wgt.         203
+ 1%            1              1
+ 5%            1              1
+10%           15              1       Obs                 203
+25%          138              1       Sum of wgt.         203
 
-50%          296                      Mean           330.9704
-                        Largest       Std. dev.       240.787
+50%          296                      Mean           331.0345
+                        Largest       Std. dev.      240.6986
 75%          525            865
-90%          662            891       Variance       57978.36
-95%          735            915       Skewness       .3939389
-99%          891            927       Kurtosis       2.239388
+90%          662            891       Variance       57935.82
+95%          735            915       Skewness       .3950885
+99%          891            927       Kurtosis       2.239475
 
 
 +-------------------+
@@ -4038,11 +4042,8 @@ immunosuppr |
                 |     Critical care
   esrd_time_cat | Ward-base  Critical  |     Total
 ----------------+----------------------+----------
-         0 days |        93         13 |       106 
-                |      0.39       0.50 |      0.40 
-----------------+----------------------+----------
-   1 to 28 days |        81         15 |        96 
-                |      0.34       0.57 |      0.36 
+   1 to 28 days |       174         28 |       202 
+                |      0.73       1.07 |      0.76 
 ----------------+----------------------+----------
   20 to 90 days |       179         14 |       193 
                 |      0.75       0.54 |      0.73 
@@ -4068,45 +4069,45 @@ immunosuppr |
           Total |    23,980      2,613 |    26,593 
                 |    100.00     100.00 |    100.00 
 
-          Pearson chi2(8) =  10.2343   Pr = 0.249
+          Pearson chi2(7) =   9.5921   Pr = 0.213
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> krt = No AKI
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            0              0
- 5%            0              0
-10%           25              0       Obs               1,193
-25%          121              0       Sum of wgt.       1,193
+ 1%            1              1
+ 5%            1              1
+10%           25              1       Obs               1,193
+25%          121              1       Sum of wgt.       1,193
 
-50%          287                      Mean           327.7435
-                        Largest       Std. dev.      244.0192
+50%          287                      Mean           327.8022
+                        Largest       Std. dev.      243.9404
 75%          511            940
-90%          679            949       Variance       59545.38
-95%          774            963       Skewness       .5235282
-99%          915            978       Kurtosis       2.340374
+90%          679            949       Variance       59506.94
+95%          774            963       Skewness       .5246139
+99%          915            978       Kurtosis       2.340567
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> krt = AKI without KRT
 
                      Time to ESRD (Days)
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            0              0
- 5%            7              0
-10%           35              0       Obs                 806
-25%          127              0       Sum of wgt.         806
+ 1%            1              1
+ 5%            7              1
+10%           35              1       Obs                 806
+25%          127              1       Sum of wgt.         806
 
-50%        293.5                      Mean            327.732
-                        Largest       Std. dev.      236.6472
+50%        293.5                      Mean           327.7767
+                        Largest       Std. dev.      236.5854
 75%          514            926
-90%          680            933       Variance        56001.9
-95%          746            969       Skewness       .4867999
-99%          880            970       Kurtosis       2.281692
+90%          680            933       Variance       55972.63
+95%          746            969       Skewness       .4877006
+99%          880            970       Kurtosis       2.281707
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> krt = AKI requiring KRT
 
                      Time to ESRD (Days)
@@ -4135,11 +4136,8 @@ immunosuppr |
                 |    Kidney replacement therapy
   esrd_time_cat |    No AKI  AKI witho  AKI requi |     Total
 ----------------+---------------------------------+----------
-         0 days |        70         36          0 |       106 
-                |      0.44       0.35       0.00 |      0.40 
-----------------+---------------------------------+----------
-   1 to 28 days |        56         37          3 |        96 
-                |      0.36       0.36       0.56 |      0.36 
+   1 to 28 days |       126         73          3 |       202 
+                |      0.80       0.71       0.56 |      0.76 
 ----------------+---------------------------------+----------
   20 to 90 days |       106         84          3 |       193 
                 |      0.67       0.82       0.56 |      0.73 
@@ -4165,7 +4163,7 @@ immunosuppr |
           Total |    15,756     10,299        538 |    26,593 
                 |    100.00     100.00     100.00 |    100.00 
 
-         Pearson chi2(16) =  14.7817   Pr = 0.541
+         Pearson chi2(14) =  11.5725   Pr = 0.641
 
 .         
 . * Exit date
@@ -4197,18 +4195,20 @@ immunosuppr |
 
 . recode follow_up_cat_esrd       min/-29=1       ///
 >                                                 -28/-1=2        ///
->                                                 0/365=3         ///
->                                                 366/730=4       ///
->                                                 731/1040=5      ///                                     
->                                                 1041/max=6
-(25486 changes made to follow_up_cat_esrd)
+>                                                 0=3                     ///
+>                                                 1/365=4         ///
+>                                                 366/730=5       ///
+>                                                 731/1040=6      ///                                     
+>                                                 1041/max=7
+(25494 changes made to follow_up_cat_esrd)
 
-. label define follow_up_cat_esrd         1 "<-29 days"           ///
->                                                         2 "-28 to -1 days"      ///
->                                                         3 "0 to 365 days"       ///
->                                                         4 "366 to 730 days" ///
->                                                         5 "731 to 1040 days"    ///
->                                                         6 ">1040 days"
+. label define follow_up_cat_esrd         1 "<-29 days"   ///
+>                                                         2 "-28 to -1 days"              ///
+>                                                         3 "0 days"                              ///
+>                                                         4 "1 to 365 days"               ///
+>                                                         5 "366 to 730 days"     ///
+>                                                         6 "731 to 1040 days"    ///
+>                                                         7 ">1040 days"
 
 . label values follow_up_cat_esrd follow_up_cat_esrd
 
@@ -4216,16 +4216,16 @@ immunosuppr |
 
 . tab case follow_up_cat_esrd
 
-                      |               Follow_up time
-                 case | -28 to -1  0 to 365   366 to 73  731 to 10 |     Total
-----------------------+--------------------------------------------+----------
-Pneumonia (pre-pandem |        49      5,518      4,655      2,980 |    13,202 
-             COVID-19 |        39      5,035      4,326      2,917 |    12,317 
-----------------------+--------------------------------------------+----------
-                Total |        88     10,553      8,981      5,897 |    25,519 
+                      |                     Follow_up time
+                 case | -28 to -1     0 days  1 to 365   366 to 73  731 to 10 |     Total
+----------------------+-------------------------------------------------------+----------
+Pneumonia (pre-pandem |        49          1      5,517      4,655      2,980 |    13,202 
+             COVID-19 |        39          0      5,035      4,326      2,917 |    12,317 
+----------------------+-------------------------------------------------------+----------
+                Total |        88          1     10,552      8,981      5,897 |    25,519 
 
-. drop if follow_up_time_esrd<0
-(88 observations deleted)
+. drop if follow_up_time_esrd<1
+(89 observations deleted)
 
 . drop if follow_up_time_esrd>1040
 (1,074 observations deleted)
@@ -4233,28 +4233,29 @@ Pneumonia (pre-pandem |        49      5,518      4,655      2,980 |    13,202
 . tab case follow_up_cat_esrd
 
                       |          Follow_up time
-                 case | 0 to 365   366 to 73  731 to 10 |     Total
+                 case | 1 to 365   366 to 73  731 to 10 |     Total
 ----------------------+---------------------------------+----------
-Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153 
+Pneumonia (pre-pandem |     5,517      4,655      2,980 |    13,152 
              COVID-19 |     5,035      4,326      2,917 |    12,278 
 ----------------------+---------------------------------+----------
-                Total |    10,553      8,981      5,897 |    25,431 
+                Total |    10,552      8,981      5,897 |    25,430 
 
+. * Time zero variable to account for differences in length of follow-up
 . gen time_zero_esrd = date("2000-01-01", "YMD")
 
 . gen time_end_esrd = time_zero_esrd + follow_up_time_esrd
 
 . gen time_esrd = time_zero_esrd + esrd_time
-(23,391 missing values generated)
+(23,390 missing values generated)
 
 . 
 . * 50% eGFR reduction (earliest month) (or ESRD)
 . gen egfr_half_date=.
-(25,431 missing values generated)
+(25,430 missing values generated)
 
-. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb
-> 2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 
-> sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+. local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 
+> jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 ju
+> n2022 jul2022 aug2022 sep2022 oct2022"
 
 . foreach x of local month_year {
   2.   replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_half_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>=index_date
@@ -4340,14 +4341,14 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 . gen index_date_egfr_half = index_date
 
 . replace index_date_egfr_half =. if baseline_egfr==.
-(11,326 real changes made, 11,326 to missing)
+(11,325 real changes made, 11,325 to missing)
 
 . gen egfr_half_time = (egfr_half_date - index_date_egfr_half)
-(19,629 missing values generated)
+(19,628 missing values generated)
 
 . * Exit date (50% eGFR reduction)
 . gen exit_date_egfr_half = egfr_half_date
-(18,741 missing values generated)
+(18,740 missing values generated)
 
 . format exit_date_egfr_half %td
 
@@ -4355,7 +4356,7 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 (8,303 real changes made)
 
 . gen follow_up_time_egfr_half = (exit_date_egfr_half - index_date_egfr_half)
-(11,326 missing values generated)
+(11,325 missing values generated)
 
 . label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
 
@@ -4367,17 +4368,17 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 . gen time_zero_egfr_half = date("2000-01-01", "YMD")
 
 . gen time_end_egfr_half = time_zero_egfr_half + follow_up_time_egfr_half
-(11,326 missing values generated)
+(11,325 missing values generated)
 
 . gen time_egfr_half = time_zero_egfr_half + egfr_half_time
-(19,629 missing values generated)
+(19,628 missing values generated)
 
 . 
 . * AKI (or ESRD)
 . gen index_date_aki = index_date
 
 . gen aki_date = date(acute_kidney_injury_outcome, "YMD")
-(22,888 missing values generated)
+(22,887 missing values generated)
 
 . format aki_date %td
 
@@ -4394,16 +4395,16 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 . label var aki "Acute kidney injury"
 
 . gen aki_time = (aki_date - index_date_aki)
-(21,055 missing values generated)
+(21,054 missing values generated)
 
 . * Exit date (AKI)
 . gen exit_date_aki = aki_date
-(21,055 missing values generated)
+(21,054 missing values generated)
 
 . format exit_date_aki %td
 
 . replace exit_date_aki = min(deregistered_date,death_date,end_date)  if aki_date==.
-(21,055 real changes made)
+(21,054 real changes made)
 
 . gen aki_denominator = 1
 
@@ -4416,14 +4417,14 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 . gen time_end_aki = time_zero_aki + follow_up_time_aki
 
 . gen time_aki = time_zero_aki + aki_time
-(21,055 missing values generated)
+(21,054 missing values generated)
 
 . 
 . * Exit date (death)
 . gen index_date_death = index_date
 
 . gen exit_date_death = death_date
-(24,377 missing values generated)
+(24,376 missing values generated)
 
 . gen death = 0
 
@@ -4433,12 +4434,12 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 . label var death "Death"
 
 . gen death_time = (death_date - index_date_death)
-(24,377 missing values generated)
+(24,376 missing values generated)
 
 . format exit_date_death %td
 
 . replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
-(24,377 real changes made)
+(24,376 real changes made)
 
 . gen death_denominator = 1
 
@@ -4451,7 +4452,7 @@ Pneumonia (pre-pandem |     5,518      4,655      2,980 |    13,153
 . gen time_end_death = time_zero_death + follow_up_time_death
 
 . gen time_death = time_zero_death + death_time
-(24,377 missing values generated)
+(24,376 missing values generated)
 
 . 
 . save ./output/analysis_hospitalised.dta, replace
@@ -4461,5 +4462,5 @@ file ./output/analysis_hospitalised.dta saved
       name:  <unnamed>
        log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_hospitalised.log
   log type:  text
- closed on:  19 Jan 2023, 10:35:48
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ closed on:  25 Jan 2023, 10:36:43
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -19,6 +19,11 @@ safecount
 
 append using `covid_hospitalised', force
 
+**ID
+* Need to create unique identifiers as individuals may be in both covid_hospitalised and pneumonia_hospitalised so will have the same patient_id
+gen unique = _n
+label var unique "Unique ID"
+
 ** Exclusions
 * Index of multiple deprivation missing
 * Ordered 1-5 from most deprived to least deprived
@@ -83,7 +88,7 @@ drop krt_outcome_date
 drop if krt_date < index_date
 gen index_date_28 = index_date + 28
 format index_date_28 %td
-replace krt_date = index_date_28 if krt_date < index_date_28
+replace krt_date = index_date_28 + 1 if krt_date < index_date_28 + 1
 
 * Death before index_date + 28 days (i.e. only include people who survived 28 days after index_date)
 drop if deceased==1
@@ -93,7 +98,7 @@ format death_date1 %td
 drop death_date
 rename death_date1 death_date
 gen deceased = 0
-replace deceased = 1 if death_date < index_date_28
+replace deceased = 1 if death_date < index_date_28 + 1
 label define deceased 0 "Alive at 28 days after index date" 1 "Deceased within 28 days of index date"
 label values deceased deceased
 tab covid deceased
@@ -702,22 +707,25 @@ label var follow_up_time_esrd "Follow-up time (ESRD) (Days)"
 gen follow_up_cat_esrd = follow_up_time_esrd
 recode follow_up_cat_esrd	min/-29=1 	///
 						-28/-1=2 	///
-						0/365=3 	///
-						366/730=4 	///
-						731/1040=5	///					
-						1041/max=6
-label define follow_up_cat_esrd 	1 "<-29 days" 		///
-							2 "-28 to -1 days" 	///
-							3 "0 to 365 days" 	///
-							4 "366 to 730 days" ///
-							5 "731 to 1040 days"	///
-							6 ">1040 days"
+						0=3			///
+						1/365=4 	///
+						366/730=5	///
+						731/1040=6	///					
+						1041/max=7
+label define follow_up_cat_esrd 	1 "<-29 days" 	///
+							2 "-28 to -1 days" 		///
+							3 "0 days"				///
+							4 "1 to 365 days"		///
+							5 "366 to 730 days" 	///
+							6 "731 to 1040 days"	///
+							7 ">1040 days"
 label values follow_up_cat_esrd follow_up_cat_esrd
 label var follow_up_cat_esrd "Follow_up time"
 tab case follow_up_cat_esrd
-drop if follow_up_time_esrd<0
+drop if follow_up_time_esrd<1
 drop if follow_up_time_esrd>1040
 tab case follow_up_cat_esrd
+* Time zero variable to account for differences in length of follow-up
 gen time_zero_esrd = date("2000-01-01", "YMD")
 gen time_end_esrd = time_zero_esrd + follow_up_time_esrd
 gen time_esrd = time_zero_esrd + esrd_time

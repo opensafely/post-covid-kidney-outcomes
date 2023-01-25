@@ -64,64 +64,56 @@ local lab1: label `interaction' 1
 
 
 	
-	qui safecount if pneumonia_`interaction'==0 & `outcome'_denominator==1
-	local denominator = r(N)
-	local r_denominator = round(`denominator',5)
-	qui safecount if pneumonia_`interaction'==0 & `outcome'==1
-	local event = r(N)
-	local r_event = round(`event',5)
+	qui safecount if pneumonia_`interaction'==0 & `outcome'_denominator==1 & _st==1
+	local denominator = round(r(N),5)
+	qui safecount if pneumonia_`interaction'==0 & `outcome'==1 & _st==1
+	local event = round(r(N),5)
     bysort pneumonia_`interaction': egen tfu0_`interaction'_`outcome' = total(_t)
 	qui su tfu0_`interaction'_`outcome' if pneumonia_`interaction'==0
 	local person_year = r(mean)
-	local rate = 100000*(`r_event'/`person_year')
+	local rate = 100000*(`event'/`person_year')
 	
 	file write tablecontent _n
 	file write tablecontent ("`outcome'") _n
-	file write tablecontent _tab ("Pneumonia `lab0'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
+	file write tablecontent _tab ("Pneumonia `lab0'") _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
 	file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 	
 
-	qui safecount if pneumonia_`interaction'==1 & `outcome'_denominator==1
-	local denominator = r(N)
-	local r_denominator = round(`denominator',5)
-	qui safecount if pneumonia_`interaction'==1 & `outcome'==1
-	local event = r(N)
-	local r_event = round(`event',5)
+	qui safecount if pneumonia_`interaction'==1 & `outcome'_denominator==1 & _st==1
+	local denominator = round(r(N),5)
+	qui safecount if pneumonia_`interaction'==1 & `outcome'==1 & _st==1
+	local event = round(r(N),5)
 	qui su tfu0_`interaction'_`outcome' if pneumonia_`interaction'==1
 	local person_year = r(mean)
-	local rate = 100000*(`r_event'/`person_year')
-	file write tablecontent _tab ("Pneumonia `lab1'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab
+	local rate = 100000*(`event'/`person_year')
+	file write tablecontent _tab ("Pneumonia `lab1'") _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab
 	file write tablecontent  _tab %4.2f (`m10`interaction'_`outcome'_b') _tab ("(") %4.2f (`m10`interaction'_`outcome'_ll') (" - ") %4.2f (`m10`interaction'_`outcome'_ul') (")")
 	file write tablecontent  _tab %4.2f (`m20`interaction'_`outcome'_b') _tab ("(") %4.2f (`m20`interaction'_`outcome'_ll') (" - ") %4.2f (`m20`interaction'_`outcome'_ul') (")")
 	file write tablecontent  _tab %4.2f (`m30`interaction'_`outcome'_b') _tab ("(") %4.2f (`m30`interaction'_`outcome'_ll') (" - ") %4.2f (`m30`interaction'_`outcome'_ul') (")")
 	file write tablecontent  _tab %4.2f (`m40`interaction'_`outcome'_b') _tab ("(") %4.2f (`m40`interaction'_`outcome'_ll') (" - ") %4.2f (`m40`interaction'_`outcome'_ul') (")") _tab  _n
 	
 	
-	qui safecount if covid_`interaction'==0 & `outcome'_denominator==1
-	local denominator = r(N)
-	local r_denominator = round(`denominator',5)
-	qui safecount if covid_`interaction'==0 & `outcome'==1
-	local event = r(N)
-	local r_event = round(`event',5)
+	qui safecount if covid_`interaction'==0 & `outcome'_denominator==1 & _st==1
+	local denominator = round(r(N),5)
+	qui safecount if covid_`interaction'==0 & `outcome'==1 & _st==1
+	local event = round(r(N),5)
     bysort covid_`interaction': egen tfu1_`interaction'_`outcome' = total(_t)
 	qui su tfu1_`interaction'_`outcome' if covid_`interaction'==0
 	local person_year = r(mean)
-	local rate = 100000*(`r_event'/`person_year')
+	local rate = 100000*(`event'/`person_year')
 	
 	file write tablecontent _n
-	file write tablecontent _tab ("COVID-19 `lab0'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
+	file write tablecontent _tab ("COVID-19 `lab0'") _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
 	file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
 	
-	qui safecount if covid_`interaction'==1 & `outcome'_denominator==1
-	local denominator = r(N)
-	local r_denominator = round(`denominator',5)
-	qui safecount if covid_`interaction'==1 & `outcome'==1
-	local event = r(N)
-	local r_event = round(`event',5)
+	qui safecount if covid_`interaction'==1 & `outcome'_denominator==1 & _st==1
+	local denominator = round(r(N),5)
+	qui safecount if covid_`interaction'==1 & `outcome'==1 & _st==1
+	local event = round(r(N),5)
 	qui su tfu1_`interaction'_`outcome' if covid_`interaction'==1
 	local person_year = r(mean)
-	local rate = 100000*(`r_event'/`person_year')
-	file write tablecontent _tab ("COVID-19 `lab1'") _tab _tab (`r_denominator') _tab (`r_event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab
+	local rate = 100000*(`event'/`person_year')
+	file write tablecontent _tab ("COVID-19 `lab1'") _tab _tab (`denominator') _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate ') _tab _tab
 	file write tablecontent  _tab %4.2f (`m11`interaction'_`outcome'_b') _tab ("(") %4.2f (`m11`interaction'_`outcome'_ll') (" - ") %4.2f (`m11`interaction'_`outcome'_ul') (")") 
 	file write tablecontent  _tab %4.2f (`m21`interaction'_`outcome'_b') _tab ("(") %4.2f (`m21`interaction'_`outcome'_ll') (" - ") %4.2f (`m21`interaction'_`outcome'_ul') (")") 
 	file write tablecontent  _tab %4.2f (`m31`interaction'_`outcome'_b') _tab ("(") %4.2f (`m31`interaction'_`outcome'_ll') (" - ") %4.2f (`m31`interaction'_`outcome'_ul') (")") 
