@@ -1,17 +1,19 @@
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  C:\Users\lsh1703468\Documents\repos\logs/descriptive_2017_table.log
+       log:  /workspace/logs/descriptive_hospitalised_case.log
   log type:  text
- opened on:  25 Jan 2023, 13:13:20
+ opened on:  25 Jan 2023, 13:42:06
 
 . 
 . * Open Stata dataset
-. use ./output/analysis_2017, clear
+. use ./output/analysis_hospitalised, clear
 
 . 
-.  /* PROGRAMS TO AUTOMATE TABULATIONS===========================================*/ 
+.  /* PROGRAMS TO AUTOMATE TABULATIONS=========================================
+> ==*/ 
 . 
-. ********************************************************************************
+. *****************************************************************************
+> ***
 . * All below code from K Baskharan 
 . * Generic code to output one row of table
 . 
@@ -31,7 +33,8 @@
   8.         local rowdenom = r(N)
   9.         local rowdenom = round(`rowdenom',5)
  10.         local colpct = 100*(`rowdenom'/`overalldenom')
- 11.         file write tablecontent %9.0gc (`rowdenom')  (" (") %3.1f (`colpct') (")") _tab
+ 11.         file write tablecontent %9.0gc (`rowdenom')  (" (") %3.1f (`colpct
+> ') (")") _tab
  12. 
 .         forvalues i=0/1{
  13.         qui cou if case == `i'
@@ -41,7 +44,8 @@
  17.         local numerator = r(N)
  18.         local numerator = round(`numerator',5)
  19.         local pct = 100*(`numerator'/`rowdenom') 
- 20.         file write tablecontent %9.0gc (`numerator') (" (") %3.1f (`pct') (")") _tab
+ 20.         file write tablecontent %9.0gc (`numerator') (" (") %3.1f (`pct') 
+> (")") _tab
  21.         }
  22.         
 .         file write tablecontent _n
@@ -62,7 +66,8 @@
 .         qui cou if `variable' `condition'
   5.         local rowdenom = round(r(N),5)
   6.         local colpct = 100*(`rowdenom'/`overalldenom')
-  7.         file write tablecontent %9.0gc (`rowdenom')  (" (") %3.1f (`colpct') (")") _tab
+  7.         file write tablecontent %9.0gc (`rowdenom')  (" (") %3.1f (`colpct
+> ') (")") _tab
   8. 
 .         forvalues i=0/1{
   9.         qui cou if case == `i'
@@ -70,7 +75,8 @@
  11.         qui cou if case == `i' & `variable' `condition'
  12.         local numerator = round(r(N),5)
  13.         local pct = 100*(`numerator'/`rowdenom') 
- 14.         file write tablecontent %9.0gc (`numerator') (" (") %3.1f (`pct') (")") _tab
+ 14.         file write tablecontent %9.0gc (`numerator') (" (") %3.1f (`pct') 
+> (")") _tab
  15.         }
  16.         
 .         file write tablecontent _n
@@ -88,11 +94,13 @@
 > the program counts if variable and condition and returns the counts
 > column percentages are then automatically generated
 > this is then written to the text file 'tablecontent' 
-> the number followed by space, brackets, formatted pct, end bracket and then tab
+> the number followed by space, brackets, formatted pct, end bracket and then t
+> ab
 > the format %3.1f specifies length of 3, followed by 1 dp. 
 > */ 
 . 
-. ********************************************************************************
+. *****************************************************************************
+> ***
 . * Generic code to output one section (varible) within table (calls above)
 . 
 . cap prog drop tabulatevariable
@@ -104,17 +112,20 @@
   3.         file write tablecontent ("`lab'") _n 
   4. 
 .         forvalues varlevel = `min'/`max'{ 
-  5.                 generaterow, variable(`variable') condition("==`varlevel'")
+  5.                 generaterow, variable(`variable') condition("==`varlevel'"
+> )
   6.         }
   7.         
-.         if "`missing'"!="" generaterow, variable(`variable') condition("== 12")
+.         if "`missing'"!="" generaterow, variable(`variable') condition("== 12
+> ")
   8.         
 . 
 . 
 . end
 
 . 
-. ********************************************************************************
+. *****************************************************************************
+> ***
 . 
 . /* Explanatory Notes 
 > defines program tabulate variable 
@@ -128,7 +139,8 @@
 > if there is a missing specified, then run the generate row for missing vals
 > */ 
 . 
-. ********************************************************************************
+. *****************************************************************************
+> ***
 . * Generic code to qui summarize a continous variable 
 . 
 . cap prog drop summarizevariable 
@@ -143,11 +155,14 @@
 .         * Means for continuous variables
 .         /*qui summarize `variable', d
 >         file write tablecontent ("Mean (SD)") _tab 
->         file write tablecontent  %3.1f (r(mean)) (" (") %3.1f (r(sd)) (")") _tab
+>         file write tablecontent  %3.1f (r(mean)) (" (") %3.1f (r(sd)) (")") _
+> tab
 >         
->         forvalues i=0/1{                                                        
+>         forvalues i=0/1{                                                     
+>    
 >         qui summarize `variable' if case == `i', d
->         file write tablecontent  %3.1f (r(mean)) (" (") %3.1f (r(sd)) (")") _tab
+>         file write tablecontent  %3.1f (r(mean)) (" (") %3.1f (r(sd)) (")") _
+> tab
 >         }*/
 . 
 . file write tablecontent
@@ -155,11 +170,13 @@
 .         
 .         qui summarize `variable', d
   6.         file write tablecontent ("Median (IQR)") _tab 
-  7.         file write tablecontent %3.1f (r(p50)) (" (") %3.1f (r(p25)) ("-") %3.1f (r(p75)) (")") _tab
+  7.         file write tablecontent %3.1f (r(p50)) (" (") %3.1f (r(p25)) ("-")
+>  %3.1f (r(p75)) (")") _tab
   8.         
 .         forvalues i=0/1{
   9.         qui summarize `variable' if case == `i', d
- 10.         file write tablecontent %3.1f (r(p50)) (" (") %3.1f (r(p25)) ("-") %3.1f (r(p75)) (")") _tab
+ 10.         file write tablecontent %3.1f (r(p50)) (" (") %3.1f (r(p25)) ("-")
+>  %3.1f (r(p75)) (")") _tab
  11.         }
  12.         
 . file write tablecontent _n
@@ -167,12 +184,15 @@
 . end
 
 . 
-. /* INVOKE PROGRAMS FOR TABLE 1================================================*/ 
+. /* INVOKE PROGRAMS FOR TABLE 1===============================================
+> =*/ 
 . 
 . *Set up output file
 . cap file close tablecontent
 
-. file open tablecontent using ./output/descriptive_2017_table.csv, write text replace
+. file open tablecontent using ./output/descriptive_hospitalised_case.csv, writ
+> e text replace
+(note: file ./output/descriptive_hospitalised_case.csv not found)
 
 . 
 . local lab0: label case 0
@@ -181,7 +201,8 @@
 
 . 
 . 
-. file write tablecontent _tab ("Total") _tab ("`lab0'") _tab ("`lab1'") _n                                                        
+. file write tablecontent _tab ("Total") _tab ("`lab0'") _tab ("`lab1'") _n    
+>                                                     
 
 .                                                          
 . ** Need to add line 95 from Kevin's
@@ -229,7 +250,7 @@
 . file write tablecontent _n 
 
 . 
-. qui tabulatevariable, variable(stp) min(1) max(35)
+. qui tabulatevariable, variable(stp) min(1) max(31)
 
 . file write tablecontent _n 
 
@@ -286,7 +307,7 @@
 . * Close log file 
 . log close
       name:  <unnamed>
-       log:  C:\Users\lsh1703468\Documents\repos\logs/descriptive_2017_table.log
+       log:  /workspace/logs/descriptive_hospitalised_case.log
   log type:  text
- closed on:  25 Jan 2023, 13:13:24
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ closed on:  25 Jan 2023, 13:42:10
+-------------------------------------------------------------------------------

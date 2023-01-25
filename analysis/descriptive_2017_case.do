@@ -1,7 +1,7 @@
 * Adapted from Rohini Mathur
 
 capture log close
-log using "logs/descriptive_2017_table.log", replace t
+log using "logs/descriptive_2017_case.log", replace t
 
 * Open Stata dataset
 use ./output/analysis_2017, clear
@@ -18,26 +18,26 @@ syntax, variable(varname) condition(string)
 	
 	qui cou
 	local overalldenom=r(N)
-	local r_overalldenom = round(`overalldenom',5)
+	local overalldenom = round(`overalldenom',5)
 	
 	qui sum `variable' if `variable' `condition'
 	file write tablecontent (r(max)) _tab
 	
 	qui cou   if `variable' `condition'
 	local rowdenom = r(N)
-	local r_rowdenom = round(`rowdenom',5)
-	local colpct = 100*(`r_rowdenom'/`r_overalldenom')
-	file write tablecontent %9.0gc (`r_rowdenom')  (" (") %3.1f (`colpct') (")") _tab
+	local rowdenom = round(`rowdenom',5)
+	local colpct = 100*(`rowdenom'/`overalldenom')
+	file write tablecontent %9.0gc (`rowdenom')  (" (") %3.1f (`colpct') (")") _tab
 
 	forvalues i=0/1{
 	qui cou if case == `i'
 	local rowdenom = r(N)
-	local r_rowdenom = round(`rowdenom',5)
+	local rowdenom = round(`rowdenom',5)
 	qui cou if case == `i' & `variable' `condition'
 	local numerator = r(N)
-	local r_numerator = round(`numerator',5)
-	local pct = 100*(`r_numerator'/`rowdenom') 
-	file write tablecontent %9.0gc (`r_numerator') (" (") %3.1f (`pct') (")") _tab
+	local numerator = round(`numerator',5)
+	local pct = 100*(`numerator'/`rowdenom') 
+	file write tablecontent %9.0gc (`numerator') (" (") %3.1f (`pct') (")") _tab
 	}
 	
 	file write tablecontent _n
@@ -51,24 +51,20 @@ program define generaterow2
 syntax, variable(varname) condition(string) 
 	
 	qui cou
-	local overalldenom=r(N)
-	local r_overalldenom = round(`overalldenom',5)
+	local overalldenom = round(r(N),5)
 	
 	qui cou if `variable' `condition'
-	local rowdenom = r(N)
-	local r_rowdenom = round(`rowdenom',5)
-	local colpct = 100*(`r_rowdenom'/`r_overalldenom')
-	file write tablecontent %9.0gc (`r_rowdenom')  (" (") %3.1f (`colpct') (")") _tab
+	local rowdenom = round(r(N),5)
+	local colpct = 100*(`rowdenom'/`overalldenom')
+	file write tablecontent %9.0gc (`rowdenom')  (" (") %3.1f (`colpct') (")") _tab
 
 	forvalues i=0/1{
 	qui cou if case == `i'
-	local rowdenom = r(N)
-	local r_rowdenom = round(`rowdenom',5)
+	local rowdenom = round(r(N),5)
 	qui cou if case == `i' & `variable' `condition'
-	local numerator = r(N)
-	local r_numerator = round(`numerator',5)
-	local pct = 100*(`r_numerator'/`rowdenom') 
-	file write tablecontent %9.0gc (`r_numerator') (" (") %3.1f (`pct') (")") _tab
+	local numerator = round(r(N),5)
+	local pct = 100*(`numerator'/`rowdenom') 
+	file write tablecontent %9.0gc (`numerator') (" (") %3.1f (`pct') (")") _tab
 	}
 	
 	file write tablecontent _n
@@ -164,30 +160,26 @@ end
 
 *Set up output file
 cap file close tablecontent
-file open tablecontent using ./output/descriptive_2017_table.csv, write text replace
-
-file write tablecontent ("Table 1: Demographic and Clinical Characteristics") _n
+file open tablecontent using ./output/descriptive_2017_case.csv, write text replace
 
 local lab0: label case 0
 local lab1: label case 1
 
 
-file write tablecontent _tab ("Total")				  			  _tab ///
-							 ("`lab0'")  						  _tab ///
-							 ("`lab1'")  						  _n 							 
+file write tablecontent _tab ("Total") _tab ("`lab0'") _tab ("`lab1'") _n 							 
 							 
 ** Need to add line 95 from Kevin's
 ** wherever label ensure same name
 
 * DEMOGRAPHICS (more than one level, potentially missing) 
 
-format age baseline_egfr follow_up_time %9.2f
+format age baseline_egfr follow_up_time_esrd %9.2f
 
 gen byte Denominator=1
 qui tabulatevariable, variable(Denominator) min(1) max(1) 
 file write tablecontent _n 
 
-qui summarizevariable, variable(follow_up_time) 
+qui summarizevariable, variable(follow_up_time_esrd) 
 file write tablecontent _n
 
 qui summarizevariable, variable(age) 
@@ -245,6 +237,3 @@ file close tablecontent
 
 * Close log file 
 log close
-
-*clear
-*insheet using "$Tabfigdir/table1_eth5_nocarehomes.txt", clear
