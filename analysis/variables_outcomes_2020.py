@@ -313,7 +313,7 @@ def generate_outcomes_2020(index_date_variable):
     ),
     acute_kidney_injury_outcome=patients.admitted_to_hospital(
         with_these_diagnoses=acute_kidney_injury_codes,
-        between = ["case_index_date + 28 days", "2022-11-30"],
+        between = ["case_index_date + 29 days", "2022-11-30"],
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,    

@@ -39,6 +39,37 @@ bysort stp: gen stp1 = 1 if _n==1
 replace stp1 = sum(stp1)
 drop stp
 rename stp1 stp
+label define stp 	1 "1"	///
+					2 "2"	///
+					3 "3"	///
+					4 "4"	///
+					5 "5"	///
+					6 "6"	///
+					7 "7"	///
+					8 "8"	///
+					9 "9"	///
+					10 "10"	///
+					11 "11"	///					
+					12 "12"	///
+					13 "13"	///
+					14 "14"	///
+					15 "15"	///
+					16 "16"	///
+					17 "17"	///
+					18 "18"	///
+					19 "19"	///
+					20 "20"	///
+					21 "21"	///					
+					22 "22"	///
+					23 "23"	///
+					24 "24"	///
+					25 "25"	///
+					26 "26"	///
+					27 "27"	///
+					28 "28"	///
+					29 "29"	///
+					30 "30"	///
+					31 "31"	
 label values stp stp
 label var stp "STP"
 safetab stp
@@ -523,15 +554,18 @@ safetab afib
 gen liver = chronic_liver_disease
 drop chronic_liver_disease
 safetab liver
+label var diabetes "Diabetes"
 safetab diabetes
 gen haem_cancer = haematological_cancer
 drop haematological_cancer
 safetab haem_cancer
 safetab heart_failure
 safetab hiv
+label var hypertension "Hypertension"
 safetab hypertension
 gen non_haem_cancer = non_haematological_cancer
 drop non_haematological_cancer
+label var non_haem_cancer "Cancer (non-haematological)"
 safetab non_haem_cancer
 safetab myocardial_infarction
 gen pvd = peripheral_vascular_disease
@@ -551,10 +585,12 @@ replace cardiovascular = 1 if heart_failure==1
 replace cardiovascular = 1 if myocardial_infarction==1
 replace cardiovascular = 1 if pvd==1
 replace cardiovascular = 1 if stroke==1
+label var cardiovascular "Cardiovascular diseases"
 gen immunosuppressed = haem_cancer
 replace immunosuppressed = 1 if hiv==1
 replace immunosuppressed = 1 if rheumatoid==1
 replace immunosuppressed = 1 if lupus==1
+label var immunosuppressed "Immunosuppressive diseases"
 safetab cardiovascular
 safetab immunosuppressed
  

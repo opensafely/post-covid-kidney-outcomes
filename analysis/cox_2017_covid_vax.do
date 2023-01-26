@@ -25,7 +25,7 @@ file write tablecontent ("By COVID-19 vaccination status") _n
 
 use ./output/analysis_2017.dta, clear
 foreach outcome of varlist esrd egfr_half aki death {
-stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
+stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(patient_id) scale(365.25)
 bysort covid_vax: egen total_follow_up_`outcome' = total(_t)
 
 stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
