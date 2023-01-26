@@ -102,26 +102,26 @@ tab region
 drop if region==10
 safetab region
 
-* Exclusions due to deregistration and kidney replacement therapy will be checked (should already have been applied from previous steps in workflow)
+* Create new index date variable 28 days after case_index_date (i.e. to exclude anyone who does not survive to start follow-up)
 gen index_date = date(patient_index_date, "YMD")
 format index_date %td
+gen index_date_28 = index_date + 28
+format index_date_28 %td
 
-* Deregistered before index_date
+* Deregistered before index_date + 29 days
 gen deregistered_date = date(date_deregistered, "YMD")
 format deregistered_date %td
 drop date_deregistered 
-drop if deregistered_date < index_date
+drop if deregistered_date < index_date_28 + 1
 
 * Kidney replacement therapy before index_date
 gen krt_date = date(krt_outcome_date, "YMD")
 format krt_date %td
 drop krt_outcome_date
 drop if krt_date < index_date
-gen index_date_28 = index_date + 28
-format index_date_28 %td
 replace krt_date = index_date_28 + 1 if krt_date < index_date_28 + 1
 
-* Death before index_date + 28 days (i.e. only include people who survived 28 days after index_date)
+* Death before index_date + 29 days (i.e. only include people who survived beyond 28 days after admission)
 drop if deceased==1
 drop deceased
 gen death_date1 = date(death_date, "YMD")
@@ -247,6 +247,26 @@ tab covid baseline_esrd
 tab pneumonia baseline_esrd
 drop if baseline_esrd==1
 drop baseline_esrd
+
+* Drop COVID-19 cases without any matched historical comparators after further application of exclusion criteria
+generate match_counts1=.
+order patient_id set_id match_counts match_counts1
+bysort set_id: replace match_counts1=_N-1
+replace match_counts1=. if case==0
+drop match_counts
+rename match_counts1 match_counts
+count if match_counts==0
+drop if match_counts==0
+safetab case
+tab match_counts
+
+bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 0 then only uncase in set, if 1 then only case in set
+gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set containing both case and uncase
+tab valid_set, miss
+tab valid_set case, col
+keep if valid_set==1
+drop valid_set set_case_mean
+
 
 ** Exposure
 gen case = covid
@@ -689,7 +709,7 @@ drop index_date_28
 gen egfr15_date=.
 local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 foreach x of local month_year  {
-  replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatinine_`x'<15 & date("01`x'", "DMY")>=index_date
+  replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatinine_`x'<15 & date("01`x'", "DMY")>index_date
 }
 format egfr15_date %td
 
@@ -770,7 +790,7 @@ gen time_esrd = time_zero_esrd + esrd_time
 gen egfr_half_date=.
 local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 foreach x of local month_year {
-  replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_half_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>=index_date
+  replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_half_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>index_date
   format egfr_half_date %td
 }
 replace egfr_half_date=esrd_date if egfr_half_date==.

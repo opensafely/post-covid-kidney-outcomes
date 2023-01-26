@@ -682,7 +682,7 @@ study=StudyDefinition(
     ),
     acute_kidney_injury_outcome=patients.admitted_to_hospital(
         with_these_diagnoses=acute_kidney_injury_codes,
-        between=["patient_index_date + 28 days", "2019-11-30"],
+        between=["patient_index_date + 29 days", "2019-11-30"],
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,    
@@ -695,7 +695,7 @@ study=StudyDefinition(
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2017-02-01", "latest": "2019-11-30"}},
     ),
     date_deregistered=patients.date_deregistered_from_all_supported_practices(
-        between= ["patient_index_date + 28 days", "2019-11-30"],
+        between= ["patient_index_date + 29 days", "2019-11-30"],
         date_format="YYYY-MM-DD",
     ),
     

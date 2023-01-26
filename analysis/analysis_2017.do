@@ -191,7 +191,7 @@ drop krt_outcome_date
 drop if krt_date < index_date
 replace krt_date = index_date_28 + 1 if krt_date < index_date_28 + 1
 
-* Death before index_date + 28 days (i.e. only include people who survived 28 days after index_date)
+* Death before index_date + 29 days (i.e. only include people who survived 29 days after index_date)
 gen death_date1 = date(death_date, "YMD")
 format death_date1 %td
 drop death_date
@@ -740,7 +740,7 @@ replace esrd_date = krt_date if esrd_date==.
 gen esrd = 0
 replace esrd = 1 if esrd_date!=.
 label var esrd "Kidney failure"
-gen esrd_time = (esrd_date - index_date)
+gen esrd_time = (esrd_date - index_date_esrd)
 label var esrd_time "Time to ESRD (Days)"
 gen esrd_time_cat = esrd_time
 recode esrd_time_cat	min/-1=1	///
