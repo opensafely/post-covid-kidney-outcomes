@@ -248,26 +248,6 @@ tab pneumonia baseline_esrd
 drop if baseline_esrd==1
 drop baseline_esrd
 
-* Drop COVID-19 cases without any matched historical comparators after further application of exclusion criteria
-generate match_counts1=.
-order patient_id set_id match_counts match_counts1
-bysort set_id: replace match_counts1=_N-1
-replace match_counts1=. if case==0
-drop match_counts
-rename match_counts1 match_counts
-count if match_counts==0
-drop if match_counts==0
-safetab case
-tab match_counts
-
-bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 0 then only uncase in set, if 1 then only case in set
-gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set containing both case and uncase
-tab valid_set, miss
-tab valid_set case, col
-keep if valid_set==1
-drop valid_set set_case_mean
-
-
 ** Exposure
 gen case = covid
 replace case = 0 if covid==.
