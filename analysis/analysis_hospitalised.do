@@ -697,6 +697,7 @@ format egfr15_date %td
 gen index_date_esrd = index_date
 gen esrd_date = egfr15_date
 format esrd_date %td
+replace esrd_date = krt_date if krt_date < egfr15_date
 replace esrd_date = krt_date if esrd_date==.
 gen esrd = 0
 replace esrd = 1 if esrd_date!=.
