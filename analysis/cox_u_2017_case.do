@@ -17,7 +17,7 @@ file write tablecontent ("Cox regression models:") _n
 file write tablecontent ("1. Crude") _n
 file write tablecontent ("2. Minimally adjusted: adjusted for age (using spline functions) and sex") _n
 file write tablecontent ("3. Additionally adjusted: additionally adjusted for ethnicity, socioeconomic deprivation, region, rural/urban, body mass index and smoking") _n
-file write tablecontent ("4. Fully adjusted: additionally adjusted for cardiovascular diseases, diabetes, hypertension, immunocompromise and cancer") _n
+file write tablecontent ("4. Fully adjusted: additionally adjusted for CKD stage, cardiovascular diseases, diabetes, hypertension, immunocompromise and cancer") _n
 file write tablecontent _n
 file write tablecontent _tab _tab _tab _tab _tab ("Number") _tab _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally adjusted") _tab ("Fully adjusted") _tab _tab _n
 file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab _n
@@ -46,7 +46,7 @@ local additional_`outcome'_b: display %4.2f table[1,2]
 local additional_`outcome'_ll: display %4.2f table[5,2]
 local additional_`outcome'_ul: display %4.2f table[6,2]
 
-stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster set_id) strata(practice_id)		
+stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster set_id) strata(practice_id)		
 matrix table = r(table)
 local full_`outcome'_b: display %4.2f table[1,2]
 local full_`outcome'_ll: display %4.2f table[5,2]
