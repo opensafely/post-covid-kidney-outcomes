@@ -1,0 +1,285 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\lsh1703468\Documents\repos\logs/cox_u_2017_covid_severity.log
+  log type:  text
+ opened on:   7 Feb 2023, 20:50:03
+
+. 
+. cap file close tablecontent
+
+. file open tablecontent using ./output/cox_u_2017_covid_severity.txt, write text replace
+
+. file write tablecontent ("Kidney outcomes by SARS-CoV-2 severity compared to matched historical general population comparator in each COVID-19 wave") _n
+
+. file write tablecontent _n
+
+. file write tablecontent ("Historical general population matched on age, sex and STP") _n
+
+. file write tablecontent ("Restricted to those who survived 28 days after first recorded SARS-CoV-2 or equivalent date of matching") _n
+
+. file write tablecontent ("All models stratified by matched set and clustering by general practice accounted for using robust standard errors") _n
+
+. file write tablecontent _n
+
+. file write tablecontent ("Cox regression models:") _n
+
+. file write tablecontent ("1. Crude") _n
+
+. file write tablecontent ("2. Minimally adjusted: adjusted for age (using spline functions) and sex") _n
+
+. file write tablecontent ("3. Additionally adjusted: additionally adjusted for ethnicity, socioeconomic deprivation, region, rural/urban, body mass index and smoking") _n
+
+. file write tablecontent ("4. Fully adjusted: additionally adjusted for CKD stage, cardiovascular diseases, diabetes, hypertension, immunocompromise and cancer") _n
+
+. file write tablecontent _n
+
+. file write tablecontent _tab _tab _tab _tab _tab ("Number") _tab _tab ("Event") _tab ("Total person-years") _tab ("Rate per 100,000") _tab ("Crude") _tab _tab _tab ("Minimally adjusted") _tab ("Additionally adjusted") _tab ("Fully adjusted") _tab _ta
+> b _n
+
+. file write tablecontent _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab ("HR") _tab ("95% CI") _tab _tab _n
+
+. file write tablecontent ("By SARS-CoV-2 severity") _n
+
+. 
+. use ./output/analysis_2017.dta, clear
+
+. foreach outcome of varlist esrd egfr_half aki death {
+  2. forvalues wave 1/4 {
+  3. use ./output/analysis_2017.dta, clear
+  4. drop if case!=0 & wave!=`wave'
+  5. bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 0 then only uncase in set, if 1 then only case in set
+  6. gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set containing both case and uncase
+  7. tab valid_set, miss
+  8. tab valid_set case, col
+  9. keep if valid_set==1
+ 10. drop valid_set set_case_mean
+ 11. stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
+ 12. bysort covid_severity: egen total_follow_up_`outcome' = total(_t)
+ 13. 
+. stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
+ 14. matrix table = r(table)
+ 15. local crude_`outcome'_1b: display %4.2f table[1,2]
+ 16. local crude_`outcome'_1ll: display %4.2f table[5,2]
+ 17. local crude_`outcome'_1ul: display %4.2f table[6,2]
+ 18. local crude_`outcome'_2b: display %4.2f table[1,3]
+ 19. local crude_`outcome'_2ll: display %4.2f table[5,3]
+ 20. local crude_`outcome'_2ul: display %4.2f table[6,3]
+ 21. local crude_`outcome'_3b: display %4.2f table[1,4]
+ 22. local crude_`outcome'_3ll: display %4.2f table[5,4]
+ 23. local crude_`outcome'_3ul: display %4.2f table[6,4]
+ 24. 
+. stcox i.covid_severity i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id)
+ 25. matrix table = r(table)
+ 26. local minimal_`outcome'_1b: display %4.2f table[1,2]
+ 27. local minimal_`outcome'_1ll: display %4.2f table[5,2]
+ 28. local minimal_`outcome'_1ul: display %4.2f table[6,2]
+ 29. local minimal_`outcome'_2b: display %4.2f table[1,3]
+ 30. local minimal_`outcome'_2ll: display %4.2f table[5,3]
+ 31. local minimal_`outcome'_2ul: display %4.2f table[6,3]
+ 32. local minimal_`outcome'_3b: display %4.2f table[1,4]
+ 33. local minimal_`outcome'_3ll: display %4.2f table[5,4]
+ 34. local minimal_`outcome'_3ul: display %4.2f table[6,4]
+ 35. 
+. stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)
+ 36. matrix table = r(table)
+ 37. local additional_`outcome'_1b: display %4.2f table[1,2]
+ 38. local additional_`outcome'_1ll: display %4.2f table[5,2]
+ 39. local additional_`outcome'_1ul: display %4.2f table[6,2]
+ 40. local additional_`outcome'_2b: display %4.2f table[1,3]
+ 41. local additional_`outcome'_2ll: display %4.2f table[5,3]
+ 42. local additional_`outcome'_2ul: display %4.2f table[6,3]
+ 43. local additional_`outcome'_3b: display %4.2f table[1,4]
+ 44. local additional_`outcome'_3ll: display %4.2f table[5,4]
+ 45. local additional_`outcome'_3ul: display %4.2f table[6,4]
+ 46. 
+. stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3, vce(cluster practice_id) strata(set_id)             
+ 47. matrix table = r(table)
+ 48. local full_`outcome'_1b: display %4.2f table[1,2]
+ 49. local full_`outcome'_1ll: display %4.2f table[5,2]
+ 50. local full_`outcome'_1ul: display %4.2f table[6,2]
+ 51. local full_`outcome'_2b: display %4.2f table[1,3]
+ 52. local full_`outcome'_2ll: display %4.2f table[5,3]
+ 53. local full_`outcome'_2ul: display %4.2f table[6,3]
+ 54. local full_`outcome'_3b: display %4.2f table[1,4]
+ 55. local full_`outcome'_3ll: display %4.2f table[5,4]
+ 56. local full_`outcome'_3ul: display %4.2f table[6,4]
+ 57.                                                                                                                         
+. local lab0: label covid_severity 0
+ 58. local lab1: label covid_severity 1
+ 59. local lab2: label covid_severity 2
+ 60. local lab3: label covid_severity 3
+ 61. 
+.         qui safecount if covid_severity==0 & `outcome'_denominator==1 & _st==1
+ 62.         local denominator = round(r(N),5)
+ 63.         qui safecount if covid_severity== 0 & `outcome'==1 & _st==1
+ 64.         local event = round(r(N),5)
+ 65.         qui su total_follow_up_`outcome' if covid_severity==0
+ 66.         local person_year = r(mean)
+ 67.         local rate = 100000*(`event'/`person_year')
+ 68.         
+.         file write tablecontent _n
+ 69.         file write tablecontent ("Wave `wave' `outcome'") _n
+ 70.         file write tablecontent _tab ("`lab0'") _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
+ 71.         file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
+ 72.         
+. forvalues severity=1/3 {
+ 73.         qui safecount if covid_severity==`severity'  & `outcome'_denominator==1 & _st==1
+ 74.         local denominator = round(r(N),5)
+ 75.         qui safecount if covid_severity==`severity' & `outcome'==1 &  _st==1
+ 76.         local event = round(r(N),5)
+ 77.         qui su total_follow_up_`outcome' if covid_severity==`severity'
+ 78.         local person_year = r(mean)
+ 79.         local rate = 100000*(`event'/`person_year')
+ 80.         file write tablecontent _tab ("`lab`severity''") _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab
+ 81.         file write tablecontent  _tab %4.2f (`crude_`outcome'_`severity'b') _tab ("(") %4.2f (`crude_`outcome'_`severity'll') (" - ") %4.2f (`crude_`outcome'_`severity'ul') (")")
+ 82.         file write tablecontent  _tab %4.2f (`minimal_`outcome'_`severity'b') _tab ("(") %4.2f (`minimal_`outcome'_`severity'll') (" - ") %4.2f (`minimal_`outcome'_`severity'ul') (")")
+ 83.         file write tablecontent  _tab %4.2f (`additional_`outcome'_`severity'b') _tab ("(") %4.2f (`additional_`outcome'_`severity'll') (" - ") %4.2f (`additional_`outcome'_`severity'ul') (")")
+ 84.         file write tablecontent  _tab %4.2f (`full_`outcome'_`severity'b') _tab ("(") %4.2f (`full_`outcome'_`severity'll') (" - ") %4.2f (`full_`outcome'_`severity'ul') (")") _tab _n
+ 85.         }
+ 86.         }
+ 87. }
+invalid syntax
+r(198);
+
+end of do-file
+
+r(198);
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
+
+. use ./output/analysis_2017.dta, clear
+
+. 
+end of do-file
+
+. drop if case!=0 & wave!=1
+(4,674 observations deleted)
+
+. tab case wave
+
+                      |     COVID-19 wave
+                 case | Historica  Febuary20 |     Total
+----------------------+----------------------+----------
+Historical comparator |    19,864          0 |    19,864 
+           SARS-CoV-2 |         0      3,307 |     3,307 
+----------------------+----------------------+----------
+                Total |    19,864      3,307 |    23,171 
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
+
+. bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 0 then only uncase in set, if 1 then only case in set
+
+. gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set containing both case and uncase
+
+. tab valid_set, miss
+
+  valid_set |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |     11,090       47.86       47.86
+          1 |     12,081       52.14      100.00
+------------+-----------------------------------
+      Total |     23,171      100.00
+
+. tab valid_set case, col
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |         case
+ valid_set | Historica  SARS-CoV- |     Total
+-----------+----------------------+----------
+         0 |    11,090          0 |    11,090 
+           |     55.83       0.00 |     47.86 
+-----------+----------------------+----------
+         1 |     8,774      3,307 |    12,081 
+           |     44.17     100.00 |     52.14 
+-----------+----------------------+----------
+     Total |    19,864      3,307 |    23,171 
+           |    100.00     100.00 |    100.00 
+
+. keep if valid_set==1
+(11,090 observations deleted)
+
+. 
+end of do-file
+
+. tab case wave
+
+                      |     COVID-19 wave
+                 case | Historica  Febuary20 |     Total
+----------------------+----------------------+----------
+Historical comparator |     8,774          0 |     8,774 
+           SARS-CoV-2 |         0      3,307 |     3,307 
+----------------------+----------------------+----------
+                Total |     8,774      3,307 |    12,081 
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
+
+. drop valid_set set_case_mean
+
+. 
+end of do-file
+
+. stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: esrd_date!=0 & esrd_date<.
+Observed time interval: (exit_date_esrd[_n-1], exit_date_esrd]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date_esrd
+
+--------------------------------------------------------------------------
+     12,081  total observations
+          0  exclusions
+--------------------------------------------------------------------------
+     12,081  observations remaining, representing
+     12,081  subjects
+      1,557  failures in single-failure-per-subject data
+  26,459.65  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  2.748802
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
+
+. foreach outcome of varlist esrd egfr_half aki death {
+  2. forvalues wave 1/4 {
+  3. use ./output/analysis_2017.dta, clear
+  4. drop if case!=0 & wave!=`wave'
+  5. bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 0 then only uncase in set, if 1 then only case in set
+  6. gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set containing both case and uncase
+  7. tab valid_set, miss
+  8. tab valid_set case, col
+  9. keep if valid_set==1
+ 10. drop valid_set set_case_mean
+ 11. stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
+ 12. bysort covid_severity: egen total_follow_up_`outcome' = total(_t)
+ 13. 
+. stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
+ 14. matrix table = r(table)
+ 15. }
+ 16. }
+invalid syntax
+r(198);
+
+end of do-file
+
+r(198);
+
+. do "C:\Users\LSH170~1\AppData\Local\Temp\STD5158_000000.tmp"
+
+. sysdir set PLUS ./analysis/adofiles
+
+. sysdir set PERSONAL ./analysis/adofiles
+
+. pwd
+C:\Users\lsh1703468\Documents\repos
+
+. cap log close
