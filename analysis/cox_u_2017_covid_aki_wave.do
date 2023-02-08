@@ -35,7 +35,7 @@ tab valid_set case, col
 keep if valid_set==1
 drop valid_set set_case_mean
 stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
-bysort covid_severity: egen total_follow_up_`outcome' = total(_t)
+bysort covid_aki: egen total_follow_up_`outcome' = total(_t)
 
 stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
