@@ -301,5 +301,10 @@ def generate_hospitalised(index_date_variable):
         on_or_before="patient_index_date",
         return_expectations={"incidence": 0.05},
     ),
+    gp_count=patients.with_gp_consultations(
+        between=["patient_index_date - 1 year", "patient_index_date"],
+        returning="number_of_matches_in_period",
+        return_expectations={"int": {"distribution": "normal", "mean": 6, "stddev": 3},"incidence": 0.6,},
+    ),
     )
     return variables_hospitalised

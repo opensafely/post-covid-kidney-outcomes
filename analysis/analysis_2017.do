@@ -450,6 +450,9 @@ label var wave "COVID-19 wave"
 safetab wave, m
 
 ** Covariates
+
+bysort case: sum gp_count, detail
+
 * Age
 tab age
 safecount
