@@ -416,6 +416,8 @@ label values month month
 safetab month case, m
 
 ** Covariates
+bysort case: sum gp_count, detail
+
 * Age
 tab age
 safecount
