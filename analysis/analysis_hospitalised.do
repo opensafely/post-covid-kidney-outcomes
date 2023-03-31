@@ -416,6 +416,8 @@ label values month month
 safetab month case, m
 
 ** Covariates
+* Check of GP consultations by groups
+sum gp_count, detail
 bysort case: sum gp_count, detail
 
 * Age
