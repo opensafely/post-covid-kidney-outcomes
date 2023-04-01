@@ -17,7 +17,7 @@ drop covid_date
 * Age <18
 drop if age <18
 
-* Anyone not registered at one practice for 3 months before
+* Anyone not registered at one practice for 3 months before February 2017
 drop if has_follow_up==0
 drop has_follow_up
 

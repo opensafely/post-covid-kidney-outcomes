@@ -8,7 +8,7 @@ import delimited ./output/input_2020_matching.csv, delimiter(comma) varnames(1) 
 * Age <18
 drop if age <18
 
-* Anyone not registered at one practice for 3 months before COVID-19 diagnosis
+* Anyone not registered at one practice for 3 months before February 2020
 drop if has_follow_up==0
 drop has_follow_up
 
@@ -66,20 +66,6 @@ drop hospital_covid_date
 *Tabulate variables
 tab age
 tab male
-
-gen covid_date = date(covid_diagnosis_date, "YMD")
-format covid_date %td
-gen covid_date_string=string(covid_date, "%td") 
-gen covid_month=substr( covid_date_string ,3,7)
-tab covid_month
-
-
-gen death_date1 = date(death_date, "YMD")
-format death_date1 %td
-gen death_date_string=string(death_date1, "%td")
-gen death_month=substr( death_date_string ,3,7)
-tab death_month
-
 
 export delimited using "./output/2020_matching.csv", replace
 log close

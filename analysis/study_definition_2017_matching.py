@@ -57,11 +57,13 @@ study = StudyDefinition(
                 },
             },
         ),
+    #Exclude all people who died before 2017-02-01
     deceased=patients.with_death_recorded_in_primary_care(
         returning="binary_flag",
         between = ["1970-01-01", "index_date"],
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2017-02-01", "latest": "2022-01-31"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2015-02-01", "latest": "2020-01-31"}},
         ),
+    #Obtain date of death for those who remain alive at 2017-02-01
     death_date=patients.with_death_recorded_in_primary_care(
         between = ["index_date", "2019-11-30"],
         returning="date_of_death",

@@ -1,0 +1,291 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /workspace/logs/2017_matching.log
+  log type:  text
+ opened on:   1 Apr 2023, 00:58:50
+
+. clear
+
+. 
+. capture noisily import delimited ./output/covid_matching_2017.csv, clear
+(10 vars, 14,637 obs)
+
+. keep patient_id covid_date
+
+. tempfile covid_list_2017
+
+. save `covid_list_2017', replace
+(note: file /tmp/St00016.000001 not found)
+file /tmp/St00016.000001 saved
+
+. 
+. capture noisily import delimited ./output/input_2017_matching.csv, delimiter(
+> comma) varnames(1) case(preserve) clear
+(16 vars, 50,000 obs)
+
+. append using `covid_list_2017', force
+
+. duplicates drop patient_id, force
+
+Duplicates in terms of patient_id
+
+(1,491 observations deleted)
+
+. drop if covid_date!=""
+(13,146 observations deleted)
+
+. drop covid_date
+
+. 
+. **Exclusions
+. * Age <18
+. drop if age <18
+(10,615 observations deleted)
+
+. 
+. * Anyone not registered at one practice for 3 months before February 2017
+. drop if has_follow_up==0
+(1,957 observations deleted)
+
+. drop has_follow_up
+
+. 
+. * Pre-existing kidney replacement therapy
+. drop if baseline_krt_primary_care==1
+(1,875 observations deleted)
+
+. drop baseline_krt_primary_care
+
+. drop if baseline_krt_icd_10==1
+(1,797 observations deleted)
+
+. drop baseline_krt_icd_10
+
+. drop if baseline_krt_opcs_4==1
+(1,702 observations deleted)
+
+. drop baseline_krt_opcs_4
+
+. 
+. * Baseline eGFR <15 as at February 2017
+. assert inlist(sex, "M", "F")
+
+. gen male = (sex=="M")
+
+. drop sex
+
+. label define sexLab 1 "Male" 0 "Female"
+
+. label values male sexLab
+
+. label var male "Sex (0=F 1=M)"
+
+. 
+. replace baseline_creatinine_feb2017 = . if !inrange(baseline_creatinine_feb20
+> 17, 20, 3000)
+(14,061 real changes made, 14,061 to missing)
+
+. gen mgdl_baseline_creatinine_feb2017 = baseline_creatinine_feb2017/88.4
+(14,061 missing values generated)
+
+. gen min_baseline_creatinine_feb2017=.
+(32,054 missing values generated)
+
+. replace min_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
+> 7 if male==0
+(9,143 real changes made)
+
+. replace min_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
+> 9 if male==1
+(8,850 real changes made)
+
+. replace min_baseline_creatinine_feb2017 = min_baseline_creatinine_feb2017^-0.
+> 329  if male==0
+(9,143 real changes made)
+
+. replace min_baseline_creatinine_feb2017 = min_baseline_creatinine_feb2017^-0.
+> 411  if male==1
+(8,850 real changes made)
+
+. replace min_baseline_creatinine_feb2017 = 1 if min_baseline_creatinine_feb201
+> 7<1
+(11,265 real changes made)
+
+. gen max_baseline_creatinine_feb2017=.
+(32,054 missing values generated)
+
+. replace max_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
+> 7 if male==0
+(9,143 real changes made)
+
+. replace max_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
+> 9 if male==1
+(8,850 real changes made)
+
+. replace max_baseline_creatinine_feb2017 = max_baseline_creatinine_feb2017^-1.
+> 209
+(17,993 real changes made)
+
+. replace max_baseline_creatinine_feb2017 = 1 if max_baseline_creatinine_feb201
+> 7>1
+(20,789 real changes made)
+
+. gen egfr_baseline_creatinine_feb2017 = min_baseline_creatinine_feb2017*max_ba
+> seline_creatinine_feb2017*141
+(14,061 missing values generated)
+
+. replace egfr_baseline_creatinine_feb2017 = egfr_baseline_creatinine_feb2017*(
+> 0.993^age)
+(17,993 real changes made)
+
+. replace egfr_baseline_creatinine_feb2017 = egfr_baseline_creatinine_feb2017*1
+> .018 if male==0
+(9,143 real changes made)
+
+. drop if egfr_baseline_creatinine_feb2017 <15
+(0 observations deleted)
+
+. drop baseline_creatinine_feb2017
+
+. drop mgdl_baseline_creatinine_feb2017
+
+. drop min_baseline_creatinine_feb2017
+
+. drop max_baseline_creatinine_feb2017
+
+. drop egfr_baseline_creatinine_feb2017
+
+. 
+. * Deceased
+. drop if deceased==1
+(3,327 observations deleted)
+
+. drop deceased
+
+. 
+. **Drop excess variables
+. drop krt_outcome_primary_care
+
+. drop krt_outcome_icd_10
+
+. drop krt_outcome_opcs_4
+
+. 
+. *Tabulate variables
+. tab age
+
+        age |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         18 |        412        1.43        1.43
+         19 |        398        1.39        2.82
+         20 |        472        1.64        4.46
+         21 |        441        1.54        6.00
+         22 |        488        1.70        7.70
+         23 |        488        1.70        9.40
+         24 |        463        1.61       11.01
+         25 |        543        1.89       12.90
+         26 |        499        1.74       14.63
+         27 |        487        1.70       16.33
+         28 |        477        1.66       17.99
+         29 |        487        1.70       19.69
+         30 |        493        1.72       21.40
+         31 |        504        1.75       23.16
+         32 |        521        1.81       24.97
+         33 |        508        1.77       26.74
+         34 |        458        1.59       28.33
+         35 |        471        1.64       29.97
+         36 |        462        1.61       31.58
+         37 |        447        1.56       33.14
+         38 |        504        1.75       34.89
+         39 |        499        1.74       36.63
+         40 |        459        1.60       38.23
+         41 |        429        1.49       39.72
+         42 |        423        1.47       41.19
+         43 |        438        1.52       42.72
+         44 |        435        1.51       44.23
+         45 |        482        1.68       45.91
+         46 |        494        1.72       47.63
+         47 |        491        1.71       49.34
+         48 |        515        1.79       51.13
+         49 |        509        1.77       52.90
+         50 |        536        1.87       54.77
+         51 |        507        1.76       56.53
+         52 |        530        1.84       58.38
+         53 |        520        1.81       60.19
+         54 |        529        1.84       62.03
+         55 |        459        1.60       63.63
+         56 |        420        1.46       65.09
+         57 |        451        1.57       66.66
+         58 |        446        1.55       68.21
+         59 |        463        1.61       69.82
+         60 |        416        1.45       71.27
+         61 |        443        1.54       72.81
+         62 |        379        1.32       74.13
+         63 |        381        1.33       75.46
+         64 |        391        1.36       76.82
+         65 |        356        1.24       78.06
+         66 |        374        1.30       79.36
+         67 |        371        1.29       80.65
+         68 |        344        1.20       81.85
+         69 |        348        1.21       83.06
+         70 |        354        1.23       84.29
+         71 |        380        1.32       85.62
+         72 |        396        1.38       86.99
+         73 |        331        1.15       88.15
+         74 |        372        1.29       89.44
+         75 |        255        0.89       90.33
+         76 |        244        0.85       91.18
+         77 |        273        0.95       92.13
+         78 |        211        0.73       92.86
+         79 |        239        0.83       93.70
+         80 |        172        0.60       94.29
+         81 |        199        0.69       94.99
+         82 |        198        0.69       95.68
+         83 |        202        0.70       96.38
+         84 |        180        0.63       97.01
+         85 |        114        0.40       97.40
+         86 |        113        0.39       97.80
+         87 |        127        0.44       98.24
+         88 |         98        0.34       98.58
+         89 |        118        0.41       98.99
+         90 |         42        0.15       99.14
+         91 |         38        0.13       99.27
+         92 |         60        0.21       99.48
+         93 |         34        0.12       99.60
+         94 |         41        0.14       99.74
+         95 |         12        0.04       99.78
+         96 |         13        0.05       99.83
+         97 |         11        0.04       99.86
+         98 |         12        0.04       99.91
+         99 |         15        0.05       99.96
+        100 |          2        0.01       99.97
+        101 |          1        0.00       99.97
+        105 |          1        0.00       99.97
+        106 |          2        0.01       99.98
+        107 |          2        0.01       99.99
+        108 |          1        0.00       99.99
+        109 |          3        0.01      100.00
+------------+-----------------------------------
+      Total |     28,727      100.00
+
+. tab male
+
+   Sex (0=F |
+       1=M) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+     Female |     14,675       51.08       51.08
+       Male |     14,052       48.92      100.00
+------------+-----------------------------------
+      Total |     28,727      100.00
+
+. 
+. export delimited using "./output/2017_matching.csv", replace
+(note: file ./output/2017_matching.csv not found)
+file ./output/2017_matching.csv saved
+
+. log close
+      name:  <unnamed>
+       log:  /workspace/logs/2017_matching.log
+  log type:  text
+ closed on:   1 Apr 2023, 00:58:51
+-------------------------------------------------------------------------------

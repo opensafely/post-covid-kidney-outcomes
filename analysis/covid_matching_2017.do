@@ -66,7 +66,7 @@ foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_mar2020 ///
 												baseline_creatinine_jul2020 ///
 												baseline_creatinine_aug2020 ///
 												baseline_creatinine_sep2020 ///
-												baseline_creatinine_oct2020 ///									
+												baseline_creatinine_oct2020 ///
 												baseline_creatinine_nov2020 ///
 												baseline_creatinine_dec2020 ///
 												baseline_creatinine_jan2021 ///
@@ -90,7 +90,7 @@ foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_mar2020 ///
 												baseline_creatinine_jul2022 ///
 												baseline_creatinine_aug2022 ///
 												baseline_creatinine_sep2022 ///
-												baseline_creatinine_oct2022	{												
+												baseline_creatinine_oct2022	{
 replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine_monthly', 20, 3000)
 gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.4
 gen min_`baseline_creatinine_monthly'=.
