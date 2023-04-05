@@ -1154,3 +1154,47 @@ actions:
         matched_matches_stp49: output/matched_matches_2020_stp49.csv
         matched_cases_stp49: output/matched_cases_2020_stp49.csv
         matched_all_stp49: output/matched_combined_2020_stp49.csv
+
+  combine_stps_covid_2020:
+    run: stata-mp:latest analysis/combine_stps_covid_2020.do
+    needs: [match_2020_stp5, match_2020_stp6, match_2020_stp7, match_2020_stp8, match_2020_stp9,
+    match_2020_stp10, match_2020_stp12, match_2020_stp13, match_2020_stp14, match_2020_stp15,
+    match_2020_stp16, match_2020_stp17, match_2020_stp20, match_2020_stp21, match_2020_stp22,
+    match_2020_stp23, match_2020_stp24, match_2020_stp25, match_2020_stp26, match_2020_stp27,
+    match_2020_stp29, match_2020_stp33, match_2020_stp35, match_2020_stp36, match_2020_stp37, 
+    match_2020_stp40, match_2020_stp41, match_2020_stp42, match_2020_stp43, match_2020_stp44, 
+    match_2020_stp49]
+    outputs:
+      highly_sensitive:
+        matched_cases_combined: output/input_combined_stps_covid_2020.csv
+      moderately_sensitive:
+        log: logs/combine_stps_covid_2020.log
+
+  combine_stps_matches_2020:
+    run: stata-mp:latest analysis/combine_stps_matches_2020.do
+    needs: [match_2020_stp5, match_2020_stp6, match_2020_stp7, match_2020_stp8, match_2020_stp9,
+    match_2020_stp10, match_2020_stp12, match_2020_stp13, match_2020_stp14, match_2020_stp15,
+    match_2020_stp16, match_2020_stp17, match_2020_stp20, match_2020_stp21, match_2020_stp22,
+    match_2020_stp23, match_2020_stp24, match_2020_stp25, match_2020_stp26, match_2020_stp27,
+    match_2020_stp29, match_2020_stp33, match_2020_stp35, match_2020_stp36, match_2020_stp37, 
+    match_2020_stp40, match_2020_stp41, match_2020_stp42, match_2020_stp43, match_2020_stp44, 
+    match_2020_stp49]
+    outputs:
+      highly_sensitive:
+        matched_matches_combined: output/input_combined_stps_matches_2020.csv
+      moderately_sensitive:
+        log: logs/combine_stps_matches_2020.log
+
+  extract_covid_2020_additional:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_covid_2020_additional 
+    needs: [combine_stps_covid_2020]
+    outputs:
+      highly_sensitive:
+        cohort: output/input_covid_2020_additional.csv
+
+  extract_2020_additional:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_2020_additional 
+    needs: [combine_stps_matches_2020]
+    outputs:
+      highly_sensitive:
+        cohort: output/input_2020_additional.csv

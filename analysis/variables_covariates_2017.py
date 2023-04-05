@@ -514,6 +514,11 @@ def generate_covariates_2017(index_date_variable):
              on_or_before="case_index_date",
          ),
      ),
+    gp_count=patients.with_gp_consultations(
+        between=["case_index_date - 1 year", "case_index_date"],
+        returning="number_of_matches_in_period",
+        return_expectations={"int": {"distribution": "normal", "mean": 6, "stddev": 3},"incidence": 0.6,},
+    ),
     #These need to be done differently
     body_mass_index=patients.most_recent_bmi(
         on_or_before="case_index_date",
