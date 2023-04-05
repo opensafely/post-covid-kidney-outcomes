@@ -416,10 +416,6 @@ label values month month
 safetab month case, m
 
 ** Covariates
-* Check of GP consultations by groups
-sum gp_count, detail
-bysort case: sum gp_count, detail
-
 * Age
 tab age
 safecount
@@ -531,6 +527,16 @@ label define smoking 1 "Current/former smoker" 0 "Non-smoker"
 label values smoking smoking
 label var smoking "Smoking status"
 safetab smoking, m
+
+* Check of GP consultations by groups
+sum gp_count, detail
+bysort case: sum gp_count, detail
+egen gp_consults = cut(gp_count), at(0, 1, 5, 10, 20, 40, 5000)
+recode gp_consults 5=2 10=3 20=4 40=5
+label define gp_consults 0 "0" 1 "1-4" 2 "5-9" 3 "10-19" 4 "20-39" 5 "≥40"
+label values gp_consults gp_consults
+label var gp_consults "GP interactions"
+tab case gp_consults
 
 * Baseline eGFR groups
 * All baseline eGFR <15 should already by excluded
