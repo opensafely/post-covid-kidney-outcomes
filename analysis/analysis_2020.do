@@ -3,73 +3,75 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 
 cap log close
-log using ./logs/analysis_2017.log, replace t
+log using ./logs/analysis_2020.log, replace t
 
 ** Analysis cohort selection
 capture noisily import delimited ./output/input_covid_matching.csv, clear
 di "Potential COVID-19 cases extracted from OpenSAFELY:"
 safecount
-capture noisily import delimited ./output/input_2017_matching.csv, clear
-di "Potential historical comparators extracted from OpenSAFELY:"
+capture noisily import delimited ./output/input_2020_matching.csv, clear
+di "Potential contemporary comparators extracted from OpenSAFELY:"
 safecount
-capture noisily import delimited ./output/covid_matching_2017.csv, clear
+capture noisily import delimited ./output/covid_matching_2020.csv, clear
 di "Potential COVID-19 cases after application of exclusion criteria:"
 safecount
-capture noisily import delimited ./output/2017_matching.csv, clear
-di "Potential historical comparators after application of exclusion criteria:"
+capture noisily import delimited ./output/2020_matching.csv, clear
+di "Potential contemporary comparators after application of exclusion criteria:"
 safecount
-* Import COVID-19 dataset comprising individuals matched with historical comparators (limited matching variables only)	
-capture noisily import delimited ./output/input_combined_stps_covid_2017.csv, clear
+* Import COVID-19 dataset comprising individuals matched with contemporary comparators (limited matching variables only)	
+capture noisily import delimited ./output/input_combined_stps_covid_2020.csv, clear
 * Drop age & covid_diagnosis_date
 keep patient_id death_date date_deregistered stp krt_outcome_date male covid_date covid_month set_id case match_counts
-tempfile covid_2017_matched
+tempfile covid_2020_matched
 * For dummy data, should do nothing in the real data
 duplicates drop patient_id, force
-save `covid_2017_matched', replace
+save `covid_2020_matched', replace
 * Number of matched COVID-19 cases
 count
-* Import matched historical comparators (limited matching variables only)
-capture noisily import delimited ./output/input_combined_stps_matches_2017.csv, clear
+* Import matched contemporary comparators (limited matching variables only)
+capture noisily import delimited ./output/input_combined_stps_matches_2020.csv, clear
 * Drop age
-keep patient_id death_date date_deregistered stp krt_outcome_date male set_id case covid_date
-tempfile 2017_matched
+* NB covid_date = date at which COVID case matched to a contemporary comparator
+* covid_diagnosis_date = date at which contemporary comparator first diagnosed with COVID
+keep patient_id death_date date_deregistered stp krt_outcome_date male set_id case covid_date covid_diagnosis_date
+tempfile 2020_matched
 * For dummy data, should do nothing in the real data
 duplicates drop patient_id, force
-save `2017_matched', replace
-* Number of matched historical comparators
+save `2020_matched', replace
+* Number of matched contemporary comparators
 count
 * Merge limited COVID-19 dataset with additional variables
-capture noisily import delimited ./output/input_covid_2017_additional.csv, clear
-merge 1:1 patient_id using `covid_2017_matched'
+capture noisily import delimited ./output/input_covid_2020_additional.csv, clear
+merge 1:1 patient_id using `covid_2020_matched'
 keep if _merge==3
 drop _merge
-tempfile covid_2017_complete
-save `covid_2017_complete', replace
+tempfile covid_2020_complete
+save `covid_2020_complete', replace
 di "Matched COVID-19 cases:"
 safecount
-* Merge limited historical comparator dataset with additional variables
-capture noisily import delimited ./output/input_2017_additional.csv, clear
-merge 1:1 patient_id using `2017_matched'
+* Merge limited contemporary comparator dataset with additional variables
+capture noisily import delimited ./output/input_2020_additional.csv, clear
+merge 1:1 patient_id using `2020_matched'
 keep if _merge==3
 drop _merge
-tempfile 2017_complete
-save `2017_complete', replace
-di "Matched historical comparators:"
+tempfile 2020_complete
+save `2020_complete', replace
+di "Matched contemporary comparators:"
 safecount
-* Append matched COVID-19 cases and historical comparators
-append using `covid_2017_complete', force
+* Append matched COVID-19 cases and contemporary comparators
+append using `covid_2020_complete', force
 order patient_id set_id match_count case
 gsort set_id -case
 count if case==0
-di "Matched COVID-19 cases and historical comparators:"
+di "Matched COVID-19 cases and contemporary comparators:"
 safecount
 tab case
 * Save list of matched COVID-19 cases
 preserve
 	keep if case==1
 	keep patient_id
-	tempfile covid_2017_matched_list
-	save `covid_2017_matched_list', replace
+	tempfile covid_2020_matched_list
+	save `covid_2020_matched_list', replace
 restore
 * Generate list of unmatched COVID-19 cases
 preserve
@@ -78,17 +80,17 @@ preserve
 	duplicates drop patient_id, force
 	tempfile covid_prematching
 	save `covid_prematching', replace
-	use `covid_2017_matched_list', clear
+	use `covid_2020_matched_list', clear
 	merge 1:1 patient_id using `covid_prematching'
 	keep if _merge==2
 	safecount
-	save output/covid_unmatched_2017.dta, replace
+	save output/covid_unmatched_2020.dta, replace
 	di "Unmatched COVID-19 cases:"
 	safecount
 restore
 
 **ID
-* Need to create unique identifiers as individuals may be in both covid_2017_matched and 2017_matched so will have the same patient_id
+* Need to create unique identifiers as individuals may be in both covid_2020_matched and 2020_matched so will have the same patient_id
 gen unique = _n
 label var unique "Unique ID"
 
@@ -178,6 +180,16 @@ format index_date %td
 gen index_date_28 = index_date + 28
 format index_date_28 %td
 
+* Create exit date for COVID amongst general population comparator
+gen covid_exit = date(covid_diagnosis_date, "YMD")
+format covid_exit %td
+replace covid_exit=. if case==1
+drop if covid_exit < index_date_28 + 1
+gen comparator_covid = .
+replace comparator_covid = 0 if case==0
+replace comparator_covid = 1 if covid_exit!=.
+tab case comparator_covid, m
+
 * Deregistered before index_date + 29 days
 gen deregistered_date = date(date_deregistered, "YMD")
 format deregistered_date %td
@@ -204,7 +216,7 @@ tab case deceased
 drop if deceased==1
 drop deceased
 
-* eGFR <15 before index_date - should apply to matched historical comparators only
+* eGFR <15 before index_date - should apply to matched contemporary comparators only
 gen index_year = yofd(index_date)
 gen age = index_year - year_of_birth
 gen sex = 1 if male == "Male"
@@ -212,39 +224,7 @@ label var sex "Sex"
 replace sex = 0 if male == "Female"
 label define sex 0"Female" 1"Male"
 label values sex sex
-foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_feb2017 ///
-												baseline_creatinine_mar2017 ///
-												baseline_creatinine_apr2017 ///
-												baseline_creatinine_may2017 ///
-												baseline_creatinine_jun2017 ///
-												baseline_creatinine_jul2017 ///
-												baseline_creatinine_aug2017 ///
-												baseline_creatinine_sep2017 ///
-												baseline_creatinine_oct2017 ///
-												baseline_creatinine_nov2017 ///
-												baseline_creatinine_dec2017 ///
-												baseline_creatinine_jan2018 ///
-												baseline_creatinine_feb2018 ///
-												baseline_creatinine_mar2018 ///
-												baseline_creatinine_apr2018 ///
-												baseline_creatinine_may2018 ///
-												baseline_creatinine_jun2018 ///
-												baseline_creatinine_jul2018 ///
-												baseline_creatinine_aug2018 ///
-												baseline_creatinine_sep2018 ///
-												baseline_creatinine_oct2018 ///
-												baseline_creatinine_nov2018 ///
-												baseline_creatinine_dec2018 ///
-												baseline_creatinine_jan2019 ///
-												baseline_creatinine_feb2019 ///
-												baseline_creatinine_mar2019 ///
-												baseline_creatinine_apr2019 ///
-												baseline_creatinine_may2019 ///
-												baseline_creatinine_jun2019 ///
-												baseline_creatinine_jul2019 ///
-												baseline_creatinine_aug2019 ///
-												baseline_creatinine_sep2019 ///
-												baseline_creatinine_feb2020 ///
+foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_feb2020 ///
 												baseline_creatinine_mar2020 ///
 												baseline_creatinine_apr2020 ///
 												baseline_creatinine_may2020 ///
@@ -301,7 +281,7 @@ drop max_`baseline_creatinine_monthly'
 gen index_date_string=string(index_date, "%td") 
 gen index_month=substr(index_date_string ,3,7)
 gen baseline_egfr=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 foreach x of local month_year  {
 replace baseline_egfr=egfr_baseline_creatinine_`x' if index_month=="`x'"
 drop egfr_baseline_creatinine_`x'
@@ -315,7 +295,7 @@ tab case baseline_esrd
 drop if baseline_esrd==1
 drop baseline_esrd
 
-* Drop COVID-19 cases without any matched historical comparators after further application of exclusion criteria
+* Drop COVID-19 cases without any matched contemporary comparators after further application of exclusion criteria
 generate match_counts1=.
 order patient_id set_id match_counts match_counts1
 bysort set_id: replace match_counts1=_N-1
@@ -335,7 +315,7 @@ keep if valid_set==1
 drop valid_set set_case_mean
 
 ** Exposure
-label define case 0 "Historical comparator" ///
+label define case 0 "Contemporary comparator" ///
 				  1 "SARS-CoV-2"
 label values case case
 safetab case 
@@ -345,7 +325,7 @@ gen covid_severity = case
 replace covid_severity = 2 if covid_hospitalised==1
 replace covid_severity = 3 if covid_critical_care==1
 replace covid_severity = 3 if covid_critical_days==1
-label define covid_severity	0 "Historical comparator"		///
+label define covid_severity	0 "Contemporary comparator"		///
 							1 "Non-hospitalised COVID" ///
 							2 "Hospitalised COVID"		///
 							3 "Critical care COVID"
@@ -359,7 +339,7 @@ safetab covid_severity, m
 gen covid_aki = case
 replace covid_aki = 2 if covid_hospitalised==1
 replace covid_aki = 3 if covid_acute_kidney_injury==1
-label define covid_aki	0 "Historical comparator" 			///
+label define covid_aki	0 "Contemporary comparator" 			///
 						1 "Non-hospitalised COVID"		///
 						2 "Hospitalised COVID"	///
 						3 "Hospitalised COVID-AKI"
@@ -374,7 +354,7 @@ replace covid_krt_combined = covid_krt_opcs_4 if covid_krt_icd_10==0
 gen covid_krt = case
 replace covid_krt = 2 if covid_hospitalised==1
 replace covid_krt = 3 if covid_krt_combined==1
-label define covid_krt	0 "Historical comparator" 			///
+label define covid_krt	0 "Contemporary comparator" 			///
 						1 "Non-hospitalised SARS-CoV-2"		///
 						2 "No KRT hospitalised COVID-19"	///
 						3 "KRT hospitalised COVID-19"
@@ -393,16 +373,16 @@ gen covidvax3date = date(covid_vax_3_date, "YMD")
 format covidvax3date %td
 gen covidvax4date = date(covid_vax_4_date, "YMD")
 format covidvax4date %td
-gen covid_vax = case
-replace covid_vax = 5 if covidvax4date!=.
-replace covid_vax = 4 if covid_vax==1 &covidvax3date!=.
+gen covid_vax = 0
+replace covid_vax = 4 if covidvax4date!=.
+replace covid_vax = 3 if covid_vax==1 &covidvax3date!=.
 replace covid_vax = 3 if covid_vax==1 &covidvax2date!=.
 replace covid_vax = 2 if covid_vax==1 &covidvax1date!=.
 drop covidvax1date
 drop covidvax2date
 drop covidvax3date
 drop covidvax4date
-label define covid_vax	0 "Historical comparator"	///
+label define covid_vax	0 "Contemporary comparator"	///
 						1 "Pre-vaccination"			///
 						2 "1 vaccine dose"			///
 						3 "2 vaccine doses"			///
@@ -440,7 +420,7 @@ replace wave = 4 if index_month=="jul2022"
 replace wave = 4 if index_month=="aug2022"
 replace wave = 4 if index_month=="sep2022"
 replace wave = 4 if index_month=="oct2022"
-label define wave	0 "Historical comparator"	///
+label define wave	0 "Contemporary comparator"	///
 					1 "Febuary20-August20"	///
 					2 "September20-June21"	///
 					3 "July21-November21"	///
@@ -640,39 +620,7 @@ safetab immunosuppressed
 **Outcomes
 * ESRD
 * eGFR <15 (earliest month)
-foreach creatinine_monthly of varlist	creatinine_feb2017 ///
-										creatinine_mar2017 ///
-										creatinine_apr2017 ///
-										creatinine_may2017 ///
-										creatinine_jun2017 ///
-										creatinine_jul2017 ///
-										creatinine_aug2017 ///
-										creatinine_sep2017 ///
-										creatinine_oct2017 ///
-										creatinine_nov2017 ///
-										creatinine_dec2017 ///
-										creatinine_jan2018 ///
-										creatinine_feb2018 ///
-										creatinine_mar2018 ///
-										creatinine_apr2018 ///
-										creatinine_may2018 ///
-										creatinine_jun2018 ///
-										creatinine_jul2018 ///
-										creatinine_aug2018 ///
-										creatinine_sep2018 ///
-										creatinine_oct2018 ///
-										creatinine_nov2018 ///
-										creatinine_dec2018 ///
-										creatinine_jan2019 ///
-										creatinine_feb2019 ///
-										creatinine_mar2019 ///
-										creatinine_apr2019 ///
-										creatinine_may2019 ///
-										creatinine_jun2019 ///
-										creatinine_jul2019 ///
-										creatinine_aug2019 ///
-										creatinine_sep2019 ///
-										creatinine_feb2020 ///
+foreach creatinine_monthly of varlist	creatinine_feb2020 ///
 										creatinine_mar2020 ///
 										creatinine_apr2020 ///
 										creatinine_may2020 ///
@@ -730,7 +678,7 @@ drop max_`creatinine_monthly'
 replace index_date = index_date_28
 drop index_date_28
 gen egfr15_date=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 foreach x of local month_year  {
   replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatinine_`x'<15 & date("01`x'", "DMY")>index_date
 }
@@ -774,10 +722,10 @@ foreach exposure of varlist 	case			///
 								}
 gen exit_date_esrd = esrd_date
 format exit_date_esrd %td
-gen end_date = date("2022-11-30", "YMD") if case==1
-replace end_date = date("2019-11-30", "YMD") if case==0
+gen end_date = date("2022-11-30", "YMD")
 format end_date %td
-replace exit_date_esrd = min(deregistered_date, death_date, end_date) if esrd_date==.
+replace exit_date_esrd = min(deregistered_date, death_date, end_date, covid_exit) if esrd_date==.
+replace exit_date_esrd = covid_exit if covid_exit < esrd_date
 gen esrd_denominator = 1
 gen follow_up_time_esrd = (exit_date_esrd - index_date_esrd)
 label var follow_up_time_esrd "Follow-up time (Days)"
@@ -808,7 +756,7 @@ gen follow_up_years_esrd = follow_up_time_esrd/365.25
 
 * 50% eGFR reduction (earliest month) (or ESRD)
 gen egfr_half_date=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
 foreach x of local month_year {
   replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_half_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>index_date
   format egfr_half_date %td
@@ -823,7 +771,8 @@ replace index_date_egfr_half =. if baseline_egfr==.
 * Exit date (50% eGFR reduction)
 gen exit_date_egfr_half = egfr_half_date
 format exit_date_egfr_half %td
-replace exit_date_egfr_half = min(deregistered_date,death_date,end_date) if egfr_half_date==. & index_date_egfr_half!=.
+replace exit_date_egfr_half = min(deregistered_date,death_date,end_date,covid_exit) if egfr_half_date==. & index_date_egfr_half!=.
+replace exit_date_egfr_half = covid_exit if covid_exit < egfr_half_date
 gen follow_up_time_egfr_half = (exit_date_egfr_half - index_date_egfr_half)
 label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
 gen egfr_half_denominator = 0
@@ -842,7 +791,8 @@ label var aki "Acute kidney injury"
 * Exit date (AKI)
 gen exit_date_aki = aki_date
 format exit_date_aki %td
-replace exit_date_aki = min(deregistered_date,death_date,end_date)  if aki_date==.
+replace exit_date_aki = min(deregistered_date,death_date,end_date,covid_exit)  if aki_date==.
+replace exit_date_aki = covid_exit if covid_exit < aki_date
 gen aki_denominator = 1
 gen follow_up_time_aki = (exit_date_aki - index_date_aki)
 label var follow_up_time_aki "Follow-up time (AKI) (Days)"
@@ -855,7 +805,8 @@ gen death = 0
 replace death = 1 if death_date!=.
 label var death "Death"
 format exit_date_death %td
-replace exit_date_death = min(deregistered_date,end_date)  if death_date==.
+replace exit_date_death = min(deregistered_date,end_date,covid_exit)  if death_date==.
+replace exit_date_death = covid_exit if covid_exit < death_date
 gen death_denominator = 1
 gen follow_up_time_death = (exit_date_death - index_date_death)
 label var follow_up_time_death "Follow-up time (death) (Days)"
@@ -893,7 +844,7 @@ foreach outcome of varlist esrd egfr_half aki death {
 	drop total_follow_up_`outcome'
 }
 
-save ./output/analysis_2017.dta, replace
+save ./output/analysis_2020.dta, replace
 log close
 
 
