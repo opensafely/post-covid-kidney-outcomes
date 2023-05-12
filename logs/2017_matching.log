@@ -2,13 +2,13 @@
       name:  <unnamed>
        log:  /workspace/logs/2017_matching.log
   log type:  text
- opened on:   5 Apr 2023, 10:23:04
+ opened on:  12 May 2023, 09:05:05
 
 . clear
 
 . 
 . capture noisily import delimited ./output/covid_matching_2017.csv, clear
-(10 vars, 14,759 obs)
+(10 vars, 14,296 obs)
 
 . keep patient_id covid_date
 
@@ -29,10 +29,10 @@ file /tmp/St00015.000001 saved
 
 Duplicates in terms of patient_id
 
-(1,456 observations deleted)
+(1,444 observations deleted)
 
 . drop if covid_date!=""
-(13,303 observations deleted)
+(12,852 observations deleted)
 
 . drop covid_date
 
@@ -40,29 +40,29 @@ Duplicates in terms of patient_id
 . **Exclusions
 . * Age <18
 . drop if age <18
-(10,476 observations deleted)
+(10,733 observations deleted)
 
 . 
 . * Anyone not registered at one practice for 3 months before February 2017
 . drop if has_follow_up==0
-(1,949 observations deleted)
+(1,957 observations deleted)
 
 . drop has_follow_up
 
 . 
 . * Pre-existing kidney replacement therapy
 . drop if baseline_krt_primary_care==1
-(1,856 observations deleted)
+(1,835 observations deleted)
 
 . drop baseline_krt_primary_care
 
 . drop if baseline_krt_icd_10==1
-(1,806 observations deleted)
+(1,799 observations deleted)
 
 . drop baseline_krt_icd_10
 
 . drop if baseline_krt_opcs_4==1
-(1,689 observations deleted)
+(1,693 observations deleted)
 
 . drop baseline_krt_opcs_4
 
@@ -83,64 +83,64 @@ Duplicates in terms of patient_id
 . 
 . replace baseline_creatinine_feb2017 = . if !inrange(baseline_creatinine_feb20
 > 17, 20, 3000)
-(14,273 real changes made, 14,273 to missing)
+(14,080 real changes made, 14,080 to missing)
 
 . gen mgdl_baseline_creatinine_feb2017 = baseline_creatinine_feb2017/88.4
-(14,273 missing values generated)
+(14,080 missing values generated)
 
 . gen min_baseline_creatinine_feb2017=.
-(32,224 missing values generated)
+(31,983 missing values generated)
 
 . replace min_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
 > 7 if male==0
-(9,083 real changes made)
+(9,302 real changes made)
 
 . replace min_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
 > 9 if male==1
-(8,868 real changes made)
+(8,601 real changes made)
 
 . replace min_baseline_creatinine_feb2017 = min_baseline_creatinine_feb2017^-0.
 > 329  if male==0
-(9,083 real changes made)
+(9,302 real changes made)
 
 . replace min_baseline_creatinine_feb2017 = min_baseline_creatinine_feb2017^-0.
 > 411  if male==1
-(8,868 real changes made)
+(8,601 real changes made)
 
 . replace min_baseline_creatinine_feb2017 = 1 if min_baseline_creatinine_feb201
 > 7<1
-(11,317 real changes made)
+(11,429 real changes made)
 
 . gen max_baseline_creatinine_feb2017=.
-(32,224 missing values generated)
+(31,983 missing values generated)
 
 . replace max_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
 > 7 if male==0
-(9,083 real changes made)
+(9,302 real changes made)
 
 . replace max_baseline_creatinine_feb2017 = mgdl_baseline_creatinine_feb2017/0.
 > 9 if male==1
-(8,868 real changes made)
+(8,601 real changes made)
 
 . replace max_baseline_creatinine_feb2017 = max_baseline_creatinine_feb2017^-1.
 > 209
-(17,951 real changes made)
+(17,903 real changes made)
 
 . replace max_baseline_creatinine_feb2017 = 1 if max_baseline_creatinine_feb201
 > 7>1
-(20,907 real changes made)
+(20,554 real changes made)
 
 . gen egfr_baseline_creatinine_feb2017 = min_baseline_creatinine_feb2017*max_ba
 > seline_creatinine_feb2017*141
-(14,273 missing values generated)
+(14,080 missing values generated)
 
 . replace egfr_baseline_creatinine_feb2017 = egfr_baseline_creatinine_feb2017*(
 > 0.993^age)
-(17,951 real changes made)
+(17,903 real changes made)
 
 . replace egfr_baseline_creatinine_feb2017 = egfr_baseline_creatinine_feb2017*1
 > .018 if male==0
-(9,083 real changes made)
+(9,302 real changes made)
 
 . drop if egfr_baseline_creatinine_feb2017 <15
 (0 observations deleted)
@@ -158,7 +158,7 @@ Duplicates in terms of patient_id
 . 
 . * Deceased
 . drop if deceased==1
-(3,211 observations deleted)
+(3,256 observations deleted)
 
 . drop deceased
 
@@ -176,108 +176,109 @@ Duplicates in terms of patient_id
 
         age |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-         18 |        421        1.45        1.45
-         19 |        395        1.36        2.81
-         20 |        469        1.62        4.43
-         21 |        465        1.60        6.03
-         22 |        485        1.67        7.70
-         23 |        459        1.58        9.29
-         24 |        445        1.53       10.82
-         25 |        439        1.51       12.33
-         26 |        547        1.89       14.22
-         27 |        502        1.73       15.95
-         28 |        520        1.79       17.74
-         29 |        482        1.66       19.40
-         30 |        497        1.71       21.11
-         31 |        493        1.70       22.81
-         32 |        507        1.75       24.56
-         33 |        503        1.73       26.30
-         34 |        494        1.70       28.00
-         35 |        465        1.60       29.60
-         36 |        459        1.58       31.18
-         37 |        491        1.69       32.87
-         38 |        470        1.62       34.49
-         39 |        488        1.68       36.18
-         40 |        445        1.53       37.71
-         41 |        470        1.62       39.33
-         42 |        451        1.55       40.89
-         43 |        482        1.66       42.55
-         44 |        436        1.50       44.05
-         45 |        463        1.60       45.65
-         46 |        518        1.79       47.43
-         47 |        497        1.71       49.14
-         48 |        513        1.77       50.91
-         49 |        507        1.75       52.66
-         50 |        537        1.85       54.51
-         51 |        501        1.73       56.24
-         52 |        537        1.85       58.09
-         53 |        489        1.69       59.77
-         54 |        517        1.78       61.56
-         55 |        491        1.69       63.25
-         56 |        505        1.74       64.99
-         57 |        464        1.60       66.59
-         58 |        496        1.71       68.30
-         59 |        485        1.67       69.97
-         60 |        406        1.40       71.37
-         61 |        387        1.33       72.70
-         62 |        403        1.39       74.09
-         63 |        397        1.37       75.46
-         64 |        455        1.57       77.03
-         65 |        379        1.31       78.33
-         66 |        383        1.32       79.65
-         67 |        369        1.27       80.93
-         68 |        381        1.31       82.24
-         69 |        382        1.32       83.56
-         70 |        316        1.09       84.64
-         71 |        373        1.29       85.93
-         72 |        355        1.22       87.15
-         73 |        374        1.29       88.44
-         74 |        352        1.21       89.66
-         75 |        262        0.90       90.56
-         76 |        237        0.82       91.38
-         77 |        253        0.87       92.25
-         78 |        259        0.89       93.14
-         79 |        227        0.78       93.92
-         80 |        188        0.65       94.57
-         81 |        187        0.64       95.22
-         82 |        178        0.61       95.83
-         83 |        168        0.58       96.41
-         84 |        199        0.69       97.09
-         85 |        111        0.38       97.48
-         86 |        103        0.36       97.83
-         87 |        102        0.35       98.18
-         88 |        104        0.36       98.54
-         89 |        104        0.36       98.90
-         90 |         46        0.16       99.06
-         91 |         52        0.18       99.24
-         92 |         41        0.14       99.38
-         93 |         61        0.21       99.59
-         94 |         46        0.16       99.75
-         95 |         20        0.07       99.82
-         96 |         10        0.03       99.85
-         97 |          7        0.02       99.88
-         98 |         15        0.05       99.93
-         99 |          8        0.03       99.96
-        101 |          1        0.00       99.96
-        102 |          1        0.00       99.96
-        103 |          3        0.01       99.97
-        104 |          1        0.00       99.98
-        105 |          2        0.01       99.98
-        106 |          2        0.01       99.99
-        107 |          2        0.01      100.00
-        108 |          1        0.00      100.00
+         18 |        368        1.28        1.28
+         19 |        376        1.31        2.59
+         20 |        479        1.67        4.26
+         21 |        433        1.51        5.76
+         22 |        439        1.53        7.29
+         23 |        460        1.60        8.89
+         24 |        469        1.63       10.53
+         25 |        485        1.69       12.21
+         26 |        550        1.91       14.13
+         27 |        488        1.70       15.83
+         28 |        508        1.77       17.60
+         29 |        502        1.75       19.34
+         30 |        477        1.66       21.00
+         31 |        469        1.63       22.64
+         32 |        482        1.68       24.32
+         33 |        466        1.62       25.94
+         34 |        456        1.59       27.52
+         35 |        513        1.79       29.31
+         36 |        444        1.55       30.86
+         37 |        471        1.64       32.50
+         38 |        465        1.62       34.11
+         39 |        501        1.74       35.86
+         40 |        432        1.50       37.36
+         41 |        441        1.54       38.90
+         42 |        459        1.60       40.50
+         43 |        441        1.54       42.03
+         44 |        444        1.55       43.58
+         45 |        490        1.71       45.28
+         46 |        502        1.75       47.03
+         47 |        552        1.92       48.95
+         48 |        545        1.90       50.85
+         49 |        504        1.75       52.60
+         50 |        476        1.66       54.26
+         51 |        534        1.86       56.12
+         52 |        492        1.71       57.83
+         53 |        527        1.83       59.67
+         54 |        499        1.74       61.40
+         55 |        487        1.70       63.10
+         56 |        466        1.62       64.72
+         57 |        464        1.62       66.33
+         58 |        464        1.62       67.95
+         59 |        436        1.52       69.47
+         60 |        446        1.55       71.02
+         61 |        374        1.30       72.32
+         62 |        395        1.38       73.70
+         63 |        362        1.26       74.96
+         64 |        378        1.32       76.27
+         65 |        383        1.33       77.61
+         66 |        382        1.33       78.94
+         67 |        387        1.35       80.28
+         68 |        390        1.36       81.64
+         69 |        378        1.32       82.96
+         70 |        373        1.30       84.26
+         71 |        367        1.28       85.53
+         72 |        337        1.17       86.71
+         73 |        370        1.29       87.99
+         74 |        347        1.21       89.20
+         75 |        238        0.83       90.03
+         76 |        223        0.78       90.81
+         77 |        256        0.89       91.70
+         78 |        244        0.85       92.55
+         79 |        274        0.95       93.50
+         80 |        166        0.58       94.08
+         81 |        179        0.62       94.70
+         82 |        188        0.65       95.36
+         83 |        199        0.69       96.05
+         84 |        226        0.79       96.84
+         85 |        106        0.37       97.20
+         86 |        110        0.38       97.59
+         87 |        129        0.45       98.04
+         88 |        115        0.40       98.44
+         89 |        108        0.38       98.81
+         90 |         47        0.16       98.98
+         91 |         53        0.18       99.16
+         92 |         60        0.21       99.37
+         93 |         44        0.15       99.52
+         94 |         46        0.16       99.68
+         95 |         19        0.07       99.75
+         96 |         10        0.03       99.78
+         97 |         17        0.06       99.84
+         98 |         21        0.07       99.92
+         99 |         10        0.03       99.95
+        100 |          1        0.00       99.95
+        101 |          3        0.01       99.97
+        102 |          1        0.00       99.97
+        103 |          1        0.00       99.97
+        104 |          3        0.01       99.98
+        105 |          1        0.00       99.99
+        106 |          1        0.00       99.99
+        107 |          1        0.00       99.99
+        108 |          2        0.01      100.00
 ------------+-----------------------------------
-      Total |     29,013      100.00
+      Total |     28,727      100.00
 
 . tab male
 
    Sex (0=F |
        1=M) |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-     Female |     14,791       50.98       50.98
-       Male |     14,222       49.02      100.00
+     Female |     14,775       51.43       51.43
+       Male |     13,952       48.57      100.00
 ------------+-----------------------------------
-      Total |     29,013      100.00
+      Total |     28,727      100.00
 
 . 
 . export delimited using "./output/2017_matching.csv", replace
@@ -288,5 +289,5 @@ file ./output/2017_matching.csv saved
       name:  <unnamed>
        log:  /workspace/logs/2017_matching.log
   log type:  text
- closed on:   5 Apr 2023, 10:23:05
+ closed on:  12 May 2023, 09:05:06
 -------------------------------------------------------------------------------
