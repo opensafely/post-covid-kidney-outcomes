@@ -219,6 +219,8 @@ drop deceased
 * eGFR <15 before index_date - should apply to matched contemporary comparators only
 gen index_year = yofd(index_date)
 gen age = index_year - year_of_birth
+*age>=18*
+drop if age<18|age==.
 gen sex = 1 if male == "Male"
 label var sex "Sex"
 replace sex = 0 if male == "Female"
@@ -373,8 +375,8 @@ gen covidvax3date = date(covid_vax_3_date, "YMD")
 format covidvax3date %td
 gen covidvax4date = date(covid_vax_4_date, "YMD")
 format covidvax4date %td
-gen covid_vax = 0
-replace covid_vax = 4 if covidvax4date!=.
+gen covid_vax = case
+replace covid_vax = 4 if covid_vax==1 &covidvax4date!=.
 replace covid_vax = 3 if covid_vax==1 &covidvax3date!=.
 replace covid_vax = 3 if covid_vax==1 &covidvax2date!=.
 replace covid_vax = 2 if covid_vax==1 &covidvax1date!=.
@@ -393,7 +395,7 @@ label var covid_vax "Vaccination status"
 safetab covid_vax, m
 
 * COVID-19 wave
-gen wave = case
+gen wave = 1
 replace wave = 2 if index_month=="sep2020"
 replace wave = 2 if index_month=="oct2020"
 replace wave = 2 if index_month=="nov2020"
@@ -420,8 +422,7 @@ replace wave = 4 if index_month=="jul2022"
 replace wave = 4 if index_month=="aug2022"
 replace wave = 4 if index_month=="sep2022"
 replace wave = 4 if index_month=="oct2022"
-label define wave	0 "Contemporary comparator"	///
-					1 "Febuary20-August20"	///
+label define wave	1 "Febuary20-August20"	///
 					2 "September20-June21"	///
 					3 "July21-November21"	///
 					4 "December21-October22"	
@@ -726,6 +727,7 @@ gen end_date = date("2022-11-30", "YMD")
 format end_date %td
 replace exit_date_esrd = min(deregistered_date, death_date, end_date, covid_exit) if esrd_date==.
 replace exit_date_esrd = covid_exit if covid_exit < esrd_date
+replace esrd_date=. if covid_exit<esrd_date&case==0
 gen esrd_denominator = 1
 gen follow_up_time_esrd = (exit_date_esrd - index_date_esrd)
 label var follow_up_time_esrd "Follow-up time (Days)"
@@ -775,6 +777,7 @@ replace exit_date_egfr_half = min(deregistered_date,death_date,end_date,covid_ex
 replace exit_date_egfr_half = covid_exit if covid_exit < egfr_half_date
 gen follow_up_time_egfr_half = (exit_date_egfr_half - index_date_egfr_half)
 label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
+replace egfr_half_date=. if covid_exit<egfr_half_date&case==0
 gen egfr_half_denominator = 0
 replace egfr_half_denominator = 1 if index_date_egfr_half!=.
 gen follow_up_years_egfr_half = follow_up_time_egfr_half/365.25
@@ -793,6 +796,7 @@ gen exit_date_aki = aki_date
 format exit_date_aki %td
 replace exit_date_aki = min(deregistered_date,death_date,end_date,covid_exit)  if aki_date==.
 replace exit_date_aki = covid_exit if covid_exit < aki_date
+replace aki_date=. if covid_exit<aki_date&case==0
 gen aki_denominator = 1
 gen follow_up_time_aki = (exit_date_aki - index_date_aki)
 label var follow_up_time_aki "Follow-up time (AKI) (Days)"
@@ -807,6 +811,7 @@ label var death "Death"
 format exit_date_death %td
 replace exit_date_death = min(deregistered_date,end_date,covid_exit)  if death_date==.
 replace exit_date_death = covid_exit if covid_exit < death_date
+replace death_date=. if covid_exit<death_date&case==0
 gen death_denominator = 1
 gen follow_up_time_death = (exit_date_death - index_date_death)
 label var follow_up_time_death "Follow-up time (death) (Days)"
