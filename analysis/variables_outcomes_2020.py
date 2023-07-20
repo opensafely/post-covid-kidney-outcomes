@@ -311,13 +311,31 @@ def generate_outcomes_2020(index_date_variable):
             "incidence": 0.60,
         }
     ),
+    creatinine_dec2022=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2022-12-01","2022-12-31"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    creatinine_jan2023=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2023-01-01","2023-01-31"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
     acute_kidney_injury_outcome=patients.admitted_to_hospital(
         with_these_diagnoses=acute_kidney_injury_codes,
         between = ["case_index_date + 29 days", "2022-11-30"],
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,    
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-03-01", "latest": "2022-11-30"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-03-01", "latest": "2023-01-31"}},
     ),
     )
     return variables_outcomes_2020
