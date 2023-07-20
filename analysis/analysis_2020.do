@@ -375,21 +375,20 @@ gen covidvax3date = date(covid_vax_3_date, "YMD")
 format covidvax3date %td
 gen covidvax4date = date(covid_vax_4_date, "YMD")
 format covidvax4date %td
-gen covid_vax = case
-replace covid_vax = 4 if covid_vax==1 &covidvax4date!=.
-replace covid_vax = 3 if covid_vax==1 &covidvax3date!=.
-replace covid_vax = 3 if covid_vax==1 &covidvax2date!=.
-replace covid_vax = 2 if covid_vax==1 &covidvax1date!=.
+gen covid_vax = 0
+replace covid_vax = 1 if covidvax1date!=.
+replace covid_vax = 2 if covidvax2date!=.
+replace covid_vax = 3 if covidvax3date!=.
+replace covid_vax = 4 if covidvax4date!=.
 drop covidvax1date
 drop covidvax2date
 drop covidvax3date
 drop covidvax4date
-label define covid_vax	0 "Contemporary comparator"	///
-						1 "Pre-vaccination"			///
-						2 "1 vaccine dose"			///
-						3 "2 vaccine doses"			///
-						4 "3 vaccine doses"			///
-						5 "4 vaccine doses"
+label define covid_vax	0 "Pre-vaccination"			///
+						1 "1 vaccine dose"			///
+						2 "2 vaccine doses"			///
+						3 "3 vaccine doses"			///
+						4 "4 vaccine doses"
 label values covid_vax covid_vax
 label var covid_vax "Vaccination status"
 safetab covid_vax, m
