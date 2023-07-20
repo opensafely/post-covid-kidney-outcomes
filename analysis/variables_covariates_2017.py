@@ -411,6 +411,30 @@ def generate_covariates_2017(index_date_variable):
             "incidence": 0.60,
         }
     ),
+    baseline_creatinine_nov2019=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2018-05-01","2019-10-31"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    baseline_creatinine_dec2019=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2018-06-01","2019-11-30"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    acute_kidney_injury_baseline=patients.admitted_to_hospital(
+        with_these_diagnoses=acute_kidney_injury_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.05},
+    ),
     atrial_fibrillation_or_flutter=patients.with_these_clinical_events(
         atrial_fibrillation_or_flutter_codes,
         returning="binary_flag",
@@ -518,6 +542,11 @@ def generate_covariates_2017(index_date_variable):
         between=["case_index_date - 1 year", "case_index_date"],
         returning="number_of_matches_in_period",
         return_expectations={"int": {"distribution": "normal", "mean": 6, "stddev": 3},"incidence": 0.6,},
+    ),
+    hosp_count=patients.admitted_to_hospital(
+        between=["case_index_date - 5 years", "case_index_date"],
+        returning="number_of_matches_in_period",
+        return_expectations={"int": {"distribution": "normal", "mean": 1, "stddev": 1},"incidence": 0.6,},
     ),
     #These need to be done differently
     body_mass_index=patients.most_recent_bmi(

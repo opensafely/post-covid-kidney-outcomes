@@ -9,41 +9,41 @@ def generate_covid(index_date_variable):
         with_these_diagnoses=covid_codes,
         returning="binary_flag",
         between = ["case_index_date", "case_index_date + 28 days"],
-        return_expectations={"incidence": 0.1, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
+        return_expectations={"incidence": 0.1, "date": {"earliest" : "2020-02-01", "latest": "2022-12-31"}},
     ),
     covid_critical_care=patients.admitted_to_hospital(
         with_these_procedures=critical_care_codes,
         returning="binary_flag",
         between = ["case_index_date", "case_index_date + 28 days"],
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-12-31"}},
     ),
     covid_critical_days=patients.admitted_to_hospital(
         with_at_least_one_day_in_critical_care=True,
         between= ["case_index_date", "case_index_date + 28 days"],
-        return_expectations = {"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
+        return_expectations = {"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-12-31"}},
     ),
     covid_acute_kidney_injury=patients.admitted_to_hospital(
         with_these_diagnoses=acute_kidney_injury_codes,
         returning="binary_flag",
         between = ["case_index_date", "case_index_date + 28 days"],
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-12-31"}},
     ),
     covid_krt_icd_10=patients.admitted_to_hospital(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="binary_flag",
         between = ["case_index_date", "case_index_date + 28 days"],
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-12-31"}},
     ),
     covid_krt_opcs_4=patients.admitted_to_hospital(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="binary_flag",
         between = ["case_index_date", "case_index_date + 28 days"],
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2022-12-31"}},
     ),
     covid_death=patients.with_death_recorded_in_primary_care(
         returning="binary_flag",
         between = ["case_index_date", "case_index_date + 28 days"],
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-01-31"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2022-12-31"}},
     ),
     covid_vax_1_date = patients.with_tpp_vaccination_record(
         target_disease_matches = "SARS-2 CORONAVIRUS",
@@ -54,7 +54,7 @@ def generate_covid(index_date_variable):
         return_expectations = {
         "date": {
             "earliest": "2020-12-08",
-            "latest": "2022-09-30",
+            "latest": "2022-12-31",
         }
         },
     ),
@@ -67,7 +67,7 @@ def generate_covid(index_date_variable):
         return_expectations = {
         "date": {
             "earliest": "2020-12-31",
-            "latest": "2022-09-30",
+            "latest": "2022-12-31",
         }
         },
     ),
@@ -80,7 +80,7 @@ def generate_covid(index_date_variable):
         return_expectations = {
         "date": {
             "earliest": "2021-03-31",
-            "latest": "2022-09-30",
+            "latest": "2022-12-31",
         }
         },
     ),
@@ -93,7 +93,7 @@ def generate_covid(index_date_variable):
         return_expectations = {
         "date": {
             "earliest": "2021-04-30",
-            "latest": "2022-09-30",
+            "latest": "2022-12-31",
         }
         },
     ),
