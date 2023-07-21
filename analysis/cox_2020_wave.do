@@ -163,13 +163,6 @@ local lab4: label wave 4
 	file write tablecontent ("`outcome'") _n
 	
 forvalues wave=1/4 {
-	file write tablecontent _tab ("`lab0'") _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab _tab
-	file write tablecontent ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _tab _tab _tab ("1.00") _n
-	file write tablecontent _tab ("`lab`wave''") _tab _tab (`denominator') _tab _tab (`event') _tab %10.0f (`person_year') _tab _tab %3.2f (`rate') _tab _tab
-	file write tablecontent  _tab %4.2f (`crude_`outcome'_`wave'b') _tab ("(") %4.2f (`crude_`outcome'_`wave'll') (" - ") %4.2f (`crude_`outcome'_`wave'ul') (")")
-	file write tablecontent  _tab %4.2f (`minimal_`outcome'_`wave'b') _tab ("(") %4.2f (`minimal_`outcome'_`wave'll') (" - ") %4.2f (`minimal_`outcome'_`wave'ul') (")")
-	file write tablecontent  _tab %4.2f (`additional_`outcome'_`wave'b') _tab ("(") %4.2f (`additional_`outcome'_`wave'll') (" - ") %4.2f (`additional_`outcome'_`wave'ul') (")")
-	file write tablecontent  _tab %4.2f (`full_`outcome'_`wave'b') _tab ("(") %4.2f (`full_`outcome'_`wave'll') (" - ") %4.2f (`full_`outcome'_`wave'ul') (")") _tab _n
 	qui safecount if wave==`wave'  & case==0&`outcome'_denominator==1 & _st==1
 	local denominator0 = round(r(N),5)
 	qui safecount if wave==`wave' & case==0&_d==1 &  _st==1
