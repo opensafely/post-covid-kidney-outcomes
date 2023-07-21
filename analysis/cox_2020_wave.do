@@ -170,7 +170,6 @@ forvalues wave=1/4 {
 	file write tablecontent  _tab %4.2f (`minimal_`outcome'_`wave'b') _tab ("(") %4.2f (`minimal_`outcome'_`wave'll') (" - ") %4.2f (`minimal_`outcome'_`wave'ul') (")")
 	file write tablecontent  _tab %4.2f (`additional_`outcome'_`wave'b') _tab ("(") %4.2f (`additional_`outcome'_`wave'll') (" - ") %4.2f (`additional_`outcome'_`wave'ul') (")")
 	file write tablecontent  _tab %4.2f (`full_`outcome'_`wave'b') _tab ("(") %4.2f (`full_`outcome'_`wave'll') (" - ") %4.2f (`full_`outcome'_`wave'ul') (")") _tab _n
-	}
 	qui safecount if wave==`wave'  & case==0&`outcome'_denominator==1 & _st==1
 	local denominator0 = round(r(N),5)
 	qui safecount if wave==`wave' & case==0&_d==1 &  _st==1
@@ -192,7 +191,7 @@ forvalues wave=1/4 {
 	file write tablecontent  _tab %4.2f (`minimal_`outcome'_`wave'b') _tab ("(") %4.2f (`minimal_`outcome'_`wave'll') (" - ") %4.2f (`minimal_`outcome'_`wave'ul') (")")
 	file write tablecontent  _tab %4.2f (`additional_`outcome'_`wave'b') _tab ("(") %4.2f (`additional_`outcome'_`wave'll') (" - ") %4.2f (`additional_`outcome'_`wave'ul') (")")
 	file write tablecontent  _tab %4.2f (`full_`outcome'_`wave'b') _tab ("(") %4.2f (`full_`outcome'_`wave'll') (" - ") %4.2f (`full_`outcome'_`wave'ul') (")") _tab _n
-
+	}
 }
 
 file close tablecontent
