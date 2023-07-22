@@ -434,6 +434,10 @@ safetab wave, m
 sum gp_count, detail
 bysort case: sum gp_count, detail
 
+* Check of hospital admissions in preceding 5 years
+sum hosp_count, detail
+bysort case: sum hosp_count, detail
+
 * Age
 tab age
 safecount

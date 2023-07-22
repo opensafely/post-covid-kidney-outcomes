@@ -276,7 +276,9 @@ foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_feb2017 ///
 												baseline_creatinine_jul2022 ///
 												baseline_creatinine_aug2022 ///
 												baseline_creatinine_sep2022 ///
-												baseline_creatinine_oct2022 {
+												baseline_creatinine_oct2022 ///
+												baseline_creatinine_nov2022 ///
+												baseline_creatinine_dec2022 {
 replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine_monthly', 20, 3000)
 gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.4
 gen min_`baseline_creatinine_monthly'=.
@@ -301,7 +303,7 @@ drop max_`baseline_creatinine_monthly'
 gen index_date_string=string(index_date, "%td") 
 gen index_month=substr(index_date_string ,3,7)
 gen baseline_egfr=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022"
 foreach x of local month_year  {
 replace baseline_egfr=egfr_baseline_creatinine_`x' if index_month=="`x'"
 drop egfr_baseline_creatinine_`x'
@@ -440,11 +442,13 @@ replace wave = 4 if index_month=="jul2022"
 replace wave = 4 if index_month=="aug2022"
 replace wave = 4 if index_month=="sep2022"
 replace wave = 4 if index_month=="oct2022"
+replace wave = 4 if index_month=="nov2022"
+replace wave = 4 if index_month=="dec2022"
 label define wave	0 "Historical comparator"	///
 					1 "Febuary20-August20"	///
 					2 "September20-June21"	///
 					3 "July21-November21"	///
-					4 "December21-October22"	
+					4 "December21-December22"	
 label values wave wave
 label var wave "COVID-19 wave"
 safetab wave, m
@@ -453,6 +457,10 @@ safetab wave, m
 * Check of GP consultations by groups
 sum gp_count, detail
 bysort case: sum gp_count, detail
+
+* Check of hospital admissions in preceding 5 years
+sum hosp_count, detail
+bysort case: sum hosp_count, detail
 
 * Age
 tab age
@@ -704,7 +712,9 @@ foreach creatinine_monthly of varlist	creatinine_feb2017 ///
 										creatinine_jul2022 ///
 										creatinine_aug2022 ///
 										creatinine_sep2022 ///
-										creatinine_oct2022 {
+										creatinine_oct2022 ///
+										creatinine_nov2022 ///
+										creatinine_dec2022 {
 replace `creatinine_monthly' = . if !inrange(`creatinine_monthly', 20, 3000)
 gen mgdl_`creatinine_monthly' = `creatinine_monthly'/88.4
 gen min_`creatinine_monthly'=.
@@ -730,7 +740,7 @@ drop max_`creatinine_monthly'
 replace index_date = index_date_28
 drop index_date_28
 gen egfr15_date=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022"
 foreach x of local month_year  {
   replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatinine_`x'<15 & date("01`x'", "DMY")>index_date
 }
@@ -808,7 +818,7 @@ gen follow_up_years_esrd = follow_up_time_esrd/365.25
 
 * 50% eGFR reduction (earliest month) (or ESRD)
 gen egfr_half_date=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022"
 foreach x of local month_year {
   replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_half_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>index_date
   format egfr_half_date %td
