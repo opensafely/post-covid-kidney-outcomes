@@ -454,13 +454,24 @@ label var wave "COVID-19 wave"
 safetab wave, m
 
 ** Covariates
-* Check of GP consultations by groups
+* Check of GP consultations over past year by groups
 sum gp_count, detail
 bysort case: sum gp_count, detail
+egen gp_consults = cut(gp_count), at(0, 1, 3, 10, 1500)
+recode gp_consults 3=2 10=3
+label define gp_consults 0 "0" 1 "1-2" 2 "3-9" 3 ">9"
+label values gp_consults gp_consults
+label var gp_consults "GP interactions"
+tab case gp_consults
 
 * Check of hospital admissions in preceding 5 years
 sum hosp_count, detail
 bysort case: sum hosp_count, detail
+egen admissions = cut(hosp_count), at(0, 1, 2, 1000)
+label define admissions 0 "0" 1 "1" 2 ">1"
+label values admissions admissions
+label var admissions "Hospital admissions"
+tab case admissions
 
 * Age
 tab age
