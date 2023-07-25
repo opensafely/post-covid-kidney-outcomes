@@ -208,7 +208,9 @@ foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_feb2017 ///
 												baseline_creatinine_jul2022 ///
 												baseline_creatinine_aug2022 ///
 												baseline_creatinine_sep2022 ///
-												baseline_creatinine_oct2022 {
+												baseline_creatinine_oct2022 ///
+												baseline_creatinine_nov2022 ///
+												baseline_creatinine_dec2022 {
 replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine_monthly', 20, 3000)
 gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.4
 gen min_`baseline_creatinine_monthly'=.
@@ -233,7 +235,7 @@ drop max_`baseline_creatinine_monthly'
 gen index_date_string=string(index_date, "%td") 
 gen index_month=substr(index_date_string ,3,7)
 gen baseline_egfr=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022"
 foreach x of local month_year  {
 replace baseline_egfr=egfr_baseline_creatinine_`x' if index_month=="`x'"
 drop egfr_baseline_creatinine_`x'
@@ -376,11 +378,13 @@ replace wave = 4 if index_month=="jul2022"
 replace wave = 4 if index_month=="aug2022"
 replace wave = 4 if index_month=="sep2022"
 replace wave = 4 if index_month=="oct2022"
+replace wave = 4 if index_month=="nov2022"
+replace wave = 4 if index_month=="dec2022"
 label define wave	0 "Pneumonia (pre-pandemic)"	///
 					1 "COVID Feb20-Aug20"	///
 					2 "COVID Sep20-Jun21"	///
 					3 "COVID Jul21-Nov21"	///
-					4 "COVID Dec21-Oct22"	
+					4 "COVID Dec21-Dec22"	
 label values wave wave
 label var wave "COVID-19 wave"
 safetab wave, m
@@ -416,6 +420,26 @@ label values month month
 safetab month case, m
 
 ** Covariates
+** Covariates
+* Check of GP consultations over past year by groups
+sum gp_count, detail
+bysort case: sum gp_count, detail
+egen gp_consults = cut(gp_count), at(0, 1, 3, 10, 1500)
+recode gp_consults 3=2 10=3
+label define gp_consults 0 "0" 1 "1-2" 2 "3-9" 3 ">9"
+label values gp_consults gp_consults
+label var gp_consults "GP interactions"
+tab case gp_consults
+
+* Check of hospital admissions in preceding 5 years
+sum hosp_count, detail
+bysort case: sum hosp_count, detail
+egen admissions = cut(hosp_count), at(0, 1, 2, 1000)
+label define admissions 0 "0" 1 "1" 2 ">1"
+label values admissions admissions
+label var admissions "Hospital admissions"
+tab case admissions
+
 * Age
 tab age
 safecount
@@ -527,16 +551,6 @@ label define smoking 1 "Current/former smoker" 0 "Non-smoker"
 label values smoking smoking
 label var smoking "Smoking status"
 safetab smoking, m
-
-* Check of GP consultations by groups
-sum gp_count, detail
-bysort case: sum gp_count, detail
-egen gp_consults = cut(gp_count), at(0, 1, 5, 10, 20, 40, 5000)
-recode gp_consults 5=2 10=3 20=4 40=5
-label define gp_consults 0 "0" 1 "1-4" 2 "5-9" 3 "10-19" 4 "20-39" 5 "≥40"
-label values gp_consults gp_consults
-label var gp_consults "GP interactions"
-tab case gp_consults
 
 * Baseline eGFR groups
 * All baseline eGFR <15 should already by excluded
