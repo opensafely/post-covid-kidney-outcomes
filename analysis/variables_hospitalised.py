@@ -181,6 +181,12 @@ def generate_hospitalised(index_date_variable):
             },
         },
     ),
+    acute_kidney_injury_baseline=patients.admitted_to_hospital(
+        with_these_diagnoses=acute_kidney_injury_codes,
+        returning="binary_flag",
+        on_or_before="patient_index_date",
+        return_expectations={"incidence": 0.05},
+    ),
     atrial_fibrillation_or_flutter=patients.with_these_clinical_events(
         atrial_fibrillation_or_flutter_codes,
         returning="binary_flag",

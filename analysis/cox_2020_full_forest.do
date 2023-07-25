@@ -3,13 +3,13 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_2017_full_forest.log, replace t
+log using ./logs/cox_2020_full_forest.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/cox_2017_full_forest.csv, write text replace
+file open tablecontent using ./output/cox_2020_full_forest.csv, write text replace
 file write tablecontent ("exposure") _tab ("mean") _tab ("lower") _tab ("upper") _tab ("hr") _n
 
-use ./output/analysis_2017.dta, clear
+use ./output/analysis_2020.dta, clear
 
 label var esrd "Kidney failure"
 label var egfr_half "50% reduction in eGFR"

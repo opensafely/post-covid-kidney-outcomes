@@ -590,6 +590,8 @@ label var ckd_stage "Baseline CKD stage"
 safetab ckd_stage, m
 
 * Comorbidities
+rename acute_kidney_injury_baseline aki_baseline
+safetab aki_baseline
 gen afib = atrial_fibrillation_or_flutter
 drop atrial_fibrillation_or_flutter
 safetab afib

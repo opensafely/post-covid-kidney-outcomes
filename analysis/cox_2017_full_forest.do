@@ -22,14 +22,14 @@ local label_`outcome': variable label `outcome'
 stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
 
 *Exposure = case
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) strata(practice_id)	
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) strata(practice_id)	
 matrix table = r(table)
 local case_`outcome'_b: display %4.2f table[1,2]
 local case_`outcome'_ll: display %4.2f table[5,2]
 local case_`outcome'_ul: display %4.2f table[6,2]
 
 *Exposure = covid_severity
-qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) strata(practice_id)	
+qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) strata(practice_id)	
 matrix table = r(table)
 local sev_`outcome'_1b: display %4.2f table[1,2]
 local sev_`outcome'_1ll: display %4.2f table[5,2]
@@ -42,7 +42,7 @@ local sev_`outcome'_3ll: display %4.2f table[5,4]
 local sev_`outcome'_3ul: display %4.2f table[6,4]
 
 *Exposure = covid_aki
-qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) strata(practice_id)
+qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) strata(practice_id)
 matrix table = r(table)
 local aki_`outcome'_1b: display %4.2f table[1,2]
 local aki_`outcome'_1ll: display %4.2f table[5,2]
@@ -55,7 +55,7 @@ local aki_`outcome'_3ll: display %4.2f table[5,4]
 local aki_`outcome'_3ul: display %4.2f table[6,4]
 
 *Exposure = wave
-qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) strata(practice_id)
+qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) strata(practice_id)
 matrix table = r(table)
 local wave_`outcome'_1b: display %4.2f table[1,2]
 local wave_`outcome'_1ll: display %4.2f table[5,2]
@@ -71,7 +71,7 @@ local wave_`outcome'_4ll: display %4.2f table[5,5]
 local wave_`outcome'_4ul: display %4.2f table[6,5]
 
 *Exposure = covid_vax
-qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) strata(practice_id)
+qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) strata(practice_id)
 matrix table = r(table)
 local vax_`outcome'_1b: display %4.2f table[1,2]
 local vax_`outcome'_1ll: display %4.2f table[5,2]
