@@ -1,12 +1,13 @@
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /workspace/logs/analysis_2020.log
+       log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2020.log
   log type:  text
- opened on:  25 Jul 2023, 22:56:52
+ opened on:  26 Jul 2023, 18:29:42
 
 . 
 . ** Analysis cohort selection
 . capture noisily import delimited ./output/input_covid_matching.csv, clear
+(encoding automatically selected: ISO-8859-9)
 (55 vars, 50,000 obs)
 
 . di "Potential COVID-19 cases extracted from OpenSAFELY:"
@@ -16,6 +17,7 @@ Potential COVID-19 cases extracted from OpenSAFELY:
   50,000
 
 . capture noisily import delimited ./output/input_2020_matching.csv, clear
+(encoding automatically selected: ISO-8859-1)
 (20 vars, 50,000 obs)
 
 . di "Potential contemporary comparators extracted from OpenSAFELY:"
@@ -25,6 +27,7 @@ Potential contemporary comparators extracted from OpenSAFELY:
   50,000
 
 . capture noisily import delimited ./output/covid_matching_2020.csv, clear
+(encoding automatically selected: ISO-8859-1)
 (10 vars, 14,597 obs)
 
 . di "Potential COVID-19 cases after application of exclusion criteria:"
@@ -34,24 +37,22 @@ Potential COVID-19 cases after application of exclusion criteria:
   14,597
 
 . capture noisily import delimited ./output/2020_matching.csv, clear
+(encoding automatically selected: ISO-8859-1)
 (8 vars, 28,833 obs)
 
-. di "Potential contemporary comparators after application of exclusion criteri
-> a:"
+. di "Potential contemporary comparators after application of exclusion criteria:"
 Potential contemporary comparators after application of exclusion criteria:
 
 . safecount
   28,833
 
-. * Import COVID-19 dataset comprising individuals matched with contemporary co
-> mparators (limited matching variables only)        
-. capture noisily import delimited ./output/input_combined_stps_covid_2020.csv,
->  clear
+. * Import COVID-19 dataset comprising individuals matched with contemporary comparators (limited matching variables only)        
+. capture noisily import delimited ./output/input_combined_stps_covid_2020.csv, clear
+(encoding automatically selected: ISO-8859-1)
 (13 vars, 12,972 obs)
 
 . * Drop age & covid_diagnosis_date
-. keep patient_id death_date date_deregistered stp krt_outcome_date male covid_
-> date covid_month set_id case match_counts
+. keep patient_id death_date date_deregistered stp krt_outcome_date male covid_date covid_month set_id case match_counts
 
 . tempfile covid_2020_matched
 
@@ -63,25 +64,22 @@ Duplicates in terms of patient_id
 (0 observations are duplicates)
 
 . save `covid_2020_matched', replace
-(note: file /tmp/St00015.000001 not found)
-file /tmp/St00015.000001 saved
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000001.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000001.tmp saved as .dta format
 
 . * Number of matched COVID-19 cases
 . count
   12,972
 
 . * Import matched contemporary comparators (limited matching variables only)
-. capture noisily import delimited ./output/input_combined_stps_matches_2020.cs
-> v, clear
+. capture noisily import delimited ./output/input_combined_stps_matches_2020.csv, clear
+(encoding automatically selected: ISO-8859-1)
 (11 vars, 18,081 obs)
 
 . * Drop age
-. * NB covid_date = date at which COVID case matched to a contemporary comparat
-> or
-. * covid_diagnosis_date = date at which contemporary comparator first diagnose
-> d with COVID
-. keep patient_id death_date date_deregistered stp krt_outcome_date male set_id
->  case covid_date covid_diagnosis_date
+. * NB covid_date = date at which COVID case matched to a contemporary comparator
+. * covid_diagnosis_date = date at which contemporary comparator first diagnosed with COVID
+. keep patient_id death_date date_deregistered stp krt_outcome_date male set_id case covid_date covid_diagnosis_date
 
 . tempfile 2020_matched
 
@@ -93,24 +91,24 @@ Duplicates in terms of patient_id
 (0 observations are duplicates)
 
 . save `2020_matched', replace
-(note: file /tmp/St00015.000002 not found)
-file /tmp/St00015.000002 saved
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000002.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000002.tmp saved as .dta format
 
 . * Number of matched contemporary comparators
 . count
   18,081
 
 . * Merge limited COVID-19 dataset with additional variables
-. capture noisily import delimited ./output/input_covid_2020_additional.csv, cl
-> ear
+. capture noisily import delimited ./output/input_covid_2020_additional.csv, clear
+(encoding automatically selected: ISO-8859-9)
 (113 vars, 12,972 obs)
 
 . merge 1:1 patient_id using `covid_2020_matched'
 
-    Result                           # of obs.
+    Result                      Number of obs
     -----------------------------------------
-    not matched                             0
-    matched                            12,972  (_merge==3)
+    Not matched                             0
+    Matched                            12,972  (_merge==3)
     -----------------------------------------
 
 . keep if _merge==3
@@ -121,8 +119,8 @@ file /tmp/St00015.000002 saved
 . tempfile covid_2020_complete
 
 . save `covid_2020_complete', replace
-(note: file /tmp/St00015.000003 not found)
-file /tmp/St00015.000003 saved
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000003.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000003.tmp saved as .dta format
 
 . di "Matched COVID-19 cases:"
 Matched COVID-19 cases:
@@ -132,14 +130,15 @@ Matched COVID-19 cases:
 
 . * Merge limited contemporary comparator dataset with additional variables
 . capture noisily import delimited ./output/input_2020_additional.csv, clear
+(encoding automatically selected: ISO-8859-9)
 (106 vars, 18,081 obs)
 
 . merge 1:1 patient_id using `2020_matched'
 
-    Result                           # of obs.
+    Result                      Number of obs
     -----------------------------------------
-    not matched                             0
-    matched                            18,081  (_merge==3)
+    Not matched                             0
+    Matched                            18,081  (_merge==3)
     -----------------------------------------
 
 . keep if _merge==3
@@ -150,8 +149,8 @@ Matched COVID-19 cases:
 . tempfile 2020_complete
 
 . save `2020_complete', replace
-(note: file /tmp/St00015.000004 not found)
-file /tmp/St00015.000004 saved
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000004.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000004.tmp saved as .dta format
 
 . di "Matched contemporary comparators:"
 Matched contemporary comparators:
@@ -195,16 +194,16 @@ Matched COVID-19 cases and contemporary comparators:
 .         tempfile covid_2020_matched_list
 
 .         save `covid_2020_matched_list', replace
-(note: file /tmp/St00015.000006 not found)
-file /tmp/St00015.000006 saved
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000006.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000006.tmp saved as .dta format
 
 . restore
 
 . * Generate list of unmatched COVID-19 cases
 . preserve
 
-.         capture noisily import delimited ./output/input_covid_matching.csv, c
-> lear
+.         capture noisily import delimited ./output/input_covid_matching.csv, clear
+(encoding automatically selected: ISO-8859-9)
 (55 vars, 50,000 obs)
 
 .         * For dummy data, should do nothing in the real data
@@ -217,20 +216,20 @@ Duplicates in terms of patient_id
 .         tempfile covid_prematching
 
 .         save `covid_prematching', replace
-(note: file /tmp/St00015.000008 not found)
-file /tmp/St00015.000008 saved
+(file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000008.tmp not found)
+file C:\Users\LSH170~1\AppData\Local\Temp\ST_1100_000008.tmp saved as .dta format
 
 .         use `covid_2020_matched_list', clear
 
 .         merge 1:1 patient_id using `covid_prematching'
 
-    Result                           # of obs.
+    Result                      Number of obs
     -----------------------------------------
-    not matched                        37,028
+    Not matched                        37,028
         from master                         0  (_merge==1)
         from using                     37,028  (_merge==2)
 
-    matched                            12,972  (_merge==3)
+    Matched                            12,972  (_merge==3)
     -----------------------------------------
 
 .         keep if _merge==2
@@ -252,8 +251,7 @@ Unmatched COVID-19 cases:
 
 . 
 . **ID
-. * Need to create unique identifiers as individuals may be in both covid_2020_
-> matched and 2020_matched so will have the same patient_id
+. * Need to create unique identifiers as individuals may be in both covid_2020_matched and 2020_matched so will have the same patient_id
 . gen unique = _n
 
 . label var unique "Unique ID"
@@ -289,7 +287,6 @@ Unmatched COVID-19 cases:
 (1,521 observations deleted)
 
 . safetab imd
-0
 
         Index of |
         multiple |
@@ -329,8 +326,7 @@ Unmatched COVID-19 cases:
 >                                         8 "8"   ///
 >                                         9 "9"   ///
 >                                         10 "10" ///
->                                         11 "11" ///                          
->            
+>                                         11 "11" ///                                     
 >                                         12 "12" ///
 >                                         13 "13" ///
 >                                         14 "14" ///
@@ -340,8 +336,7 @@ Unmatched COVID-19 cases:
 >                                         18 "18" ///
 >                                         19 "19" ///
 >                                         20 "20" ///
->                                         21 "21" ///                          
->            
+>                                         21 "21" ///                                     
 >                                         22 "22" ///
 >                                         23 "23" ///
 >                                         24 "24" ///
@@ -358,7 +353,6 @@ Unmatched COVID-19 cases:
 . label var stp "STP"
 
 . safetab stp
-0
 
         STP |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -430,24 +424,15 @@ Unmatched COVID-19 cases:
 . replace region = 10 if region_string==""
 (0 real changes made)
 
-. label define region     1 "East Midlands"                                    
->    ///
->                                                 2 "East"                     
->                                    ///
->                                                 3 "London"                   
->                                    ///
->                                                 4 "North East"               
->                            ///
->                                                 5 "North West"               
->                            ///
->                                                 6 "South East"               
->                            ///
->                                                 7 "South West"               
->                            ///
->                                                 8 "West Midlands"            
->                            ///
->                                                 9 "Yorkshire and The Humber" 
->            ///
+. label define region     1 "East Midlands"                                       ///
+>                                                 2 "East"                                                        ///
+>                                                 3 "London"                                                      ///
+>                                                 4 "North East"                                          ///
+>                                                 5 "North West"                                          ///
+>                                                 6 "South East"                                          ///
+>                                                 7 "South West"                                          ///
+>                                                 8 "West Midlands"                                       ///
+>                                                 9 "Yorkshire and The Humber"            ///
 >                                                 10 "Missing"
 
 . label values region region
@@ -474,7 +459,6 @@ Yorkshire and The Humber |      3,065       10.38      100.00
 (0 observations deleted)
 
 . safetab region
-0
 
                   Region |      Freq.     Percent        Cum.
 -------------------------+-----------------------------------
@@ -491,8 +475,7 @@ Yorkshire and The Humber |      3,065       10.38      100.00
                    Total |     29,532      100.00
 
 . 
-. * Create new index date variable 28 days after case_index_date (i.e. to exclu
-> de anyone who does not survive to start follow-up)
+. * Create new index date variable 28 days after case_index_date (i.e. to exclude anyone who does not survive to start follow-up)
 . gen index_date = date(case_index_date, "YMD")
 
 . format index_date %td
@@ -561,8 +544,7 @@ Yorkshire and The Humber |      3,065       10.38      100.00
 (113 real changes made)
 
 . 
-. * Death before index_date + 29 days (i.e. only include people who survived 29
->  days after index_date)
+. * Death before index_date + 29 days (i.e. only include people who survived 29 days after index_date)
 . gen death_date1 = date(death_date, "YMD")
 (27,472 missing values generated)
 
@@ -577,8 +559,7 @@ Yorkshire and The Humber |      3,065       10.38      100.00
 . replace deceased = 1 if death_date < index_date_28 + 1
 (60 real changes made)
 
-. label define deceased 0 "Alive at 28 days after index date" 1 "Deceased withi
-> n 28 days of index date"
+. label define deceased 0 "Alive at 28 days after index date" 1 "Deceased within 28 days of index date"
 
 . label values deceased deceased
 
@@ -598,8 +579,7 @@ Yorkshire and The Humber |      3,065       10.38      100.00
 . drop deceased
 
 . 
-. * eGFR <15 before index_date - should apply to matched contemporary comparato
-> rs only
+. * eGFR <15 before index_date - should apply to matched contemporary comparators only
 . gen index_year = yofd(index_date)
 
 . gen age = index_year - year_of_birth
@@ -620,106 +600,57 @@ Yorkshire and The Humber |      3,065       10.38      100.00
 
 . label values sex sex
 
-. foreach baseline_creatinine_monthly of varlist  baseline_creatinine_feb2020 /
-> //
->                                                                              
->                    baseline_creatinine_mar2020 ///
->                                                                              
->                    baseline_creatinine_apr2020 ///
->                                                                              
->                    baseline_creatinine_may2020 ///
->                                                                              
->                    baseline_creatinine_jun2020 ///
->                                                                              
->                    baseline_creatinine_jul2020 ///
->                                                                              
->                    baseline_creatinine_aug2020 ///
->                                                                              
->                    baseline_creatinine_sep2020 ///
->                                                                              
->                    baseline_creatinine_oct2020 ///
->                                                                              
->                    baseline_creatinine_nov2020 ///
->                                                                              
->                    baseline_creatinine_dec2020 ///
->                                                                              
->                    baseline_creatinine_jan2021 ///
->                                                                              
->                    baseline_creatinine_feb2021 ///
->                                                                              
->                    baseline_creatinine_mar2021 ///
->                                                                              
->                    baseline_creatinine_apr2021 ///
->                                                                              
->                    baseline_creatinine_may2021 ///
->                                                                              
->                    baseline_creatinine_jun2021 ///
->                                                                              
->                    baseline_creatinine_jul2021 ///
->                                                                              
->                    baseline_creatinine_aug2021 ///
->                                                                              
->                    baseline_creatinine_sep2021 ///
->                                                                              
->                    baseline_creatinine_oct2021 ///
->                                                                              
->                    baseline_creatinine_nov2021 ///
->                                                                              
->                    baseline_creatinine_dec2021 ///
->                                                                              
->                    baseline_creatinine_jan2022 ///
->                                                                              
->                    baseline_creatinine_feb2022 ///
->                                                                              
->                    baseline_creatinine_mar2022 ///
->                                                                              
->                    baseline_creatinine_apr2022 ///
->                                                                              
->                    baseline_creatinine_may2022 ///
->                                                                              
->                    baseline_creatinine_jun2022 ///
->                                                                              
->                    baseline_creatinine_jul2022 ///
->                                                                              
->                    baseline_creatinine_aug2022 ///
->                                                                              
->                    baseline_creatinine_sep2022 ///
->                                                                              
->                    baseline_creatinine_oct2022 ///
->                                                                              
->                    baseline_creatinine_nov2022 ///
->                                                                              
->                    baseline_creatinine_dec2022 {
-  2. replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine
-> _monthly', 20, 3000)
-  3. gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.
-> 4
+. foreach baseline_creatinine_monthly of varlist  baseline_creatinine_feb2020 ///
+>                                                                                                 baseline_creatinine_mar2020 ///
+>                                                                                                 baseline_creatinine_apr2020 ///
+>                                                                                                 baseline_creatinine_may2020 ///
+>                                                                                                 baseline_creatinine_jun2020 ///
+>                                                                                                 baseline_creatinine_jul2020 ///
+>                                                                                                 baseline_creatinine_aug2020 ///
+>                                                                                                 baseline_creatinine_sep2020 ///
+>                                                                                                 baseline_creatinine_oct2020 ///
+>                                                                                                 baseline_creatinine_nov2020 ///
+>                                                                                                 baseline_creatinine_dec2020 ///
+>                                                                                                 baseline_creatinine_jan2021 ///
+>                                                                                                 baseline_creatinine_feb2021 ///
+>                                                                                                 baseline_creatinine_mar2021 ///
+>                                                                                                 baseline_creatinine_apr2021 ///
+>                                                                                                 baseline_creatinine_may2021 ///
+>                                                                                                 baseline_creatinine_jun2021 ///
+>                                                                                                 baseline_creatinine_jul2021 ///
+>                                                                                                 baseline_creatinine_aug2021 ///
+>                                                                                                 baseline_creatinine_sep2021 ///
+>                                                                                                 baseline_creatinine_oct2021 ///
+>                                                                                                 baseline_creatinine_nov2021 ///
+>                                                                                                 baseline_creatinine_dec2021 ///
+>                                                                                                 baseline_creatinine_jan2022 ///
+>                                                                                                 baseline_creatinine_feb2022 ///
+>                                                                                                 baseline_creatinine_mar2022 ///
+>                                                                                                 baseline_creatinine_apr2022 ///
+>                                                                                                 baseline_creatinine_may2022 ///
+>                                                                                                 baseline_creatinine_jun2022 ///
+>                                                                                                 baseline_creatinine_jul2022 ///
+>                                                                                                 baseline_creatinine_aug2022 ///
+>                                                                                                 baseline_creatinine_sep2022 ///
+>                                                                                                 baseline_creatinine_oct2022 ///
+>                                                                                                 baseline_creatinine_nov2022 ///
+>                                                                                                 baseline_creatinine_dec2022 {
+  2. replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine_monthly', 20, 3000)
+  3. gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.4
   4. gen min_`baseline_creatinine_monthly'=.
-  5. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
-> hly'/0.7 if sex==0
-  6. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
-> hly'/0.9 if sex==1
-  7. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_month
-> ly'^-0.329 if sex==0
-  8. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_month
-> ly'^-0.411 if sex==1
-  9. replace min_`baseline_creatinine_monthly' = 1 if min_`baseline_creatinine_
-> monthly'<1
+  5. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.7 if sex==0
+  6. replace min_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.9 if sex==1
+  7. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'^-0.329 if sex==0
+  8. replace min_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'^-0.411 if sex==1
+  9. replace min_`baseline_creatinine_monthly' = 1 if min_`baseline_creatinine_monthly'<1
  10. gen max_`baseline_creatinine_monthly'=.
- 11. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
-> hly'/0.7 if sex==0
- 12. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_mont
-> hly'/0.9 if sex==1
- 13. replace max_`baseline_creatinine_monthly' = max_`baseline_creatinine_month
-> ly'^-1.209
- 14. replace max_`baseline_creatinine_monthly' = 1 if max_`baseline_creatinine_
-> monthly'>1
- 15. gen egfr_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'
-> *max_`baseline_creatinine_monthly'*141
- 16. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_mon
-> thly'*(0.993^age)
- 17. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_mon
-> thly'*1.018 if sex==0
+ 11. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.7 if sex==0
+ 12. replace max_`baseline_creatinine_monthly' = mgdl_`baseline_creatinine_monthly'/0.9 if sex==1
+ 13. replace max_`baseline_creatinine_monthly' = max_`baseline_creatinine_monthly'^-1.209
+ 14. replace max_`baseline_creatinine_monthly' = 1 if max_`baseline_creatinine_monthly'>1
+ 15. gen egfr_`baseline_creatinine_monthly' = min_`baseline_creatinine_monthly'*max_`baseline_creatinine_monthly'*141
+ 16. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_monthly'*(0.993^age)
+ 17. replace egfr_`baseline_creatinine_monthly' = egfr_`baseline_creatinine_monthly'*1.018 if sex==0
  18. drop `baseline_creatinine_monthly'
  19. drop mgdl_`baseline_creatinine_monthly'
  20. drop min_`baseline_creatinine_monthly'
@@ -1293,10 +1224,8 @@ Yorkshire and The Humber |      3,065       10.38      100.00
 . gen baseline_egfr=.
 (29,084 missing values generated)
 
-. local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep
-> 2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 
-> jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr20
-> 22 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022"
+. local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 
+> jul2022 aug2022 sep2022 oct2022 nov2022 dec2022"
 
 . foreach x of local month_year  {
   2. replace baseline_egfr=egfr_baseline_creatinine_`x' if index_month=="`x'"
@@ -1366,15 +1295,14 @@ Yorkshire and The Humber |      3,065       10.38      100.00
 . drop baseline_esrd
 
 . 
-. * Drop COVID-19 cases without any matched contemporary comparators after furt
-> her application of exclusion criteria
+. * Drop COVID-19 cases without any matched contemporary comparators after further application of exclusion criteria
 . generate match_counts1=.
 (29,084 missing values generated)
 
 . order patient_id set_id match_counts match_counts1
 
 . bysort set_id: replace match_counts1=_N-1
-(29084 real changes made)
+(29,084 real changes made)
 
 . replace match_counts1=. if case==0
 (16,763 real changes made, 16,763 to missing)
@@ -1390,7 +1318,6 @@ Yorkshire and The Humber |      3,065       10.38      100.00
 (5,574 observations deleted)
 
 . safetab case
-0
 
        case |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -1411,11 +1338,9 @@ match_count |
       Total |      6,747      100.00
 
 . 
-. bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 
-> 0 then only uncase in set, if 1 then only case in set
+. bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 0 then only uncase in set, if 1 then only case in set
 
-. gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set conta
-> ining both case and uncase
+. gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set containing both case and uncase
 
 . tab valid_set, miss
 
@@ -1460,7 +1385,6 @@ match_count |
 . label values case case
 
 . safetab case 
-0
 
                    case |      Freq.     Percent        Cum.
 ------------------------+-----------------------------------
@@ -1483,12 +1407,9 @@ Contemporary comparator |     15,918       70.23       70.23
 (307 real changes made)
 
 . label define covid_severity     0 "Contemporary comparator"             ///
->                                                         1 "Non-hospitalised C
-> OVID" ///
->                                                         2 "Hospitalised COVID
-> "          ///
->                                                         3 "Critical care COVI
-> D"
+>                                                         1 "Non-hospitalised COVID" ///
+>                                                         2 "Hospitalised COVID"          ///
+>                                                         3 "Critical care COVID"
 
 . label values covid_severity covid_severity
 
@@ -1499,7 +1420,6 @@ Contemporary comparator |     15,918       70.23       70.23
 . drop covid_critical_days
 
 . safetab covid_severity, m
-15
 
     SARS-CoV-2 severity |      Freq.     Percent        Cum.
 ------------------------+-----------------------------------
@@ -1521,8 +1441,7 @@ Contemporary comparator |     15,918       70.23       70.23
 (353 real changes made)
 
 . label define covid_aki  0 "Contemporary comparator"                     ///
->                                                 1 "Non-hospitalised COVID"   
->            ///
+>                                                 1 "Non-hospitalised COVID"              ///
 >                                                 2 "Hospitalised COVID"  ///
 >                                                 3 "Hospitalised COVID-AKI"
 
@@ -1533,7 +1452,6 @@ Contemporary comparator |     15,918       70.23       70.23
 . drop covid_acute_kidney_injury
 
 . safetab covid_aki, m
-10
 
   COVID-19 acute kidney |
                  injury |      Freq.     Percent        Cum.
@@ -1562,10 +1480,8 @@ Contemporary comparator |     15,918       70.23       70.23
 (680 real changes made)
 
 . label define covid_krt  0 "Contemporary comparator"                     ///
->                                                 1 "Non-hospitalised SARS-CoV-
-> 2"         ///
->                                                 2 "No KRT hospitalised COVID-
-> 19"        ///
+>                                                 1 "Non-hospitalised SARS-CoV-2"         ///
+>                                                 2 "No KRT hospitalised COVID-19"        ///
 >                                                 3 "KRT hospitalised COVID-19"
 
 . label values covid_krt covid_krt
@@ -1577,7 +1493,6 @@ Contemporary comparator |     15,918       70.23       70.23
 . drop covid_krt_opcs_4
 
 . safetab covid_krt, m
-10
 
  COVID-19 kidney replacement |
                      therapy |      Freq.     Percent        Cum.
@@ -1634,12 +1549,9 @@ No KRT hospitalised COVID-19 |        583        2.57       97.00
 . drop covidvax4date
 
 . label define covid_vax  0 "Pre-vaccination"                     ///
->                                                 1 "1 vaccine dose"           
->            ///
->                                                 2 "2 vaccine doses"          
->            ///
->                                                 3 "3 vaccine doses"          
->            ///
+>                                                 1 "1 vaccine dose"                      ///
+>                                                 2 "2 vaccine doses"                     ///
+>                                                 3 "3 vaccine doses"                     ///
 >                                                 4 "4 vaccine doses"
 
 . label values covid_vax covid_vax
@@ -1647,7 +1559,6 @@ No KRT hospitalised COVID-19 |        583        2.57       97.00
 . label var covid_vax "Vaccination status"
 
 . safetab covid_vax, m
-10
 
     Vaccination |
          status |      Freq.     Percent        Cum.
@@ -1758,7 +1669,6 @@ Pre-vaccination |      9,320       41.12       41.12
 . label var wave "COVID-19 wave"
 
 . safetab wave, m
-5
 
         COVID-19 wave |      Freq.     Percent        Cum.
 ----------------------+-----------------------------------
@@ -1780,10 +1690,10 @@ December21-December22 |      2,421       10.68      100.00
  1%            0             -5
  5%            0             -4
 10%            0             -4       Obs              22,665
-25%            0             -4       Sum of Wgt.      22,665
+25%            0             -4       Sum of wgt.      22,665
 
 50%            3                      Mean           3.320274
-                        Largest       Std. Dev.      3.551001
+                        Largest       Std. dev.      3.551001
 75%            6             16
 90%            8             16       Variance       12.60961
 95%           10             16       Skewness       .6302866
@@ -1791,7 +1701,7 @@ December21-December22 |      2,421       10.68      100.00
 
 . bysort case: sum gp_count, detail
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> case = Contemporary comparator
 
                           gp_count
@@ -1800,16 +1710,16 @@ December21-December22 |      2,421       10.68      100.00
  1%            0             -5
  5%            0             -4
 10%            0             -4       Obs              15,918
-25%            0             -4       Sum of Wgt.      15,918
+25%            0             -4       Sum of wgt.      15,918
 
 50%            3                      Mean           3.327868
-                        Largest       Std. Dev.      3.561148
+                        Largest       Std. dev.      3.561148
 75%            6             16
 90%            8             16       Variance       12.68178
 95%           10             16       Skewness       .6309651
 99%           12             16       Kurtosis       2.247505
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> case = SARS-CoV-2
 
                           gp_count
@@ -1818,10 +1728,10 @@ December21-December22 |      2,421       10.68      100.00
  1%            0             -3
  5%            0             -2
 10%            0             -2       Obs               6,747
-25%            0             -2       Sum of Wgt.       6,747
+25%            0             -2       Sum of wgt.       6,747
 
 50%            3                      Mean           3.302357
-                        Largest       Std. Dev.      3.527142
+                        Largest       Std. dev.      3.527142
 75%            6             15
 90%            8             15       Variance       12.44073
 95%           10             16       Skewness       .6283147
@@ -1832,7 +1742,7 @@ December21-December22 |      2,421       10.68      100.00
 (129 missing values generated)
 
 . recode gp_consults 3=2 10=3
-(gp_consults: 11421 changes made)
+(11,421 changes made to gp_consults)
 
 . label define gp_consults 0 "0" 1 "1-2" 2 "3-9" 3 ">9"
 
@@ -1860,10 +1770,10 @@ Contemporary comparat |     6,736      1,087      7,096        913 |    15,832
  1%           -1             -2
  5%            0             -2
 10%            0             -2       Obs              22,665
-25%            0             -2       Sum of Wgt.      22,665
+25%            0             -2       Sum of wgt.      22,665
 
 50%            0                      Mean           .3961174
-                        Largest       Std. Dev.        .72155
+                        Largest       Std. dev.        .72155
 75%            1              4
 90%            1              4       Variance       .5206344
 95%            2              4       Skewness       1.492993
@@ -1871,7 +1781,7 @@ Contemporary comparat |     6,736      1,087      7,096        913 |    15,832
 
 . bysort case: sum hosp_count, detail
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> case = Contemporary comparator
 
                          hosp_count
@@ -1880,16 +1790,16 @@ Contemporary comparat |     6,736      1,087      7,096        913 |    15,832
  1%           -1             -2
  5%            0             -2
 10%            0             -2       Obs              15,918
-25%            0             -2       Sum of Wgt.      15,918
+25%            0             -2       Sum of wgt.      15,918
 
 50%            0                      Mean           .3938309
-                        Largest       Std. Dev.      .7167073
+                        Largest       Std. dev.      .7167073
 75%            1              4
 90%            1              4       Variance       .5136693
 95%            2              4       Skewness       1.476311
 99%            3              4       Kurtosis       5.064761
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> case = SARS-CoV-2
 
                          hosp_count
@@ -1898,10 +1808,10 @@ Contemporary comparat |     6,736      1,087      7,096        913 |    15,832
  1%           -1             -2
  5%            0             -2
 10%            0             -2       Obs               6,747
-25%            0             -2       Sum of Wgt.       6,747
+25%            0             -2       Sum of wgt.       6,747
 
 50%            0                      Mean           .4015118
-                        Largest       Std. Dev.      .7328739
+                        Largest       Std. dev.      .7328739
 75%            1              3
 90%            1              4       Variance       .5371041
 95%            2              4       Skewness        1.52826
@@ -1997,11 +1907,10 @@ Contemporary comparat |    10,929      3,264      1,510 |    15,703
 >                                                 40/49.9999=2    ///
 >                                                 50/59.9999=3    ///
 >                                                 60/69.9999=4    ///
->                                                 70/79.9999=5    ///          
->                            
+>                                                 70/79.9999=5    ///                                     
 >                                                 80/max=6,               ///
 >                                                 gen(agegroup) 
-(22665 differences between age and agegroup)
+(22,665 differences between age and agegroup)
 
 . 
 . label var age "Age"
@@ -2031,7 +1940,6 @@ Contemporary comparat |    10,929      3,264      1,510 |    15,703
 . 
 . * Sex
 . safetab sex
-0
 
         Sex |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2046,10 +1954,8 @@ Contemporary comparat |    10,929      3,264      1,510 |    15,703
 . 
 . * Ethnicity
 . * 1 = White ethnicities (white British, white Irish, with other)
-. * 2 = Mixed ethnicities (white & black Caribbean, white & black African, whit
-> e & Asian, other mixed ethnicities)
-. * 3 = South Asian ethnicities (Indian, Pakistani, Bangladeshi, other South As
-> ian)
+. * 2 = Mixed ethnicities (white & black Caribbean, white & black African, white & Asian, other mixed ethnicities)
+. * 3 = South Asian ethnicities (Indian, Pakistani, Bangladeshi, other South Asian)
 . * 4 = Black ethnicities (black Caribbean, black African, other black)
 . * 5 = Other ethnicities (Chinese, all other ethnicities)
 . * . = Unknown ethnicity
@@ -2069,17 +1975,14 @@ Contemporary comparat |    10,929      3,264      1,510 |    15,703
 (847 real changes made)
 
 . label define ethnicity  1 "White"               ///
->                                                 2 "South Asian" ///          
->                                    
+>                                                 2 "South Asian" ///                                             
 >                                                 3 "Black"               ///
 >                                                 4 "Mixed"               ///
->                                                 5 "Other"                    
->                                            
+>                                                 5 "Other"                                                               
 
 . label values ethnicity ethnicity
 
 . safetab ethnicity, m
-10
 
   ethnicity |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2100,14 +2003,10 @@ South Asian |        858        3.79       63.49
 (5,678 real changes made)
 
 . label define ethnicity1 1 "White"                                       ///
->                                                 2 "South Asian"              
->            ///                                             
->                                                 3 "Black"                    
->                    ///
->                                                 4 "Mixed"                    
->                    ///
->                                                 5 "Other"                    
->                    ///
+>                                                 2 "South Asian"                         ///                                             
+>                                                 3 "Black"                                       ///
+>                                                 4 "Mixed"                                       ///
+>                                                 5 "Other"                                       ///
 >                                                 6 "Unknown"     
 
 . label values ethnicity1 ethnicity1
@@ -2115,7 +2014,6 @@ South Asian |        858        3.79       63.49
 . label var ethnicity1 "Ethnicity"
 
 . safetab ethnicity1, m
-11
 
   Ethnicity |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2133,22 +2031,14 @@ South Asian |        858        3.79       63.49
 . replace rural_urban=. if rural_urban<1|rural_urban>8
 (0 real changes made)
 
-. label define rural_urban 1 "Urban major conurbation"                         
->                    ///
->                                                  2 "Urban minor conurbation" 
->                                            ///
->                                                  3 "Urban city and town"     
->                                                    ///
->                                                  4 "Urban city and town in a 
-> sparse setting"            ///
->                                                  5 "Rural town and fringe"   
->                                                    ///
->                                                  6 "Rural town and fringe in 
-> a sparse setting"          ///
->                                                  7 "Rural village and dispers
-> ed"                                        ///
->                                                  8 "Rural village and dispers
-> ed in a sparse setting"
+. label define rural_urban 1 "Urban major conurbation"                                            ///
+>                                                  2 "Urban minor conurbation"                                            ///
+>                                                  3 "Urban city and town"                                                        ///
+>                                                  4 "Urban city and town in a sparse setting"            ///
+>                                                  5 "Rural town and fringe"                                                      ///
+>                                                  6 "Rural town and fringe in a sparse setting"          ///
+>                                                  7 "Rural village and dispersed"                                        ///
+>                                                  8 "Rural village and dispersed in a sparse setting"
 
 . label values rural_urban rural_urban
 
@@ -2186,22 +2076,13 @@ Rural village and dispersed in a sparse |      4,459       19.67      100.00
 
 . tab urban rural_urban, m
 
-Urban/rura |                      rural_urban
-         l | Urban maj  Urban min  Urban cit  Urban cit  Rural tow |     Total
------------+-------------------------------------------------------+----------
-     Rural |         0          0          0          0      2,344 |    13,518 
-     Urban |     2,219      2,320      2,301      2,307          0 |     9,147 
------------+-------------------------------------------------------+----------
-     Total |     2,219      2,320      2,301      2,307      2,344 |    22,665 
-
-
-Urban/rura |           rural_urban
-         l | Rural tow  Rural vil  Rural vil |     Total
------------+---------------------------------+----------
-     Rural |     2,257      4,458      4,459 |    13,518 
-     Urban |         0          0          0 |     9,147 
------------+---------------------------------+----------
-     Total |     2,257      4,458      4,459 |    22,665 
+Urban/rura |                                       rural_urban
+         l | Urban maj  Urban min  Urban cit  Urban cit  Rural tow  Rural tow  Rural vil  Rural vil |     Total
+-----------+----------------------------------------------------------------------------------------+----------
+     Rural |         0          0          0          0      2,344      2,257      4,458      4,459 |    13,518 
+     Urban |     2,219      2,320      2,301      2,307          0          0          0          0 |     9,147 
+-----------+----------------------------------------------------------------------------------------+----------
+     Total |     2,219      2,320      2,301      2,307      2,344      2,257      4,458      4,459 |    22,665 
 
 . tab case urban
 
@@ -2222,22 +2103,22 @@ Contemporary comparat |     9,537      6,381 |    15,918
 (22,665 missing values generated)
 
 . recode  bmi . = 1 if body_mass_index<18.5
-(bmi: 1373 changes made)
+(1,373 changes made to bmi)
 
 . recode  bmi . = 2 if body_mass_index<25
-(bmi: 5048 changes made)
+(5,048 changes made to bmi)
 
 . recode  bmi . = 3 if body_mass_index<30
-(bmi: 5347 changes made)
+(5,347 changes made to bmi)
 
 . recode  bmi . = 4 if body_mass_index<35
-(bmi: 4525 changes made)
+(4,525 changes made to bmi)
 
 . recode  bmi . = 5 if body_mass_index<40
-(bmi: 2653 changes made)
+(2,653 changes made to bmi)
 
 . recode  bmi . = 6 if body_mass_index<.
-(bmi: 1402 changes made)
+(1,402 changes made to bmi)
 
 . replace bmi = . if body_mass_index>=.
 (0 real changes made)
@@ -2247,15 +2128,13 @@ Contemporary comparat |     9,537      6,381 |    15,918
 >                                         3 "Overweight (25-29.9)"        ///
 >                                         4 "Obese I (30-34.9)"           ///
 >                                         5 "Obese II (35-39.9)"          ///
->                                         6 "Obese III (40+)"                  
->            
+>                                         6 "Obese III (40+)"                             
 
 . label values bmi bmi
 
 . label var bmi "Body mass index (BMI)"
 
 . safetab bmi, m
-4
 
      Body mass index |
                (BMI) |      Freq.     Percent        Cum.
@@ -2291,7 +2170,6 @@ Overweight (25-29.9) |      5,347       23.59       51.92
 . label var smoking "Smoking status"
 
 . safetab smoking, m
-8
 
        Smoking status |      Freq.     Percent        Cum.
 ----------------------+-----------------------------------
@@ -2304,22 +2182,19 @@ Current/former smoker |      3,111       13.73       17.75
 . 
 . * Baseline eGFR groups
 . * All baseline eGFR <15 should already by excluded
-. egen egfr_group = cut(baseline_egfr), at(0, 15, 30, 45, 60, 75, 90, 105, 5000
-> )
-(9865 missing values generated)
+. egen egfr_group = cut(baseline_egfr), at(0, 15, 30, 45, 60, 75, 90, 105, 5000)
+(9,865 missing values generated)
 
 . recode egfr_group 0=8 15=7 30=6 45=5 60=4 75=3 90=2 105=1
-(egfr_group: 12800 changes made)
+(12,800 changes made to egfr_group)
 
-. label define egfr_group 1 "≥105" 2 "90-104" 3 "75-89" 4 "60-74" 5 "45-59" 6 "
-> 30-44" 7 "15-29" 8 "<15"
+. label define egfr_group 1 "≥105" 2 "90-104" 3 "75-89" 4 "60-74" 5 "45-59" 6 "30-44" 7 "15-29" 8 "<15"
 
 . label values egfr_group egfr_group
 
 . label var egfr_group "Baseline eGFR range"
 
 . safetab egfr_group, m
-11
 
    Baseline |
  eGFR range |      Freq.     Percent        Cum.
@@ -2337,24 +2212,21 @@ Current/former smoker |      3,111       13.73       17.75
 
 . 
 . * Baseline CKD stage
-. * No CKD = eGFR >59, CKD 3A = eGFR 45-59, CKD 3B = eGFR 30-44, CKD 4 = eGFR 1
-> 5-29, CKD 5 = eGFR <15
+. * No CKD = eGFR >59, CKD 3A = eGFR 45-59, CKD 3B = eGFR 30-44, CKD 4 = eGFR 15-29, CKD 5 = eGFR <15
 . * CKD 5 should already be excluded
 . gen ckd_stage = egfr_group
 (9,865 missing values generated)
 
 . recode ckd_stage 2/4=1 5=2 6=3 7=4 8=5 .=6
-(ckd_stage: 18702 changes made)
+(18,702 changes made to ckd_stage)
 
-. label define ckd_stage 1 "No CKD" 2 "CKD 3A" 3 "CKD 3B" 4 "CKD 4" 5 "CKD 5" 6
->  "No baseline eGFR measurement"
+. label define ckd_stage 1 "No CKD" 2 "CKD 3A" 3 "CKD 3B" 4 "CKD 4" 5 "CKD 5" 6 "No baseline eGFR measurement"
 
 . label values ckd_stage ckd_stage
 
 . label var ckd_stage "Baseline CKD stage"
 
 . safetab ckd_stage, m
-10
 
           Baseline CKD stage |      Freq.     Percent        Cum.
 -----------------------------+-----------------------------------
@@ -2371,7 +2243,6 @@ No baseline eGFR measurement |      9,865       43.53      100.00
 . rename acute_kidney_injury_baseline aki_baseline
 
 . safetab aki_baseline
-0
 
 aki_baselin |
           e |      Freq.     Percent        Cum.
@@ -2386,7 +2257,6 @@ aki_baselin |
 . drop atrial_fibrillation_or_flutter
 
 . safetab afib
-0
 
        afib |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2400,7 +2270,6 @@ aki_baselin |
 . drop chronic_liver_disease
 
 . safetab liver
-0
 
       liver |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2412,7 +2281,6 @@ aki_baselin |
 . label var diabetes "Diabetes"
 
 . safetab diabetes
-0
 
    Diabetes |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2426,7 +2294,6 @@ aki_baselin |
 . drop haematological_cancer
 
 . safetab haem_cancer
-0
 
 haem_cancer |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2436,7 +2303,6 @@ haem_cancer |      Freq.     Percent        Cum.
       Total |     22,665      100.00
 
 . safetab heart_failure
-0
 
 heart_failu |
          re |      Freq.     Percent        Cum.
@@ -2447,7 +2313,6 @@ heart_failu |
       Total |     22,665      100.00
 
 . safetab hiv
-0
 
         hiv |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2459,7 +2324,6 @@ heart_failu |
 . label var hypertension "Hypertension"
 
 . safetab hypertension
-0
 
 Hypertensio |
           n |      Freq.     Percent        Cum.
@@ -2476,7 +2340,6 @@ Hypertensio |
 . label var non_haem_cancer "Cancer (non-haematological)"
 
 . safetab non_haem_cancer
-0
 
      Cancer |
 (non-haemat |
@@ -2488,7 +2351,6 @@ Hypertensio |
       Total |     22,665      100.00
 
 . safetab myocardial_infarction
-0
 
 myocardial_ |
  infarction |      Freq.     Percent        Cum.
@@ -2503,7 +2365,6 @@ myocardial_ |
 . drop peripheral_vascular_disease
 
 . safetab pvd
-0
 
         pvd |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2517,7 +2378,6 @@ myocardial_ |
 . drop rheumatoid_arthritis
 
 . safetab rheumatoid
-0
 
  rheumatoid |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2527,7 +2387,6 @@ myocardial_ |
       Total |     22,665      100.00
 
 . safetab stroke
-0
 
      stroke |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2541,7 +2400,6 @@ myocardial_ |
 . drop systemic_lupus_erythematosus
 
 . safetab lupus
-0
 
       lupus |      Freq.     Percent        Cum.
 ------------+-----------------------------------
@@ -2582,7 +2440,6 @@ myocardial_ |
 . label var immunosuppressed "Immunosuppressive diseases"
 
 . safetab cardiovascular
-0
 
 Cardiovascu |
         lar |
@@ -2594,7 +2451,6 @@ Cardiovascu |
       Total |     22,665      100.00
 
 . safetab immunosuppressed
-0
 
 Immunosuppr |
      essive |
@@ -2610,95 +2466,57 @@ Immunosuppr |
 . * ESRD
 . * eGFR <15 (earliest month)
 . foreach creatinine_monthly of varlist   creatinine_feb2020 ///
->                                                                              
->    creatinine_mar2020 ///
->                                                                              
->    creatinine_apr2020 ///
->                                                                              
->    creatinine_may2020 ///
->                                                                              
->    creatinine_jun2020 ///
->                                                                              
->    creatinine_jul2020 ///
->                                                                              
->    creatinine_aug2020 ///
->                                                                              
->    creatinine_sep2020 ///
->                                                                              
->    creatinine_oct2020 ///
->                                                                              
->    creatinine_nov2020 ///
->                                                                              
->    creatinine_dec2020 ///
->                                                                              
->    creatinine_jan2021 ///
->                                                                              
->    creatinine_feb2021 ///
->                                                                              
->    creatinine_mar2021 ///
->                                                                              
->    creatinine_apr2021 ///
->                                                                              
->    creatinine_may2021 ///
->                                                                              
->    creatinine_jun2021 ///
->                                                                              
->    creatinine_jul2021 ///
->                                                                              
->    creatinine_aug2021 ///
->                                                                              
->    creatinine_sep2021 ///
->                                                                              
->    creatinine_oct2021 ///
->                                                                              
->    creatinine_nov2021 ///
->                                                                              
->    creatinine_dec2021 ///
->                                                                              
->    creatinine_jan2022 ///
->                                                                              
->    creatinine_feb2022 ///
->                                                                              
->    creatinine_mar2022 ///
->                                                                              
->    creatinine_apr2022 ///
->                                                                              
->    creatinine_may2022 ///
->                                                                              
->    creatinine_jun2022 ///
->                                                                              
->    creatinine_jul2022 ///
->                                                                              
->    creatinine_aug2022 ///
->                                                                              
->    creatinine_sep2022 ///
->                                                                              
->    creatinine_oct2022 ///
->                                                                              
->    creatinine_nov2022 ///
->                                                                              
->    creatinine_dec2022 {
-  2. replace `creatinine_monthly' = . if !inrange(`creatinine_monthly', 20, 300
-> 0)
+>                                                                                 creatinine_mar2020 ///
+>                                                                                 creatinine_apr2020 ///
+>                                                                                 creatinine_may2020 ///
+>                                                                                 creatinine_jun2020 ///
+>                                                                                 creatinine_jul2020 ///
+>                                                                                 creatinine_aug2020 ///
+>                                                                                 creatinine_sep2020 ///
+>                                                                                 creatinine_oct2020 ///
+>                                                                                 creatinine_nov2020 ///
+>                                                                                 creatinine_dec2020 ///
+>                                                                                 creatinine_jan2021 ///
+>                                                                                 creatinine_feb2021 ///
+>                                                                                 creatinine_mar2021 ///
+>                                                                                 creatinine_apr2021 ///
+>                                                                                 creatinine_may2021 ///
+>                                                                                 creatinine_jun2021 ///
+>                                                                                 creatinine_jul2021 ///
+>                                                                                 creatinine_aug2021 ///
+>                                                                                 creatinine_sep2021 ///
+>                                                                                 creatinine_oct2021 ///
+>                                                                                 creatinine_nov2021 ///
+>                                                                                 creatinine_dec2021 ///
+>                                                                                 creatinine_jan2022 ///
+>                                                                                 creatinine_feb2022 ///
+>                                                                                 creatinine_mar2022 ///
+>                                                                                 creatinine_apr2022 ///
+>                                                                                 creatinine_may2022 ///
+>                                                                                 creatinine_jun2022 ///
+>                                                                                 creatinine_jul2022 ///
+>                                                                                 creatinine_aug2022 ///
+>                                                                                 creatinine_sep2022 ///
+>                                                                                 creatinine_oct2022 ///
+>                                                                                 creatinine_nov2022 ///
+>                                                                                 creatinine_dec2022 ///
+>                                                                                 creatinine_jan2023 {
+  2. replace `creatinine_monthly' = . if !inrange(`creatinine_monthly', 20, 3000)
   3. gen mgdl_`creatinine_monthly' = `creatinine_monthly'/88.4
   4. gen min_`creatinine_monthly'=.
   5. replace min_`creatinine_monthly' = mgdl_`creatinine_monthly'/0.7 if sex==0
   6. replace min_`creatinine_monthly' = mgdl_`creatinine_monthly'/0.9 if sex==1
-  7. replace min_`creatinine_monthly' = min_`creatinine_monthly'^-0.329 if sex=
-> =0
-  8. replace min_`creatinine_monthly' = min_`creatinine_monthly'^-0.411 if sex=
-> =1
+  7. replace min_`creatinine_monthly' = min_`creatinine_monthly'^-0.329 if sex==0
+  8. replace min_`creatinine_monthly' = min_`creatinine_monthly'^-0.411 if sex==1
   9. replace min_`creatinine_monthly' = 1 if min_`creatinine_monthly'<1
  10. gen max_`creatinine_monthly'=.
  11. replace max_`creatinine_monthly' = mgdl_`creatinine_monthly'/0.7 if sex==0
  12. replace max_`creatinine_monthly' = mgdl_`creatinine_monthly'/0.9 if sex==1
  13. replace max_`creatinine_monthly' = max_`creatinine_monthly'^-1.209
  14. replace max_`creatinine_monthly' = 1 if max_`creatinine_monthly'>1
- 15. gen egfr_`creatinine_monthly' = min_`creatinine_monthly'*max_`creatinine_m
-> onthly'*141
+ 15. gen egfr_`creatinine_monthly' = min_`creatinine_monthly'*max_`creatinine_monthly'*141
  16. replace egfr_`creatinine_monthly' = egfr_`creatinine_monthly'*(0.993^age)
- 17. replace egfr_`creatinine_monthly' = egfr_`creatinine_monthly'*1.018 if sex
-> ==0
+ 17. replace egfr_`creatinine_monthly' = egfr_`creatinine_monthly'*1.018 if sex==0
  18. drop `creatinine_monthly'
  19. drop mgdl_`creatinine_monthly'
  20. drop min_`creatinine_monthly'
@@ -3264,6 +3082,22 @@ Immunosuppr |
 (9,959 missing values generated)
 (12,706 real changes made)
 (6,451 real changes made)
+(9,976 real changes made, 9,976 to missing)
+(9,976 missing values generated)
+(22,665 missing values generated)
+(6,433 real changes made)
+(6,256 real changes made)
+(6,433 real changes made)
+(6,256 real changes made)
+(8,035 real changes made)
+(22,665 missing values generated)
+(6,433 real changes made)
+(6,256 real changes made)
+(12,689 real changes made)
+(14,630 real changes made)
+(9,976 missing values generated)
+(12,689 real changes made)
+(6,433 real changes made)
 
 . 
 . replace index_date = index_date_28
@@ -3274,15 +3108,13 @@ Immunosuppr |
 . gen egfr15_date=.
 (22,665 missing values generated)
 
-. local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep
-> 2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 
-> jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr20
-> 22 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022"
+. local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 
+> jul2022 aug2022 sep2022 oct2022 nov2022 dec2022 jan2023"
 
 . foreach x of local month_year  {
-  2.   replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatin
-> ine_`x'<15 & date("01`x'", "DMY")>index_date
+  2.   replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatinine_`x'<15 & date("01`x'", "DMY")>index_date
   3. }
+(0 real changes made)
 (0 real changes made)
 (0 real changes made)
 (0 real changes made)
@@ -3357,39 +3189,28 @@ Immunosuppr |
 >                                                 366/730=7       ///
 >                                                 731/973=8       ///
 >                                                 974/max=9
-(esrd_time_cat: 2383 changes made)
+(2,383 changes made to esrd_time_cat)
 
 . label define esrd_time_cat      1 "<0 days"                     ///
->                                                         2 "0 days"           
->            ///
->                                                         3 "1 to 28 days"     
->    ///
->                                                         4 "20 to 90 days"    
->    ///
->                                                         5 "91 to 180 days"   
->    ///
->                                                         6 "181 to 365 days"  
->    ///
->                                                         7 "366 to 730 days"  
->    ///
->                                                         8 "731 to 973 days"  
->    ///
+>                                                         2 "0 days"                      ///
+>                                                         3 "1 to 28 days"        ///
+>                                                         4 "20 to 90 days"       ///
+>                                                         5 "91 to 180 days"      ///
+>                                                         6 "181 to 365 days"     ///
+>                                                         7 "366 to 730 days"     ///
+>                                                         8 "731 to 973 days"     ///
 >                                                         9 ">973 days"
 
 . label values esrd_time_cat esrd_time_cat
 
 . foreach exposure of varlist     case                    ///
->                                                                 covid_severit
-> y  ///
->                                                                 covid_aki    
->            {
-  2.                                                                 by `exposu
-> re',sort: sum esrd_time, de
-  3.                                                                 tab esrd_t
-> ime_cat `exposure', m col chi
+>                                                                 covid_severity  ///
+>                                                                 covid_aki               {
+  2.                                                                 by `exposure',sort: sum esrd_time, de
+  3.                                                                 tab esrd_time_cat `exposure', m col chi
   4.                                                                 }
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> case = Contemporary comparator
 
                      Time to ESRD (Days)
@@ -3398,16 +3219,16 @@ Immunosuppr |
  1%            1              1
  5%           12              1
 10%           53              1       Obs               1,707
-25%          165              1       Sum of Wgt.       1,707
+25%          165              1       Sum of wgt.       1,707
 
 50%          364                      Mean           398.2068
-                        Largest       Std. Dev.      270.5786
+                        Largest       Std. dev.      270.5786
 75%          600           1039
 90%          793           1039       Variance       73212.77
 95%          883           1043       Skewness       .3433866
 99%          984           1051       Kurtosis       2.109761
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> case = SARS-CoV-2
 
                      Time to ESRD (Days)
@@ -3416,10 +3237,10 @@ Immunosuppr |
  1%            1              1
  5%            7              1
 10%           41              1       Obs                 681
-25%          145              1       Sum of Wgt.         681
+25%          145              1       Sum of wgt.         681
 
 50%          340                      Mean           375.5022
-                        Largest       Std. Dev.      264.0898
+                        Largest       Std. dev.      264.0898
 75%          577           1003
 90%          758           1008       Variance       69743.43
 95%          835           1011       Skewness       .3493358
@@ -3465,7 +3286,7 @@ Immunosuppr |
 
           Pearson chi2(7) =   8.8024   Pr = 0.267
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> covid_severity = Contemporary comparator
 
                      Time to ESRD (Days)
@@ -3474,16 +3295,16 @@ Immunosuppr |
  1%            1              1
  5%           12              1
 10%           53              1       Obs               1,707
-25%          165              1       Sum of Wgt.       1,707
+25%          165              1       Sum of wgt.       1,707
 
 50%          364                      Mean           398.2068
-                        Largest       Std. Dev.      270.5786
+                        Largest       Std. dev.      270.5786
 75%          600           1039
 90%          793           1039       Variance       73212.77
 95%          883           1043       Skewness       .3433866
 99%          984           1051       Kurtosis       2.109761
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> covid_severity = Non-hospitalised COVID
 
                      Time to ESRD (Days)
@@ -3492,16 +3313,16 @@ Immunosuppr |
  1%            1              1
  5%            6              1
 10%           38              1       Obs                 548
-25%          147              1       Sum of Wgt.         548
+25%          147              1       Sum of wgt.         548
 
 50%        352.5                      Mean           378.1569
-                        Largest       Std. Dev.      261.4792
+                        Largest       Std. dev.      261.4792
 75%          588            958
 90%          749            973       Variance       68371.35
 95%          826           1011       Skewness       .2844595
 99%          933           1020       Kurtosis       2.018468
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> covid_severity = Hospitalised COVID
 
                      Time to ESRD (Days)
@@ -3510,16 +3331,16 @@ Immunosuppr |
  1%            1              1
  5%            7              1
 10%           39              5       Obs                  69
-25%          166              7       Sum of Wgt.          69
+25%          166              7       Sum of wgt.          69
 
 50%          317                      Mean           388.8841
-                        Largest       Std. Dev.      277.6788
+                        Largest       Std. dev.      277.6788
 75%          576            894
 90%          812            957       Variance       77105.52
 95%          894            977       Skewness       .5215258
 99%         1003           1003       Kurtosis       2.236567
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> covid_severity = Critical care COVID
 
                      Time to ESRD (Days)
@@ -3528,10 +3349,10 @@ Immunosuppr |
  1%            1              1
  5%           18              1
 10%           46              1       Obs                  64
-25%          100             18       Sum of Wgt.          64
+25%          100             18       Sum of wgt.          64
 
 50%          262                      Mean           338.3438
-                        Largest       Std. Dev.      272.5145
+                        Largest       Std. dev.      272.5145
 75%        528.5            846
 90%          764            873       Variance       74264.13
 95%          846            990       Skewness       .6762079
@@ -3577,7 +3398,7 @@ Immunosuppr |
 
          Pearson chi2(21) =  27.5064   Pr = 0.155
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> covid_aki = Contemporary comparator
 
                      Time to ESRD (Days)
@@ -3586,16 +3407,16 @@ Immunosuppr |
  1%            1              1
  5%           12              1
 10%           53              1       Obs               1,707
-25%          165              1       Sum of Wgt.       1,707
+25%          165              1       Sum of wgt.       1,707
 
 50%          364                      Mean           398.2068
-                        Largest       Std. Dev.      270.5786
+                        Largest       Std. dev.      270.5786
 75%          600           1039
 90%          793           1039       Variance       73212.77
 95%          883           1043       Skewness       .3433866
 99%          984           1051       Kurtosis       2.109761
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> covid_aki = Non-hospitalised COVID
 
                      Time to ESRD (Days)
@@ -3604,16 +3425,16 @@ Immunosuppr |
  1%            1              1
  5%           10              1
 10%           44              1       Obs                 573
-25%          145              1       Sum of Wgt.         573
+25%          145              1       Sum of wgt.         573
 
 50%          352                      Mean           375.8028
-                        Largest       Std. Dev.      261.1596
+                        Largest       Std. dev.      261.1596
 75%          583            990
 90%          747           1008       Variance       68204.34
 95%          826           1011       Skewness       .3073518
 99%          949           1020       Kurtosis       2.041782
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> covid_aki = Hospitalised COVID
 
                      Time to ESRD (Days)
@@ -3622,16 +3443,16 @@ Immunosuppr |
  1%            1              1
  5%            5              1
 10%           56              1       Obs                  73
-25%          166              5       Sum of Wgt.          73
+25%          166              5       Sum of wgt.          73
 
 50%          316                      Mean           386.7808
-                        Largest       Std. Dev.      279.8714
+                        Largest       Std. dev.      279.8714
 75%          576            894
 90%          812            957       Variance       78328.01
 95%          894            977       Skewness       .5457309
 99%         1003           1003       Kurtosis       2.222535
 
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -> covid_aki = Hospitalised COVID-AKI
 
                      Time to ESRD (Days)
@@ -3640,10 +3461,10 @@ Immunosuppr |
  1%            1              1
  5%            1              1
 10%            7              6       Obs                  35
-25%           67              7       Sum of Wgt.          35
+25%           67              7       Sum of wgt.          35
 
 50%          317                      Mean           347.0571
-                        Largest       Std. Dev.       283.641
+                        Largest       Std. dev.       283.641
 75%          568            763
 90%          763            799       Variance       80452.23
 95%          912            912       Skewness        .517862
@@ -3694,16 +3515,15 @@ Immunosuppr |
 
 . format exit_date_esrd %td
 
-. gen end_date = date("2022-11-30", "YMD")
+. gen end_date = date("2023-01-31", "YMD")
 
 . format end_date %td
 
-. replace exit_date_esrd = min(deregistered_date, death_date, end_date, covid_e
-> xit) if esrd_date==.
+. replace exit_date_esrd = min(deregistered_date, death_date, end_date, covid_exit) if esrd_date==.
 (20,277 real changes made)
 
 . replace exit_date_esrd = covid_exit if covid_exit < esrd_date
-(861 real changes made)
+(669 real changes made)
 
 . replace esrd_date=. if covid_exit<esrd_date&case==0
 (392 real changes made, 392 to missing)
@@ -3721,22 +3541,16 @@ Immunosuppr |
 >                                                 0=3                     ///
 >                                                 1/365=4         ///
 >                                                 366/730=5       ///
->                                                 731/1040=6      ///          
->                            
+>                                                 731/1040=6      ///                                     
 >                                                 1041/max=7
-(follow_up_cat_esrd: 22648 changes made)
+(22,648 changes made to follow_up_cat_esrd)
 
 . label define follow_up_cat_esrd         1 "<-29 days"   ///
->                                                         2 "-28 to -1 days"   
->            ///
->                                                         3 "0 days"           
->                    ///
->                                                         4 "1 to 365 days"    
->            ///
->                                                         5 "366 to 730 days"  
->    ///
->                                                         6 "731 to 1040 days" 
->    ///
+>                                                         2 "-28 to -1 days"              ///
+>                                                         3 "0 days"                              ///
+>                                                         4 "1 to 365 days"               ///
+>                                                         5 "366 to 730 days"     ///
+>                                                         6 "731 to 1040 days"    ///
 >                                                         7 ">1040 days"
 
 . label values follow_up_cat_esrd follow_up_cat_esrd
@@ -3745,135 +3559,112 @@ Immunosuppr |
 
 . tab case follow_up_cat_esrd
 
-                      |               Follow_up time
-                 case | <-29 days  -28 to -1     0 days  1 to 365  |     Total
-----------------------+--------------------------------------------+----------
-Contemporary comparat |       133         63          4      5,920 |    15,918 
-           SARS-CoV-2 |        79         38          2      1,381 |     6,747 
-----------------------+--------------------------------------------+----------
-                Total |       212        101          6      7,301 |    22,665 
-
-
-                      |    Follow_up time
-                 case | 366 to 73  731 to 10 |     Total
-----------------------+----------------------+----------
-Contemporary comparat |     5,632      4,166 |    15,918 
-           SARS-CoV-2 |     2,417      2,830 |     6,747 
-----------------------+----------------------+----------
-                Total |     8,049      6,996 |    22,665 
+                      |                          Follow_up time
+                 case | -28 to -1     0 days  1 to 365   366 to 73  731 to 10  >1040 day |     Total
+----------------------+------------------------------------------------------------------+----------
+Contemporary comparat |        62          3      5,771      5,323      4,399        360 |    15,918 
+           SARS-CoV-2 |        35          2      1,272      2,147      3,008        283 |     6,747 
+----------------------+------------------------------------------------------------------+----------
+                Total |        97          5      7,043      7,470      7,407        643 |    22,665 
 
 . tab covid_krt follow_up_cat_esrd
 
-      COVID-19 kidney |               Follow_up time
-  replacement therapy | <-29 days  -28 to -1     0 days  1 to 365  |     Total
-----------------------+--------------------------------------------+----------
-Contemporary comparat |       133         63          4      5,920 |    15,918 
-Non-hospitalised SARS |        69         29          2      1,122 |     5,484 
-No KRT hospitalised C |         6          5          0        120 |       583 
-KRT hospitalised COVI |         4          4          0        139 |       680 
-----------------------+--------------------------------------------+----------
-                Total |       212        101          6      7,301 |    22,665 
-
-
-      COVID-19 kidney |    Follow_up time
-  replacement therapy | 366 to 73  731 to 10 |     Total
-----------------------+----------------------+----------
-Contemporary comparat |     5,632      4,166 |    15,918 
-Non-hospitalised SARS |     1,946      2,316 |     5,484 
-No KRT hospitalised C |       199        253 |       583 
-KRT hospitalised COVI |       272        261 |       680 
-----------------------+----------------------+----------
-                Total |     8,049      6,996 |    22,665 
+      COVID-19 kidney |                          Follow_up time
+  replacement therapy | -28 to -1     0 days  1 to 365   366 to 73  731 to 10  >1040 day |     Total
+----------------------+------------------------------------------------------------------+----------
+Contemporary comparat |        62          3      5,771      5,323      4,399        360 |    15,918 
+Non-hospitalised SARS |        29          1      1,043      1,724      2,450        237 |     5,484 
+No KRT hospitalised C |         3          0        115        173        268         24 |       583 
+KRT hospitalised COVI |         3          1        114        250        290         22 |       680 
+----------------------+------------------------------------------------------------------+----------
+                Total |        97          5      7,043      7,470      7,407        643 |    22,665 
 
 . drop if follow_up_time_esrd<1
-(319 observations deleted)
+(102 observations deleted)
 
 . drop if follow_up_time_esrd>1040
-(0 observations deleted)
+(643 observations deleted)
 
 . tab case follow_up_cat_esrd
 
                       |          Follow_up time
                  case | 1 to 365   366 to 73  731 to 10 |     Total
 ----------------------+---------------------------------+----------
-Contemporary comparat |     5,920      5,632      4,166 |    15,718 
-           SARS-CoV-2 |     1,381      2,417      2,830 |     6,628 
+Contemporary comparat |     5,771      5,323      4,399 |    15,493 
+           SARS-CoV-2 |     1,272      2,147      3,008 |     6,427 
 ----------------------+---------------------------------+----------
-                Total |     7,301      8,049      6,996 |    22,346 
+                Total |     7,043      7,470      7,407 |    21,920 
 
 . tab covid_krt follow_up_cat_esrd
 
       COVID-19 kidney |          Follow_up time
   replacement therapy | 1 to 365   366 to 73  731 to 10 |     Total
 ----------------------+---------------------------------+----------
-Contemporary comparat |     5,920      5,632      4,166 |    15,718 
-Non-hospitalised SARS |     1,122      1,946      2,316 |     5,384 
-No KRT hospitalised C |       120        199        253 |       572 
-KRT hospitalised COVI |       139        272        261 |       672 
+Contemporary comparat |     5,771      5,323      4,399 |    15,493 
+Non-hospitalised SARS |     1,043      1,724      2,450 |     5,217 
+No KRT hospitalised C |       115        173        268 |       556 
+KRT hospitalised COVI |       114        250        290 |       654 
 ----------------------+---------------------------------+----------
-                Total |     7,301      8,049      6,996 |    22,346 
+                Total |     7,043      7,470      7,407 |    21,920 
 
 . gen follow_up_years_esrd = follow_up_time_esrd/365.25
 
 . 
 . * 50% eGFR reduction (earliest month) (or ESRD)
 . gen egfr_half_date=.
-(22,346 missing values generated)
+(21,920 missing values generated)
 
-. local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep
-> 2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 
-> jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr20
-> 22 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022"
+. local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 
+> jul2022 aug2022 sep2022 oct2022 nov2022 dec2022 jan2023"
 
 . foreach x of local month_year {
-  2.   replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_h
-> alf_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>ind
-> ex_date
+  2.   replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_half_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>index_date
   3.   format egfr_half_date %td
   4. }
 (0 real changes made)
 (0 real changes made)
-(46 real changes made)
-(85 real changes made)
-(143 real changes made)
-(167 real changes made)
-(181 real changes made)
-(182 real changes made)
-(224 real changes made)
-(246 real changes made)
-(216 real changes made)
+(30 real changes made)
+(74 real changes made)
+(130 real changes made)
+(144 real changes made)
+(170 real changes made)
+(174 real changes made)
+(213 real changes made)
+(238 real changes made)
+(208 real changes made)
+(229 real changes made)
+(245 real changes made)
+(240 real changes made)
+(236 real changes made)
 (234 real changes made)
-(249 real changes made)
-(244 real changes made)
-(241 real changes made)
-(237 real changes made)
-(228 real changes made)
-(213 real changes made)
-(213 real changes made)
-(205 real changes made)
+(225 real changes made)
+(210 real changes made)
+(210 real changes made)
+(204 real changes made)
+(189 real changes made)
 (191 real changes made)
-(192 real changes made)
-(171 real changes made)
-(196 real changes made)
-(166 real changes made)
-(146 real changes made)
-(150 real changes made)
-(152 real changes made)
-(145 real changes made)
+(168 real changes made)
+(195 real changes made)
+(162 real changes made)
+(144 real changes made)
 (148 real changes made)
-(115 real changes made)
-(128 real changes made)
-(108 real changes made)
+(151 real changes made)
+(145 real changes made)
+(143 real changes made)
+(112 real changes made)
+(127 real changes made)
+(107 real changes made)
 (98 real changes made)
-(96 real changes made)
+(95 real changes made)
+(113 real changes made)
 
 . replace egfr_half_date=esrd_date if egfr_half_date==.
-(1,454 real changes made)
+(1,450 real changes made)
 
 . gen egfr_half = 0
 
 . replace egfr_half = 1 if egfr_half_date!=.
-(7,210 real changes made)
+(7,152 real changes made)
 
 . label var egfr_half "50% reduction in eGFR"
 
@@ -3881,44 +3672,42 @@ KRT hospitalised COVI |       139        272        261 |       672
 . gen index_date_egfr_half = index_date
 
 . replace index_date_egfr_half =. if baseline_egfr==.
-(9,669 real changes made, 9,669 to missing)
+(9,479 real changes made, 9,479 to missing)
 
 . * Exit date (50% eGFR reduction)
 . gen exit_date_egfr_half = egfr_half_date
-(15,136 missing values generated)
+(14,768 missing values generated)
 
 . format exit_date_egfr_half %td
 
-. replace exit_date_egfr_half = min(deregistered_date,death_date,end_date,covid
-> _exit) if egfr_half_date==. & index_date_egfr_half!=.
-(6,348 real changes made)
+. replace exit_date_egfr_half = min(deregistered_date,death_date,end_date,covid_exit) if egfr_half_date==. & index_date_egfr_half!=.
+(6,170 real changes made)
 
 . replace exit_date_egfr_half = covid_exit if covid_exit < egfr_half_date
-(3,590 real changes made)
+(3,536 real changes made)
 
 . gen follow_up_time_egfr_half = (exit_date_egfr_half - index_date_egfr_half)
-(9,669 missing values generated)
+(9,479 missing values generated)
 
-. label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days
-> )"
+. label var follow_up_time_egfr_half "Follow-up time (50% eGFR reduction) (Days)"
 
 . replace egfr_half_date=. if covid_exit<egfr_half_date&case==0
-(662 real changes made, 662 to missing)
+(681 real changes made, 681 to missing)
 
 . gen egfr_half_denominator = 0
 
 . replace egfr_half_denominator = 1 if index_date_egfr_half!=.
-(12,677 real changes made)
+(12,441 real changes made)
 
 . gen follow_up_years_egfr_half = follow_up_time_egfr_half/365.25
-(9,669 missing values generated)
+(9,479 missing values generated)
 
 . 
 . * AKI (or ESRD)
 . gen index_date_aki = index_date
 
 . gen aki_date = date(acute_kidney_injury_outcome, "YMD")
-(20,248 missing values generated)
+(19,863 missing values generated)
 
 . format aki_date %td
 
@@ -3930,22 +3719,21 @@ KRT hospitalised COVI |       139        272        261 |       672
 . gen aki = 0
 
 . replace aki = 1 if aki_date!=.
-(3,910 real changes made)
+(3,869 real changes made)
 
 . label var aki "Acute kidney injury"
 
 . * Exit date (AKI)
 . gen exit_date_aki = aki_date
-(18,436 missing values generated)
+(18,051 missing values generated)
 
 . format exit_date_aki %td
 
-. replace exit_date_aki = min(deregistered_date,death_date,end_date,covid_exit)
->   if aki_date==.
-(18,436 real changes made)
+. replace exit_date_aki = min(deregistered_date,death_date,end_date,covid_exit)  if aki_date==.
+(18,051 real changes made)
 
 . replace exit_date_aki = covid_exit if covid_exit < aki_date
-(705 real changes made)
+(530 real changes made)
 
 . replace aki_date=. if covid_exit<aki_date&case==0
 (265 real changes made, 265 to missing)
@@ -3963,23 +3751,22 @@ KRT hospitalised COVI |       139        272        261 |       672
 . gen index_date_death = index_date
 
 . gen exit_date_death = death_date
-(20,931 missing values generated)
+(20,504 missing values generated)
 
 . gen death = 0
 
 . replace death = 1 if death_date!=.
-(1,415 real changes made)
+(1,416 real changes made)
 
 . label var death "Death"
 
 . format exit_date_death %td
 
-. replace exit_date_death = min(deregistered_date,end_date,covid_exit)  if deat
-> h_date==.
-(20,931 real changes made)
+. replace exit_date_death = min(deregistered_date,end_date,covid_exit)  if death_date==.
+(20,504 real changes made)
 
 . replace exit_date_death = covid_exit if covid_exit < death_date
-(594 real changes made)
+(375 real changes made)
 
 . replace death_date=. if covid_exit<death_date&case==0
 (279 real changes made, 279 to missing)
@@ -3993,27 +3780,614 @@ KRT hospitalised COVI |       139        272        261 |       672
 . gen follow_up_years_death = follow_up_time_death/365.25
 
 . 
-. stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scal
-> e(365.25)
+. *Outcomes by time period
+. *ESRD
+. *0-29 days
+. gen esrd_date29 = esrd_date if esrd_date < (index_date_esrd + 30) 
+(21,740 missing values generated)
 
-                id:  unique
-     failure event:  esrd_date != 0 & esrd_date < .
-obs. time interval:  (exit_date_esrd[_n-1], exit_date_esrd]
- exit on or before:  failure
-    t for analysis:  (time-origin)/365.25
-            origin:  time index_date_esrd
+. gen exit_date29_esrd = esrd_date29
+(21,740 missing values generated)
 
-------------------------------------------------------------------------------
-     22,346  total observations
+. gen index_date29_esrd = index_date_esrd
+
+. format exit_date29_esrd %td
+
+. replace exit_date29_esrd = min(deregistered_date, death_date, end_date, (index_date_esrd + 29)) if esrd_date29==.
+(21,740 real changes made)
+
+. stset exit_date29_esrd, fail(esrd_date29) origin(index_date29_esrd) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: esrd_date29!=0 & esrd_date29<.
+Observed time interval: (exit_date29_esrd[_n-1], exit_date29_esrd]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date29_esrd
+
+--------------------------------------------------------------------------
+     21,920  total observations
           0  exclusions
-------------------------------------------------------------------------------
-     22,346  observations remaining, representing
-     22,346  subjects
+--------------------------------------------------------------------------
+     21,920  observations remaining, representing
+     21,920  subjects
+        180  failures in single-failure-per-subject data
+  1,723.283  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .0793977
+
+. *30-89 days
+. gen esrd_date89 = esrd_date if esrd_date < (index_date_esrd + 90) 
+(21,554 missing values generated)
+
+. gen exit_date89_esrd = esrd_date89
+(21,554 missing values generated)
+
+. gen index_date89_esrd = index_date_esrd + 30
+
+. format exit_date89_esrd %td
+
+. replace exit_date89_esrd = min(deregistered_date, death_date, end_date, (index_date_esrd + 89)) if esrd_date89==.
+(21,554 real changes made)
+
+. stset exit_date89_esrd, fail(esrd_date89) origin(index_date89_esrd) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: esrd_date89!=0 & esrd_date89<.
+Observed time interval: (exit_date89_esrd[_n-1], exit_date89_esrd]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date89_esrd
+
+--------------------------------------------------------------------------
+     21,920  total observations
+        359  observations end on or before enter()
+--------------------------------------------------------------------------
+     21,561  observations remaining, representing
+     21,561  subjects
+        185  failures in single-failure-per-subject data
+  3,438.563  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .1615332
+
+. *90-179 days
+. gen esrd_date179 = esrd_date if esrd_date < (index_date_esrd + 180) 
+(21,288 missing values generated)
+
+. gen exit_date179_esrd = esrd_date179
+(21,288 missing values generated)
+
+. gen index_date179_esrd = index_date_esrd + 90
+
+. format exit_date179_esrd %td
+
+. replace exit_date179_esrd = min(deregistered_date, death_date, end_date, (index_date_esrd + 179)) if esrd_date179==.
+(21,288 real changes made)
+
+. stset exit_date179_esrd, fail(esrd_date179) origin(index_date179_esrd) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: esrd_date179!=0 & esrd_date179<.
+Observed time interval: (exit_date179_esrd[_n-1], exit_date179_esrd]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date179_esrd
+
+--------------------------------------------------------------------------
+     21,920  total observations
+        912  observations end on or before enter()
+--------------------------------------------------------------------------
+     21,008  observations remaining, representing
+     21,008  subjects
+        264  failures in single-failure-per-subject data
+  5,012.372  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .2436687
+
+. *180+ days
+. gen index_datemax_esrd = index_date_esrd + 180
+
+. gen exit_datemax_esrd = exit_date_esrd
+
+. gen esrd_datemax = esrd_date
+(19,924 missing values generated)
+
+. stset exit_date_esrd, fail(esrd_date) origin(index_datemax_esrd) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: esrd_date!=0 & esrd_date<.
+Observed time interval: (exit_date_esrd[_n-1], exit_date_esrd]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_datemax_esrd
+
+--------------------------------------------------------------------------
+     21,920  total observations
+      3,500  observations end on or before enter()
+--------------------------------------------------------------------------
+     18,420  observations remaining, representing
+     18,420  subjects
+      1,362  failures in single-failure-per-subject data
+ 22,913.432  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  2.354552
+
+. 
+. *50% reduction in eGFR
+. *0-29 days
+. gen egfr_half_date29 = egfr_half_date if egfr_half_date < (index_date_egfr_half + 30) 
+(20,635 missing values generated)
+
+. gen exit_date29_egfr_half = egfr_half_date29
+(20,635 missing values generated)
+
+. gen index_date29_egfr_half = index_date_egfr_half
+(9,479 missing values generated)
+
+. format exit_date29_egfr_half %td
+
+. replace exit_date29_egfr_half = min(deregistered_date, death_date, end_date, (index_date_egfr_half + 29)) if egfr_half_date29==.
+(20,635 real changes made)
+
+. stset exit_date29_egfr_half, fail(egfr_half_date29) origin(index_date29_egfr_half) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: egfr_half_date29!=0 & egfr_half_date29<.
+Observed time interval: (exit_date29_egfr_half[_n-1], exit_date29_egfr_half]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date29_egfr_half
+
+--------------------------------------------------------------------------
+     21,920  total observations
+      9,479  ignored because never entered
+--------------------------------------------------------------------------
+     12,441  observations remaining, representing
+     12,441  subjects
+        404  failures in single-failure-per-subject data
+    974.678  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .0793977
+
+. *30-89 days
+. gen egfr_half_date89 = egfr_half_date if egfr_half_date < (index_date_egfr_half + 90) 
+(19,425 missing values generated)
+
+. gen exit_date89_egfr_half = egfr_half_date89
+(19,425 missing values generated)
+
+. gen index_date89_egfr_half = index_date_egfr_half + 30
+(9,479 missing values generated)
+
+. format exit_date89_egfr_half %td
+
+. replace exit_date89_egfr_half = min(deregistered_date, death_date, end_date, (index_date_egfr_half + 89)) if egfr_half_date89==.
+(19,425 real changes made)
+
+. stset exit_date89_egfr_half, fail(egfr_half_date89) origin(index_date89_egfr_half) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: egfr_half_date89!=0 & egfr_half_date89<.
+Observed time interval: (exit_date89_egfr_half[_n-1], exit_date89_egfr_half]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date89_egfr_half
+
+--------------------------------------------------------------------------
+     21,920  total observations
+      9,479  ignored because never entered
+        517  observations end on or before enter()
+--------------------------------------------------------------------------
+     11,924  observations remaining, representing
+     11,924  subjects
+      1,186  failures in single-failure-per-subject data
+  1,812.597  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .1615332
+
+. *90-179 days
+. gen egfr_half_date179 = egfr_half_date if egfr_half_date < (index_date_egfr_half + 180) 
+(18,177 missing values generated)
+
+. gen exit_date179_egfr_half = egfr_half_date179
+(18,177 missing values generated)
+
+. gen index_date179_egfr_half = index_date_egfr_half + 90
+(9,479 missing values generated)
+
+. format exit_date179_egfr_half %td
+
+. replace exit_date179_egfr_half = min(deregistered_date, death_date, end_date, (index_date_egfr_half + 179)) if egfr_half_date179==.
+(18,177 real changes made)
+
+. stset exit_date179_egfr_half, fail(egfr_half_date179) origin(index_date179_egfr_half) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: egfr_half_date179!=0 & egfr_half_date179<.
+Observed time interval: (exit_date179_egfr_half[_n-1], exit_date179_egfr_half]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date179_egfr_half
+
+--------------------------------------------------------------------------
+     21,920  total observations
+      9,479  ignored because never entered
+      1,901  observations end on or before enter()
+--------------------------------------------------------------------------
+     10,540  observations remaining, representing
+     10,540  subjects
+      1,231  failures in single-failure-per-subject data
+  2,373.703  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .2436687
+
+. *180+ days
+. gen index_datemax_egfr_half = index_date_egfr_half + 180
+(9,479 missing values generated)
+
+. gen exit_datemax_egfr_half = exit_date_egfr_half
+(5,818 missing values generated)
+
+. gen egfr_half_datemax = egfr_half_date
+(15,449 missing values generated)
+
+. stset exit_date_egfr_half, fail(egfr_half_date) origin(index_datemax_egfr_half) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: egfr_half_date!=0 & egfr_half_date<.
+Observed time interval: (exit_date_egfr_half[_n-1], exit_date_egfr_half]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_datemax_egfr_half
+
+--------------------------------------------------------------------------
+     21,920  total observations
+      5,818  event time missing (exit_date_egfr_half>=.)    PROBABLE ERROR
+      3,661  ignored because never entered
+      4,287  observations end on or before enter()
+--------------------------------------------------------------------------
+      8,154  observations remaining, representing
+      8,154  subjects
+      2,715  failures in single-failure-per-subject data
+  8,066.513  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =   2.38193
+
+. 
+. *AKI
+. *0-29 days
+. gen aki_date29 = aki_date if aki_date < (index_date_aki + 30) 
+(21,049 missing values generated)
+
+. gen exit_date29_aki = aki_date29
+(21,049 missing values generated)
+
+. gen index_date29_aki = index_date_aki
+
+. format exit_date29_aki %td
+
+. replace exit_date29_aki = min(deregistered_date, death_date, end_date, (index_date_aki + 29)) if aki_date29==.
+(21,049 real changes made)
+
+. stset exit_date29_aki, fail(aki_date29) origin(index_date29_aki) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: aki_date29!=0 & aki_date29<.
+Observed time interval: (exit_date29_aki[_n-1], exit_date29_aki]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date29_aki
+
+--------------------------------------------------------------------------
+     21,920  total observations
+        652  observations end on or before enter()
+--------------------------------------------------------------------------
+     21,268  observations remaining, representing
+     21,268  subjects
+        219  failures in single-failure-per-subject data
+   1,670.48  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .0793977
+
+. *30-89 days
+. gen aki_date89 = aki_date if aki_date < (index_date_aki + 90) 
+(20,760 missing values generated)
+
+. gen exit_date89_aki = aki_date89
+(20,760 missing values generated)
+
+. gen index_date89_aki = index_date_aki + 30
+
+. format exit_date89_aki %td
+
+. replace exit_date89_aki = min(deregistered_date, death_date, end_date, (index_date_aki + 89)) if aki_date89==.
+(20,760 real changes made)
+
+. stset exit_date89_aki, fail(aki_date89) origin(index_date89_aki) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: aki_date89!=0 & aki_date89<.
+Observed time interval: (exit_date89_aki[_n-1], exit_date89_aki]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date89_aki
+
+--------------------------------------------------------------------------
+     21,920  total observations
+      1,043  observations end on or before enter()
+--------------------------------------------------------------------------
+     20,877  observations remaining, representing
+     20,877  subjects
+        287  failures in single-failure-per-subject data
+  3,321.525  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .1615332
+
+. *90-179 days
+. gen aki_date179 = aki_date if aki_date < (index_date_aki + 180) 
+(20,365 missing values generated)
+
+. gen exit_date179_aki = aki_date179
+(20,365 missing values generated)
+
+. gen index_date179_aki = index_date_aki + 90
+
+. format exit_date179_aki %td
+
+. replace exit_date179_aki = min(deregistered_date, death_date, end_date, (index_date_aki + 179)) if aki_date179==.
+(20,365 real changes made)
+
+. stset exit_date179_aki, fail(aki_date179) origin(index_date179_aki) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: aki_date179!=0 & aki_date179<.
+Observed time interval: (exit_date179_aki[_n-1], exit_date179_aki]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date179_aki
+
+--------------------------------------------------------------------------
+     21,920  total observations
+      1,680  observations end on or before enter()
+--------------------------------------------------------------------------
+     20,240  observations remaining, representing
+     20,240  subjects
+        392  failures in single-failure-per-subject data
+  4,815.001  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .2436687
+
+. *180+ days
+. gen index_datemax_aki = index_date_aki + 180
+
+. gen exit_datemax_aki = exit_date_aki
+
+. gen aki_datemax = aki_date
+(18,316 missing values generated)
+
+. stset exit_date_aki, fail(aki_date) origin(index_datemax_aki) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: aki_date!=0 & aki_date<.
+Observed time interval: (exit_date_aki[_n-1], exit_date_aki]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_datemax_aki
+
+--------------------------------------------------------------------------
+     21,920  total observations
+      4,277  observations end on or before enter()
+--------------------------------------------------------------------------
+     17,643  observations remaining, representing
+     17,643  subjects
+      2,044  failures in single-failure-per-subject data
+ 21,463.808  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  2.354552
+
+. 
+. *Death
+. *0-29 days
+. gen death_date29 = death_date if death_date < (index_date_death + 30) 
+(21,867 missing values generated)
+
+. gen exit_date29_death = death_date29
+(21,867 missing values generated)
+
+. gen index_date29_death = index_date_death
+
+. format exit_date29_death %td
+
+. replace exit_date29_death = min(deregistered_date, death_date, end_date, (index_date_death + 29)) if death_date29==.
+(21,867 real changes made)
+
+. stset exit_date29_death, fail(death_date29) origin(index_date29_death) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: death_date29!=0 & death_date29<.
+Observed time interval: (exit_date29_death[_n-1], exit_date29_death]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date29_death
+
+--------------------------------------------------------------------------
+     21,920  total observations
+          0  exclusions
+--------------------------------------------------------------------------
+     21,920  observations remaining, representing
+     21,920  subjects
+         53  failures in single-failure-per-subject data
+  1,733.394  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .0793977
+
+. *30-89 days
+. gen death_date89 = death_date if death_date < (index_date_death + 90) 
+(21,771 missing values generated)
+
+. gen exit_date89_death = death_date89
+(21,771 missing values generated)
+
+. gen index_date89_death = index_date_death + 30
+
+. format exit_date89_death %td
+
+. replace exit_date89_death = min(deregistered_date, death_date, end_date, (index_date_death + 89)) if death_date89==.
+(21,771 real changes made)
+
+. stset exit_date89_death, fail(death_date89) origin(index_date89_death) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: death_date89!=0 & death_date89<.
+Observed time interval: (exit_date89_death[_n-1], exit_date89_death]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date89_death
+
+--------------------------------------------------------------------------
+     21,920  total observations
+        181  observations end on or before enter()
+--------------------------------------------------------------------------
+     21,739  observations remaining, representing
+     21,739  subjects
+         96  failures in single-failure-per-subject data
+  3,482.037  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .1615332
+
+. *90-179 days
+. gen death_date179 = death_date if death_date < (index_date_death + 180) 
+(21,614 missing values generated)
+
+. gen exit_date179_death = death_date179
+(21,614 missing values generated)
+
+. gen index_date179_death = index_date_death + 90
+
+. format exit_date179_death %td
+
+. replace exit_date179_death = min(deregistered_date, death_date, end_date, (index_date_death + 179)) if death_date179==.
+(21,614 real changes made)
+
+. stset exit_date179_death, fail(death_date179) origin(index_date179_death) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: death_date179!=0 & death_date179<.
+Observed time interval: (exit_date179_death[_n-1], exit_date179_death]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date179_death
+
+--------------------------------------------------------------------------
+     21,920  total observations
+        557  observations end on or before enter()
+--------------------------------------------------------------------------
+     21,363  observations remaining, representing
+     21,363  subjects
+        155  failures in single-failure-per-subject data
+  5,129.248  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  .2436687
+
+. *180+ days
+. gen index_datemax_death = index_date_death + 180
+
+. gen exit_datemax_death = exit_date_death
+
+. gen death_datemax = death_date
+(20,783 missing values generated)
+
+. stset exit_date_death, fail(death_date) origin(index_datemax_death) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: death_date!=0 & death_date<.
+Observed time interval: (exit_date_death[_n-1], exit_date_death]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_datemax_death
+
+--------------------------------------------------------------------------
+     21,920  total observations
+      3,019  observations end on or before enter()
+--------------------------------------------------------------------------
+     18,901  observations remaining, representing
+     18,901  subjects
+        829  failures in single-failure-per-subject data
+ 24,641.654  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  2.425736
+
+. 
+. stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+
+Survival-time data settings
+
+           ID variable: unique
+         Failure event: esrd_date!=0 & esrd_date<.
+Observed time interval: (exit_date_esrd[_n-1], exit_date_esrd]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date_esrd
+
+--------------------------------------------------------------------------
+     21,920  total observations
+          0  exclusions
+--------------------------------------------------------------------------
+     21,920  observations remaining, representing
+     21,920  subjects
       1,996  failures in single-failure-per-subject data
- 32,509.476  total analysis time at risk and under observation
-                                                at risk from t =         0
-                                     earliest observed entry t =         0
-                                          last observed exit t =  2.844627
+ 32,828.854  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  2.847365
 
 . tab _st follow_up_cat_esrd
 
@@ -4023,14 +4397,13 @@ obs. time interval:  (exit_date_esrd[_n-1], exit_date_esrd]
    used; 0 |          Follow_up time
  otherwise | 1 to 365   366 to 73  731 to 10 |     Total
 -----------+---------------------------------+----------
-         1 |     7,301      8,049      6,996 |    22,346 
+         1 |     7,043      7,470      7,407 |    21,920 
 -----------+---------------------------------+----------
-     Total |     7,301      8,049      6,996 |    22,346 
+     Total |     7,043      7,470      7,407 |    21,920 
 
 . 
 . foreach outcome of varlist esrd egfr_half aki death {
-  2.         stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_
-> `outcome') id(unique) scale(365.25)
+  2.         stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
   3.         bysort case: egen total_follow_up_`outcome' = total(_t)
   4.         forvalues i=0/1 {
   5.         di "Denominator case=`i' `outcome':"
@@ -4058,227 +4431,234 @@ obs. time interval:  (exit_date_esrd[_n-1], exit_date_esrd]
  27.         drop total_follow_up_`outcome'
  28. }
 
-                id:  unique
-     failure event:  esrd_date != 0 & esrd_date < .
-obs. time interval:  (exit_date_esrd[_n-1], exit_date_esrd]
- exit on or before:  failure
-    t for analysis:  (time-origin)/365.25
-            origin:  time index_date_esrd
+Survival-time data settings
 
-------------------------------------------------------------------------------
-     22,346  total observations
+           ID variable: unique
+         Failure event: esrd_date!=0 & esrd_date<.
+Observed time interval: (exit_date_esrd[_n-1], exit_date_esrd]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date_esrd
+
+--------------------------------------------------------------------------
+     21,920  total observations
           0  exclusions
-------------------------------------------------------------------------------
-     22,346  observations remaining, representing
-     22,346  subjects
+--------------------------------------------------------------------------
+     21,920  observations remaining, representing
+     21,920  subjects
       1,996  failures in single-failure-per-subject data
- 32,509.476  total analysis time at risk and under observation
-                                                at risk from t =         0
-                                     earliest observed entry t =         0
-                                          last observed exit t =  2.844627
+ 32,828.854  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  2.847365
 Denominator case=0 esrd:
-  15,718
+  15,493
 Denominator(_st=1) case=0 esrd:
-  15,718
+  15,493
 Events case=0 esrd:
   1,707
 Events (_st=1) case=0 esrd:
   1,707
 Total follow_up case=0 esrd:
 
-    Variable |        Obs        Mean    Std. Dev.       Min        Max
+    Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-total_foll~d |     15,718    21272.34           0   21272.34   21272.34
+total_foll~d |     15,493    21465.25           0   21465.25   21465.25
 Rate case=0 esrd:
-8024.5051
+7952.3889
 Rate (_st=1) case=0 esrd:
-8024.5051
+7952.3889
 Denominator case=1 esrd:
-  6,628
+  6,427
 Denominator(_st=1) case=1 esrd:
-  6,628
+  6,427
 Events case=1 esrd:
   681
 Events (_st=1) case=1 esrd:
   681
 Total follow_up case=1 esrd:
 
-    Variable |        Obs        Mean    Std. Dev.       Min        Max
+    Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-total_foll~d |      6,628    11237.14           0   11237.14   11237.14
+total_foll~d |      6,427    11363.61           0   11363.61   11363.61
 Rate case=1 esrd:
-6060.2632
+5992.8163
 Rate (_st=1) case=1 esrd:
-6060.2632
+5992.8163
 
-                id:  unique
-     failure event:  egfr_half_date != 0 & egfr_half_date < .
-obs. time interval:  (exit_date_egfr_half[_n-1], exit_date_egfr_half]
- exit on or before:  failure
-    t for analysis:  (time-origin)/365.25
-            origin:  time index_date_egfr_half
+Survival-time data settings
 
-------------------------------------------------------------------------------
-     22,346  total observations
-      6,008  event time missing (exit_date_egfr_half>=.)        PROBABLE ERROR
+           ID variable: unique
+         Failure event: egfr_half_date!=0 & egfr_half_date<.
+Observed time interval: (exit_date_egfr_half[_n-1], exit_date_egfr_half]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date_egfr_half
+
+--------------------------------------------------------------------------
+     21,920  total observations
+      5,818  event time missing (exit_date_egfr_half>=.)    PROBABLE ERROR
       3,661  ignored because never entered
-------------------------------------------------------------------------------
-     12,677  observations remaining, representing
-     12,677  subjects
-      5,667  failures in single-failure-per-subject data
- 13,068.353  total analysis time at risk and under observation
-                                                at risk from t =         0
-                                     earliest observed entry t =         0
-                                          last observed exit t =  2.844627
+--------------------------------------------------------------------------
+     12,441  observations remaining, representing
+     12,441  subjects
+      5,590  failures in single-failure-per-subject data
+ 13,091.305  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  2.874743
 Denominator case=0 egfr_half:
-  8,889
+  8,761
 Denominator(_st=1) case=0 egfr_half:
-  8,889
+  8,761
 Events case=0 egfr_half:
-  5,045
+  5,028
 Events (_st=1) case=0 egfr_half:
-  4,449
+  4,432
 Total follow_up case=0 egfr_half:
 
-    Variable |        Obs        Mean    Std. Dev.       Min        Max
+    Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-total_foll~f |     15,718    8618.708           0   8618.708   8618.708
+total_foll~f |     15,493    8626.095           0   8626.095   8626.095
 Rate case=0 egfr_half:
-58535.456
+58288.254
 Rate (_st=1) case=0 egfr_half:
-51620.266
+51378.986
 Denominator case=1 egfr_half:
-  3,788
+  3,680
 Denominator(_st=1) case=1 egfr_half:
-  3,788
+  3,680
 Events case=1 egfr_half:
-  2,165
+  2,124
 Events (_st=1) case=1 egfr_half:
-  1,880
+  1,839
 Total follow_up case=1 egfr_half:
 
-    Variable |        Obs        Mean    Std. Dev.       Min        Max
+    Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-total_foll~f |      6,628    4449.646           0   4449.646   4449.646
+total_foll~f |      6,427     4465.21           0    4465.21    4465.21
 Rate case=1 egfr_half:
-48655.561
+47567.752
 Rate (_st=1) case=1 egfr_half:
-42250.557
+41185.073
 
-                id:  unique
-     failure event:  aki_date != 0 & aki_date < .
-obs. time interval:  (exit_date_aki[_n-1], exit_date_aki]
- exit on or before:  failure
-    t for analysis:  (time-origin)/365.25
-            origin:  time index_date_aki
+Survival-time data settings
 
-------------------------------------------------------------------------------
-     22,346  total observations
-        640  observations end on or before enter()
-------------------------------------------------------------------------------
-     21,706  observations remaining, representing
-     21,706  subjects
-      3,005  failures in single-failure-per-subject data
- 30,823.168  total analysis time at risk and under observation
-                                                at risk from t =         0
-                                     earliest observed entry t =         0
-                                          last observed exit t =  2.844627
+           ID variable: unique
+         Failure event: aki_date!=0 & aki_date<.
+Observed time interval: (exit_date_aki[_n-1], exit_date_aki]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date_aki
+
+--------------------------------------------------------------------------
+     21,920  total observations
+        652  observations end on or before enter()
+--------------------------------------------------------------------------
+     21,268  observations remaining, representing
+     21,268  subjects
+      2,952  failures in single-failure-per-subject data
+ 31,021.985  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  2.847365
 Denominator case=0 aki:
-  15,718
+  15,493
 Denominator(_st=1) case=0 aki:
-  15,281
+  15,047
 Events case=0 aki:
-  2,676
+  2,656
 Events (_st=1) case=0 aki:
-  2,239
+  2,210
 Total follow_up case=0 aki:
 
-    Variable |        Obs        Mean    Std. Dev.       Min        Max
+    Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-total_foll~i |     15,718    20209.06           0   20209.06   20209.06
+total_foll~i |     15,493    20324.99           0   20324.99   20324.99
 Rate case=0 aki:
-13241.584
+13067.657
 Rate (_st=1) case=0 aki:
-11079.188
+10873.314
 Denominator case=1 aki:
-  6,628
+  6,427
 Denominator(_st=1) case=1 aki:
-  6,425
+  6,221
 Events case=1 aki:
-  1,234
+  1,213
 Events (_st=1) case=1 aki:
-  1,031
+  1,007
 Total follow_up case=1 aki:
 
-    Variable |        Obs        Mean    Std. Dev.       Min        Max
+    Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-total_foll~i |      6,628    10614.11           0   10614.11   10614.11
+total_foll~i |      6,427    10696.99           0   10696.99   10696.99
 Rate case=1 aki:
-11626.039
+11339.634
 Rate (_st=1) case=1 aki:
-9713.4893
+9413.8595
 
-                id:  unique
-     failure event:  death_date != 0 & death_date < .
-obs. time interval:  (exit_date_death[_n-1], exit_date_death]
- exit on or before:  failure
-    t for analysis:  (time-origin)/365.25
-            origin:  time index_date_death
+Survival-time data settings
 
-------------------------------------------------------------------------------
-     22,346  total observations
-          2  observations end on or before enter()
-------------------------------------------------------------------------------
-     22,344  observations remaining, representing
-     22,344  subjects
-      1,136  failures in single-failure-per-subject data
- 34,140.745  total analysis time at risk and under observation
-                                                at risk from t =         0
-                                     earliest observed entry t =         0
-                                          last observed exit t =  2.910335
+           ID variable: unique
+         Failure event: death_date!=0 & death_date<.
+Observed time interval: (exit_date_death[_n-1], exit_date_death]
+     Exit on or before: failure
+     Time for analysis: (time-origin)/365.25
+                Origin: time index_date_death
+
+--------------------------------------------------------------------------
+     21,920  total observations
+          0  exclusions
+--------------------------------------------------------------------------
+     21,920  observations remaining, representing
+     21,920  subjects
+      1,137  failures in single-failure-per-subject data
+ 34,701.169  total analysis time at risk and under observation
+                                                At risk from t =         0
+                                     Earliest observed entry t =         0
+                                          Last observed exit t =  2.918549
 Denominator case=0 death:
-  15,718
+  15,493
 Denominator(_st=1) case=0 death:
-  15,717
+  15,493
 Events case=0 death:
   1,140
 Events (_st=1) case=0 death:
   1,140
 Total follow_up case=0 death:
 
-    Variable |        Obs        Mean    Std. Dev.       Min        Max
+    Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-total_foll~h |     15,718    22236.08           0   22236.08   22236.08
+total_foll~h |     15,493    22564.62           0   22564.62   22564.62
 Rate case=0 death:
-5126.8029
+5052.1571
 Rate (_st=1) case=0 death:
-5126.8029
+5052.1571
 Denominator case=1 death:
-  6,628
+  6,427
 Denominator(_st=1) case=1 death:
-  6,627
+  6,427
 Events case=1 death:
-  275
+  276
 Events (_st=1) case=1 death:
-  275
+  276
 Total follow_up case=1 death:
 
-    Variable |        Obs        Mean    Std. Dev.       Min        Max
+    Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-total_foll~h |      6,628    11904.67           0   11904.67   11904.67
+total_foll~h |      6,427    12136.55           0   12136.55   12136.55
 Rate case=1 death:
-2310.0188
+2274.1222
 Rate (_st=1) case=1 death:
-2310.0188
+2274.1222
 
 . 
 . save ./output/analysis_2020.dta, replace
-(note: file ./output/analysis_2020.dta not found)
 file ./output/analysis_2020.dta saved
 
 . log close
       name:  <unnamed>
-       log:  /workspace/logs/analysis_2020.log
+       log:  C:\Users\lsh1703468\Documents\repos\logs/analysis_2020.log
   log type:  text
- closed on:  25 Jul 2023, 22:57:01
--------------------------------------------------------------------------------
+ closed on:  26 Jul 2023, 18:30:00
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
