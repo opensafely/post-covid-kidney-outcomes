@@ -425,10 +425,10 @@ replace wave = 4 if index_month=="sep2022"
 replace wave = 4 if index_month=="oct2022"
 replace wave = 4 if index_month=="nov2022"
 replace wave = 4 if index_month=="dec2022"
-label define wave	1 "Febuary20-August20"	///
-					2 "September20-June21"	///
-					3 "July21-November21"	///
-					4 "December21-December22"	
+label define wave	1 "Feb20-Aug20"	///
+					2 "Sep20-Jun21"	///
+					3 "Jul21-Nov21"	///
+					4 "Dec21-Dec22"	
 label values wave wave
 label var wave "COVID-19 wave"
 safetab wave, m

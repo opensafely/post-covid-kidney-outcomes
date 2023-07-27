@@ -409,6 +409,7 @@ file write tablecontent _n
 *COVID-19 vaccination status
 file write tablecontent ("COVID-19 vaccination status") _n
 forvalues group=1/5 {
+use ./output/analysis_2020.dta
 local label_`group': label covid_vax `group'
 file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
@@ -433,6 +434,7 @@ file write tablecontent _n
 *COVID-19 wave
 file write tablecontent ("COVID-19 wave") _n
 forvalues group=1/4 {
+use ./output/analysis_2020.dta
 local label_`group': label wave `group'
 file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
