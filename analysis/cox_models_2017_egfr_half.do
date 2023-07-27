@@ -3,16 +3,16 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_models_2017_esrd.log, replace t
+log using ./logs/cox_models_2017_egfr_half.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/cox_models_2017_esrd.csv, write text replace
+file open tablecontent using ./output/cox_models_2017_egfr_half.csv, write text replace
 file write tablecontent _tab ("Crude rate (/100000py) (95% CI)") _n
 file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemic)") _tab ("Crude HR (95% CI)") _tab ("Age and sex adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_2017.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1
 local cases_py = r(mean)
@@ -60,7 +60,7 @@ local labmax "180+ days"
 
 foreach x of local period {
 file write tablecontent ("`lab`x''") _tab
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
 bysort case: egen total_follow_up`x' = total(_t)
 qui su total_follow_up`x' if case==1
 local cases_py = r(mean)
@@ -109,7 +109,7 @@ local severity1: label covid_severity 1
 local severity2: label covid_severity 2
 local severity3: label covid_severity 3
 
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 
 qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -162,7 +162,7 @@ file write tablecontent ("`severity`i''") _tab ("`cases`i'_rate'") (" (") %3.2f 
 
 foreach x of local period {
 file write tablecontent ("`lab`x''") _n
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
 qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local crude_severity_1b`x': display %4.2f table[1,2]
@@ -222,7 +222,7 @@ local aki1: label covid_aki 1
 local aki2: label covid_aki 2
 local aki3: label covid_aki 3
 
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 
 qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -275,7 +275,7 @@ file write tablecontent ("`aki`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`cas
 
 foreach x of local period {
 file write tablecontent ("`lab`x''") _n
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
 qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local crude_aki_1b`x': display %4.2f table[1,2]
@@ -337,7 +337,7 @@ local wave2: label wave 2
 local wave3: label wave 3
 local wave4: label wave 4
 
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 
 qui stcox i.wave, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -399,7 +399,7 @@ file write tablecontent ("`wave`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`ca
 
 foreach x of local period {
 file write tablecontent ("`lab`x''") _n
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
 qui stcox i.wave, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local crude_wave_1b`x': display %4.2f table[1,2]
@@ -471,7 +471,7 @@ local vax3: label covid_vax 3
 local vax4: label covid_vax 4
 local vax5: label covid_vax 5
 
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 
 qui stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -542,7 +542,7 @@ file write tablecontent ("`vax`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`cas
 
 foreach x of local period {
 file write tablecontent ("`lab`x''") _n
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
 qui stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local crude_vax_1b`x': display %4.2f table[1,2]

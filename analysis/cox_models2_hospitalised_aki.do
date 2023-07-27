@@ -3,16 +3,16 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_models_hospitalised_esrd.log, replace t
+log using ./logs/cox_models2_hospitalised_aki.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/cox_models_hospitalised_esrd.csv, write text replace
+file open tablecontent using ./output/cox_models2_hospitalised_aki.csv, write text replace
 file write tablecontent _tab ("Crude rate (/100000py) (95% CI)") _n
 file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemic)") _tab ("Crude HR (95% CI)") _tab ("Age and sex adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_hospitalised.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1
 local cases_py = r(mean)
@@ -51,16 +51,15 @@ local full_overall_ul: display %4.2f table[6,2]
 
 file write tablecontent  %4.2f (`crude_overall_b') (" (") %4.2f (`crude_overall_ll') ("-") %4.2f (`crude_overall_ul') (")") _tab %4.2f (`minimal_overall_b') (" (") %4.2f (`minimal_overall_ll') ("-") %4.2f (`minimal_overall_ul') (")") _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f (`full_overall_ul') (")") _n
 
-local period "29 89 179 max"
+local period "29 89 179"
 
 local lab29 "0-29 days"
-local lab89 "30-89 days"
-local lab179 "90-179 days"
-local labmax "180+ days"
+local lab89 "0-89 days"
+local lab179 "0-179 days"
 
 foreach x of local period {
 file write tablecontent ("`lab`x''") _tab
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_aki, fail(aki_date`x') origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up`x' = total(_t)
 qui su total_follow_up`x' if case==1
 local cases_py = r(mean)
@@ -110,7 +109,7 @@ local wave2: label wave 2
 local wave3: label wave 3
 local wave4: label wave 4
 
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 
 qui stcox i.wave, vce(cluster practice_id)
 matrix table = r(table)
@@ -172,7 +171,7 @@ file write tablecontent ("`wave`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`ca
 
 foreach x of local period {
 file write tablecontent ("`lab`x''") _n
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_aki, fail(aki_date`x') origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.wave, vce(cluster practice_id)
 matrix table = r(table)
 local crude_wave_1b`x': display %4.2f table[1,2]
@@ -244,7 +243,7 @@ local vax3: label covid_vax 3
 local vax4: label covid_vax 4
 local vax5: label covid_vax 5
 
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 
 qui stcox i.covid_vax, vce(cluster practice_id)
 matrix table = r(table)
@@ -315,7 +314,7 @@ file write tablecontent ("`vax`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`cas
 
 foreach x of local period {
 file write tablecontent ("`lab`x''") _n
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_aki, fail(aki_date`x') origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.covid_vax, vce(cluster practice_id)
 matrix table = r(table)
 local crude_vax_1b`x': display %4.2f table[1,2]
