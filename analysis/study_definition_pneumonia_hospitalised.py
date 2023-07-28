@@ -39,14 +39,14 @@ study=StudyDefinition(
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        between=["2017-02-01", "2019-10-31"],
+        between=["2017-02-01", "2019-12-31"],
         return_expectations={"incidence": 1.0, "date": {"earliest": "2017-02-01"}},
     ),
     pneumonia=patients.admitted_to_hospital(
         with_these_diagnoses=pneumonia_codelist,
         returning="binary_flag",
         find_first_match_in_period=True,
-        between=["2017-02-01", "2019-10-31"],
+        between=["2017-02-01", "2019-12-31"],
         return_expectations={"incidence": 1.0,
         },
     ),
@@ -342,6 +342,24 @@ study=StudyDefinition(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
         between=["2018-04-01","2019-09-30"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    baseline_creatinine_nov2019=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2017-05-01","2019-10-31"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    baseline_creatinine_dec2019=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2018-06-01","2019-11-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -653,49 +671,67 @@ study=StudyDefinition(
             "incidence": 0.60,
         }
     ),
+    creatinine_dec2019=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2019-12-01","2019-12-31"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
+    creatinine_jan2020=patients.mean_recorded_value(
+        creatinine_codes,
+        on_most_recent_day_of_measurement=False,
+        between=["2020-01-01","2020-01-31"],
+        return_expectations={
+            "float": {"distribution": "normal", "mean": 80, "stddev": 40},
+            "incidence": 0.60,
+        }
+    ),
     krt_outcome_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
-        between=["patient_index_date", "2019-11-30"],
+        between=["patient_index_date", "2020-01-31"],
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2019-11-30"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}}
     ),
     krt_outcome_icd_10=patients.admitted_to_hospital(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between=["patient_index_date", "2019-11-30"],
+        between=["patient_index_date", "2020-01-31"],
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2019-11-30"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}}
     ),
     krt_outcome_opcs_4=patients.admitted_to_hospital(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between=["patient_index_date", "2019-11-30"],
+        between=["patient_index_date", "2020-01-31"],
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2019-11-30"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}}
     ),
     krt_outcome_date=patients.minimum_of(
         "krt_outcome_primary_care", "krt_outcome_icd_10", "krt_outcome_opcs_4",
     ),
     acute_kidney_injury_outcome=patients.admitted_to_hospital(
         with_these_diagnoses=acute_kidney_injury_codes,
-        between=["patient_index_date + 29 days", "2019-11-30"],
+        between=["patient_index_date + 29 days", "2020-01-31"],
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,    
         return_expectations={"incidence": 0.10, "date": {"earliest" : "2017-03-01", "latest": "2019-09-30"}},
     ),
     death_date=patients.with_death_recorded_in_primary_care(
-        between=["patient_index_date + 29 days", "2019-11-30"],
+        between=["patient_index_date + 29 days", "2020-01-31"],
         returning="date_of_death",
         date_format= "YYYY-MM-DD",
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2017-02-01", "latest": "2019-11-30"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}},
     ),
     date_deregistered=patients.date_deregistered_from_all_supported_practices(
-        between= ["patient_index_date + 29 days", "2019-11-30"],
+        between= ["patient_index_date + 29 days", "2020-01-31"],
         date_format="YYYY-MM-DD",
     ),
     

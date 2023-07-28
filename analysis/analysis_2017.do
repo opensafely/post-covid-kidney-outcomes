@@ -276,7 +276,9 @@ foreach baseline_creatinine_monthly of varlist 	baseline_creatinine_feb2017 ///
 												baseline_creatinine_jul2022 ///
 												baseline_creatinine_aug2022 ///
 												baseline_creatinine_sep2022 ///
-												baseline_creatinine_oct2022 {
+												baseline_creatinine_oct2022 ///
+												baseline_creatinine_nov2022 ///
+												baseline_creatinine_dec2022 {
 replace `baseline_creatinine_monthly' = . if !inrange(`baseline_creatinine_monthly', 20, 3000)
 gen mgdl_`baseline_creatinine_monthly' = `baseline_creatinine_monthly'/88.4
 gen min_`baseline_creatinine_monthly'=.
@@ -301,7 +303,7 @@ drop max_`baseline_creatinine_monthly'
 gen index_date_string=string(index_date, "%td") 
 gen index_month=substr(index_date_string ,3,7)
 gen baseline_egfr=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022"
 foreach x of local month_year  {
 replace baseline_egfr=egfr_baseline_creatinine_`x' if index_month=="`x'"
 drop egfr_baseline_creatinine_`x'
@@ -440,19 +442,36 @@ replace wave = 4 if index_month=="jul2022"
 replace wave = 4 if index_month=="aug2022"
 replace wave = 4 if index_month=="sep2022"
 replace wave = 4 if index_month=="oct2022"
+replace wave = 4 if index_month=="nov2022"
+replace wave = 4 if index_month=="dec2022"
 label define wave	0 "Historical comparator"	///
 					1 "Febuary20-August20"	///
 					2 "September20-June21"	///
 					3 "July21-November21"	///
-					4 "December21-October22"	
+					4 "December21-December22"	
 label values wave wave
 label var wave "COVID-19 wave"
 safetab wave, m
 
 ** Covariates
-* Check of GP consultations by groups
+* Check of GP consultations over past year by groups
 sum gp_count, detail
 bysort case: sum gp_count, detail
+egen gp_consults = cut(gp_count), at(0, 1, 3, 10, 1500)
+recode gp_consults 3=2 10=3
+label define gp_consults 0 "0" 1 "1-2" 2 "3-9" 3 ">9"
+label values gp_consults gp_consults
+label var gp_consults "GP interactions"
+tab case gp_consults
+
+* Check of hospital admissions in preceding 5 years
+sum hosp_count, detail
+bysort case: sum hosp_count, detail
+egen admissions = cut(hosp_count), at(0, 1, 2, 1000)
+label define admissions 0 "0" 1 "1" 2 ">1"
+label values admissions admissions
+label var admissions "Hospital admissions"
+tab case admissions
 
 * Age
 tab age
@@ -591,6 +610,8 @@ label var ckd_stage "Baseline CKD stage"
 safetab ckd_stage, m
 
 * Comorbidities
+rename acute_kidney_injury_baseline aki_baseline
+safetab aki_baseline
 gen afib = atrial_fibrillation_or_flutter
 drop atrial_fibrillation_or_flutter
 safetab afib
@@ -704,7 +725,10 @@ foreach creatinine_monthly of varlist	creatinine_feb2017 ///
 										creatinine_jul2022 ///
 										creatinine_aug2022 ///
 										creatinine_sep2022 ///
-										creatinine_oct2022 {
+										creatinine_oct2022 ///
+										creatinine_nov2022 ///
+										creatinine_dec2022 ///
+										creatinine_jan2023 {
 replace `creatinine_monthly' = . if !inrange(`creatinine_monthly', 20, 3000)
 gen mgdl_`creatinine_monthly' = `creatinine_monthly'/88.4
 gen min_`creatinine_monthly'=.
@@ -730,7 +754,7 @@ drop max_`creatinine_monthly'
 replace index_date = index_date_28
 drop index_date_28
 gen egfr15_date=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022 jan2023"
 foreach x of local month_year  {
   replace egfr15_date=date("15`x'", "DMY") if egfr15_date==.& egfr_creatinine_`x'<15 & date("01`x'", "DMY")>index_date
 }
@@ -774,8 +798,8 @@ foreach exposure of varlist 	case			///
 								}
 gen exit_date_esrd = esrd_date
 format exit_date_esrd %td
-gen end_date = date("2022-11-30", "YMD") if case==1
-replace end_date = date("2019-11-30", "YMD") if case==0
+gen end_date = date("2023-01-31", "YMD") if case==1
+replace end_date = date("2020-01-31", "YMD") if case==0
 format end_date %td
 replace exit_date_esrd = min(deregistered_date, death_date, end_date) if esrd_date==.
 gen esrd_denominator = 1
@@ -808,7 +832,7 @@ gen follow_up_years_esrd = follow_up_time_esrd/365.25
 
 * 50% eGFR reduction (earliest month) (or ESRD)
 gen egfr_half_date=.
-local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022"
+local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022 jan2023"
 foreach x of local month_year {
   replace egfr_half_date=date("15`x'", "DMY") if baseline_egfr!=. & egfr_half_date==.& egfr_creatinine_`x'<0.5*baseline_egfr & date("01`x'", "DMY")>index_date
   format egfr_half_date %td
@@ -861,7 +885,121 @@ gen follow_up_time_death = (exit_date_death - index_date_death)
 label var follow_up_time_death "Follow-up time (death) (Days)"
 gen follow_up_years_death = follow_up_time_death/365.25
 
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+*Outcomes by time period
+*ESRD
+*0-29 days
+gen esrd_date29 = esrd_date if esrd_date < (index_date_esrd + 30) 
+gen exit_date29_esrd = esrd_date29
+gen index_date29_esrd = index_date_esrd
+format exit_date29_esrd %td
+replace exit_date29_esrd = min(deregistered_date, death_date, end_date, (index_date_esrd + 29)) if esrd_date29==.
+stset exit_date29_esrd, fail(esrd_date29) origin(index_date29_esrd) id(unique) scale(365.25)
+*30-89 days
+gen esrd_date89 = esrd_date if esrd_date < (index_date_esrd + 90) 
+gen exit_date89_esrd = esrd_date89
+gen index_date89_esrd = index_date_esrd + 30
+format exit_date89_esrd %td
+replace exit_date89_esrd = min(deregistered_date, death_date, end_date, (index_date_esrd + 89)) if esrd_date89==.
+stset exit_date89_esrd, fail(esrd_date89) origin(index_date89_esrd) id(unique) scale(365.25)
+*90-179 days
+gen esrd_date179 = esrd_date if esrd_date < (index_date_esrd + 180) 
+gen exit_date179_esrd = esrd_date179
+gen index_date179_esrd = index_date_esrd + 90
+format exit_date179_esrd %td
+replace exit_date179_esrd = min(deregistered_date, death_date, end_date, (index_date_esrd + 179)) if esrd_date179==.
+stset exit_date179_esrd, fail(esrd_date179) origin(index_date179_esrd) id(unique) scale(365.25)
+*180+ days
+gen index_datemax_esrd = index_date_esrd + 180
+gen exit_datemax_esrd = exit_date_esrd
+gen esrd_datemax = esrd_date
+stset exit_date_esrd, fail(esrd_date) origin(index_datemax_esrd) id(unique) scale(365.25)
+
+*50% reduction in eGFR
+*0-29 days
+gen egfr_half_date29 = egfr_half_date if egfr_half_date < (index_date_egfr_half + 30) 
+gen exit_date29_egfr_half = egfr_half_date29
+gen index_date29_egfr_half = index_date_egfr_half
+format exit_date29_egfr_half %td
+replace exit_date29_egfr_half = min(deregistered_date, death_date, end_date, (index_date_egfr_half + 29)) if egfr_half_date29==.
+stset exit_date29_egfr_half, fail(egfr_half_date29) origin(index_date29_egfr_half) id(unique) scale(365.25)
+*30-89 days
+gen egfr_half_date89 = egfr_half_date if egfr_half_date < (index_date_egfr_half + 90) 
+gen exit_date89_egfr_half = egfr_half_date89
+gen index_date89_egfr_half = index_date_egfr_half + 30
+format exit_date89_egfr_half %td
+replace exit_date89_egfr_half = min(deregistered_date, death_date, end_date, (index_date_egfr_half + 89)) if egfr_half_date89==.
+stset exit_date89_egfr_half, fail(egfr_half_date89) origin(index_date89_egfr_half) id(unique) scale(365.25)
+*90-179 days
+gen egfr_half_date179 = egfr_half_date if egfr_half_date < (index_date_egfr_half + 180) 
+gen exit_date179_egfr_half = egfr_half_date179
+gen index_date179_egfr_half = index_date_egfr_half + 90
+format exit_date179_egfr_half %td
+replace exit_date179_egfr_half = min(deregistered_date, death_date, end_date, (index_date_egfr_half + 179)) if egfr_half_date179==.
+stset exit_date179_egfr_half, fail(egfr_half_date179) origin(index_date179_egfr_half) id(unique) scale(365.25)
+*180+ days
+gen index_datemax_egfr_half = index_date_egfr_half + 180
+gen exit_datemax_egfr_half = exit_date_egfr_half
+gen egfr_half_datemax = egfr_half_date
+stset exit_date_egfr_half, fail(egfr_half_date) origin(index_datemax_egfr_half) id(unique) scale(365.25)
+
+*AKI
+*0-29 days
+gen aki_date29 = aki_date if aki_date < (index_date_aki + 30) 
+gen exit_date29_aki = aki_date29
+gen index_date29_aki = index_date_aki
+format exit_date29_aki %td
+replace exit_date29_aki = min(deregistered_date, death_date, end_date, (index_date_aki + 29)) if aki_date29==.
+stset exit_date29_aki, fail(aki_date29) origin(index_date29_aki) id(unique) scale(365.25)
+*30-89 days
+gen aki_date89 = aki_date if aki_date < (index_date_aki + 90) 
+gen exit_date89_aki = aki_date89
+gen index_date89_aki = index_date_aki + 30
+format exit_date89_aki %td
+replace exit_date89_aki = min(deregistered_date, death_date, end_date, (index_date_aki + 89)) if aki_date89==.
+stset exit_date89_aki, fail(aki_date89) origin(index_date89_aki) id(unique) scale(365.25)
+*90-179 days
+gen aki_date179 = aki_date if aki_date < (index_date_aki + 180) 
+gen exit_date179_aki = aki_date179
+gen index_date179_aki = index_date_aki + 90
+format exit_date179_aki %td
+replace exit_date179_aki = min(deregistered_date, death_date, end_date, (index_date_aki + 179)) if aki_date179==.
+stset exit_date179_aki, fail(aki_date179) origin(index_date179_aki) id(unique) scale(365.25)
+*180+ days
+gen index_datemax_aki = index_date_aki + 180
+gen exit_datemax_aki = exit_date_aki
+gen aki_datemax = aki_date
+stset exit_date_aki, fail(aki_date) origin(index_datemax_aki) id(unique) scale(365.25)
+
+*Death
+*0-29 days
+gen death_date29 = death_date if death_date < (index_date_death + 30) 
+gen exit_date29_death = death_date29
+gen index_date29_death = index_date_death
+format exit_date29_death %td
+replace exit_date29_death = min(deregistered_date, death_date, end_date, (index_date_death + 29)) if death_date29==.
+stset exit_date29_death, fail(death_date29) origin(index_date29_death) id(unique) scale(365.25)
+*30-89 days
+gen death_date89 = death_date if death_date < (index_date_death + 90) 
+gen exit_date89_death = death_date89
+gen index_date89_death = index_date_death + 30
+format exit_date89_death %td
+replace exit_date89_death = min(deregistered_date, death_date, end_date, (index_date_death + 89)) if death_date89==.
+stset exit_date89_death, fail(death_date89) origin(index_date89_death) id(unique) scale(365.25)
+*90-179 days
+gen death_date179 = death_date if death_date < (index_date_death + 180) 
+gen exit_date179_death = death_date179
+gen index_date179_death = index_date_death + 90
+format exit_date179_death %td
+replace exit_date179_death = min(deregistered_date, death_date, end_date, (index_date_death + 179)) if death_date179==.
+stset exit_date179_death, fail(death_date179) origin(index_date179_death) id(unique) scale(365.25)
+*180+ days
+gen index_datemax_death = index_date_death + 180
+gen exit_datemax_death = exit_date_death
+gen death_datemax = death_date
+stset exit_date_death, fail(death_date) origin(index_datemax_death) id(unique) scale(365.25)
+
+
+/*stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 tab _st follow_up_cat_esrd
 
 foreach outcome of varlist esrd egfr_half aki death {
@@ -891,7 +1029,7 @@ foreach outcome of varlist esrd egfr_half aki death {
 	di `st_rate'
 	}
 	drop total_follow_up_`outcome'
-}
+}*/
 
 save ./output/analysis_2017.dta, replace
 log close

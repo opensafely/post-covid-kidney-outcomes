@@ -181,6 +181,12 @@ def generate_hospitalised(index_date_variable):
             },
         },
     ),
+    acute_kidney_injury_baseline=patients.admitted_to_hospital(
+        with_these_diagnoses=acute_kidney_injury_codes,
+        returning="binary_flag",
+        on_or_before="patient_index_date",
+        return_expectations={"incidence": 0.05},
+    ),
     atrial_fibrillation_or_flutter=patients.with_these_clinical_events(
         atrial_fibrillation_or_flutter_codes,
         returning="binary_flag",
@@ -290,7 +296,7 @@ def generate_hospitalised(index_date_variable):
         include_measurement_date=True,
         date_format="YYYY-MM-DD",
         return_expectations={
-            "date": {"earliest": "2015-01-01", "latest": "2022-10-31"},
+            "date": {"earliest": "2015-01-01", "latest": "2022-12-31"},
             "float": {"distribution": "normal", "mean": 28, "stddev": 8, "min": 18, "max": 45},
             "incidence": 0.95,
         }
@@ -305,6 +311,11 @@ def generate_hospitalised(index_date_variable):
         between=["patient_index_date - 1 year", "patient_index_date"],
         returning="number_of_matches_in_period",
         return_expectations={"int": {"distribution": "normal", "mean": 6, "stddev": 3},"incidence": 0.6,},
+    ),
+    hosp_count=patients.admitted_to_hospital(
+        between=["patient_index_date - 5 years", "patient_index_date"],
+        returning="number_of_matches_in_period",
+        return_expectations={"int": {"distribution": "normal", "mean": 1, "stddev": 1},"incidence": 0.6,},
     ),
     )
     return variables_hospitalised
