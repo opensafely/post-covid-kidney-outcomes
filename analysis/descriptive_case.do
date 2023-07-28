@@ -398,7 +398,6 @@ file write tablecontent _n
 *COVID-19 vaccination
 file write tablecontent ("COVID-19 vaccination status") _n
 forvalues vax=1/5 {
-use ./output/analysis_2020.dta
 local label_`vax': label covid_vax `vax'
 file write tablecontent ("`label_`vax''") _tab
 foreach x of local cohort {

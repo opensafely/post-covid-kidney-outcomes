@@ -8,7 +8,7 @@ log using ./logs/cox_models_2020_esrd.log, replace t
 cap file close tablecontent
 file open tablecontent using ./output/cox_models_2020_esrd.csv, write text replace
 file write tablecontent _tab ("Crude rate (/100000py) (95% CI)") _n
-file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemic)") _tab ("Crude HR (95% CI)") _tab ("Age and sex adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
+file write tablecontent _tab ("COVID-19") _tab ("General population (contemporary)") _tab ("Crude HR (95% CI)") _tab ("Age and sex adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_2020.dta, clear
@@ -165,39 +165,39 @@ file write tablecontent ("`lab`x''") _n
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
 qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
-local crude_severity_1b`x': display %4.2f table[1,2]
-local crude_severity_1ll`x': display %4.2f table[5,2]
-local crude_severity_1ul`x': display %4.2f table[6,2]
-local crude_severity_2b`x': display %4.2f table[1,3]
-local crude_severity_2ll`x': display %4.2f table[5,3]
-local crude_severity_2ul`x': display %4.2f table[6,3]
-local crude_severity_3b`x': display %4.2f table[1,4]
-local crude_severity_3ll`x': display %4.2f table[5,4]
-local crude_severity_3ul`x': display %4.2f table[6,4]
+local crude_severity_1b: display %4.2f table[1,2]
+local crude_severity_1ll: display %4.2f table[5,2]
+local crude_severity_1ul: display %4.2f table[6,2]
+local crude_severity_2b: display %4.2f table[1,3]
+local crude_severity_2ll: display %4.2f table[5,3]
+local crude_severity_2ul: display %4.2f table[6,3]
+local crude_severity_3b: display %4.2f table[1,4]
+local crude_severity_3ll: display %4.2f table[5,4]
+local crude_severity_3ul: display %4.2f table[6,4]
 
 qui stcox i.covid_severity i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
-local minimal_severity_1b`x': display %4.2f table[1,2]
-local minimal_severity_1ll`x': display %4.2f table[5,2]
-local minimal_severity_1ul`x': display %4.2f table[6,2]
-local minimal_severity_2b`x': display %4.2f table[1,3]
-local minimal_severity_2ll`x': display %4.2f table[5,3]
-local minimal_severity_2ul`x': display %4.2f table[6,3]
-local minimal_severity_3b`x': display %4.2f table[1,4]
-local minimal_severity_3ll`x': display %4.2f table[5,4]
-local minimal_severity_3ul`x': display %4.2f table[6,4]
+local minimal_severity_1b: display %4.2f table[1,2]
+local minimal_severity_1ll: display %4.2f table[5,2]
+local minimal_severity_1ul: display %4.2f table[6,2]
+local minimal_severity_2b: display %4.2f table[1,3]
+local minimal_severity_2ll: display %4.2f table[5,3]
+local minimal_severity_2ul: display %4.2f table[6,3]
+local minimal_severity_3b: display %4.2f table[1,4]
+local minimal_severity_3ll: display %4.2f table[5,4]
+local minimal_severity_3ul: display %4.2f table[6,4]
 
 qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.wave i.covid_vax age1 age2 age3, vce(cluster set_id)	
 matrix table = r(table)
-local full_severity_1b`x': display %4.2f table[1,2]
-local full_severity_1ll`x': display %4.2f table[5,2]
-local full_severity_1ul`x': display %4.2f table[6,2]
-local full_severity_2b`x': display %4.2f table[1,3]
-local full_severity_2ll`x': display %4.2f table[5,3]
-local full_severity_2ul`x': display %4.2f table[6,3]
-local full_severity_3b`x': display %4.2f table[1,4]
-local full_severity_3ll`x': display %4.2f table[5,4]
-local full_severity_3ul`x': display %4.2f table[6,4]
+local full_severity_1b: display %4.2f table[1,2]
+local full_severity_1ll: display %4.2f table[5,2]
+local full_severity_1ul: display %4.2f table[6,2]
+local full_severity_2b: display %4.2f table[1,3]
+local full_severity_2ll: display %4.2f table[5,3]
+local full_severity_2ul: display %4.2f table[6,3]
+local full_severity_3b: display %4.2f table[1,4]
+local full_severity_3ll: display %4.2f table[5,4]
+local full_severity_3ul: display %4.2f table[6,4]
 
 bysort covid_severity: egen total_follow_up`x' = total(_t)
 forvalues i=1/3 {
@@ -278,39 +278,39 @@ file write tablecontent ("`lab`x''") _n
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
 qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
-local crude_aki_1b`x': display %4.2f table[1,2]
-local crude_aki_1ll`x': display %4.2f table[5,2]
-local crude_aki_1ul`x': display %4.2f table[6,2]
-local crude_aki_2b`x': display %4.2f table[1,3]
-local crude_aki_2ll`x': display %4.2f table[5,3]
-local crude_aki_2ul`x': display %4.2f table[6,3]
-local crude_aki_3b`x': display %4.2f table[1,4]
-local crude_aki_3ll`x': display %4.2f table[5,4]
-local crude_aki_3ul`x': display %4.2f table[6,4]
+local crude_aki_1b: display %4.2f table[1,2]
+local crude_aki_1ll: display %4.2f table[5,2]
+local crude_aki_1ul: display %4.2f table[6,2]
+local crude_aki_2b: display %4.2f table[1,3]
+local crude_aki_2ll: display %4.2f table[5,3]
+local crude_aki_2ul: display %4.2f table[6,3]
+local crude_aki_3b: display %4.2f table[1,4]
+local crude_aki_3ll: display %4.2f table[5,4]
+local crude_aki_3ul: display %4.2f table[6,4]
 
 qui stcox i.covid_aki i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
-local minimal_aki_1b`x': display %4.2f table[1,2]
-local minimal_aki_1ll`x': display %4.2f table[5,2]
-local minimal_aki_1ul`x': display %4.2f table[6,2]
-local minimal_aki_2b`x': display %4.2f table[1,3]
-local minimal_aki_2ll`x': display %4.2f table[5,3]
-local minimal_aki_2ul`x': display %4.2f table[6,3]
-local minimal_aki_3b`x': display %4.2f table[1,4]
-local minimal_aki_3ll`x': display %4.2f table[5,4]
-local minimal_aki_3ul`x': display %4.2f table[6,4]
+local minimal_aki_1b: display %4.2f table[1,2]
+local minimal_aki_1ll: display %4.2f table[5,2]
+local minimal_aki_1ul: display %4.2f table[6,2]
+local minimal_aki_2b: display %4.2f table[1,3]
+local minimal_aki_2ll: display %4.2f table[5,3]
+local minimal_aki_2ul: display %4.2f table[6,3]
+local minimal_aki_3b: display %4.2f table[1,4]
+local minimal_aki_3ll: display %4.2f table[5,4]
+local minimal_aki_3ul: display %4.2f table[6,4]
 
 qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.wave i.covid_vax age1 age2 age3, vce(cluster set_id)	
 matrix table = r(table)
-local full_aki_1b`x': display %4.2f table[1,2]
-local full_aki_1ll`x': display %4.2f table[5,2]
-local full_aki_1ul`x': display %4.2f table[6,2]
-local full_aki_2b`x': display %4.2f table[1,3]
-local full_aki_2ll`x': display %4.2f table[5,3]
-local full_aki_2ul`x': display %4.2f table[6,3]
-local full_aki_3b`x': display %4.2f table[1,4]
-local full_aki_3ll`x': display %4.2f table[5,4]
-local full_aki_3ul`x': display %4.2f table[6,4]
+local full_aki_1b: display %4.2f table[1,2]
+local full_aki_1ll: display %4.2f table[5,2]
+local full_aki_1ul: display %4.2f table[6,2]
+local full_aki_2b: display %4.2f table[1,3]
+local full_aki_2ll: display %4.2f table[5,3]
+local full_aki_2ul: display %4.2f table[6,3]
+local full_aki_3b: display %4.2f table[1,4]
+local full_aki_3ll: display %4.2f table[5,4]
+local full_aki_3ul: display %4.2f table[6,4]
 
 bysort covid_aki: egen total_follow_up`x' = total(_t)
 forvalues i=1/3 {
