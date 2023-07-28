@@ -28,54 +28,54 @@ foreach outcome of varlist esrd egfr_half aki death {
 stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique) scale(365.25)
 bysort wave case: egen total_follow_up_`outcome' = total(_t)
 
-stcox i.case if wave==1, vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case if wave==1, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local crude_`outcome'_1b: display %4.2f table[1,2]
 local crude_`outcome'_1ll: display %4.2f table[5,2]
 local crude_`outcome'_1ul: display %4.2f table[6,2]
-stcox i.case if wave==2, vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case if wave==2, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local crude_`outcome'_2b: display %4.2f table[1,2]
 local crude_`outcome'_2ll: display %4.2f table[5,2]
 local crude_`outcome'_2ul: display %4.2f table[6,2]
-stcox i.case if wave==3, vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case if wave==3, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local crude_`outcome'_3b: display %4.2f table[1,2]
 local crude_`outcome'_3ll: display %4.2f table[5,2]
 local crude_`outcome'_3ul: display %4.2f table[6,2]
-stcox i.case if wave==4, vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case if wave==4, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local crude_`outcome'_4b: display %4.2f table[1,2]
 local crude_`outcome'_4ll: display %4.2f table[5,2]
 local crude_`outcome'_4ul: display %4.2f table[6,2]
 
-stcox i.case##i.wave, vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case##i.wave, vce(cluster practice_id) strata(set_id)
 contrast i.case#i.wave
 
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&wave==1, cubic nknots(4)
-stcox i.case i.sex age1 age2 age3 if wave==1,  vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case i.sex age1 age2 age3 if wave==1,  vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_`outcome'_1b: display %4.2f table[1,2]
 local minimal_`outcome'_1ll: display %4.2f table[5,2]
 local minimal_`outcome'_1ul: display %4.2f table[6,2]
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&wave==2, cubic nknots(4)
-stcox i.case i.sex age1 age2 age3 if wave==2,  vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case i.sex age1 age2 age3 if wave==2,  vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_`outcome'_2b: display %4.2f table[1,2]
 local minimal_`outcome'_2ll: display %4.2f table[5,2]
 local minimal_`outcome'_2ul: display %4.2f table[6,2]
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&wave==3, cubic nknots(4)
-stcox i.case i.sex age1 age2 age3 if wave==3,  vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case i.sex age1 age2 age3 if wave==3,  vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_`outcome'_3b: display %4.2f table[1,2]
 local minimal_`outcome'_3ll: display %4.2f table[5,2]
 local minimal_`outcome'_3ul: display %4.2f table[6,2]
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&wave==4, cubic nknots(4)
-stcox i.case i.sex age1 age2 age3 if wave==4,  vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case i.sex age1 age2 age3 if wave==4,  vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_`outcome'_4b: display %4.2f table[1,2]
 local minimal_`outcome'_4ll: display %4.2f table[5,2]
@@ -83,33 +83,33 @@ local minimal_`outcome'_4ul: display %4.2f table[6,2]
 
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=., cubic nknots(4)
-stcox i.case##i.wave i.sex age1 age2 age3,  vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case##i.wave i.sex age1 age2 age3,  vce(cluster practice_id) strata(set_id)
 contrast i.case#i.wave
 
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&wave==1, cubic nknots(4)
-stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3 if wave==1,  vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3 if wave==1,  vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local additional_`outcome'_1b: display %4.2f table[1,2]
 local additional_`outcome'_1ll: display %4.2f table[5,2]
 local additional_`outcome'_1ul: display %4.2f table[6,2]
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&wave==2, cubic nknots(4)
-stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3 if wave==2,  vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3 if wave==2,  vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local additional_`outcome'_2b: display %4.2f table[1,2]
 local additional_`outcome'_2ll: display %4.2f table[5,2]
 local additional_`outcome'_2ul: display %4.2f table[6,2]
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&wave==3, cubic nknots(4)
-stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3 if wave==3,  vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3 if wave==3,  vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local additional_`outcome'_3b: display %4.2f table[1,2]
 local additional_`outcome'_3ll: display %4.2f table[5,2]
 local additional_`outcome'_3ul: display %4.2f table[6,2]
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&wave==4, cubic nknots(4)
-stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3 if wave==4,  vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3 if wave==4,  vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local additional_`outcome'_4b: display %4.2f table[1,2]
 local additional_`outcome'_4ll: display %4.2f table[5,2]
@@ -117,33 +117,33 @@ local additional_`outcome'_4ul: display %4.2f table[6,2]
 
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
-stcox i.case##i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3 ,  vce(cluster practice_id) strata(set_id)
+capture noisily stcox i.case##i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking age1 age2 age3 ,  vce(cluster practice_id) strata(set_id)
 contrast i.case#i.wave
 
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&ckd_stage!=.&cardiovascular!=.&diabetes!=.&hypertension!=.&immunosuppressed!=.&non_haem_cancer!=.&wave==1, cubic nknots(4)
-stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 if wave==1,  vce(cluster practice_id) strata(set_id)	
+capture noisily stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 if wave==1,  vce(cluster practice_id) strata(set_id)	
 matrix table = r(table)
 local full_`outcome'_1b: display %4.2f table[1,2]
 local full_`outcome'_1ll: display %4.2f table[5,2]
 local full_`outcome'_1ul: display %4.2f table[6,2]
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&ckd_stage!=.&cardiovascular!=.&diabetes!=.&hypertension!=.&immunosuppressed!=.&non_haem_cancer!=.&wave==2, cubic nknots(4)
-stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 if wave==2,  vce(cluster practice_id) strata(set_id)	
+capture noisily stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 if wave==2,  vce(cluster practice_id) strata(set_id)	
 matrix table = r(table)
 local full_`outcome'_2b: display %4.2f table[1,2]
 local full_`outcome'_2ll: display %4.2f table[5,2]
 local full_`outcome'_2ul: display %4.2f table[6,2]
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&ckd_stage!=.&cardiovascular!=.&diabetes!=.&hypertension!=.&immunosuppressed!=.&non_haem_cancer!=.&wave==3, cubic nknots(4)
-stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 if wave==3,  vce(cluster practice_id) strata(set_id)	
+capture noisily stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 if wave==3,  vce(cluster practice_id) strata(set_id)	
 matrix table = r(table)
 local full_`outcome'_3b: display %4.2f table[1,2]
 local full_`outcome'_3ll: display %4.2f table[5,2]
 local full_`outcome'_3ul: display %4.2f table[6,2]
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&ckd_stage!=.&cardiovascular!=.&diabetes!=.&hypertension!=.&immunosuppressed!=.&non_haem_cancer!=.&wave==4, cubic nknots(4)
-stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 if wave==4,  vce(cluster practice_id) strata(set_id)	
+capture noisily stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3 if wave==4,  vce(cluster practice_id) strata(set_id)	
 matrix table = r(table)
 local full_`outcome'_4b: display %4.2f table[1,2]
 local full_`outcome'_4ll: display %4.2f table[5,2]
@@ -151,7 +151,7 @@ local full_`outcome'_4ul: display %4.2f table[6,2]
 
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&ckd_stage!=.&cardiovascular!=.&diabetes!=.&hypertension!=.&immunosuppressed!=.&non_haem_cancer!=., cubic nknots(4)
-stcox i.case##i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3,  vce(cluster practice_id) strata(set_id)	
+capture noisily stcox i.case##i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.ckd_stage i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.smoking age1 age2 age3,  vce(cluster practice_id) strata(set_id)	
 contrast i.case#i.wave
 		
 local lab1: label wave 1
