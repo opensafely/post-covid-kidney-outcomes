@@ -885,20 +885,48 @@ gen follow_up_time_death = (exit_date_death - index_date_death)
 label var follow_up_time_death "Follow-up time (death) (Days)"
 gen follow_up_years_death = follow_up_time_death/365.25
 
-*Outcomes by time period
-local outcome "esrd egfr_half aki death"
-foreach out of local outcome {
+*ESRD by time period (i.e. including 0-1 days (because if ESRD before index date, this was set to index_date + 1))
 *0-1 days
-gen `out'_date1 = `out'_date if `out'_date < (index_date_`out' + 2)
-gen exit_date1_`out' = `out'_date1
-gen index_date1_`out' = index_date_`out'
-format exit_date1_`out' %td
-replace exit_date1_`out' = min(deregistered_date, death_date, end_date, index_date_`out') if `out'_date1==.
-*stset exit_date1_`out', fail(`out'_date1) origin(index_date1_`out') id(unique) scale(365.25)
+gen esrd_date1 = esrd_date if esrd_date < (index_date_esrd + 2)
+gen exit_date1_esrd = esrd_date1
+gen index_date1_esrd = index_date_esrd
+format exit_date1_esrd %td
+replace exit_date1_esrd = min(deregistered_date, death_date, end_date, index_date_esrd) if esrd_date1==.
+*stset exit_date1_esrd, fail(esrd_date1) origin(index_date1_esrd) id(unique) scale(365.25)
 *2-29 days
+gen esrd_date29 = esrd_date if esrd_date < (index_date_esrd + 30) 
+gen exit_date29_esrd = esrd_date29
+gen index_date29_esrd = index_date_esrd + 2
+format exit_date29_esrd %td
+replace exit_date29_esrd = min(deregistered_date, death_date, end_date, (index_date_esrd + 29)) if esrd_date29==.
+*stset exit_date29_esrd, fail(esrd_date29) origin(index_date29_esrd) id(unique) scale(365.25)
+*30-89 days
+gen esrd_date89 = esrd_date if esrd_date < (index_date_esrd + 90) 
+gen exit_date89_esrd = esrd_date89
+gen index_date89_esrd = index_date_esrd + 30
+format exit_date89_esrd %td
+replace exit_date89_esrd = min(deregistered_date, death_date, end_date, (index_date_esrd + 89)) if esrd_date89==.
+*stset exit_date89_esrd, fail(esrd_date89) origin(index_date89_esrd) id(unique) scale(365.25)
+*90-179 days
+gen esrd_date179 = esrd_date if esrd_date < (index_date_esrd + 180) 
+gen exit_date179_esrd = esrd_date179
+gen index_date179_esrd = index_date_esrd + 90
+format exit_date179_esrd %td
+replace exit_date179_esrd = min(deregistered_date, death_date, end_date, (index_date_esrd + 179)) if esrd_date179==.
+*stset exit_date179_esrd, fail(esrd_date179) origin(index_date179_esrd) id(unique) scale(365.25)
+*180+ days
+gen index_datemax_esrd = index_date_esrd + 180
+gen exit_datemax_esrd = exit_date_esrd
+gen esrd_datemax = esrd_date
+*stset exit_date_esrd, fail(esrd_date) origin(index_datemax_esrd) id(unique) scale(365.25)
+
+*Secondary outcomes by time period
+local outcome "egfr_half aki death"
+foreach out of local outcome {
+*0-29 days
 gen `out'_date29 = `out'_date if `out'_date < (index_date_`out' + 30) 
 gen exit_date29_`out' = `out'_date29
-gen index_date29_`out' = index_date_`out' + 2
+gen index_date29_`out' = index_date_`out'
 format exit_date29_`out' %td
 replace exit_date29_`out' = min(deregistered_date, death_date, end_date, (index_date_`out' + 29)) if `out'_date29==.
 *stset exit_date29_`out', fail(`out'_date29) origin(index_date29_`out') id(unique) scale(365.25)
