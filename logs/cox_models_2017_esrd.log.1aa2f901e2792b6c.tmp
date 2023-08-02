@@ -1,0 +1,1604 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /workspace/logs/cox_models_2017_esrd.log
+  log type:  text
+ opened on:   2 Aug 2023, 14:34:58
+
+. 
+. cap file close tablecontent
+
+. file open tablecontent using ./output/cox_models_2017_esrd.csv, write text re
+> place
+(note: file ./output/cox_models_2017_esrd.csv not found)
+
+. file write tablecontent _tab ("Crude rate (/100000py) (95% CI)") _n
+
+. file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pand
+> emic)") _tab ("Crude HR (95% CI)") _tab ("Age and sex adjusted HR (95% CI)") 
+> _tab ("Fully-adjusted HR (95% CI)") _n
+
+. file write tablecontent ("COVID-19 overall") _n
+
+. file write tablecontent ("Overall") _tab
+
+. use ./output/analysis_2017.dta, clear
+
+. stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scal
+> e(365.25)
+
+                id:  unique
+     failure event:  esrd_date != 0 & esrd_date < .
+obs. time interval:  (exit_date_esrd[_n-1], exit_date_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+          0  exclusions
+------------------------------------------------------------------------------
+     25,703  observations remaining, representing
+     25,703  subjects
+      2,596  failures in single-failure-per-subject data
+ 43,458.272  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  2.847365
+
+. bysort case: egen total_follow_up = total(_t)
+
+. qui su total_follow_up if case==1
+
+. local cases_py = r(mean)
+
+. local cases_multip = 100000 / r(mean)
+
+. qui su total_follow_up if case==0
+
+. local controls_multip = 100000 / r(mean)
+
+. qui safecount if case==1 & _d==1 & _st==1
+
+. local cases_events = round(r(N),5)
+
+. local cases_rate : di %3.2f (`cases_events' * `cases_multip')
+
+. local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip'))
+
+. local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip'))
+
+. qui safecount if case==0 & _d==1 & _st==1
+
+. local controls_events = round(r(N),5)
+
+. local controls_rate : di %3.2f (`controls_events' * `controls_multip')
+
+. local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_
+> multip'))
+
+. local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_
+> multip'))
+
+. file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.
+> 2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll') 
+>  ("-") %3.2f (`controls_ul') (")") _tab
+
+. 
+. qui stcox i.case, vce(cluster set_id) strata(practice_id)
+
+. matrix table = r(table)
+
+. local crude_overall_b: display %4.2f table[1,2]
+
+. local crude_overall_ll: display %4.2f table[5,2]
+
+. local crude_overall_ul: display %4.2f table[6,2]
+
+. 
+. qui stcox i.case i.sex age1 age2 age3, vce(cluster set_id) strata(practice_id
+> )
+
+. matrix table = r(table)
+
+. local minimal_overall_b: display %4.2f table[1,2]
+
+. local minimal_overall_ll: display %4.2f table[5,2]
+
+. local minimal_overall_ul: display %4.2f table[6,2]
+
+. 
+. qui stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.c
+> kd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosu
+> ppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(clu
+> ster set_id) 
+
+. matrix table = r(table)
+
+. local full_overall_b: display %4.2f table[1,2]
+
+. local full_overall_ll: display %4.2f table[5,2]
+
+. local full_overall_ul: display %4.2f table[6,2] 
+
+. 
+. file write tablecontent  %4.2f (`crude_overall_b') (" (") %4.2f (`crude_overa
+> ll_ll') ("-") %4.2f (`crude_overall_ul') (")") _tab %4.2f (`minimal_overall_b
+> ') (" (") %4.2f (`minimal_overall_ll') ("-") %4.2f (`minimal_overall_ul') (")
+> ") _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f
+>  (`full_overall_ul') (")") _n
+
+. 
+. local period "1 29 89 179 max"
+
+. 
+. local lab1 "0-1 days"
+
+. local lab29 "2-29 days"
+
+. local lab89 "30-89 days"
+
+. local lab179 "90-179 days"
+
+. local labmax "180+ days"
+
+. 
+. foreach x of local period {
+  2. file write tablecontent ("`lab`x''") _tab
+  3. stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(
+> unique) scale(365.25)
+  4. bysort case: egen total_follow_up`x' = total(_t)
+  5. qui su total_follow_up`x' if case==1
+  6. local cases_py = r(mean)
+  7. local cases_multip = 100000 / r(mean)
+  8. qui su total_follow_up`x' if case==0
+  9. local controls_multip = 100000 / r(mean)
+ 10. qui safecount if case==1 & _d==1 & _st==1
+ 11. local cases_events = round(r(N),5)
+ 12. local cases_rate : di %3.2f (`cases_events' * `cases_multip')
+ 13. local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip'))
+ 14. local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip'))
+ 15. qui safecount if case==0 & _d==1 & _st==1
+ 16. local controls_events = round(r(N),5)
+ 17. local controls_rate : di %3.2f (`controls_events' * `controls_multip')
+ 18. local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `contro
+> ls_multip'))
+ 19. local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `contro
+> ls_multip'))
+ 20. file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") 
+> %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll
+> ')  ("-") %3.2f (`controls_ul') (")") _tab
+ 21. 
+. qui stcox i.case, vce(cluster set_id) strata(practice_id)
+ 22. matrix table = r(table)
+ 23. local crude_overall_b: display %4.2f table[1,2]
+ 24. local crude_overall_ll: display %4.2f table[5,2]
+ 25. local crude_overall_ul: display %4.2f table[6,2]
+ 26. 
+. qui stcox i.case i.sex age1 age2 age3, vce(cluster set_id) strata(practice_id
+> )
+ 27. matrix table = r(table)
+ 28. local minimal_overall_b: display %4.2f table[1,2]
+ 29. local minimal_overall_ll: display %4.2f table[5,2]
+ 30. local minimal_overall_ul: display %4.2f table[6,2]
+ 31. 
+. qui stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.c
+> kd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosu
+> ppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(clu
+> ster set_id) 
+ 32. matrix table = r(table)
+ 33. local full_overall_b: display %4.2f table[1,2]
+ 34. local full_overall_ll: display %4.2f table[5,2]
+ 35. local full_overall_ul: display %4.2f table[6,2] 
+ 36. 
+. file write tablecontent  %4.2f (`crude_overall_b') (" (") %4.2f (`crude_overa
+> ll_ll') ("-") %4.2f (`crude_overall_ul') (")") _tab %4.2f (`minimal_overall_b
+> ') (" (") %4.2f (`minimal_overall_ll') ("-") %4.2f (`minimal_overall_ul') (")
+> ") _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f
+>  (`full_overall_ul') (")") _n
+ 37. }
+
+                id:  unique
+     failure event:  esrd_date1 != 0 & esrd_date1 < .
+obs. time interval:  (exit_date1_esrd[_n-1], exit_date1_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date1_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+     25,581  observations end on or before enter()
+------------------------------------------------------------------------------
+        122  observations remaining, representing
+        122  subjects
+        122  failures in single-failure-per-subject data
+       .334  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .0027379
+
+                id:  unique
+     failure event:  esrd_date29 != 0 & esrd_date29 < .
+obs. time interval:  (exit_date29_esrd[_n-1], exit_date29_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date29_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+        163  observations end on or before enter()
+------------------------------------------------------------------------------
+     25,540  observations remaining, representing
+     25,540  subjects
+        108  failures in single-failure-per-subject data
+  1,873.478  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =   .073922
+
+                id:  unique
+     failure event:  esrd_date89 != 0 & esrd_date89 < .
+obs. time interval:  (exit_date89_esrd[_n-1], exit_date89_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date89_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+        555  observations end on or before enter()
+------------------------------------------------------------------------------
+     25,148  observations remaining, representing
+     25,148  subjects
+        249  failures in single-failure-per-subject data
+  3,988.186  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .1615332
+
+                id:  unique
+     failure event:  esrd_date179 != 0 & esrd_date179 < .
+obs. time interval:  (exit_date179_esrd[_n-1], exit_date179_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date179_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+      1,477  observations end on or before enter()
+------------------------------------------------------------------------------
+     24,226  observations remaining, representing
+     24,226  subjects
+        303  failures in single-failure-per-subject data
+  5,739.428  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .2436687
+
+                id:  unique
+     failure event:  esrd_datemax != 0 & esrd_datemax < .
+obs. time interval:  (exit_datemax_esrd[_n-1], exit_datemax_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_datemax_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+      2,797  observations end on or before enter()
+------------------------------------------------------------------------------
+     22,906  observations remaining, representing
+     22,906  subjects
+      1,805  failures in single-failure-per-subject data
+ 31,510.283  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  2.354552
+
+. file write tablecontent _n
+
+. 
+. file write tablecontent ("By COVID-19 severity") _n
+
+. 
+. use ./output/analysis_2017.dta, clear
+
+. 
+. local severity1: label covid_severity 1
+
+. local severity2: label covid_severity 2
+
+. local severity3: label covid_severity 3
+
+. 
+. stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scal
+> e(365.25)
+
+                id:  unique
+     failure event:  esrd_date != 0 & esrd_date < .
+obs. time interval:  (exit_date_esrd[_n-1], exit_date_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+          0  exclusions
+------------------------------------------------------------------------------
+     25,703  observations remaining, representing
+     25,703  subjects
+      2,596  failures in single-failure-per-subject data
+ 43,458.272  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  2.847365
+
+. 
+. qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
+
+. matrix table = r(table)
+
+. local crude_severity_1b: display %4.2f table[1,2]
+
+. local crude_severity_1ll: display %4.2f table[5,2]
+
+. local crude_severity_1ul: display %4.2f table[6,2]
+
+. local crude_severity_2b: display %4.2f table[1,3]
+
+. local crude_severity_2ll: display %4.2f table[5,3]
+
+. local crude_severity_2ul: display %4.2f table[6,3]
+
+. local crude_severity_3b: display %4.2f table[1,4]
+
+. local crude_severity_3ll: display %4.2f table[5,4]
+
+. local crude_severity_3ul: display %4.2f table[6,4]
+
+. 
+. qui stcox i.covid_severity i.sex age1 age2 age3, vce(cluster practice_id) str
+> ata(set_id)
+
+. matrix table = r(table)
+
+. local minimal_severity_1b: display %4.2f table[1,2]
+
+. local minimal_severity_1ll: display %4.2f table[5,2]
+
+. local minimal_severity_1ul: display %4.2f table[6,2]
+
+. local minimal_severity_2b: display %4.2f table[1,3]
+
+. local minimal_severity_2ll: display %4.2f table[5,3]
+
+. local minimal_severity_2ul: display %4.2f table[6,3]
+
+. local minimal_severity_3b: display %4.2f table[1,4]
+
+. local minimal_severity_3ll: display %4.2f table[5,4]
+
+. local minimal_severity_3ul: display %4.2f table[6,4]
+
+. 
+. qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.s
+> moking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension 
+> i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age
+> 3, vce(cluster set_id)   
+
+. matrix table = r(table)
+
+. local full_severity_1b: display %4.2f table[1,2]
+
+. local full_severity_1ll: display %4.2f table[5,2]
+
+. local full_severity_1ul: display %4.2f table[6,2]
+
+. local full_severity_2b: display %4.2f table[1,3]
+
+. local full_severity_2ll: display %4.2f table[5,3]
+
+. local full_severity_2ul: display %4.2f table[6,3]
+
+. local full_severity_3b: display %4.2f table[1,4]
+
+. local full_severity_3ll: display %4.2f table[5,4]
+
+. local full_severity_3ul: display %4.2f table[6,4]
+
+. 
+. bysort covid_severity: egen total_follow_up = total(_t)
+
+. forvalues i=1/3 {
+  2. qui su total_follow_up if covid_severity==`i'
+  3. local cases`i'_py = r(mean)
+  4. local cases`i'_multip = 100000 / r(mean)
+  5. qui safecount if covid_severity==`i' & _d==1 & _st==1
+  6. local cases`i'_events = round(r(N),5)
+  7. local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+  8. local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`
+> i'_multip'))
+  9. local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`
+> i'_multip'))
+ 10. }
+
+. 
+. foreach x of local period {
+  2. stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(
+> unique) scale(365.25)
+  3. qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
+  4. matrix table = r(table)
+  5. local crude_severity_1b`x': display %4.2f table[1,2]
+  6. local crude_severity_1ll`x': display %4.2f table[5,2]
+  7. local crude_severity_1ul`x': display %4.2f table[6,2]
+  8. local crude_severity_2b`x': display %4.2f table[1,3]
+  9. local crude_severity_2ll`x': display %4.2f table[5,3]
+ 10. local crude_severity_2ul`x': display %4.2f table[6,3]
+ 11. local crude_severity_3b`x': display %4.2f table[1,4]
+ 12. local crude_severity_3ll`x': display %4.2f table[5,4]
+ 13. local crude_severity_3ul`x': display %4.2f table[6,4]
+ 14. 
+. qui stcox i.covid_severity i.sex age1 age2 age3, vce(cluster practice_id) str
+> ata(set_id)
+ 15. matrix table = r(table)
+ 16. local minimal_severity_1b`x': display %4.2f table[1,2]
+ 17. local minimal_severity_1ll`x': display %4.2f table[5,2]
+ 18. local minimal_severity_1ul`x': display %4.2f table[6,2]
+ 19. local minimal_severity_2b`x': display %4.2f table[1,3]
+ 20. local minimal_severity_2ll`x': display %4.2f table[5,3]
+ 21. local minimal_severity_2ul`x': display %4.2f table[6,3]
+ 22. local minimal_severity_3b`x': display %4.2f table[1,4]
+ 23. local minimal_severity_3ll`x': display %4.2f table[5,4]
+ 24. local minimal_severity_3ul`x': display %4.2f table[6,4]
+ 25. 
+. qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.s
+> moking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension 
+> i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age
+> 3, vce(cluster set_id)   
+ 26. matrix table = r(table)
+ 27. local full_severity_1b`x': display %4.2f table[1,2]
+ 28. local full_severity_1ll`x': display %4.2f table[5,2]
+ 29. local full_severity_1ul`x': display %4.2f table[6,2]
+ 30. local full_severity_2b`x': display %4.2f table[1,3]
+ 31. local full_severity_2ll`x': display %4.2f table[5,3]
+ 32. local full_severity_2ul`x': display %4.2f table[6,3]
+ 33. local full_severity_3b`x': display %4.2f table[1,4]
+ 34. local full_severity_3ll`x': display %4.2f table[5,4]
+ 35. local full_severity_3ul`x': display %4.2f table[6,4]
+ 36. 
+. bysort covid_severity: egen total_follow_up`x' = total(_t)
+ 37. forvalues i=1/3 {
+ 38. qui su total_follow_up`x' if covid_severity==`i'
+ 39. local cases`i'_py = r(mean)
+ 40. local cases`i'_multip = 100000 / r(mean)
+ 41. qui safecount if covid_severity==`i' & _d==1 & _st==1
+ 42. local cases`i'_events = round(r(N),5)
+ 43. local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+ 44. local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' 
+> / `cases`i'_multip'))
+ 45. local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' 
+> / `cases`i'_multip'))
+ 46. }
+ 47. }
+
+                id:  unique
+     failure event:  esrd_date1 != 0 & esrd_date1 < .
+obs. time interval:  (exit_date1_esrd[_n-1], exit_date1_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date1_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+     25,581  observations end on or before enter()
+------------------------------------------------------------------------------
+        122  observations remaining, representing
+        122  subjects
+        122  failures in single-failure-per-subject data
+       .334  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .0027379
+
+                id:  unique
+     failure event:  esrd_date29 != 0 & esrd_date29 < .
+obs. time interval:  (exit_date29_esrd[_n-1], exit_date29_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date29_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+        163  observations end on or before enter()
+------------------------------------------------------------------------------
+     25,540  observations remaining, representing
+     25,540  subjects
+        108  failures in single-failure-per-subject data
+  1,873.478  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =   .073922
+
+                id:  unique
+     failure event:  esrd_date89 != 0 & esrd_date89 < .
+obs. time interval:  (exit_date89_esrd[_n-1], exit_date89_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date89_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+        555  observations end on or before enter()
+------------------------------------------------------------------------------
+     25,148  observations remaining, representing
+     25,148  subjects
+        249  failures in single-failure-per-subject data
+  3,988.186  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .1615332
+
+                id:  unique
+     failure event:  esrd_date179 != 0 & esrd_date179 < .
+obs. time interval:  (exit_date179_esrd[_n-1], exit_date179_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date179_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+      1,477  observations end on or before enter()
+------------------------------------------------------------------------------
+     24,226  observations remaining, representing
+     24,226  subjects
+        303  failures in single-failure-per-subject data
+  5,739.428  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .2436687
+
+                id:  unique
+     failure event:  esrd_datemax != 0 & esrd_datemax < .
+obs. time interval:  (exit_datemax_esrd[_n-1], exit_datemax_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_datemax_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+      2,797  observations end on or before enter()
+------------------------------------------------------------------------------
+     22,906  observations remaining, representing
+     22,906  subjects
+      1,805  failures in single-failure-per-subject data
+ 31,510.283  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  2.354552
+
+. 
+. forvalues i=1/3 {
+  2. file write tablecontent ("`severity`i''") _n
+  3. file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f 
+> (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_
+> severity_`i'b') (" (") %4.2f (`crude_severity_`i'll') ("-") %4.2f (`crude_sev
+> erity_`i'ul') (")") _tab %4.2f (`minimal_severity_`i'b') (" (") %4.2f (`minim
+> al_severity_`i'll') ("-") %4.2f (`minimal_severity_`i'ul') (")") _tab %4.2f (
+> `full_severity_`i'b') (" (") %4.2f (`full_severity_`i'll') ("-") %4.2f (`full
+> _severity_`i'ul') (")") _n
+  4. foreach x of local period {
+  5. file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3
+> .2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f
+>  (`crude_severity_`i'b`x'') (" (") %4.2f (`crude_severity_`i'll`x'') ("-") %4
+> .2f (`crude_severity_`i'ul`x'') (")") _tab %4.2f (`minimal_severity_`i'b`x'')
+>  (" (") %4.2f (`minimal_severity_`i'll`x'') ("-") %4.2f (`minimal_severity_`i
+> 'ul`x'') (")") _tab %4.2f (`full_severity_`i'b`x'') (" (") %4.2f (`full_sever
+> ity_`i'll`x'') ("-") %4.2f (`full_severity_`i'ul`x'') (")") _n
+  6. }
+  7. }
+
+. file write tablecontent _n
+
+. 
+. 
+. file write tablecontent ("By COVID-19 AKI") _n
+
+. 
+. use ./output/analysis_2017.dta, clear
+
+. 
+. local aki1: label covid_aki 1
+
+. local aki2: label covid_aki 2
+
+. local aki3: label covid_aki 3
+
+. 
+. stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scal
+> e(365.25)
+
+                id:  unique
+     failure event:  esrd_date != 0 & esrd_date < .
+obs. time interval:  (exit_date_esrd[_n-1], exit_date_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+          0  exclusions
+------------------------------------------------------------------------------
+     25,703  observations remaining, representing
+     25,703  subjects
+      2,596  failures in single-failure-per-subject data
+ 43,458.272  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  2.847365
+
+. 
+. qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
+
+. matrix table = r(table)
+
+. local crude_aki_1b: display %4.2f table[1,2]
+
+. local crude_aki_1ll: display %4.2f table[5,2]
+
+. local crude_aki_1ul: display %4.2f table[6,2]
+
+. local crude_aki_2b: display %4.2f table[1,3]
+
+. local crude_aki_2ll: display %4.2f table[5,3]
+
+. local crude_aki_2ul: display %4.2f table[6,3]
+
+. local crude_aki_3b: display %4.2f table[1,4]
+
+. local crude_aki_3ll: display %4.2f table[5,4]
+
+. local crude_aki_3ul: display %4.2f table[6,4]
+
+. 
+. qui stcox i.covid_aki i.sex age1 age2 age3, vce(cluster practice_id) strata(s
+> et_id)
+
+. matrix table = r(table)
+
+. local minimal_aki_1b: display %4.2f table[1,2]
+
+. local minimal_aki_1ll: display %4.2f table[5,2]
+
+. local minimal_aki_1ul: display %4.2f table[6,2]
+
+. local minimal_aki_2b: display %4.2f table[1,3]
+
+. local minimal_aki_2ll: display %4.2f table[5,3]
+
+. local minimal_aki_2ul: display %4.2f table[6,3]
+
+. local minimal_aki_3b: display %4.2f table[1,4]
+
+. local minimal_aki_3ll: display %4.2f table[5,4]
+
+. local minimal_aki_3ul: display %4.2f table[6,4]
+
+. 
+. qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smokin
+> g i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.imm
+> unosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vc
+> e(cluster set_id)        
+
+. matrix table = r(table)
+
+. local full_aki_1b: display %4.2f table[1,2]
+
+. local full_aki_1ll: display %4.2f table[5,2]
+
+. local full_aki_1ul: display %4.2f table[6,2]
+
+. local full_aki_2b: display %4.2f table[1,3]
+
+. local full_aki_2ll: display %4.2f table[5,3]
+
+. local full_aki_2ul: display %4.2f table[6,3]
+
+. local full_aki_3b: display %4.2f table[1,4]
+
+. local full_aki_3ll: display %4.2f table[5,4]
+
+. local full_aki_3ul: display %4.2f table[6,4]
+
+. 
+. bysort covid_aki: egen total_follow_up = total(_t)
+
+. forvalues i=1/3 {
+  2. qui su total_follow_up if covid_aki==`i'
+  3. local cases`i'_py = r(mean)
+  4. local cases`i'_multip = 100000 / r(mean)
+  5. qui safecount if covid_aki==`i' & _d==1 & _st==1
+  6. local cases`i'_events = round(r(N),5)
+  7. local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+  8. local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`
+> i'_multip'))
+  9. local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`
+> i'_multip'))
+ 10. }
+
+. 
+. foreach x of local period {
+  2. stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(
+> unique) scale(365.25)
+  3. qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
+  4. matrix table = r(table)
+  5. local crude_aki_1b`x': display %4.2f table[1,2]
+  6. local crude_aki_1ll`x': display %4.2f table[5,2]
+  7. local crude_aki_1ul`x': display %4.2f table[6,2]
+  8. local crude_aki_2b`x': display %4.2f table[1,3]
+  9. local crude_aki_2ll`x': display %4.2f table[5,3]
+ 10. local crude_aki_2ul`x': display %4.2f table[6,3]
+ 11. local crude_aki_3b`x': display %4.2f table[1,4]
+ 12. local crude_aki_3ll`x': display %4.2f table[5,4]
+ 13. local crude_aki_3ul`x': display %4.2f table[6,4]
+ 14. 
+. qui stcox i.covid_aki i.sex age1 age2 age3, vce(cluster practice_id) strata(s
+> et_id)
+ 15. matrix table = r(table)
+ 16. local minimal_aki_1b`x': display %4.2f table[1,2]
+ 17. local minimal_aki_1ll`x': display %4.2f table[5,2]
+ 18. local minimal_aki_1ul`x': display %4.2f table[6,2]
+ 19. local minimal_aki_2b`x': display %4.2f table[1,3]
+ 20. local minimal_aki_2ll`x': display %4.2f table[5,3]
+ 21. local minimal_aki_2ul`x': display %4.2f table[6,3]
+ 22. local minimal_aki_3b`x': display %4.2f table[1,4]
+ 23. local minimal_aki_3ll`x': display %4.2f table[5,4]
+ 24. local minimal_aki_3ul`x': display %4.2f table[6,4]
+ 25. 
+. qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smokin
+> g i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.imm
+> unosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vc
+> e(cluster set_id)        
+ 26. matrix table = r(table)
+ 27. local full_aki_1b`x': display %4.2f table[1,2]
+ 28. local full_aki_1ll`x': display %4.2f table[5,2]
+ 29. local full_aki_1ul`x': display %4.2f table[6,2]
+ 30. local full_aki_2b`x': display %4.2f table[1,3]
+ 31. local full_aki_2ll`x': display %4.2f table[5,3]
+ 32. local full_aki_2ul`x': display %4.2f table[6,3]
+ 33. local full_aki_3b`x': display %4.2f table[1,4]
+ 34. local full_aki_3ll`x': display %4.2f table[5,4]
+ 35. local full_aki_3ul`x': display %4.2f table[6,4]
+ 36. 
+. bysort covid_aki: egen total_follow_up`x' = total(_t)
+ 37. forvalues i=1/3 {
+ 38. qui su total_follow_up`x' if covid_aki==`i'
+ 39. local cases`i'_py = r(mean)
+ 40. local cases`i'_multip = 100000 / r(mean)
+ 41. qui safecount if covid_aki==`i' & _d==1 & _st==1
+ 42. local cases`i'_events = round(r(N),5)
+ 43. local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+ 44. local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' 
+> / `cases`i'_multip'))
+ 45. local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' 
+> / `cases`i'_multip'))
+ 46. }
+ 47. }
+
+                id:  unique
+     failure event:  esrd_date1 != 0 & esrd_date1 < .
+obs. time interval:  (exit_date1_esrd[_n-1], exit_date1_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date1_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+     25,581  observations end on or before enter()
+------------------------------------------------------------------------------
+        122  observations remaining, representing
+        122  subjects
+        122  failures in single-failure-per-subject data
+       .334  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .0027379
+
+                id:  unique
+     failure event:  esrd_date29 != 0 & esrd_date29 < .
+obs. time interval:  (exit_date29_esrd[_n-1], exit_date29_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date29_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+        163  observations end on or before enter()
+------------------------------------------------------------------------------
+     25,540  observations remaining, representing
+     25,540  subjects
+        108  failures in single-failure-per-subject data
+  1,873.478  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =   .073922
+
+                id:  unique
+     failure event:  esrd_date89 != 0 & esrd_date89 < .
+obs. time interval:  (exit_date89_esrd[_n-1], exit_date89_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date89_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+        555  observations end on or before enter()
+------------------------------------------------------------------------------
+     25,148  observations remaining, representing
+     25,148  subjects
+        249  failures in single-failure-per-subject data
+  3,988.186  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .1615332
+
+                id:  unique
+     failure event:  esrd_date179 != 0 & esrd_date179 < .
+obs. time interval:  (exit_date179_esrd[_n-1], exit_date179_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date179_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+      1,477  observations end on or before enter()
+------------------------------------------------------------------------------
+     24,226  observations remaining, representing
+     24,226  subjects
+        303  failures in single-failure-per-subject data
+  5,739.428  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .2436687
+
+                id:  unique
+     failure event:  esrd_datemax != 0 & esrd_datemax < .
+obs. time interval:  (exit_datemax_esrd[_n-1], exit_datemax_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_datemax_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+      2,797  observations end on or before enter()
+------------------------------------------------------------------------------
+     22,906  observations remaining, representing
+     22,906  subjects
+      1,805  failures in single-failure-per-subject data
+ 31,510.283  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  2.354552
+
+. 
+. forvalues i=1/3 {
+  2. file write tablecontent ("`aki`i''") _n
+  3. file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f 
+> (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_
+> aki_`i'b') (" (") %4.2f (`crude_aki_`i'll') ("-") %4.2f (`crude_aki_`i'ul') (
+> ")") _tab %4.2f (`minimal_aki_`i'b') (" (") %4.2f (`minimal_aki_`i'll') ("-")
+>  %4.2f (`minimal_aki_`i'ul') (")") _tab %4.2f (`full_aki_`i'b') (" (") %4.2f 
+> (`full_aki_`i'll') ("-") %4.2f (`full_aki_`i'ul') (")") _n
+  4. foreach x of local period {
+  5. file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3
+> .2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f
+>  (`crude_aki_`i'b`x'') (" (") %4.2f (`crude_aki_`i'll`x'') ("-") %4.2f (`crud
+> e_aki_`i'ul`x'') (")") _tab %4.2f (`minimal_aki_`i'b`x'') (" (") %4.2f (`mini
+> mal_aki_`i'll`x'') ("-") %4.2f (`minimal_aki_`i'ul`x'') (")") _tab %4.2f (`fu
+> ll_aki_`i'b`x'') (" (") %4.2f (`full_aki_`i'll`x'') ("-") %4.2f (`full_aki_`i
+> 'ul`x'') (")") _n
+  6. }
+  7. }
+
+. file write tablecontent _n
+
+. 
+. 
+. file write tablecontent ("By COVID-19 wave") _n
+
+. 
+. use ./output/analysis_2017.dta, clear
+
+. 
+. local wave1: label wave 1
+
+. local wave2: label wave 2
+
+. local wave3: label wave 3
+
+. local wave4: label wave 4
+
+. 
+. stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scal
+> e(365.25)
+
+                id:  unique
+     failure event:  esrd_date != 0 & esrd_date < .
+obs. time interval:  (exit_date_esrd[_n-1], exit_date_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+          0  exclusions
+------------------------------------------------------------------------------
+     25,703  observations remaining, representing
+     25,703  subjects
+      2,596  failures in single-failure-per-subject data
+ 43,458.272  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  2.847365
+
+. 
+. qui stcox i.wave, vce(cluster practice_id) strata(set_id)
+
+. matrix table = r(table)
+
+. local crude_wave_1b: display %4.2f table[1,2]
+
+. local crude_wave_1ll: display %4.2f table[5,2]
+
+. local crude_wave_1ul: display %4.2f table[6,2]
+
+. local crude_wave_2b: display %4.2f table[1,3]
+
+. local crude_wave_2ll: display %4.2f table[5,3]
+
+. local crude_wave_2ul: display %4.2f table[6,3]
+
+. local crude_wave_3b: display %4.2f table[1,4]
+
+. local crude_wave_3ll: display %4.2f table[5,4]
+
+. local crude_wave_3ul: display %4.2f table[6,4]
+
+. local crude_wave_4b: display %4.2f table[1,5]
+
+. local crude_wave_4ll: display %4.2f table[5,5]
+
+. local crude_wave_4ul: display %4.2f table[6,5]
+
+. 
+. qui stcox i.wave i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id
+> )
+
+. matrix table = r(table)
+
+. local minimal_wave_1b: display %4.2f table[1,2]
+
+. local minimal_wave_1ll: display %4.2f table[5,2]
+
+. local minimal_wave_1ul: display %4.2f table[6,2]
+
+. local minimal_wave_2b: display %4.2f table[1,3]
+
+. local minimal_wave_2ll: display %4.2f table[5,3]
+
+. local minimal_wave_2ul: display %4.2f table[6,3]
+
+. local minimal_wave_3b: display %4.2f table[1,4]
+
+. local minimal_wave_3ll: display %4.2f table[5,4]
+
+. local minimal_wave_3ul: display %4.2f table[6,4]
+
+. local minimal_wave_4b: display %4.2f table[1,5]
+
+. local minimal_wave_4ll: display %4.2f table[5,5]
+
+. local minimal_wave_4ul: display %4.2f table[6,5]
+
+. 
+. qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.c
+> kd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosu
+> ppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(clu
+> ster set_id)     
+
+. matrix table = r(table)
+
+. local full_wave_1b: display %4.2f table[1,2]
+
+. local full_wave_1ll: display %4.2f table[5,2]
+
+. local full_wave_1ul: display %4.2f table[6,2]
+
+. local full_wave_2b: display %4.2f table[1,3]
+
+. local full_wave_2ll: display %4.2f table[5,3]
+
+. local full_wave_2ul: display %4.2f table[6,3]
+
+. local full_wave_3b: display %4.2f table[1,4]
+
+. local full_wave_3ll: display %4.2f table[5,4]
+
+. local full_wave_3ul: display %4.2f table[6,4]
+
+. local full_wave_4b: display %4.2f table[1,5]
+
+. local full_wave_4ll: display %4.2f table[5,5]
+
+. local full_wave_4ul: display %4.2f table[6,5]   
+
+. 
+. bysort wave: egen total_follow_up = total(_t)
+
+. forvalues i=1/4 {
+  2. qui su total_follow_up if wave==`i'
+  3. local cases`i'_py = r(mean)
+  4. local cases`i'_multip = 100000 / r(mean)
+  5. qui safecount if wave==`i' & _d==1 & _st==1
+  6. local cases`i'_events = round(r(N),5)
+  7. local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+  8. local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`
+> i'_multip'))
+  9. local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`
+> i'_multip'))
+ 10. }
+
+. 
+. foreach x of local period {
+  2. stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(
+> unique) scale(365.25)
+  3. qui stcox i.wave, vce(cluster practice_id) strata(set_id)
+  4. matrix table = r(table)
+  5. local crude_wave_1b`x': display %4.2f table[1,2]
+  6. local crude_wave_1ll`x': display %4.2f table[5,2]
+  7. local crude_wave_1ul`x': display %4.2f table[6,2]
+  8. local crude_wave_2b`x': display %4.2f table[1,3]
+  9. local crude_wave_2ll`x': display %4.2f table[5,3]
+ 10. local crude_wave_2ul`x': display %4.2f table[6,3]
+ 11. local crude_wave_3b`x': display %4.2f table[1,4]
+ 12. local crude_wave_3ll`x': display %4.2f table[5,4]
+ 13. local crude_wave_3ul`x': display %4.2f table[6,4]
+ 14. local crude_wave_4b`x': display %4.2f table[1,5]
+ 15. local crude_wave_4ll`x': display %4.2f table[5,5]
+ 16. local crude_wave_4ul`x': display %4.2f table[6,5]
+ 17. 
+. qui stcox i.wave i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id
+> )
+ 18. matrix table = r(table)
+ 19. local minimal_wave_1b`x': display %4.2f table[1,2]
+ 20. local minimal_wave_1ll`x': display %4.2f table[5,2]
+ 21. local minimal_wave_1ul`x': display %4.2f table[6,2]
+ 22. local minimal_wave_2b`x': display %4.2f table[1,3]
+ 23. local minimal_wave_2ll`x': display %4.2f table[5,3]
+ 24. local minimal_wave_2ul`x': display %4.2f table[6,3]
+ 25. local minimal_wave_3b`x': display %4.2f table[1,4]
+ 26. local minimal_wave_3ll`x': display %4.2f table[5,4]
+ 27. local minimal_wave_3ul`x': display %4.2f table[6,4]
+ 28. local minimal_wave_4b`x': display %4.2f table[1,5]
+ 29. local minimal_wave_4ll`x': display %4.2f table[5,5]
+ 30. local minimal_wave_4ul`x': display %4.2f table[6,5]
+ 31. 
+. qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.c
+> kd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosu
+> ppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(clu
+> ster set_id)     
+ 32. matrix table = r(table)
+ 33. local full_wave_1b`x': display %4.2f table[1,2]
+ 34. local full_wave_1ll`x': display %4.2f table[5,2]
+ 35. local full_wave_1ul`x': display %4.2f table[6,2]
+ 36. local full_wave_2b`x': display %4.2f table[1,3]
+ 37. local full_wave_2ll`x': display %4.2f table[5,3]
+ 38. local full_wave_2ul`x': display %4.2f table[6,3]
+ 39. local full_wave_3b`x': display %4.2f table[1,4]
+ 40. local full_wave_3ll`x': display %4.2f table[5,4]
+ 41. local full_wave_3ul`x': display %4.2f table[6,4]
+ 42. local full_wave_4b`x': display %4.2f table[1,5]
+ 43. local full_wave_4ll`x': display %4.2f table[5,5]
+ 44. local full_wave_4ul`x': display %4.2f table[6,5]
+ 45. 
+. bysort wave: egen total_follow_up`x' = total(_t)
+ 46. forvalues i=1/4 {
+ 47. qui su total_follow_up`x' if wave==`i'
+ 48. local cases`i'_py = r(mean)
+ 49. local cases`i'_multip = 100000 / r(mean)
+ 50. qui safecount if wave==`i' & _d==1 & _st==1
+ 51. local cases`i'_events = round(r(N),5)
+ 52. local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+ 53. local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' 
+> / `cases`i'_multip'))
+ 54. local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' 
+> / `cases`i'_multip'))
+ 55. }
+ 56. }
+
+                id:  unique
+     failure event:  esrd_date1 != 0 & esrd_date1 < .
+obs. time interval:  (exit_date1_esrd[_n-1], exit_date1_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date1_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+     25,581  observations end on or before enter()
+------------------------------------------------------------------------------
+        122  observations remaining, representing
+        122  subjects
+        122  failures in single-failure-per-subject data
+       .334  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .0027379
+
+                id:  unique
+     failure event:  esrd_date29 != 0 & esrd_date29 < .
+obs. time interval:  (exit_date29_esrd[_n-1], exit_date29_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date29_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+        163  observations end on or before enter()
+------------------------------------------------------------------------------
+     25,540  observations remaining, representing
+     25,540  subjects
+        108  failures in single-failure-per-subject data
+  1,873.478  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =   .073922
+
+                id:  unique
+     failure event:  esrd_date89 != 0 & esrd_date89 < .
+obs. time interval:  (exit_date89_esrd[_n-1], exit_date89_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date89_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+        555  observations end on or before enter()
+------------------------------------------------------------------------------
+     25,148  observations remaining, representing
+     25,148  subjects
+        249  failures in single-failure-per-subject data
+  3,988.186  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .1615332
+
+                id:  unique
+     failure event:  esrd_date179 != 0 & esrd_date179 < .
+obs. time interval:  (exit_date179_esrd[_n-1], exit_date179_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date179_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+      1,477  observations end on or before enter()
+------------------------------------------------------------------------------
+     24,226  observations remaining, representing
+     24,226  subjects
+        303  failures in single-failure-per-subject data
+  5,739.428  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .2436687
+
+                id:  unique
+     failure event:  esrd_datemax != 0 & esrd_datemax < .
+obs. time interval:  (exit_datemax_esrd[_n-1], exit_datemax_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_datemax_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+      2,797  observations end on or before enter()
+------------------------------------------------------------------------------
+     22,906  observations remaining, representing
+     22,906  subjects
+      1,805  failures in single-failure-per-subject data
+ 31,510.283  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  2.354552
+
+. 
+. forvalues i=1/4 {
+  2. file write tablecontent ("`wave`i''") _n
+  3. file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f 
+> (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_
+> wave_`i'b') (" (") %4.2f (`crude_wave_`i'll') ("-") %4.2f (`crude_wave_`i'ul'
+> ) (")") _tab %4.2f (`minimal_wave_`i'b') (" (") %4.2f (`minimal_wave_`i'll') 
+> ("-") %4.2f (`minimal_wave_`i'ul') (")") _tab %4.2f (`full_wave_`i'b') (" (")
+>  %4.2f (`full_wave_`i'll') ("-") %4.2f (`full_wave_`i'ul') (")") _n
+  4. foreach x of local period {
+  5. file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3
+> .2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f
+>  (`crude_wave_`i'b`x'') (" (") %4.2f (`crude_wave_`i'll`x'') ("-") %4.2f (`cr
+> ude_wave_`i'ul`x'') (")") _tab %4.2f (`minimal_wave_`i'b`x'') (" (") %4.2f (`
+> minimal_wave_`i'll`x'') ("-") %4.2f (`minimal_wave_`i'ul`x'') (")") _tab %4.2
+> f (`full_wave_`i'b`x'') (" (") %4.2f (`full_wave_`i'll`x'') ("-") %4.2f (`ful
+> l_wave_`i'ul`x'') (")") _n
+  6. }
+  7. }
+
+. file write tablecontent _n
+
+. 
+. file write tablecontent ("By COVID-19 vaccination status") _n
+
+. 
+. use ./output/analysis_2017.dta, clear
+
+. 
+. local vax1: label covid_vax 1
+
+. local vax2: label covid_vax 2
+
+. local vax3: label covid_vax 3
+
+. local vax4: label covid_vax 4
+
+. local vax5: label covid_vax 5
+
+. 
+. stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scal
+> e(365.25)
+
+                id:  unique
+     failure event:  esrd_date != 0 & esrd_date < .
+obs. time interval:  (exit_date_esrd[_n-1], exit_date_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+          0  exclusions
+------------------------------------------------------------------------------
+     25,703  observations remaining, representing
+     25,703  subjects
+      2,596  failures in single-failure-per-subject data
+ 43,458.272  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  2.847365
+
+. 
+. qui stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
+
+. matrix table = r(table)
+
+. local crude_vax_1b: display %4.2f table[1,2]
+
+. local crude_vax_1ll: display %4.2f table[5,2]
+
+. local crude_vax_1ul: display %4.2f table[6,2]
+
+. local crude_vax_2b: display %4.2f table[1,3]
+
+. local crude_vax_2ll: display %4.2f table[5,3]
+
+. local crude_vax_2ul: display %4.2f table[6,3]
+
+. local crude_vax_3b: display %4.2f table[1,4]
+
+. local crude_vax_3ll: display %4.2f table[5,4]
+
+. local crude_vax_3ul: display %4.2f table[6,4]
+
+. local crude_vax_4b: display %4.2f table[1,5]
+
+. local crude_vax_4ll: display %4.2f table[5,5]
+
+. local crude_vax_4ul: display %4.2f table[6,5]
+
+. local crude_vax_5b: display %4.2f table[1,6]
+
+. local crude_vax_5ll: display %4.2f table[5,6]
+
+. local crude_vax_5ul: display %4.2f table[6,6]
+
+. 
+. qui stcox i.covid_vax i.sex age1 age2 age3, vce(cluster practice_id) strata(s
+> et_id)
+
+. matrix table = r(table)
+
+. local minimal_vax_1b: display %4.2f table[1,2]
+
+. local minimal_vax_1ll: display %4.2f table[5,2]
+
+. local minimal_vax_1ul: display %4.2f table[6,2]
+
+. local minimal_vax_2b: display %4.2f table[1,3]
+
+. local minimal_vax_2ll: display %4.2f table[5,3]
+
+. local minimal_vax_2ul: display %4.2f table[6,3]
+
+. local minimal_vax_3b: display %4.2f table[1,4]
+
+. local minimal_vax_3ll: display %4.2f table[5,4]
+
+. local minimal_vax_3ul: display %4.2f table[6,4]
+
+. local minimal_vax_4b: display %4.2f table[1,5]
+
+. local minimal_vax_4ll: display %4.2f table[5,5]
+
+. local minimal_vax_4ul: display %4.2f table[6,5]
+
+. local minimal_vax_5b: display %4.2f table[1,6]
+
+. local minimal_vax_5ll: display %4.2f table[5,6]
+
+. local minimal_vax_5ul: display %4.2f table[6,6]
+
+. 
+. qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smokin
+> g i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.imm
+> unosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vc
+> e(cluster set_id)        
+
+. matrix table = r(table)
+
+. local full_vax_1b: display %4.2f table[1,2]
+
+. local full_vax_1ll: display %4.2f table[5,2]
+
+. local full_vax_1ul: display %4.2f table[6,2]
+
+. local full_vax_2b: display %4.2f table[1,3]
+
+. local full_vax_2ll: display %4.2f table[5,3]
+
+. local full_vax_2ul: display %4.2f table[6,3]
+
+. local full_vax_3b: display %4.2f table[1,4]
+
+. local full_vax_3ll: display %4.2f table[5,4]
+
+. local full_vax_3ul: display %4.2f table[6,4]
+
+. local full_vax_4b: display %4.2f table[1,5]
+
+. local full_vax_4ll: display %4.2f table[5,5]
+
+. local full_vax_4ul: display %4.2f table[6,5]
+
+. local full_vax_5b: display %4.2f table[1,6]
+
+. local full_vax_5ll: display %4.2f table[5,6]
+
+. local full_vax_5ul: display %4.2f table[6,6]
+
+. 
+. bysort covid_vax: egen total_follow_up = total(_t)
+
+. forvalues i=1/5 {
+  2. qui su total_follow_up if covid_vax==`i'
+  3. local cases`i'_py = r(mean)
+  4. local cases`i'_multip = 100000 / r(mean)
+  5. qui safecount if covid_vax==`i' & _d==1 & _st==1
+  6. local cases`i'_events = round(r(N),5)
+  7. local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+  8. local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`
+> i'_multip'))
+  9. local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`
+> i'_multip'))
+ 10. }
+
+. 
+. foreach x of local period {
+  2. stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(
+> unique) scale(365.25)
+  3. qui stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
+  4. matrix table = r(table)
+  5. local crude_vax_1b`x': display %4.2f table[1,2]
+  6. local crude_vax_1ll`x': display %4.2f table[5,2]
+  7. local crude_vax_1ul`x': display %4.2f table[6,2]
+  8. local crude_vax_2b`x': display %4.2f table[1,3]
+  9. local crude_vax_2ll`x': display %4.2f table[5,3]
+ 10. local crude_vax_2ul`x': display %4.2f table[6,3]
+ 11. local crude_vax_3b`x': display %4.2f table[1,4]
+ 12. local crude_vax_3ll`x': display %4.2f table[5,4]
+ 13. local crude_vax_3ul`x': display %4.2f table[6,4]
+ 14. local crude_vax_4b`x': display %4.2f table[1,5]
+ 15. local crude_vax_4ll`x': display %4.2f table[5,5]
+ 16. local crude_vax_4ul`x': display %4.2f table[6,5]
+ 17. local crude_vax_5b`x': display %4.2f table[1,6]
+ 18. local crude_vax_5ll`x': display %4.2f table[5,6]
+ 19. local crude_vax_5ul`x': display %4.2f table[6,6]
+ 20. 
+. qui stcox i.covid_vax i.sex age1 age2 age3, vce(cluster practice_id) strata(s
+> et_id)
+ 21. matrix table = r(table)
+ 22. local minimal_vax_1b`x': display %4.2f table[1,2]
+ 23. local minimal_vax_1ll`x': display %4.2f table[5,2]
+ 24. local minimal_vax_1ul`x': display %4.2f table[6,2]
+ 25. local minimal_vax_2b`x': display %4.2f table[1,3]
+ 26. local minimal_vax_2ll`x': display %4.2f table[5,3]
+ 27. local minimal_vax_2ul`x': display %4.2f table[6,3]
+ 28. local minimal_vax_3b`x': display %4.2f table[1,4]
+ 29. local minimal_vax_3ll`x': display %4.2f table[5,4]
+ 30. local minimal_vax_3ul`x': display %4.2f table[6,4]
+ 31. local minimal_vax_4b`x': display %4.2f table[1,5]
+ 32. local minimal_vax_4ll`x': display %4.2f table[5,5]
+ 33. local minimal_vax_4ul`x': display %4.2f table[6,5]
+ 34. local minimal_vax_5b`x': display %4.2f table[1,6]
+ 35. local minimal_vax_5ll`x': display %4.2f table[5,6]
+ 36. local minimal_vax_5ul`x': display %4.2f table[6,6]
+ 37. 
+. qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smokin
+> g i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.imm
+> unosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vc
+> e(cluster set_id)        
+ 38. matrix table = r(table)
+ 39. local full_vax_1b`x': display %4.2f table[1,2]
+ 40. local full_vax_1ll`x': display %4.2f table[5,2]
+ 41. local full_vax_1ul`x': display %4.2f table[6,2]
+ 42. local full_vax_2b`x': display %4.2f table[1,3]
+ 43. local full_vax_2ll`x': display %4.2f table[5,3]
+ 44. local full_vax_2ul`x': display %4.2f table[6,3]
+ 45. local full_vax_3b`x': display %4.2f table[1,4]
+ 46. local full_vax_3ll`x': display %4.2f table[5,4]
+ 47. local full_vax_3ul`x': display %4.2f table[6,4]
+ 48. local full_vax_4b`x': display %4.2f table[1,5]
+ 49. local full_vax_4ll`x': display %4.2f table[5,5]
+ 50. local full_vax_4ul`x': display %4.2f table[6,5]
+ 51. local full_vax_5b`x': display %4.2f table[1,6]
+ 52. local full_vax_5ll`x': display %4.2f table[5,6]
+ 53. local full_vax_5ul`x': display %4.2f table[6,6]
+ 54. 
+. bysort covid_vax: egen total_follow_up`x' = total(_t)
+ 55. forvalues i=1/5 {
+ 56. qui su total_follow_up`x' if covid_vax==`i'
+ 57. local cases`i'_py = r(mean)
+ 58. local cases`i'_multip = 100000 / r(mean)
+ 59. qui safecount if covid_vax==`i' & _d==1 & _st==1
+ 60. local cases`i'_events = round(r(N),5)
+ 61. local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+ 62. local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' 
+> / `cases`i'_multip'))
+ 63. local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' 
+> / `cases`i'_multip'))
+ 64. }
+ 65. }
+
+                id:  unique
+     failure event:  esrd_date1 != 0 & esrd_date1 < .
+obs. time interval:  (exit_date1_esrd[_n-1], exit_date1_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date1_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+     25,581  observations end on or before enter()
+------------------------------------------------------------------------------
+        122  observations remaining, representing
+        122  subjects
+        122  failures in single-failure-per-subject data
+       .334  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .0027379
+
+                id:  unique
+     failure event:  esrd_date29 != 0 & esrd_date29 < .
+obs. time interval:  (exit_date29_esrd[_n-1], exit_date29_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date29_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+        163  observations end on or before enter()
+------------------------------------------------------------------------------
+     25,540  observations remaining, representing
+     25,540  subjects
+        108  failures in single-failure-per-subject data
+  1,873.478  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =   .073922
+
+                id:  unique
+     failure event:  esrd_date89 != 0 & esrd_date89 < .
+obs. time interval:  (exit_date89_esrd[_n-1], exit_date89_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date89_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+        555  observations end on or before enter()
+------------------------------------------------------------------------------
+     25,148  observations remaining, representing
+     25,148  subjects
+        249  failures in single-failure-per-subject data
+  3,988.186  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .1615332
+
+                id:  unique
+     failure event:  esrd_date179 != 0 & esrd_date179 < .
+obs. time interval:  (exit_date179_esrd[_n-1], exit_date179_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_date179_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+      1,477  observations end on or before enter()
+------------------------------------------------------------------------------
+     24,226  observations remaining, representing
+     24,226  subjects
+        303  failures in single-failure-per-subject data
+  5,739.428  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  .2436687
+
+                id:  unique
+     failure event:  esrd_datemax != 0 & esrd_datemax < .
+obs. time interval:  (exit_datemax_esrd[_n-1], exit_datemax_esrd]
+ exit on or before:  failure
+    t for analysis:  (time-origin)/365.25
+            origin:  time index_datemax_esrd
+
+------------------------------------------------------------------------------
+     25,703  total observations
+      2,797  observations end on or before enter()
+------------------------------------------------------------------------------
+     22,906  observations remaining, representing
+     22,906  subjects
+      1,805  failures in single-failure-per-subject data
+ 31,510.283  total analysis time at risk and under observation
+                                                at risk from t =         0
+                                     earliest observed entry t =         0
+                                          last observed exit t =  2.354552
+
+. 
+. forvalues i=1/5 {
+  2. file write tablecontent ("`vax`i''") _n
+  3. file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f 
+> (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_
+> vax_`i'b') (" (") %4.2f (`crude_vax_`i'll') ("-") %4.2f (`crude_vax_`i'ul') (
+> ")") _tab %4.2f (`minimal_vax_`i'b') (" (") %4.2f (`minimal_vax_`i'll') ("-")
+>  %4.2f (`minimal_vax_`i'ul') (")") _tab %4.2f (`full_vax_`i'b') (" (") %4.2f 
+> (`full_vax_`i'll') ("-") %4.2f (`full_vax_`i'ul') (")") _n
+  4. foreach x of local period {
+  5. file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3
+> .2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f
+>  (`crude_vax_`i'b`x'') (" (") %4.2f (`crude_vax_`i'll`x'') ("-") %4.2f (`crud
+> e_vax_`i'ul`x'') (")") _tab %4.2f (`minimal_vax_`i'b`x'') (" (") %4.2f (`mini
+> mal_vax_`i'll`x'') ("-") %4.2f (`minimal_vax_`i'ul`x'') (")") _tab %4.2f (`fu
+> ll_vax_`i'b`x'') (" (") %4.2f (`full_vax_`i'll`x'') ("-") %4.2f (`full_vax_`i
+> 'ul`x'') (")") _n
+  6. }
+  7. }
+
+. file write tablecontent _n
+
+. 
+end of do-file
+
+. . file open output using "/tmp/cox_models_2017_esrd.do.BcZs.out", write text 
+> replace
+
+. . file write output "success" 
+
+. . file close output
+
+. 
+end of do-file
+
+

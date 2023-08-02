@@ -102,7 +102,7 @@ file write tablecontent  %4.2f (`crude_overall_b') (" (") %4.2f (`crude_overall_
 file write tablecontent _n
 
 file write tablecontent ("By COVID-19 severity") _n
-file write tablecontent ("Overall") _n
+
 use ./output/analysis_2017.dta, clear
 
 local severity1: label covid_severity 1
@@ -157,11 +157,9 @@ local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
 local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
 local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-file write tablecontent ("`severity`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_severity_`i'b') (" (") %4.2f (`crude_severity_`i'll') ("-") %4.2f (`crude_severity_`i'ul') (")") _tab %4.2f (`minimal_severity_`i'b') (" (") %4.2f (`minimal_severity_`i'll') ("-") %4.2f (`minimal_severity_`i'ul') (")") _tab %4.2f (`full_severity_`i'b') (" (") %4.2f (`full_severity_`i'll') ("-") %4.2f (`full_severity_`i'ul') (")") _n
 }
 
 foreach x of local period {
-file write tablecontent ("`lab`x''") _n
 stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
 qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -206,16 +204,24 @@ local cases`i'_py = r(mean)
 local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
-local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-file write tablecontent ("`severity`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_severity_`i'b') (" (") %4.2f (`crude_severity_`i'll') ("-") %4.2f (`crude_severity_`i'ul') (")") _tab %4.2f (`minimal_severity_`i'b') (" (") %4.2f (`minimal_severity_`i'll') ("-") %4.2f (`minimal_severity_`i'ul') (")") _tab %4.2f (`full_severity_`i'b') (" (") %4.2f (`full_severity_`i'll') ("-") %4.2f (`full_severity_`i'ul') (")") _n
+local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+}
+}
+
+forvalues i=1/3 {
+file write tablecontent ("`severity`i''") _n
+file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_severity_`i'b') (" (") %4.2f (`crude_severity_`i'll') ("-") %4.2f (`crude_severity_`i'ul') (")") _tab %4.2f (`minimal_severity_`i'b') (" (") %4.2f (`minimal_severity_`i'll') ("-") %4.2f (`minimal_severity_`i'ul') (")") _tab %4.2f (`full_severity_`i'b') (" (") %4.2f (`full_severity_`i'll') ("-") %4.2f (`full_severity_`i'ul') (")") _n
+foreach x of local period {
+file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`crude_severity_`i'b`x'') (" (") %4.2f (`crude_severity_`i'll`x'') ("-") %4.2f (`crude_severity_`i'ul`x'') (")") _tab %4.2f (`minimal_severity_`i'b`x'') (" (") %4.2f (`minimal_severity_`i'll`x'') ("-") %4.2f (`minimal_severity_`i'ul`x'') (")") _tab %4.2f (`full_severity_`i'b`x'') (" (") %4.2f (`full_severity_`i'll`x'') ("-") %4.2f (`full_severity_`i'ul`x'') (")") _n
 }
 }
 file write tablecontent _n
 
-file write tablecontent ("By COVID-19-AKI") _n
-file write tablecontent ("Overall") _n
+
+file write tablecontent ("By COVID-19 AKI") _n
+
 use ./output/analysis_2017.dta, clear
 
 local aki1: label covid_aki 1
@@ -270,11 +276,9 @@ local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
 local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
 local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-file write tablecontent ("`aki`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_aki_`i'b') (" (") %4.2f (`crude_aki_`i'll') ("-") %4.2f (`crude_aki_`i'ul') (")") _tab %4.2f (`minimal_aki_`i'b') (" (") %4.2f (`minimal_aki_`i'll') ("-") %4.2f (`minimal_aki_`i'ul') (")") _tab %4.2f (`full_aki_`i'b') (" (") %4.2f (`full_aki_`i'll') ("-") %4.2f (`full_aki_`i'ul') (")") _n
 }
 
 foreach x of local period {
-file write tablecontent ("`lab`x''") _n
 stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
 qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -319,17 +323,24 @@ local cases`i'_py = r(mean)
 local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_aki==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
-local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-file write tablecontent ("`aki`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_aki_`i'b') (" (") %4.2f (`crude_aki_`i'll') ("-") %4.2f (`crude_aki_`i'ul') (")") _tab %4.2f (`minimal_aki_`i'b') (" (") %4.2f (`minimal_aki_`i'll') ("-") %4.2f (`minimal_aki_`i'ul') (")") _tab %4.2f (`full_aki_`i'b') (" (") %4.2f (`full_aki_`i'll') ("-") %4.2f (`full_aki_`i'ul') (")") _n
+local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
 }
 }
 
+forvalues i=1/3 {
+file write tablecontent ("`aki`i''") _n
+file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_aki_`i'b') (" (") %4.2f (`crude_aki_`i'll') ("-") %4.2f (`crude_aki_`i'ul') (")") _tab %4.2f (`minimal_aki_`i'b') (" (") %4.2f (`minimal_aki_`i'll') ("-") %4.2f (`minimal_aki_`i'ul') (")") _tab %4.2f (`full_aki_`i'b') (" (") %4.2f (`full_aki_`i'll') ("-") %4.2f (`full_aki_`i'ul') (")") _n
+foreach x of local period {
+file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`crude_aki_`i'b`x'') (" (") %4.2f (`crude_aki_`i'll`x'') ("-") %4.2f (`crude_aki_`i'ul`x'') (")") _tab %4.2f (`minimal_aki_`i'b`x'') (" (") %4.2f (`minimal_aki_`i'll`x'') ("-") %4.2f (`minimal_aki_`i'ul`x'') (")") _tab %4.2f (`full_aki_`i'b`x'') (" (") %4.2f (`full_aki_`i'll`x'') ("-") %4.2f (`full_aki_`i'ul`x'') (")") _n
+}
+}
 file write tablecontent _n
 
+
 file write tablecontent ("By COVID-19 wave") _n
-file write tablecontent ("Overall") _n
+
 use ./output/analysis_2017.dta, clear
 
 local wave1: label wave 1
@@ -394,11 +405,9 @@ local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
 local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
 local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-file write tablecontent ("`wave`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_wave_`i'b') (" (") %4.2f (`crude_wave_`i'll') ("-") %4.2f (`crude_wave_`i'ul') (")") _tab %4.2f (`minimal_wave_`i'b') (" (") %4.2f (`minimal_wave_`i'll') ("-") %4.2f (`minimal_wave_`i'ul') (")") _tab %4.2f (`full_wave_`i'b') (" (") %4.2f (`full_wave_`i'll') ("-") %4.2f (`full_wave_`i'ul') (")") _n
 }
 
 foreach x of local period {
-file write tablecontent ("`lab`x''") _n
 stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
 qui stcox i.wave, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -452,17 +461,23 @@ local cases`i'_py = r(mean)
 local cases`i'_multip = 100000 / r(mean)
 qui safecount if wave==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
-local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-file write tablecontent ("`wave`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_wave_`i'b') (" (") %4.2f (`crude_wave_`i'll') ("-") %4.2f (`crude_wave_`i'ul') (")") _tab %4.2f (`minimal_wave_`i'b') (" (") %4.2f (`minimal_wave_`i'll') ("-") %4.2f (`minimal_wave_`i'ul') (")") _tab %4.2f (`full_wave_`i'b') (" (") %4.2f (`full_wave_`i'll') ("-") %4.2f (`full_wave_`i'ul') (")") _n
+local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
 }
 }
 
+forvalues i=1/4 {
+file write tablecontent ("`wave`i''") _n
+file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_wave_`i'b') (" (") %4.2f (`crude_wave_`i'll') ("-") %4.2f (`crude_wave_`i'ul') (")") _tab %4.2f (`minimal_wave_`i'b') (" (") %4.2f (`minimal_wave_`i'll') ("-") %4.2f (`minimal_wave_`i'ul') (")") _tab %4.2f (`full_wave_`i'b') (" (") %4.2f (`full_wave_`i'll') ("-") %4.2f (`full_wave_`i'ul') (")") _n
+foreach x of local period {
+file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`crude_wave_`i'b`x'') (" (") %4.2f (`crude_wave_`i'll`x'') ("-") %4.2f (`crude_wave_`i'ul`x'') (")") _tab %4.2f (`minimal_wave_`i'b`x'') (" (") %4.2f (`minimal_wave_`i'll`x'') ("-") %4.2f (`minimal_wave_`i'ul`x'') (")") _tab %4.2f (`full_wave_`i'b`x'') (" (") %4.2f (`full_wave_`i'll`x'') ("-") %4.2f (`full_wave_`i'ul`x'') (")") _n
+}
+}
 file write tablecontent _n
 
 file write tablecontent ("By COVID-19 vaccination status") _n
-file write tablecontent ("Overall") _n
+
 use ./output/analysis_2017.dta, clear
 
 local vax1: label covid_vax 1
@@ -537,11 +552,9 @@ local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
 local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
 local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-file write tablecontent ("`vax`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_vax_`i'b') (" (") %4.2f (`crude_vax_`i'll') ("-") %4.2f (`crude_vax_`i'ul') (")") _tab %4.2f (`minimal_vax_`i'b') (" (") %4.2f (`minimal_vax_`i'll') ("-") %4.2f (`minimal_vax_`i'ul') (")") _tab %4.2f (`full_vax_`i'b') (" (") %4.2f (`full_vax_`i'll') ("-") %4.2f (`full_vax_`i'ul') (")") _n
 }
 
 foreach x of local period {
-file write tablecontent ("`lab`x''") _n
 stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
 qui stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -604,9 +617,17 @@ local cases`i'_py = r(mean)
 local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_vax==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
-local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-file write tablecontent ("`vax`i''") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_vax_`i'b') (" (") %4.2f (`crude_vax_`i'll') ("-") %4.2f (`crude_vax_`i'ul') (")") _tab %4.2f (`minimal_vax_`i'b') (" (") %4.2f (`minimal_vax_`i'll') ("-") %4.2f (`minimal_vax_`i'ul') (")") _tab %4.2f (`full_vax_`i'b') (" (") %4.2f (`full_vax_`i'll') ("-") %4.2f (`full_vax_`i'ul') (")") _n
+local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
+local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
 }
 }
+
+forvalues i=1/5 {
+file write tablecontent ("`vax`i''") _n
+file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`crude_vax_`i'b') (" (") %4.2f (`crude_vax_`i'll') ("-") %4.2f (`crude_vax_`i'ul') (")") _tab %4.2f (`minimal_vax_`i'b') (" (") %4.2f (`minimal_vax_`i'll') ("-") %4.2f (`minimal_vax_`i'ul') (")") _tab %4.2f (`full_vax_`i'b') (" (") %4.2f (`full_vax_`i'll') ("-") %4.2f (`full_vax_`i'ul') (")") _n
+foreach x of local period {
+file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`crude_vax_`i'b`x'') (" (") %4.2f (`crude_vax_`i'll`x'') ("-") %4.2f (`crude_vax_`i'ul`x'') (")") _tab %4.2f (`minimal_vax_`i'b`x'') (" (") %4.2f (`minimal_vax_`i'll`x'') ("-") %4.2f (`minimal_vax_`i'ul`x'') (")") _tab %4.2f (`full_vax_`i'b`x'') (" (") %4.2f (`full_vax_`i'll`x'') ("-") %4.2f (`full_vax_`i'ul`x'') (")") _n
+}
+}
+file write tablecontent _n
