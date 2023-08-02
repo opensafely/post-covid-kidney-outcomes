@@ -8,7 +8,7 @@ log using ./logs/cox_models_2017_esrd.log, replace t
 cap file close tablecontent
 file open tablecontent using ./output/cox_models_2017_esrd.csv, write text replace
 file write tablecontent _tab ("Crude rate (/100000py) (95% CI)") _n
-file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemic)") _tab ("Age and sex adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
+file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemic)") _tab ("Age/sex/STP-adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_2017.dta, clear
@@ -31,13 +31,13 @@ local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_mul
 local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip'))
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 
-qui stcox i.case i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id)
+qui stcox i.case, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_overall_b: display %4.2f table[1,2]
 local minimal_overall_ll: display %4.2f table[5,2]
 local minimal_overall_ul: display %4.2f table[6,2]
 
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id) strata(set_id) 
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -74,13 +74,13 @@ local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_mul
 local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip'))
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 
-qui stcox i.case i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id)
+qui stcox i.case, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_overall_b: display %4.2f table[1,2]
 local minimal_overall_ll: display %4.2f table[5,2]
 local minimal_overall_ul: display %4.2f table[6,2]
 
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id) strata(set_id) 
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -100,7 +100,7 @@ local severity3: label covid_severity 3
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
-qui stcox i.covid_severity i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id) strata(set_id)
+qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_severity_1b: display %4.2f table[1,2]
 local minimal_severity_1ll: display %4.2f table[5,2]
@@ -112,7 +112,7 @@ local minimal_severity_3b: display %4.2f table[1,4]
 local minimal_severity_3ll: display %4.2f table[5,4]
 local minimal_severity_3ul: display %4.2f table[6,4]
 
-qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id) strata(set_id)	
+qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_severity_1b: display %4.2f table[1,2]
 local full_severity_1ll: display %4.2f table[5,2]
@@ -139,7 +139,7 @@ local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_mul
 foreach x of local period {
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
 
-qui stcox i.covid_severity i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id) strata(set_id)
+qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_severity_1b`x': display %4.2f table[1,2]
 local minimal_severity_1ll`x': display %4.2f table[5,2]
@@ -151,7 +151,7 @@ local minimal_severity_3b`x': display %4.2f table[1,4]
 local minimal_severity_3ll`x': display %4.2f table[5,4]
 local minimal_severity_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id) strata(set_id)	
+qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_severity_1b`x': display %4.2f table[1,2]
 local full_severity_1ll`x': display %4.2f table[5,2]
@@ -196,7 +196,7 @@ local aki3: label covid_aki 3
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
-qui stcox i.covid_aki i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id) strata(set_id)
+qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_aki_1b: display %4.2f table[1,2]
 local minimal_aki_1ll: display %4.2f table[5,2]
@@ -208,7 +208,7 @@ local minimal_aki_3b: display %4.2f table[1,4]
 local minimal_aki_3ll: display %4.2f table[5,4]
 local minimal_aki_3ul: display %4.2f table[6,4]
 
-qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id) strata(set_id)	
+qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_aki_1b: display %4.2f table[1,2]
 local full_aki_1ll: display %4.2f table[5,2]
@@ -235,7 +235,7 @@ local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_mul
 foreach x of local period {
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
 
-qui stcox i.covid_aki i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id) strata(set_id)
+qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_aki_1b`x': display %4.2f table[1,2]
 local minimal_aki_1ll`x': display %4.2f table[5,2]
@@ -247,7 +247,7 @@ local minimal_aki_3b`x': display %4.2f table[1,4]
 local minimal_aki_3ll`x': display %4.2f table[5,4]
 local minimal_aki_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id) strata(set_id)	
+qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_aki_1b`x': display %4.2f table[1,2]
 local full_aki_1ll`x': display %4.2f table[5,2]
@@ -274,9 +274,9 @@ local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cas
 
 forvalues i=1/3 {
 file write tablecontent ("`aki`i''") _n
-file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab %4.2f (`minimal_aki_`i'ul') (")") _tab %4.2f (`full_aki_`i'b') (" (") %4.2f (`full_aki_`i'll') ("-") %4.2f (`full_aki_`i'ul') (")") _n
+file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_aki_`i'b') (" (") %4.2f (`minimal_aki_`i'll') ("-") %4.2f (`minimal_aki_`i'ul') (")") _tab %4.2f (`full_aki_`i'b') (" (") %4.2f (`full_aki_`i'll') ("-") %4.2f (`full_aki_`i'ul') (")") _n
 foreach x of local period {
-file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_aki_`i'll`x'') ("-") %4.2f (`minimal_aki_`i'ul`x'') (")") _tab %4.2f (`full_aki_`i'b`x'') (" (") %4.2f (`full_aki_`i'll`x'') ("-") %4.2f (`full_aki_`i'ul`x'') (")") _n
+file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_aki_`i'b`x'') (" (") %4.2f (`minimal_aki_`i'll`x'') ("-") %4.2f (`minimal_aki_`i'ul`x'') (")") _tab %4.2f (`full_aki_`i'b`x'') (" (") %4.2f (`full_aki_`i'll`x'') ("-") %4.2f (`full_aki_`i'ul`x'') (")") _n
 }
 }
 file write tablecontent _n
@@ -293,7 +293,7 @@ local wave4: label wave 4
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
-qui stcox i.wave i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id) strata(set_id)
+qui stcox i.wave, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_wave_1b: display %4.2f table[1,2]
 local minimal_wave_1ll: display %4.2f table[5,2]
@@ -308,7 +308,7 @@ local minimal_wave_4b: display %4.2f table[1,5]
 local minimal_wave_4ll: display %4.2f table[5,5]
 local minimal_wave_4ul: display %4.2f table[6,5]
 
-qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id) strata(set_id)	
+qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_wave_1b: display %4.2f table[1,2]
 local full_wave_1ll: display %4.2f table[5,2]
@@ -338,7 +338,7 @@ local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_mul
 foreach x of local period {
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
 
-qui stcox i.wave i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id) strata(set_id)
+qui stcox i.wave, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_wave_1b`x': display %4.2f table[1,2]
 local minimal_wave_1ll`x': display %4.2f table[5,2]
@@ -353,7 +353,7 @@ local minimal_wave_4b`x': display %4.2f table[1,5]
 local minimal_wave_4ll`x': display %4.2f table[5,5]
 local minimal_wave_4ul`x': display %4.2f table[6,5]
 
-qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id) strata(set_id)	
+qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_wave_1b`x': display %4.2f table[1,2]
 local full_wave_1ll`x': display %4.2f table[5,2]
@@ -383,9 +383,9 @@ local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cas
 
 forvalues i=1/4 {
 file write tablecontent ("`wave`i''") _n
-file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_wave_`i'ul') (")") _tab %4.2f (`full_wave_`i'b') (" (") %4.2f (`full_wave_`i'll') ("-") %4.2f (`full_wave_`i'ul') (")") _n
+file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_wave_`i'b') (" (") %4.2f (`minimal_wave_`i'll') ("-") %4.2f (`minimal_wave_`i'ul') (")") _tab %4.2f (`full_wave_`i'b') (" (") %4.2f (`full_wave_`i'll') ("-") %4.2f (`full_wave_`i'ul') (")") _n
 foreach x of local period {
-file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_wave_`i'll`x'') ("-") %4.2f (`minimal_wave_`i'ul`x'') (")") _tab %4.2f (`full_wave_`i'b`x'') (" (") %4.2f (`full_wave_`i'll`x'') ("-") %4.2f (`full_wave_`i'ul`x'') (")") _n
+file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_wave_`i'b`x'') (" (") %4.2f (`minimal_wave_`i'll`x'') ("-") %4.2f (`minimal_wave_`i'ul`x'') (")") _tab %4.2f (`full_wave_`i'b`x'') (" (") %4.2f (`full_wave_`i'll`x'') ("-") %4.2f (`full_wave_`i'ul`x'') (")") _n
 }
 }
 file write tablecontent _n
@@ -402,7 +402,7 @@ local vax5: label covid_vax 5
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
-qui stcox i.covid_vax i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id) strata(set_id)
+qui stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_vax_1b: display %4.2f table[1,2]
 local minimal_vax_1ll: display %4.2f table[5,2]
@@ -420,7 +420,7 @@ local minimal_vax_5b: display %4.2f table[1,6]
 local minimal_vax_5ll: display %4.2f table[5,6]
 local minimal_vax_5ul: display %4.2f table[6,6]
 
-qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id) strata(set_id)	
+qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_vax_1b: display %4.2f table[1,2]
 local full_vax_1ll: display %4.2f table[5,2]
@@ -453,7 +453,7 @@ local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_mul
 foreach x of local period {
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
 
-qui stcox i.covid_vax i.sex age1 age2 age3, vce(cluster practice_id) strata(set_id) strata(set_id)
+qui stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local minimal_vax_1b`x': display %4.2f table[1,2]
 local minimal_vax_1ll`x': display %4.2f table[5,2]
@@ -471,7 +471,7 @@ local minimal_vax_5b`x': display %4.2f table[1,6]
 local minimal_vax_5ll`x': display %4.2f table[5,6]
 local minimal_vax_5ul`x': display %4.2f table[6,6]
 
-qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id) strata(set_id)	
+qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_vax_1b`x': display %4.2f table[1,2]
 local full_vax_1ll`x': display %4.2f table[5,2]
@@ -504,9 +504,9 @@ local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cas
 
 forvalues i=1/5 {
 file write tablecontent ("`vax`i''") _n
-file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_vax_`i'll') ("-") %4.2f (`minimal_vax_`i'ul') (")") _tab %4.2f (`full_vax_`i'b') (" (") %4.2f (`full_vax_`i'll') ("-") %4.2f (`full_vax_`i'ul') (")") _n
+file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_vax_`i'b') (" (") %4.2f (`minimal_vax_`i'll') ("-") %4.2f (`minimal_vax_`i'ul') (")") _tab %4.2f (`full_vax_`i'b') (" (") %4.2f (`full_vax_`i'll') ("-") %4.2f (`full_vax_`i'ul') (")") _n
 foreach x of local period {
-file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_vax_`i'll`x'') ("-") %4.2f (`minimal_vax_`i'ul`x'') (")") _tab %4.2f (`full_vax_`i'b`x'') (" (") %4.2f (`full_vax_`i'll`x'') ("-") %4.2f (`full_vax_`i'ul`x'') (")") _n
+file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_vax_`i'b`x'') (" (") %4.2f (`minimal_vax_`i'll`x'') ("-") %4.2f (`minimal_vax_`i'ul`x'') (")") _tab %4.2f (`full_vax_`i'b`x'') (" (") %4.2f (`full_vax_`i'll`x'') ("-") %4.2f (`full_vax_`i'ul`x'') (")") _n
 }
 }
 file write tablecontent _n

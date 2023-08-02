@@ -8,7 +8,7 @@ log using ./logs/cox_models_2017_egfr_half.log, replace t
 cap file close tablecontent
 file open tablecontent using ./output/cox_models_2017_egfr_half.csv, write text replace
 file write tablecontent _tab ("Crude rate (/100000py) (95% CI)") _n
-file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemic)") _tab ("Age, sex and STP adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
+file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemic)") _tab ("Age/sex/STP-adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_2017.dta, clear
@@ -273,9 +273,9 @@ local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cas
 
 forvalues i=1/3 {
 file write tablecontent ("`aki`i''") _n
-file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab %4.2f (`minimal_aki_`i'ul') (")") _tab %4.2f (`full_aki_`i'b') (" (") %4.2f (`full_aki_`i'll') ("-") %4.2f (`full_aki_`i'ul') (")") _n
+file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_aki_`i'b') (" (") %4.2f (`minimal_aki_`i'll') ("-") %4.2f (`minimal_aki_`i'ul') (")") _tab %4.2f (`full_aki_`i'b') (" (") %4.2f (`full_aki_`i'll') ("-") %4.2f (`full_aki_`i'ul') (")") _n
 foreach x of local period {
-file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_aki_`i'll`x'') ("-") %4.2f (`minimal_aki_`i'ul`x'') (")") _tab %4.2f (`full_aki_`i'b`x'') (" (") %4.2f (`full_aki_`i'll`x'') ("-") %4.2f (`full_aki_`i'ul`x'') (")") _n
+file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_aki_`i'b`x'') (" (") %4.2f (`minimal_aki_`i'll`x'') ("-") %4.2f (`minimal_aki_`i'ul`x'') (")") _tab %4.2f (`full_aki_`i'b`x'') (" (") %4.2f (`full_aki_`i'll`x'') ("-") %4.2f (`full_aki_`i'ul`x'') (")") _n
 }
 }
 file write tablecontent _n
@@ -382,9 +382,9 @@ local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cas
 
 forvalues i=1/4 {
 file write tablecontent ("`wave`i''") _n
-file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_wave_`i'ul') (")") _tab %4.2f (`full_wave_`i'b') (" (") %4.2f (`full_wave_`i'll') ("-") %4.2f (`full_wave_`i'ul') (")") _n
+file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_wave_`i'b') (" (") %4.2f (`minimal_wave_`i'll') ("-") %4.2f (`minimal_wave_`i'ul') (")") _tab %4.2f (`full_wave_`i'b') (" (") %4.2f (`full_wave_`i'll') ("-") %4.2f (`full_wave_`i'ul') (")") _n
 foreach x of local period {
-file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_wave_`i'll`x'') ("-") %4.2f (`minimal_wave_`i'ul`x'') (")") _tab %4.2f (`full_wave_`i'b`x'') (" (") %4.2f (`full_wave_`i'll`x'') ("-") %4.2f (`full_wave_`i'ul`x'') (")") _n
+file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_wave_`i'b`x'') (" (") %4.2f (`minimal_wave_`i'll`x'') ("-") %4.2f (`minimal_wave_`i'ul`x'') (")") _tab %4.2f (`full_wave_`i'b`x'') (" (") %4.2f (`full_wave_`i'll`x'') ("-") %4.2f (`full_wave_`i'ul`x'') (")") _n
 }
 }
 file write tablecontent _n
@@ -503,9 +503,9 @@ local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cas
 
 forvalues i=1/5 {
 file write tablecontent ("`vax`i''") _n
-file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_vax_`i'll') ("-") %4.2f (`minimal_vax_`i'ul') (")") _tab %4.2f (`full_vax_`i'b') (" (") %4.2f (`full_vax_`i'll') ("-") %4.2f (`full_vax_`i'ul') (")") _n
+file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_vax_`i'b') (" (") %4.2f (`minimal_vax_`i'll') ("-") %4.2f (`minimal_vax_`i'ul') (")") _tab %4.2f (`full_vax_`i'b') (" (") %4.2f (`full_vax_`i'll') ("-") %4.2f (`full_vax_`i'ul') (")") _n
 foreach x of local period {
-file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_vax_`i'll`x'') ("-") %4.2f (`minimal_vax_`i'ul`x'') (")") _tab %4.2f (`full_vax_`i'b`x'') (" (") %4.2f (`full_vax_`i'll`x'') ("-") %4.2f (`full_vax_`i'ul`x'') (")") _n
+file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_vax_`i'b`x'') (" (") %4.2f (`minimal_vax_`i'll`x'') ("-") %4.2f (`minimal_vax_`i'ul`x'') (")") _tab %4.2f (`full_vax_`i'b`x'') (" (") %4.2f (`full_vax_`i'll`x'') ("-") %4.2f (`full_vax_`i'ul`x'') (")") _n
 }
 }
 file write tablecontent _n
