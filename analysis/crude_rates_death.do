@@ -202,23 +202,59 @@ file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f 
 }
 file write tablecontent _n
 }
-
-*Smoking
-file write tablecontent ("Current/former smoker") _tab
+file write tablecontent ("Missing") _tab
 foreach x of local cohort {
-use ./output/analysis_`x'.dta
 stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
-qui safecount if smoking==1 & case==1 & death==1 & _st==1
+qui safecount if bmi==. & case==1 & death==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if smoking==1 & case==0 & death==1 & _st==1
+qui safecount if bmi==. & case==0 & death==1 & _st==1
+local controls_events = round(r(N),5)
+local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
+local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
+local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
+file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
+}
+file write tablecontent _n
+
+*Smoking
+file write tablecontent ("Smoking") _n
+forvalues smoking=0/1 {
+local label_`smoking': label smoking `smoking'
+file write tablecontent ("`label_`smoking''") _tab
+foreach x of local cohort {
+use ./output/analysis_`x'.dta
+stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+qui safecount if smoking==`smoking' & case==1 & death==1 & _st==1
+local cases_events = round(r(N),5)
+local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
+local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
+local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
+qui safecount if smoking==`smoking' & case==0 & death==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
 local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab 
+}
+file write tablecontent _n
+}
+file write tablecontent ("Missing") _tab
+foreach x of local cohort {
+stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+qui safecount if smoking==. & case==1 & death==1 & _st==1
+local cases_events = round(r(N),5)
+local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
+local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
+local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
+qui safecount if smoking==. & case==0 & death==1 & _st==1
+local controls_events = round(r(N),5)
+local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
+local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
+local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
+file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 }
 file write tablecontent _n
 

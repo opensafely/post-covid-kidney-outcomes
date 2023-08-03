@@ -29,12 +29,12 @@ file write tablecontent ("Total") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if case==1 & esrd==1 & _st==1
+qui safecount if case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if case==0 & esrd==1 & _st==1
+qui safecount if case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -51,12 +51,12 @@ file write tablecontent ("`label_`age''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if agegroup==`age' & case==1 & esrd==1 & _st==1
+qui safecount if agegroup==`age' & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if agegroup==`age' & case==0 & esrd==1 & _st==1
+qui safecount if agegroup==`age' & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -74,12 +74,12 @@ file write tablecontent ("`label_`sex''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if sex==`sex' & case==1 & esrd==1 & _st==1
+qui safecount if sex==`sex' & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if sex==`sex' & case==0 & esrd==1 & _st==1
+qui safecount if sex==`sex' & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -97,12 +97,12 @@ file write tablecontent ("`label_`imd''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if imd==`imd' & case==1 & esrd==1 & _st==1
+qui safecount if imd==`imd' & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if imd==`imd' & case==0 & esrd==1 & _st==1
+qui safecount if imd==`imd' & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -120,12 +120,12 @@ file write tablecontent ("`label_`ethnicity1''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if ethnicity1==`ethnicity1' & case==1 & esrd==1 & _st==1
+qui safecount if ethnicity1==`ethnicity1' & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if ethnicity1==`ethnicity1' & case==0 & esrd==1 & _st==1
+qui safecount if ethnicity1==`ethnicity1' & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -143,12 +143,12 @@ file write tablecontent ("`label_`region''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if region==`region' & case==1 & esrd==1 & _st==1
+qui safecount if region==`region' & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if region==`region' & case==0 & esrd==1 & _st==1
+qui safecount if region==`region' & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -166,12 +166,12 @@ file write tablecontent ("`label_urban'") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if urban==1 & case==1 & esrd==1 & _st==1
+qui safecount if urban==1 & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if urban==1 & case==0 & esrd==1 & _st==1
+qui safecount if urban==1 & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -188,12 +188,12 @@ file write tablecontent ("`label_`bmi''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if bmi==`bmi' & case==1 & esrd==1 & _st==1
+qui safecount if bmi==`bmi' & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if bmi==`bmi' & case==0 & esrd==1 & _st==1
+qui safecount if bmi==`bmi' & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -202,23 +202,59 @@ file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f 
 }
 file write tablecontent _n
 }
-
-*Smoking
-file write tablecontent ("Current/former smoker") _tab
+file write tablecontent ("Missing") _tab
 foreach x of local cohort {
-use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if smoking==1 & case==1 & esrd==1 & _st==1
+qui safecount if bmi==. & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if smoking==1 & case==0 & esrd==1 & _st==1
+qui safecount if bmi==. & case==0 & aki==1 & _st==1
+local controls_events = round(r(N),5)
+local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
+local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
+local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
+file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
+}
+file write tablecontent _n
+
+*Smoking
+file write tablecontent ("Smoking") _n
+forvalues smoking=0/1 {
+local label_`smoking': label smoking `smoking'
+file write tablecontent ("`label_`smoking''") _tab
+foreach x of local cohort {
+use ./output/analysis_`x'.dta
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
+qui safecount if smoking==`smoking' & case==1 & aki==1 & _st==1
+local cases_events = round(r(N),5)
+local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
+local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
+local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
+qui safecount if smoking==`smoking' & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
 local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab 
+}
+file write tablecontent _n
+}
+file write tablecontent ("Missing") _tab
+foreach x of local cohort {
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
+qui safecount if smoking==. & case==1 & aki==1 & _st==1
+local cases_events = round(r(N),5)
+local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
+local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
+local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
+qui safecount if smoking==. & case==0 & aki==1 & _st==1
+local controls_events = round(r(N),5)
+local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
+local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
+local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
+file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 }
 file write tablecontent _n
 
@@ -230,12 +266,12 @@ file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if egfr_group==`group' & case==1 & esrd==1 & _st==1
+qui safecount if egfr_group==`group' & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if egfr_group==`group' & case==0 & esrd==1 & _st==1
+qui safecount if egfr_group==`group' & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -250,12 +286,12 @@ file write tablecontent ("Previous acute kidney injury") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if aki_baseline==1 & case==1 & esrd==1 & _st==1
+qui safecount if aki_baseline==1 & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if aki_baseline==1 & case==0 & esrd==1 & _st==1
+qui safecount if aki_baseline==1 & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -269,12 +305,12 @@ file write tablecontent ("Cardiovascular diseases") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if cardiovascular==1 & case==1 & esrd==1 & _st==1
+qui safecount if cardiovascular==1 & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if cardiovascular==1 & case==0 & esrd==1 & _st==1
+qui safecount if cardiovascular==1 & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -288,12 +324,12 @@ file write tablecontent ("Diabetes") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if diabetes==1 & case==1 & esrd==1 & _st==1
+qui safecount if diabetes==1 & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if diabetes==1 & case==0 & esrd==1 & _st==1
+qui safecount if diabetes==1 & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -307,12 +343,12 @@ file write tablecontent ("Hypertension") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if hypertension==1 & case==1 & esrd==1 & _st==1
+qui safecount if hypertension==1 & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if hypertension==1 & case==0 & esrd==1 & _st==1
+qui safecount if hypertension==1 & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -326,12 +362,12 @@ file write tablecontent ("Immunosuppressive diseases") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if immunosuppressed==1 & case==1 & esrd==1 & _st==1
+qui safecount if immunosuppressed==1 & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if immunosuppressed==1 & case==0 & esrd==1 & _st==1
+qui safecount if immunosuppressed==1 & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -345,12 +381,12 @@ file write tablecontent ("Non-haematological cancer") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if non_haem_cancer==1 & case==1 & esrd==1 & _st==1
+qui safecount if non_haem_cancer==1 & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if non_haem_cancer==1 & case==0 & esrd==1 & _st==1
+qui safecount if non_haem_cancer==1 & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -367,12 +403,12 @@ file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if gp_consults==`group' & case==1 & esrd==1 & _st==1
+qui safecount if gp_consults==`group' & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if gp_consults==`group' & case==0 & esrd==1 & _st==1
+qui safecount if gp_consults==`group' & case==0 & aki==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip_`x''))
@@ -390,12 +426,12 @@ file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui safecount if admissions==`group' & case==1 & esrd==1 & _st==1
+qui safecount if admissions==`group' & case==1 & aki==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip_`x'')
 local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
 local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip_`x''))
-qui safecount if admissions==`group' & case==0 & esrd==1 & _st==1
+qui safecount if admissions==`group' & case==0 & aki==1 & _st==1
 local controls_`group' = round(r(N),5)
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip_`x'')
