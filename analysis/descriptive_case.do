@@ -200,18 +200,46 @@ file write tablecontent %9.0f (`cases_`bmi'') (" (") %4.1f (`cases_`bmi'_pc') ("
 }
 file write tablecontent _n
 }
-
-*Smoking
-file write tablecontent ("Current/former smoker") _tab
+file write tablecontent ("Missing") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
-qui safecount if smoking==1 & case==1
+qui safecount if bmi==. & case==1
+local cases = round(r(N),5)
+local cases_pc = (`cases'/`cases_`x'')*100
+qui safecount if bmi==. & case==0
+local controls = round(r(N),5)
+local controls_pc = (`controls'/`controls_`x'')*100
+file write tablecontent %9.0f (`cases') (" (") %4.1f (`cases_pc') (")") _tab %9.0f (`controls') (" (") %4.1f (`controls_pc') (")") _tab
+}
+file write tablecontent _n
+
+*Smoking
+file write tablecontent ("Smoking") _n
+forvalues smoking=0/1 {
+local label_`smoking': label smoking `smoking'
+file write tablecontent ("`label_`smoking''") _tab
+foreach x of local cohort {
+use ./output/analysis_`x'.dta
+qui safecount if smoking==`smoking' & case==1
 local cases_smoking = round(r(N),5)
 local cases_smoking_pc = (`cases_smoking'/`cases_`x'')*100
-qui safecount if smoking==1 & case==0
+qui safecount if smoking==`smoking' & case==0
 local controls_smoking = round(r(N),5)
 local controls_smoking_pc = (`controls_smoking'/`controls_`x'')*100
 file write tablecontent %9.0f (`cases_smoking') (" (") %4.1f (`cases_smoking_pc') (")") _tab %9.0f (`controls_smoking') (" (") %4.1f (`controls_smoking_pc') (")") _tab
+}
+file write tablecontent _n
+}
+file write tablecontent ("Missing") _tab
+foreach x of local cohort {
+use ./output/analysis_`x'.dta
+qui safecount if smoking==. & case==1
+local cases = round(r(N),5)
+local cases_pc = (`cases'/`cases_`x'')*100
+qui safecount if smoking==. & case==0
+local controls = round(r(N),5)
+local controls_pc = (`controls'/`controls_`x'')*100
+file write tablecontent %9.0f (`cases') (" (") %4.1f (`cases_pc') (")") _tab %9.0f (`controls') (" (") %4.1f (`controls_pc') (")") _tab
 }
 file write tablecontent _n
 

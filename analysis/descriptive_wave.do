@@ -217,11 +217,11 @@ local label_`bmi': label bmi `bmi'
 file write tablecontent ("`label_`bmi''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
-forvalues i=1/4{
+forvalues i=1/4 {
 qui safecount if bmi==`bmi' & wave==`i'
-local cases`i'_`bmi' = round(r(N),5)
-local cases`i'_`bmi'_pc = (`cases`i'_`bmi''/`cases`i'_`x'')*100
-file write tablecontent %9.0f (`cases`i'_`bmi'') (" (") %4.1f (`cases`i'_`bmi'_pc') (")") _tab
+local cases_`bmi' = round(r(N),5)
+local cases_`bmi'_pc = (`cases_`bmi''/`cases`i'_`x'')*100
+file write tablecontent %9.0f (`cases_`bmi'') (" (") %4.1f (`cases_`bmi'_pc') (")") _tab
 }
 qui safecount if bmi==`bmi' & wave==0
 local controls_`bmi' = round(r(N),5)
@@ -230,21 +230,55 @@ file write tablecontent %9.0f (`controls_`bmi'') (" (") %4.1f (`controls_`bmi'_p
 }
 file write tablecontent _n
 }
-
-*Smoking
-file write tablecontent ("Current/former smoker") _tab
+file write tablecontent ("Missing") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta
-forvalues i=1/4{
-qui safecount if smoking==1 & wave==`i'
-local cases`i'_smoking = round(r(N),5)
-local cases`i'_smoking_pc = (`cases`i'_smoking'/`cases`i'_`x'')*100
-file write tablecontent %9.0f (`cases`i'_smoking') (" (") %4.1f (`cases`i'_smoking_pc') (")") _tab 
+forvalues i=1/4 {
+qui safecount if bmi==. & wave==`i'
+local cases = round(r(N),5)
+local cases_pc = (`cases'/`cases`i'_`x'')*100
+file write tablecontent %9.0f (`cases') (" (") %4.1f (`cases_pc') (")") _tab
 }
-qui safecount if smoking==1 & wave==0
+qui safecount if bmi==. & wave==0
+local controls = round(r(N),5)
+local controls_pc = (`controls'/`controls_`x'')*100
+file write tablecontent %9.0f (`controls') (" (") %4.1f (`controls_pc') (")") _tab
+}
+file write tablecontent _n
+
+*Smoking
+file write tablecontent ("Smoking") _n
+forvalues smoking=0/1 {
+local label_`smoking': label smoking `smoking'
+file write tablecontent ("`label_`smoking''") _tab
+foreach x of local cohort {
+use ./output/analysis_`x'.dta
+forvalues i=1/4 {
+qui safecount if smoking==`smoking' & wave==`i'
+local cases_smoking = round(r(N),5)
+local cases_smoking_pc = (`cases_smoking'/`cases`i'_`x'')*100
+file write tablecontent %9.0f (`cases_smoking') (" (") %4.1f (`cases_smoking_pc') (")") _tab
+}
+qui safecount if smoking==`smoking' & wave==0
 local controls_smoking = round(r(N),5)
 local controls_smoking_pc = (`controls_smoking'/`controls_`x'')*100
 file write tablecontent %9.0f (`controls_smoking') (" (") %4.1f (`controls_smoking_pc') (")") _tab
+}
+file write tablecontent _n
+}
+file write tablecontent ("Missing") _tab
+foreach x of local cohort {
+use ./output/analysis_`x'.dta
+forvalues i=1/4 {
+qui safecount if smoking==. & wave==`i'
+local cases = round(r(N),5)
+local cases_pc = (`cases'/`cases`i'_`x'')*100
+file write tablecontent %9.0f (`cases') (" (") %4.1f (`cases_pc') (")") _tab
+}
+qui safecount if smoking==. & wave==0
+local controls = round(r(N),5)
+local controls_pc = (`controls'/`controls_`x'')*100
+file write tablecontent %9.0f (`controls') (" (") %4.1f (`controls_pc') (")") _tab
 }
 file write tablecontent _n
 

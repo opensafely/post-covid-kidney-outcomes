@@ -1336,3 +1336,29 @@ actions:
       moderately_sensitive:
         log: logs/cox_models2_hospitalised_death.log
         output: output/cox_models2_hospitalised_death.csv
+
+  analysis_complete:
+    run: stata-mp:latest analysis/analysis_complete.do
+    needs: [analysis_2017, analysis_2020]
+    outputs:
+      highly_sensitive:
+        analysis_2017: output/analysis_complete_2017.dta
+        analysis_2020: output/analysis_complete_2020.dta
+      moderately_sensitive:
+        log: logs/analysis_complete.log
+
+  descriptive_case_complete:
+    run: stata-mp:latest analysis/descriptive_case_complete.do
+    needs: [analysis_complete]
+    outputs:
+      moderately_sensitive:
+        log: logs/descriptive_case_complete.log
+        output: output/descriptive_case_complete.csv
+
+  cox_models3_2017_esrd:
+    run: stata-mp:latest analysis/cox_models3_2017_esrd.do
+    needs: [analysis_complete]
+    outputs:
+      moderately_sensitive:
+        log: logs/cox_models3_2017_esrd.log
+        output: output/cox_models3_2017_esrd.csv
