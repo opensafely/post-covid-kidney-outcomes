@@ -8,7 +8,7 @@ log using ./logs/cox_models_2017_aki.log, replace t
 cap file close tablecontent
 file open tablecontent using ./output/cox_models_2017_aki.csv, write text replace
 file write tablecontent _tab ("Crude rate (/100000py) (95% CI)") _n
-file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemic)") _tab ("Age/sex/STP-adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
+file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemic)") _tab ("Minimally-adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_2017.dta, clear
