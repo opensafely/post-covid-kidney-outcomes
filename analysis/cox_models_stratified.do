@@ -7,20 +7,24 @@ log using ./logs/cox_models_stratified_esrd.log, replace t
 
 cap file close tablecontent
 file open tablecontent using ./output/cox_models_stratified_esrd.csv, write text replace
-file write tablecontent _tab ("Pre-pandemic general population comparison") _tab _tab _tab ("Contemporary general population comparison") _tab _tab _tab ("Pre-pandemic hospitalised comparison") _n
-file write tablecontent _tab ("COVID-19 crude rate") _tab ("General population crude rate (/100000py) (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _tab ("COVID-19 crude rate (/100000py) (95% CI)") _tab ("General population crude rate (/100000py) (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _tab ("COVID-19 crude rate (/100000py) (95% CI)") _tab ("Pneumonia crude rate (/100000py) (95% CI)") _tab ("Fully-adjusted HR (95% CI)")
-file write tablecontent _tab ("(/100000py) (95% CI)") _tab ("(/100000py) (95% CI)") _tab _tab ("(/100000py) (95% CI)") _tab ("(/100000py) (95% CI)") _tab _tab ("(/100000py) (95% CI)") _tab ("(/100000py) (95% CI)") _n
+file write tablecontent _tab ("Pre-pandemic general population comparison") _tab _tab _tab _tab ("Contemporary general population comparison") _n
+file write tablecontent _tab ("COVID-19 crude rate") _tab ("General population crude rate (/100000py) (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _tab ("p-value for interaction") _tab ("COVID-19 crude rate (/100000py) (95% CI)") _tab ("General population crude rate (/100000py) (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _tab ("p-value for interaction") _n
 
 local cohort "2017 2020"
 
-*Age
-file write tablecontent ("Age") _n
-forvalues age=1/6 {
-local label_`age': label agegroup `age'
-file write tablecontent ("`label_`age''") _tab
+*Sex
+file write tablecontent ("Sex") _n
+forvalues i=0/1 {
+local label_`i': label sex `i'
+file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-drop if agegroup!=`age'
+stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+qui stcox i.case##i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id)
+matrix table = r(table)
+local p0: di %4.2f table[4,8]
+local p1 .
+drop if sex!=`i'
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 bysort case: egen total_follow_up`x' = total(_t)
 qui su total_follow_up`x' if case==1
@@ -38,44 +42,54 @@ local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip'))
 local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip'))
-file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) 
+file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
+qui stcox i.case i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) 
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
 local full_overall_ul: display %4.2f table[6,2]
-file write tablecontent  %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f (`full_overall_ul') (")") _tab
+file write tablecontent _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f (`full_overall_ul') (")") _tab %4.2f (`p`i'')
 }
 file write tablecontent _n
 }
 
-
-
-qui safecount if agegroup==`age' & case==1
-local cases_`age' = round(r(N),5)
-local cases_`age'_pc = (`cases_`age''/`cases_`x'')*100
-qui safecount if agegroup==`age' & case==0
-local controls_`age' = round(r(N),5)
-local controls_`age'_pc = (`controls_`age''/`controls_`x'')*100
-file write tablecontent %9.0f (`cases_`age'') (" (") %4.1f (`cases_`age'_pc') (")") _tab %9.0f (`controls_`age'') (" (") %4.1f (`controls_`age'_pc') (")") _tab
-}
-file write tablecontent _n
-}
-
-*Sex
-file write tablecontent ("Sex") _n
-forvalues sex=0/1 {
-local label_`sex': label sex `sex'
-file write tablecontent ("`label_`sex''") _tab
+*Diabetes
+file write tablecontent ("Diabetes") _n
+forvalues i=0/1 {
+local label_`i': label diabetes `i'
+file write tablecontent ("`label_`i''")
 foreach x of local cohort {
-use ./output/analysis_`x'.dta
-qui safecount if sex==`sex' & case==1
-local cases_`sex' = round(r(N),5)
-local cases_`sex'_pc = (`cases_`sex''/`cases_`x'')*100
-qui safecount if sex==`sex' & case==0
-local controls_`sex' = round(r(N),5)
-local controls_`sex'_pc = (`controls_`sex''/`controls_`x'')*100
-file write tablecontent %9.0f (`cases_`sex'') (" (") %4.1f (`cases_`sex'_pc') (")") _tab %9.0f (`controls_`sex'') (" (") %4.1f (`controls_`sex'_pc') (")") _tab
+use ./output/analysis_`x'.dta, clear
+stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+qui stcox i.case##i.diabetes i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id)
+matrix table = r(table)
+local p0: di %4.2f table[4,8]
+local p1 .
+drop if diabetes!=`i'
+stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+bysort case: egen total_follow_up`x' = total(_t)
+qui su total_follow_up`x' if case==1
+local cases_py = r(mean)
+local cases_multip = 100000 / r(mean)
+qui su total_follow_up`x' if case==0
+local controls_multip = 100000 / r(mean)
+qui safecount if case==1 & _d==1 & _st==1
+local cases_events = round(r(N),5)
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
+local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip'))
+local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip'))
+qui safecount if case==0 & _d==1 & _st==1
+local controls_events = round(r(N),5)
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
+local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip'))
+local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip'))
+file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster set_id) 
+matrix table = r(table)
+local full_overall_b: display %4.2f table[1,2]
+local full_overall_ll: display %4.2f table[5,2]
+local full_overall_ul: display %4.2f table[6,2]
+file write tablecontent _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f (`full_overall_ul') (")") _tab %4.2f (`p`i'')
 }
 file write tablecontent _n
 }
