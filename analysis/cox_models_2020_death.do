@@ -39,7 +39,7 @@ local minimal_overall_b: display %4.2f table[1,2]
 local minimal_overall_ll: display %4.2f table[5,2]
 local minimal_overall_ul: display %4.2f table[6,2]
 
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -72,9 +72,8 @@ local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip')
-local controls_ef = exp(1.96/(sqrt(`controls_events')))
-local controls_ul = `controls_rate' * `controls_ef'
-local controls_ll = `controls_rate' / `controls_ef'
+local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip'))
+local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip'))
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 
 qui stcox i.case, vce(cluster practice_id) strata(set_id)
@@ -83,7 +82,7 @@ local minimal_overall_b: display %4.2f table[1,2]
 local minimal_overall_ll: display %4.2f table[5,2]
 local minimal_overall_ul: display %4.2f table[6,2]
 
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -115,7 +114,7 @@ local minimal_severity_3b: display %4.2f table[1,4]
 local minimal_severity_3ll: display %4.2f table[5,4]
 local minimal_severity_3ul: display %4.2f table[6,4]
 
-qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_severity_1b: display %4.2f table[1,2]
 local full_severity_1ll: display %4.2f table[5,2]
@@ -155,7 +154,7 @@ local minimal_severity_3b`x': display %4.2f table[1,4]
 local minimal_severity_3ll`x': display %4.2f table[5,4]
 local minimal_severity_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_severity_1b`x': display %4.2f table[1,2]
 local full_severity_1ll`x': display %4.2f table[5,2]
@@ -213,7 +212,7 @@ local minimal_aki_3b: display %4.2f table[1,4]
 local minimal_aki_3ll: display %4.2f table[5,4]
 local minimal_aki_3ul: display %4.2f table[6,4]
 
-qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_aki_1b: display %4.2f table[1,2]
 local full_aki_1ll: display %4.2f table[5,2]
@@ -253,7 +252,7 @@ local minimal_aki_3b`x': display %4.2f table[1,4]
 local minimal_aki_3ll`x': display %4.2f table[5,4]
 local minimal_aki_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_aki_1b`x': display %4.2f table[1,2]
 local full_aki_1ll`x': display %4.2f table[5,2]
