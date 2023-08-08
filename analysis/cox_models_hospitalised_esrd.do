@@ -47,10 +47,9 @@ local full_overall_ul: display %4.2f table[6,2]
 
 file write tablecontent  %4.2f (`minimal_overall_b') (" (") %4.2f (`minimal_overall_ll') ("-") %4.2f (`minimal_overall_ul') (")") _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f (`full_overall_ul') (")") _n
 
-local period "1 29 89 179 max"
+local period "29 89 179 max"
 
-local lab1 "0-1 days"
-local lab29 "2-29 days"
+local lab29 "0-29 days"
 local lab89 "30-89 days"
 local lab179 "90-179 days"
 local labmax "180+ days"
