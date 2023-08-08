@@ -3,16 +3,16 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_models_2017_esrd.log, replace t
+log using ./logs/cox_models3_2017_death.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/cox_models_2017_esrd.csv, write text replace
+file open tablecontent using ./output/cox_models3_2017_death.csv, write text replace
 file write tablecontent _tab ("Crude rate (/100000py) (95% CI)") _n
 file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemic)") _tab ("Minimally-adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
-use ./output/analysis_2017.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+use ./output/analysis_complete_2017.dta, clear
+stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1
 local cases_py = r(mean)
@@ -22,15 +22,13 @@ local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip')
-local cases_ef = exp(1.96/(sqrt(`cases_events')))
-local cases_ul = `cases_rate' * `cases_ef'
-local cases_ll = `cases_rate' / `cases_ef'
+local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip'))
+local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip'))
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip')
-local controls_ef = exp(1.96/(sqrt(`controls_events')))
-local controls_ul = `controls_rate' * `controls_ef'
-local controls_ll = `controls_rate' / `controls_ef'
+local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip'))
+local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip'))
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 
 qui stcox i.case, vce(cluster practice_id) strata(set_id)
@@ -39,7 +37,7 @@ local minimal_overall_b: display %4.2f table[1,2]
 local minimal_overall_ll: display %4.2f table[5,2]
 local minimal_overall_ul: display %4.2f table[6,2]
 
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -56,7 +54,7 @@ local labmax "180+ days"
 
 foreach x of local period {
 file write tablecontent ("`lab`x''") _tab
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_death, fail(death_date`x') origin(index_date`x'_death) id(unique) scale(365.25)
 bysort case: egen total_follow_up`x' = total(_t)
 qui su total_follow_up`x' if case==1
 local cases_py = r(mean)
@@ -66,9 +64,8 @@ local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip')
-local cases_ef = exp(1.96/(sqrt(`cases_events')))
-local cases_ul = `cases_rate' * `cases_ef'
-local cases_ll = `cases_rate' / `cases_ef'
+local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip'))
+local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip'))
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip')
@@ -82,7 +79,7 @@ local minimal_overall_b: display %4.2f table[1,2]
 local minimal_overall_ll: display %4.2f table[5,2]
 local minimal_overall_ul: display %4.2f table[6,2]
 
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -94,13 +91,13 @@ file write tablecontent _n
 
 file write tablecontent ("By COVID-19 severity") _n
 
-use ./output/analysis_2017.dta, clear
+use ./output/analysis_complete_2017.dta, clear
 
 local severity1: label covid_severity 1
 local severity2: label covid_severity 2
 local severity3: label covid_severity 3
 
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
 
 qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -114,7 +111,7 @@ local minimal_severity_3b: display %4.2f table[1,4]
 local minimal_severity_3ll: display %4.2f table[5,4]
 local minimal_severity_3ul: display %4.2f table[6,4]
 
-qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_severity i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local full_severity_1b: display %4.2f table[1,2]
 local full_severity_1ll: display %4.2f table[5,2]
@@ -134,13 +131,12 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
-local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
-local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
+local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
+local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
 }
 
 foreach x of local period {
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_death, fail(death_date`x') origin(index_date`x'_death) id(unique) scale(365.25)
 
 qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -154,7 +150,7 @@ local minimal_severity_3b`x': display %4.2f table[1,4]
 local minimal_severity_3ll`x': display %4.2f table[5,4]
 local minimal_severity_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_severity i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id)	strata(set_id)
 matrix table = r(table)
 local full_severity_1b`x': display %4.2f table[1,2]
 local full_severity_1ll`x': display %4.2f table[5,2]
@@ -174,9 +170,8 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
-local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
-local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
+local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
 }
 }
 
@@ -192,13 +187,13 @@ file write tablecontent _n
 
 file write tablecontent ("By COVID-19 AKI") _n
 
-use ./output/analysis_2017.dta, clear
+use ./output/analysis_complete_2017.dta, clear
 
 local aki1: label covid_aki 1
 local aki2: label covid_aki 2
 local aki3: label covid_aki 3
 
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
 
 qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -212,7 +207,7 @@ local minimal_aki_3b: display %4.2f table[1,4]
 local minimal_aki_3ll: display %4.2f table[5,4]
 local minimal_aki_3ul: display %4.2f table[6,4]
 
-qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_aki i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local full_aki_1b: display %4.2f table[1,2]
 local full_aki_1ll: display %4.2f table[5,2]
@@ -232,13 +227,12 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_aki==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
-local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
-local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
+local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
+local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
 }
 
 foreach x of local period {
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_death, fail(death_date`x') origin(index_date`x'_death) id(unique) scale(365.25)
 
 qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -252,7 +246,7 @@ local minimal_aki_3b`x': display %4.2f table[1,4]
 local minimal_aki_3ll`x': display %4.2f table[5,4]
 local minimal_aki_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_aki i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id) strata(set_id)	
 matrix table = r(table)
 local full_aki_1b`x': display %4.2f table[1,2]
 local full_aki_1ll`x': display %4.2f table[5,2]
@@ -272,9 +266,8 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_aki==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
-local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
-local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
+local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
 }
 }
 
@@ -290,14 +283,14 @@ file write tablecontent _n
 
 file write tablecontent ("By COVID-19 wave") _n
 
-use ./output/analysis_2017.dta, clear
+use ./output/analysis_complete_2017.dta, clear
 
 local wave1: label wave 1
 local wave2: label wave 2
 local wave3: label wave 3
 local wave4: label wave 4
 
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
 
 qui stcox i.wave, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -314,7 +307,7 @@ local minimal_wave_4b: display %4.2f table[1,5]
 local minimal_wave_4ll: display %4.2f table[5,5]
 local minimal_wave_4ul: display %4.2f table[6,5]
 
-qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.wave i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id) strata(set_id)	
 matrix table = r(table)
 local full_wave_1b: display %4.2f table[1,2]
 local full_wave_1ll: display %4.2f table[5,2]
@@ -337,13 +330,12 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if wave==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
-local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
-local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
+local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
+local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
 }
 
 foreach x of local period {
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_death, fail(death_date`x') origin(index_date`x'_death) id(unique) scale(365.25)
 
 qui stcox i.wave, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -360,7 +352,7 @@ local minimal_wave_4b`x': display %4.2f table[1,5]
 local minimal_wave_4ll`x': display %4.2f table[5,5]
 local minimal_wave_4ul`x': display %4.2f table[6,5]
 
-qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.wave i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id) strata(set_id)	
 matrix table = r(table)
 local full_wave_1b`x': display %4.2f table[1,2]
 local full_wave_1ll`x': display %4.2f table[5,2]
@@ -383,9 +375,8 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if wave==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
-local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
-local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
+local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
 }
 }
 
@@ -400,7 +391,7 @@ file write tablecontent _n
 
 file write tablecontent ("By COVID-19 vaccination status") _n
 
-use ./output/analysis_2017.dta, clear
+use ./output/analysis_complete_2017.dta, clear
 
 local vax1: label covid_vax 1
 local vax2: label covid_vax 2
@@ -408,7 +399,7 @@ local vax3: label covid_vax 3
 local vax4: label covid_vax 4
 local vax5: label covid_vax 5
 
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
 
 qui stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -428,7 +419,7 @@ local minimal_vax_5b: display %4.2f table[1,6]
 local minimal_vax_5ll: display %4.2f table[5,6]
 local minimal_vax_5ul: display %4.2f table[6,6]
 
-qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_vax i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local full_vax_1b: display %4.2f table[1,2]
 local full_vax_1ll: display %4.2f table[5,2]
@@ -454,13 +445,12 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_vax==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
-local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
-local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
+local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
+local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
 }
 
 foreach x of local period {
-stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+stset exit_date`x'_death, fail(death_date`x') origin(index_date`x'_death) id(unique) scale(365.25)
 
 qui stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -480,7 +470,7 @@ local minimal_vax_5b`x': display %4.2f table[1,6]
 local minimal_vax_5ll`x': display %4.2f table[5,6]
 local minimal_vax_5ul`x': display %4.2f table[6,6]
 
-qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_vax i.ethnicity i.imd i.urban i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local full_vax_1b`x': display %4.2f table[1,2]
 local full_vax_1ll`x': display %4.2f table[5,2]
@@ -506,9 +496,8 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_vax==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
-local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
-local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
+local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
 }
 }
 

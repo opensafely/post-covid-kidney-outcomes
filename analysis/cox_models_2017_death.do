@@ -39,7 +39,7 @@ local minimal_overall_b: display %4.2f table[1,2]
 local minimal_overall_ll: display %4.2f table[5,2]
 local minimal_overall_ul: display %4.2f table[6,2]
 
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -83,7 +83,7 @@ local minimal_overall_b: display %4.2f table[1,2]
 local minimal_overall_ll: display %4.2f table[5,2]
 local minimal_overall_ul: display %4.2f table[6,2]
 
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -115,7 +115,7 @@ local minimal_severity_3b: display %4.2f table[1,4]
 local minimal_severity_3ll: display %4.2f table[5,4]
 local minimal_severity_3ul: display %4.2f table[6,4]
 
-qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_severity_1b: display %4.2f table[1,2]
 local full_severity_1ll: display %4.2f table[5,2]
@@ -155,7 +155,7 @@ local minimal_severity_3b`x': display %4.2f table[1,4]
 local minimal_severity_3ll`x': display %4.2f table[5,4]
 local minimal_severity_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_severity_1b`x': display %4.2f table[1,2]
 local full_severity_1ll`x': display %4.2f table[5,2]
@@ -213,7 +213,7 @@ local minimal_aki_3b: display %4.2f table[1,4]
 local minimal_aki_3ll: display %4.2f table[5,4]
 local minimal_aki_3ul: display %4.2f table[6,4]
 
-qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_aki_1b: display %4.2f table[1,2]
 local full_aki_1ll: display %4.2f table[5,2]
@@ -253,7 +253,7 @@ local minimal_aki_3b`x': display %4.2f table[1,4]
 local minimal_aki_3ll`x': display %4.2f table[5,4]
 local minimal_aki_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_aki_1b`x': display %4.2f table[1,2]
 local full_aki_1ll`x': display %4.2f table[5,2]
@@ -315,7 +315,7 @@ local minimal_wave_4b: display %4.2f table[1,5]
 local minimal_wave_4ll: display %4.2f table[5,5]
 local minimal_wave_4ul: display %4.2f table[6,5]
 
-qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_wave_1b: display %4.2f table[1,2]
 local full_wave_1ll: display %4.2f table[5,2]
@@ -361,7 +361,7 @@ local minimal_wave_4b`x': display %4.2f table[1,5]
 local minimal_wave_4ll`x': display %4.2f table[5,5]
 local minimal_wave_4ul`x': display %4.2f table[6,5]
 
-qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.wave i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_wave_1b`x': display %4.2f table[1,2]
 local full_wave_1ll`x': display %4.2f table[5,2]
@@ -429,7 +429,7 @@ local minimal_vax_5b: display %4.2f table[1,6]
 local minimal_vax_5ll: display %4.2f table[5,6]
 local minimal_vax_5ul: display %4.2f table[6,6]
 
-qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_vax_1b: display %4.2f table[1,2]
 local full_vax_1ll: display %4.2f table[5,2]
@@ -481,7 +481,7 @@ local minimal_vax_5b`x': display %4.2f table[1,6]
 local minimal_vax_5ll`x': display %4.2f table[5,6]
 local minimal_vax_5ul`x': display %4.2f table[6,6]
 
-qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_vax i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)	
 matrix table = r(table)
 local full_vax_1b`x': display %4.2f table[1,2]
 local full_vax_1ll`x': display %4.2f table[5,2]
