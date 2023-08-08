@@ -72,8 +72,9 @@ local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip')
-local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip'))
-local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip'))
+local controls_ef = exp(1.96/(sqrt(`controls_events')))
+local controls_ul = `controls_rate' * `controls_ef'
+local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 
 qui stcox i.case, vce(cluster practice_id) strata(set_id)
