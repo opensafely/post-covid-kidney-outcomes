@@ -22,13 +22,15 @@ local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip')
-local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip'))
-local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip'))
+local cases_ef = exp(1.96/(sqrt(`cases_events')))
+local cases_ul = `cases_rate' * `cases_ef'
+local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip')
-local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip'))
-local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip'))
+local controls_ef = exp(1.96/(sqrt(`controls_events')))
+local controls_ul = `controls_rate' * `controls_ef'
+local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 
 qui stcox i.case, vce(cluster practice_id) strata(set_id)
@@ -64,13 +66,15 @@ local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip')
-local cases_ul = `cases_rate' + (1.96*sqrt(`cases_rate' / `cases_multip'))
-local cases_ll = `cases_rate' - (1.96*sqrt(`cases_rate' / `cases_multip'))
+local cases_ef = exp(1.96/(sqrt(`cases_events')))
+local cases_ul = `cases_rate' * `cases_ef'
+local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip')
-local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip'))
-local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip'))
+local controls_ef = exp(1.96/(sqrt(`controls_events')))
+local controls_ul = `controls_rate' * `controls_ef'
+local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 
 qui stcox i.case, vce(cluster practice_id) strata(set_id)
@@ -131,8 +135,9 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
+local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
+local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
+local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 }
 
 foreach x of local period {
@@ -150,7 +155,7 @@ local minimal_severity_3b`x': display %4.2f table[1,4]
 local minimal_severity_3ll`x': display %4.2f table[5,4]
 local minimal_severity_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_severity i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id)	strata(set_id)
+qui stcox i.covid_severity i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local full_severity_1b`x': display %4.2f table[1,2]
 local full_severity_1ll`x': display %4.2f table[5,2]
@@ -170,8 +175,9 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
-local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
+local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
+local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
 }
 }
 
@@ -227,8 +233,9 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_aki==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
+local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
+local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
+local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 }
 
 foreach x of local period {
@@ -266,8 +273,9 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_aki==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
-local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
+local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
+local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
 }
 }
 
@@ -330,8 +338,9 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if wave==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
+local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
+local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
+local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 }
 
 foreach x of local period {
@@ -375,8 +384,9 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if wave==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
-local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
+local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
+local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
 }
 }
 
@@ -445,8 +455,9 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_vax==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul = `cases`i'_rate' + (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
-local cases`i'_ll = `cases`i'_rate' - (1.96*sqrt(`cases`i'_rate' / `cases`i'_multip'))
+local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
+local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
+local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 }
 
 foreach x of local period {
@@ -496,8 +507,9 @@ local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_vax==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
-local cases`i'_ul`x' = `cases`i'_rate`x'' + (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
-local cases`i'_ll`x' = `cases`i'_rate`x'' - (1.96*sqrt(`cases`i'_rate`x'' / `cases`i'_multip'))
+local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
+local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
+local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
 }
 }
 
