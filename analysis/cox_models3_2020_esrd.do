@@ -191,46 +191,46 @@ file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`
 file write tablecontent _n
 
 
-file write tablecontent ("By COVID-19 esrd") _n
+file write tablecontent ("By COVID-19 AKI") _n
 
 use ./output/analysis_complete_2020.dta, clear
 
-local esrd1: label covid_esrd 1
-local esrd2: label covid_esrd 2
-local esrd3: label covid_esrd 3
+local aki1: label covid_aki 1
+local aki2: label covid_aki 2
+local aki3: label covid_aki 3
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
-qui stcox i.covid_esrd, vce(cluster practice_id) strata(set_id)
+qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
-local minimal_esrd_1b: display %4.2f table[1,2]
-local minimal_esrd_1ll: display %4.2f table[5,2]
-local minimal_esrd_1ul: display %4.2f table[6,2]
-local minimal_esrd_2b: display %4.2f table[1,3]
-local minimal_esrd_2ll: display %4.2f table[5,3]
-local minimal_esrd_2ul: display %4.2f table[6,3]
-local minimal_esrd_3b: display %4.2f table[1,4]
-local minimal_esrd_3ll: display %4.2f table[5,4]
-local minimal_esrd_3ul: display %4.2f table[6,4]
+local minimal_aki_1b: display %4.2f table[1,2]
+local minimal_aki_1ll: display %4.2f table[5,2]
+local minimal_aki_1ul: display %4.2f table[6,2]
+local minimal_aki_2b: display %4.2f table[1,3]
+local minimal_aki_2ll: display %4.2f table[5,3]
+local minimal_aki_2ul: display %4.2f table[6,3]
+local minimal_aki_3b: display %4.2f table[1,4]
+local minimal_aki_3ll: display %4.2f table[5,4]
+local minimal_aki_3ul: display %4.2f table[6,4]
 
-qui stcox i.covid_esrd i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
+qui stcox i.covid_aki i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
-local full_esrd_1b: display %4.2f table[1,2]
-local full_esrd_1ll: display %4.2f table[5,2]
-local full_esrd_1ul: display %4.2f table[6,2]
-local full_esrd_2b: display %4.2f table[1,3]
-local full_esrd_2ll: display %4.2f table[5,3]
-local full_esrd_2ul: display %4.2f table[6,3]
-local full_esrd_3b: display %4.2f table[1,4]
-local full_esrd_3ll: display %4.2f table[5,4]
-local full_esrd_3ul: display %4.2f table[6,4]
+local full_aki_1b: display %4.2f table[1,2]
+local full_aki_1ll: display %4.2f table[5,2]
+local full_aki_1ul: display %4.2f table[6,2]
+local full_aki_2b: display %4.2f table[1,3]
+local full_aki_2ll: display %4.2f table[5,3]
+local full_aki_2ul: display %4.2f table[6,3]
+local full_aki_3b: display %4.2f table[1,4]
+local full_aki_3ll: display %4.2f table[5,4]
+local full_aki_3ul: display %4.2f table[6,4]
 
-bysort covid_esrd: egen total_follow_up = total(_t)
+bysort covid_aki: egen total_follow_up = total(_t)
 forvalues i=1/3 {
-qui su total_follow_up if covid_esrd==`i'
+qui su total_follow_up if covid_aki==`i'
 local cases`i'_py = r(mean)
 local cases`i'_multip = 100000 / r(mean)
-qui safecount if covid_esrd==`i' & _d==1 & _st==1
+qui safecount if covid_aki==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
 local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
@@ -241,36 +241,36 @@ local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 foreach x of local period {
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
 
-qui stcox i.covid_esrd, vce(cluster practice_id) strata(set_id)
+qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
-local minimal_esrd_1b`x': display %4.2f table[1,2]
-local minimal_esrd_1ll`x': display %4.2f table[5,2]
-local minimal_esrd_1ul`x': display %4.2f table[6,2]
-local minimal_esrd_2b`x': display %4.2f table[1,3]
-local minimal_esrd_2ll`x': display %4.2f table[5,3]
-local minimal_esrd_2ul`x': display %4.2f table[6,3]
-local minimal_esrd_3b`x': display %4.2f table[1,4]
-local minimal_esrd_3ll`x': display %4.2f table[5,4]
-local minimal_esrd_3ul`x': display %4.2f table[6,4]
+local minimal_aki_1b`x': display %4.2f table[1,2]
+local minimal_aki_1ll`x': display %4.2f table[5,2]
+local minimal_aki_1ul`x': display %4.2f table[6,2]
+local minimal_aki_2b`x': display %4.2f table[1,3]
+local minimal_aki_2ll`x': display %4.2f table[5,3]
+local minimal_aki_2ul`x': display %4.2f table[6,3]
+local minimal_aki_3b`x': display %4.2f table[1,4]
+local minimal_aki_3ll`x': display %4.2f table[5,4]
+local minimal_aki_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_esrd i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)	
+qui stcox i.covid_aki i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)	
 matrix table = r(table)
-local full_esrd_1b`x': display %4.2f table[1,2]
-local full_esrd_1ll`x': display %4.2f table[5,2]
-local full_esrd_1ul`x': display %4.2f table[6,2]
-local full_esrd_2b`x': display %4.2f table[1,3]
-local full_esrd_2ll`x': display %4.2f table[5,3]
-local full_esrd_2ul`x': display %4.2f table[6,3]
-local full_esrd_3b`x': display %4.2f table[1,4]
-local full_esrd_3ll`x': display %4.2f table[5,4]
-local full_esrd_3ul`x': display %4.2f table[6,4]
+local full_aki_1b`x': display %4.2f table[1,2]
+local full_aki_1ll`x': display %4.2f table[5,2]
+local full_aki_1ul`x': display %4.2f table[6,2]
+local full_aki_2b`x': display %4.2f table[1,3]
+local full_aki_2ll`x': display %4.2f table[5,3]
+local full_aki_2ul`x': display %4.2f table[6,3]
+local full_aki_3b`x': display %4.2f table[1,4]
+local full_aki_3ll`x': display %4.2f table[5,4]
+local full_aki_3ul`x': display %4.2f table[6,4]
 
-bysort covid_esrd: egen total_follow_up`x' = total(_t)
+bysort covid_aki: egen total_follow_up`x' = total(_t)
 forvalues i=1/3 {
-qui su total_follow_up`x' if covid_esrd==`i'
+qui su total_follow_up`x' if covid_aki==`i'
 local cases`i'_py = r(mean)
 local cases`i'_multip = 100000 / r(mean)
-qui safecount if covid_esrd==`i' & _d==1 & _st==1
+qui safecount if covid_aki==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
 local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
@@ -280,9 +280,9 @@ local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
 }
 
 forvalues i=1/3 {
-file write tablecontent ("`esrd`i''") _n
-file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_esrd_`i'b') (" (") %4.2f (`minimal_esrd_`i'll') ("-") %4.2f (`minimal_esrd_`i'ul') (")") _tab %4.2f (`full_esrd_`i'b') (" (") %4.2f (`full_esrd_`i'll') ("-") %4.2f (`full_esrd_`i'ul') (")") _n
+file write tablecontent ("`aki`i''") _n
+file write tablecontent ("Overall") _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab _tab  %4.2f (`minimal_aki_`i'b') (" (") %4.2f (`minimal_aki_`i'll') ("-") %4.2f (`minimal_aki_`i'ul') (")") _tab %4.2f (`full_aki_`i'b') (" (") %4.2f (`full_aki_`i'll') ("-") %4.2f (`full_aki_`i'ul') (")") _n
 foreach x of local period {
-file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_esrd_`i'b`x'') (" (") %4.2f (`minimal_esrd_`i'll`x'') ("-") %4.2f (`minimal_esrd_`i'ul`x'') (")") _tab %4.2f (`full_esrd_`i'b`x'') (" (") %4.2f (`full_esrd_`i'll`x'') ("-") %4.2f (`full_esrd_`i'ul`x'') (")") _n
+file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_aki_`i'b`x'') (" (") %4.2f (`minimal_aki_`i'll`x'') ("-") %4.2f (`minimal_aki_`i'ul`x'') (")") _tab %4.2f (`full_aki_`i'b`x'') (" (") %4.2f (`full_aki_`i'll`x'') ("-") %4.2f (`full_aki_`i'ul`x'') (")") _n
 }
 }

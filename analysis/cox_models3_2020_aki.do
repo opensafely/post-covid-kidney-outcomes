@@ -134,6 +134,7 @@ local cases`i'_py = r(mean)
 local cases`i'_multip = 100000 / r(mean)
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
+local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
 local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
 local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
