@@ -128,20 +128,20 @@ study = StudyDefinition(
     ),
     baseline_krt_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
-        between = ["1970-01-01", "covid_diagnosis_date"],
+        between = ["1970-01-01", "covid_diagnosis_date - 1 day"],
         returning="binary_flag",
         return_expectations = {"incidence": 0.05},
     ),
     baseline_krt_icd_10=patients.admitted_to_hospital(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="binary_flag",
-        between = ["1970-01-01", "covid_diagnosis_date"],
+        between = ["1970-01-01", "covid_diagnosis_date - 1 day"],
         return_expectations={"incidence": 0.05},
     ),
     baseline_krt_opcs_4=patients.admitted_to_hospital(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="binary_flag",
-        between = ["1970-01-01", "covid_diagnosis_date"],
+        between = ["1970-01-01", "covid_diagnosis_date - 1 day"],
         return_expectations={"incidence": 0.05},
     ),
     baseline_creatinine_feb2020=patients.mean_recorded_value(
