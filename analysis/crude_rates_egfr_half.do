@@ -11,6 +11,18 @@ file write tablecontent _tab ("Pre-pandemic general population comparison") _tab
 file write tablecontent _tab ("COVID-19 cohort") _tab ("General population cohort") _tab ("COVID-19 cohort") _tab ("General population cohort") _tab ("Hospitalised COVID-19 cohort") _tab ("Hospitalised pneumonia cohort") _n
 file write tablecontent _tab ("Rate (/100000py) (95% CI)") _tab ("Rate (/100000py) (95% CI)") _tab ("Rate (/100000py) (95% CI)") _tab ("Rate (/100000py) (95% CI)") _tab ("Rate (/100000py) (95% CI)") _tab ("Rate (/100000py) (95% CI)") _n
 
+*Calculate denominator for each cohort (i.e. 100000 person-years)
+/*local cohort "2017 2020 hospitalised"
+foreach x of local cohort {
+use ./output/analysis_`x'.dta, clear, clear
+stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
+bysort case: egen total_follow_up = total(_t)
+qui su total_follow_up if case==1
+local cases_multip = 100000 / r(mean)
+qui su total_follow_up if case==0
+local controls_multip = 100000 / r(mean)
+}*/
+
 local cohort "2017 2020 hospitalised"
 
 *Total
@@ -47,7 +59,7 @@ file write tablecontent ("`label_`age''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case agegroup: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & agegroup==`age'
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & agegroup==`age'
@@ -77,7 +89,7 @@ file write tablecontent ("`label_`sex''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case sex: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & sex==`sex'
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & sex==`sex'
@@ -107,7 +119,7 @@ file write tablecontent ("`label_`imd''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case imd: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & imd==`imd'
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & imd==`imd'
@@ -131,24 +143,24 @@ file write tablecontent _n
 
 *Ethnicity
 file write tablecontent ("Ethnicity") _n
-forvalues ethnicity1=1/6 {
-local label_`ethnicity1': label ethnicity1 `ethnicity1'
-file write tablecontent ("`label_`ethnicity1''") _tab
+forvalues ethnicity=1/5 {
+local label_`ethnicity': label ethnicity `ethnicity'
+file write tablecontent ("`label_`ethnicity''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
-qui su total_follow_up if case==1 & ethnicity1==`ethnicity1'
+bysort case ethnicity: egen total_follow_up = total(_t)
+qui su total_follow_up if case==1 & ethnicity==`ethnicity'
 local cases_multip = 100000 / r(mean)
-qui su total_follow_up if case==0 & ethnicity1==`ethnicity1'
+qui su total_follow_up if case==0 & ethnicity==`ethnicity'
 local controls_multip = 100000 / r(mean)
-qui safecount if ethnicity1==`ethnicity1' & case==1 & egfr_half==1 & _st==1
+qui safecount if ethnicity==`ethnicity' & case==1 & egfr_half==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip')
 local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
-qui safecount if ethnicity1==`ethnicity1' & case==0 & egfr_half==1 & _st==1
+qui safecount if ethnicity==`ethnicity' & case==0 & egfr_half==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
@@ -158,6 +170,30 @@ file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f 
 }
 file write tablecontent _n
 }
+file write tablecontent ("Missing") _tab
+foreach x of local cohort {
+use ./output/analysis_`x'.dta, clear
+stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
+bysort case ethnicity: egen total_follow_up = total(_t)
+qui su total_follow_up if case==1 & ethnicity==.
+local cases_multip = 100000 / r(mean)
+qui su total_follow_up if case==0 & ethnicity==.
+local controls_multip = 100000 / r(mean)
+qui safecount if ethnicity==. & case==1 & egfr_half==1 & _st==1
+local cases_events = round(r(N),5)
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
+local cases_ef = exp(1.96/(sqrt(`cases_events')))
+local cases_ul = `cases_rate' * `cases_ef'
+local cases_ll = `cases_rate' / `cases_ef'
+qui safecount if ethnicity==. & case==0 & egfr_half==1 & _st==1
+local controls_events = round(r(N),5)
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
+local controls_ef = exp(1.96/(sqrt(`controls_events')))
+local controls_ul = `controls_rate' * `controls_ef'
+local controls_ll = `controls_rate' / `controls_ef'
+file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
+}
+file write tablecontent _n
 
 *Region
 file write tablecontent ("Region") _n
@@ -167,7 +203,7 @@ file write tablecontent ("`label_`region''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case region: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & region==`region'
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & region==`region'
@@ -197,7 +233,7 @@ file write tablecontent ("`label_urban'") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case urban: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & urban==1
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & urban==1
@@ -226,7 +262,7 @@ file write tablecontent ("`label_`bmi''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case bmi: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & bmi==`bmi'
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & bmi==`bmi'
@@ -251,7 +287,7 @@ file write tablecontent ("Missing") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case bmi: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & bmi==.
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & bmi==.
@@ -280,7 +316,7 @@ file write tablecontent ("`label_`smoking''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case smoking: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & smoking==`smoking'
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & smoking==`smoking'
@@ -305,7 +341,7 @@ file write tablecontent ("Missing") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case smoking: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & smoking==.
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & smoking==.
@@ -334,7 +370,7 @@ file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case egfr_group: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & egfr_group==`group'
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & egfr_group==`group'
@@ -361,7 +397,7 @@ file write tablecontent ("Previous acute kidney injury") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case aki_baseline: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & aki_baseline==1
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & aki_baseline==1
@@ -387,7 +423,7 @@ file write tablecontent ("Cardiovascular diseases") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case cardiovascular: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & cardiovascular==1
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & cardiovascular==1
@@ -413,7 +449,7 @@ file write tablecontent ("Diabetes") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case diabetes: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & diabetes==1
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & diabetes==1
@@ -439,7 +475,7 @@ file write tablecontent ("Hypertension") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case hypertension: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & hypertension==1
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & hypertension==1
@@ -465,7 +501,7 @@ file write tablecontent ("Immunosuppressive diseases") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case immunosuppressed: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & immunosuppressed==1
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & immunosuppressed==1
@@ -491,7 +527,7 @@ file write tablecontent ("Non-haematological cancer") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case non_haem_cancer: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & non_haem_cancer==1
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & non_haem_cancer==1
@@ -520,7 +556,7 @@ file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case gp_consults: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & gp_consults==`group'
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & gp_consults==`group'
@@ -550,7 +586,7 @@ file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case admissions: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & admissions==`group'
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & admissions==`group'
@@ -582,7 +618,7 @@ file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case covid_vax: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & covid_vax==`group'
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & covid_vax==`group'
@@ -614,7 +650,7 @@ file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
+bysort case wave: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1 & wave==`group'
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & wave==`group'
