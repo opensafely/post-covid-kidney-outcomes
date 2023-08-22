@@ -13,6 +13,8 @@ file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_hospitalised.dta, clear
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 bysort case: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1
 local cases_py = r(mean)
@@ -57,6 +59,8 @@ local labmax "180+ days"
 foreach x of local period {
 file write tablecontent ("`lab`x''") _tab
 stset exit_date`x'_aki, fail(aki_date`x') origin(index_date`x'_aki) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 bysort case: egen total_follow_up`x' = total(_t)
 qui su total_follow_up`x' if case==1
 local cases_py = r(mean)
@@ -103,6 +107,8 @@ local wave3: label wave 3
 local wave4: label wave 4
 
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.wave i.sex age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
@@ -149,6 +155,8 @@ local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 
 foreach x of local period {
 stset exit_date`x'_aki, fail(aki_date`x') origin(index_date`x'_aki) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.wave i.sex age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
@@ -214,6 +222,8 @@ local vax4: label covid_vax 4
 local vax5: label covid_vax 5
 
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.covid_vax i.sex age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
@@ -266,6 +276,8 @@ local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 
 foreach x of local period {
 stset exit_date`x'_aki, fail(aki_date`x') origin(index_date`x'_aki) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.covid_vax i.sex age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)

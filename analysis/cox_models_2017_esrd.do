@@ -13,6 +13,9 @@ file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_2017.dta, clear
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+
 bysort case: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1
 local cases_py = r(mean)
@@ -57,6 +60,8 @@ local labmax "180+ days"
 foreach x of local period {
 file write tablecontent ("`lab`x''") _tab
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 bysort case: egen total_follow_up`x' = total(_t)
 qui su total_follow_up`x' if case==1
 local cases_py = r(mean)
@@ -72,8 +77,9 @@ local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip')
-local controls_ul = `controls_rate' + (1.96*sqrt(`controls_rate' / `controls_multip'))
-local controls_ll = `controls_rate' - (1.96*sqrt(`controls_rate' / `controls_multip'))
+local controls_ef = exp(1.96/(sqrt(`controls_events')))
+local controls_ul = `controls_rate' * `controls_ef'
+local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 
 qui stcox i.case, vce(cluster practice_id) strata(set_id)
@@ -101,6 +107,8 @@ local severity2: label covid_severity 2
 local severity3: label covid_severity 3
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -141,6 +149,8 @@ local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 
 foreach x of local period {
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.covid_severity, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -199,6 +209,8 @@ local aki2: label covid_aki 2
 local aki3: label covid_aki 3
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -239,6 +251,8 @@ local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 
 foreach x of local period {
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.covid_aki, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -298,6 +312,8 @@ local wave3: label wave 3
 local wave4: label wave 4
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.wave, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -344,6 +360,8 @@ local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 
 foreach x of local period {
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.wave, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -409,6 +427,8 @@ local vax4: label covid_vax 4
 local vax5: label covid_vax 5
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
@@ -461,6 +481,8 @@ local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 
 foreach x of local period {
 stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 qui stcox i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
