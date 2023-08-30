@@ -35,8 +35,8 @@ local p4_`x' .
 local p5_`x' .
 local p6_`x' .
 }
-*forvalues i=1/6{
-forvalues i=1/5 {
+
+forvalues i=1/6 {
 local label_`i': label agegroup `i'
 file write tablecontent ("`label_`i''")
 foreach x of local cohort {
@@ -51,17 +51,17 @@ qui su total_follow_up`x' if case==0
 local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
-local cases_rate : di %10.2f (`cases_events' * `cases_multip')
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
 local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-local controls_rate : di %10.2f (`controls_events' * `controls_multip')
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
-file write tablecontent _tab ("`cases_rate'") (" (") %10.2f (`cases_ll')  ("-") %10.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %10.2f (`controls_ll')  ("-") %10.2f (`controls_ul') (")")
+file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
 qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
@@ -105,17 +105,17 @@ qui su total_follow_up`x' if case==0
 local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
-local cases_rate : di %10.2f (`cases_events' * `cases_multip')
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
 local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-local controls_rate : di %10.2f (`controls_events' * `controls_multip')
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
-file write tablecontent _tab ("`cases_rate'") (" (") %10.2f (`cases_ll')  ("-") %10.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %10.2f (`controls_ll')  ("-") %10.2f (`controls_ul') (")")
+file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
 qui stcox i.case i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
@@ -161,17 +161,17 @@ qui su total_follow_up`x' if case==0
 local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
-local cases_rate : di %10.2f (`cases_events' * `cases_multip')
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
 local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-local controls_rate : di %10.2f (`controls_events' * `controls_multip')
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
-file write tablecontent _tab ("`cases_rate'") (" (") %10.2f (`cases_ll')  ("-") %10.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %10.2f (`controls_ll')  ("-") %10.2f (`controls_ul') (")")
+file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
 qui stcox i.case i.sex i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
@@ -217,17 +217,17 @@ qui su total_follow_up`x' if case==0
 local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
-local cases_rate : di %10.2f (`cases_events' * `cases_multip')
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
 local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-local controls_rate : di %10.2f (`controls_events' * `controls_multip')
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
-file write tablecontent _tab ("`cases_rate'") (" (") %10.2f (`cases_ll')  ("-") %10.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %10.2f (`controls_ll')  ("-") %10.2f (`controls_ul') (")")
+file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
 qui stcox i.case i.sex i.ethnicity i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
@@ -272,17 +272,17 @@ qui su total_follow_up`x' if case==0
 local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
-local cases_rate : di %10.2f (`cases_events' * `cases_multip')
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
 local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-local controls_rate : di %10.2f (`controls_events' * `controls_multip')
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
-file write tablecontent _tab ("`cases_rate'") (" (") %10.2f (`cases_ll')  ("-") %10.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %10.2f (`controls_ll')  ("-") %10.2f (`controls_ul') (")")
+file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
 qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
@@ -330,17 +330,17 @@ qui su total_follow_up`x' if case==0
 local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
-local cases_rate : di %10.2f (`cases_events' * `cases_multip')
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
 local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-local controls_rate : di %10.2f (`controls_events' * `controls_multip')
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
-file write tablecontent _tab ("`cases_rate'") (" (") %10.2f (`cases_ll')  ("-") %10.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %10.2f (`controls_ll')  ("-") %10.2f (`controls_ul') (")")
+file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
 qui stcox i.case i.egfr_group i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
@@ -384,17 +384,17 @@ qui su total_follow_up`x' if case==0
 local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
-local cases_rate : di %10.2f (`cases_events' * `cases_multip')
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
 local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-local controls_rate : di %10.2f (`controls_events' * `controls_multip')
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
-file write tablecontent _tab ("`cases_rate'") (" (") %10.2f (`cases_ll')  ("-") %10.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %10.2f (`controls_ll')  ("-") %10.2f (`controls_ul') (")")
+file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
 qui stcox i.case i.sex i.diabetes i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
@@ -438,17 +438,17 @@ qui su total_follow_up if case==0
 local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
-local cases_rate : di %10.2f (`cases_events' * `cases_multip')
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
 local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-local controls_rate : di %10.2f (`controls_events' * `controls_multip')
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
-file write tablecontent _tab _tab _tab _tab _tab ("`cases_rate'") (" (") %10.2f (`cases_ll')  ("-") %10.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %10.2f (`controls_ll')  ("-") %10.2f (`controls_ul') (")")
+file write tablecontent _tab _tab _tab _tab _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
 qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
@@ -491,17 +491,17 @@ qui su total_follow_up if case==0
 local controls_multip = 100000 / r(mean)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
-local cases_rate : di %10.2f (`cases_events' * `cases_multip')
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
 local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-local controls_rate : di %10.2f (`controls_events' * `controls_multip')
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
-file write tablecontent _tab _tab _tab _tab _tab ("`cases_rate'") (" (") %10.2f (`cases_ll')  ("-") %10.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %10.2f (`controls_ll')  ("-") %10.2f (`controls_ul') (")")
+file write tablecontent _tab _tab _tab _tab _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
 qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.wave age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
