@@ -4,11 +4,11 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_models_stratified_esrd.log, replace t
+log using ./logs/cox_models_case_aki.log, replace t
 cap file close tablecontent
-file open tablecontent using ./output/cox_models_stratified_esrd.csv, write text replace
+file open tablecontent using ./output/cox_models_case_aki.csv, write text replace
 file write tablecontent _tab ("Pre-pandemic general population comparison") _tab _tab _tab _tab ("Contemporary general population comparison") _n
-file write tablecontent _tab ("COVID-19 crude rate") _tab ("General population crude rate (/100000py) (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _tab ("p-value for interaction") _tab ("COVID-19 crude rate (/100000py) (95% CI)") _tab ("General population crude rate (/100000py) (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _tab ("p-value for interaction") _n
+file write tablecontent _tab ("COVID-19 crude rate (/100000py) (95% CI)") _tab ("General population crude rate (/100000py) (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _tab ("p-value for interaction") _tab ("COVID-19 crude rate (/100000py) (95% CI)") _tab ("General population crude rate (/100000py) (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _tab ("p-value for interaction") _n
 
 local cohort "2017 2020"
 
@@ -22,7 +22,7 @@ label define agegroup 	1 "18-39" 		///
 						6 "80+"
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.case##i.agegroup i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions
 est store a
 qui stcox i.case i.agegroup i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions
@@ -42,7 +42,7 @@ file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 drop if agegroup!=`i'
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up`x' = total(_t)
 qui su total_follow_up`x' if case==1
 local cases_py = r(mean)
@@ -77,7 +77,7 @@ file write tablecontent _n
 file write tablecontent ("Sex") _n
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 qui stcox i.case##i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
@@ -94,7 +94,7 @@ file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 drop if sex!=`i'
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 bysort case: egen total_follow_up`x' = total(_t)
@@ -130,7 +130,7 @@ file write tablecontent _n
 file write tablecontent ("Ethnicity") _n
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 qui stcox i.case##i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
@@ -150,7 +150,7 @@ file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 drop if ethnicity!=`i'
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 bysort case: egen total_follow_up`x' = total(_t)
@@ -186,7 +186,7 @@ file write tablecontent _n
 file write tablecontent ("Index of multiple deprivation") _n
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 qui stcox i.case##i.imd i.sex i.ethnicity i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
@@ -206,7 +206,7 @@ file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 drop if imd!=`i'
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 bysort case: egen total_follow_up`x' = total(_t)
@@ -243,7 +243,7 @@ file write tablecontent _n
 file write tablecontent ("Diabetes") _n
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 qui stcox i.case##i.diabetes i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
@@ -261,7 +261,7 @@ file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 drop if diabetes!=`i'
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 bysort case: egen total_follow_up`x' = total(_t)
@@ -297,7 +297,7 @@ file write tablecontent _n
 file write tablecontent ("Baseline eGFR") _n
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&egfr_group!=., cubic nknots(4)
 qui stcox i.case##i.egfr_group i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
@@ -319,7 +319,7 @@ file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 drop if egfr_group!=`i'
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&egfr_group!=., cubic nknots(4)
 bysort case: egen total_follow_up`x' = total(_t)
@@ -355,7 +355,7 @@ file write tablecontent _n
 file write tablecontent ("Previous AKI") _n
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 qui stcox i.case##i.aki_baseline i.diabetes i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
@@ -373,7 +373,7 @@ file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 drop if aki_baseline!=`i'
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 bysort case: egen total_follow_up`x' = total(_t)
@@ -409,7 +409,7 @@ file write tablecontent _n
 file write tablecontent ("COVID-19 wave") _n
 foreach x of local cohort {
 use ./output/analysis_2020.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 qui stcox i.case##i.wave i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3
@@ -427,7 +427,7 @@ local label_`i': label wave `i'
 file write tablecontent ("`label_`i''")
 use ./output/analysis_2020.dta, clear
 drop if wave!=`i'
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 bysort case: egen total_follow_up = total(_t)
@@ -461,7 +461,7 @@ file write tablecontent _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overal
 file write tablecontent ("COVID-19 vaccination") _n
 foreach x of local cohort {
 use ./output/analysis_2020.dta, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 qui stcox i.case##i.covid_vax i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.wave age1 age2 age3
@@ -480,7 +480,7 @@ local label_`i': label covid_vax `i'
 file write tablecontent ("`label_`i''")
 use ./output/analysis_2020.dta, clear
 drop if covid_vax!=`i'
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 bysort case: egen total_follow_up = total(_t)
