@@ -19,9 +19,9 @@ label define agegroup 	1 "18-39" 		///
 						6 "80+"
 use ./output/analysis_hospitalised.dta, clear
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui stcox i.case##i.agegroup i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions
+qui stcox i.case##i.agegroup i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month
 est store a
-qui stcox i.case i.agegroup i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions
+qui stcox i.case i.agegroup i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month
 est store b
 qui lrtest b a
 local p1 = r(p)
@@ -57,7 +57,7 @@ local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id)
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -72,9 +72,9 @@ use ./output/analysis_hospitalised.dta, clear
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
-qui stcox i.case##i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case##i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store a
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store b
 qui lrtest b a
 local p0 = r(p)
@@ -107,7 +107,7 @@ local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
-qui stcox i.case i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -122,9 +122,9 @@ use ./output/analysis_hospitalised.dta, clear
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
-qui stcox i.case##i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case##i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store a
-qui stcox i.case i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store b
 qui lrtest b a
 local p1 = r(p)
@@ -160,7 +160,7 @@ local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
-qui stcox i.case i.sex i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.sex i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -176,9 +176,9 @@ use ./output/analysis_hospitalised.dta, clear
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
-qui stcox i.case##i.imd i.sex i.ethnicity i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case##i.imd i.sex i.ethnicity i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store a
-qui stcox i.case i.imd i.sex i.ethnicity i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case i.imd i.sex i.ethnicity i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store b
 qui lrtest b a
 local p1 = r(p)
@@ -214,7 +214,7 @@ local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
-qui stcox i.case i.sex i.ethnicity i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.sex i.ethnicity i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -228,9 +228,9 @@ use ./output/analysis_hospitalised.dta, clear
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
-qui stcox i.case##i.diabetes i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case##i.diabetes i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store a
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store b
 qui lrtest b a
 local p0 = r(p)
@@ -264,7 +264,7 @@ local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -278,9 +278,9 @@ use ./output/analysis_hospitalised.dta, clear
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&egfr_group!=., cubic nknots(4)
-qui stcox i.case##i.egfr_group i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case##i.egfr_group i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store a
-qui stcox i.case i.egfr_group i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case i.egfr_group i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store b
 qui lrtest b a
 local p1 = r(p)
@@ -318,7 +318,7 @@ local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
-qui stcox i.case i.egfr_group i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.egfr_group i.ethnicity i.sex i.imd i.urban i.stp i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -332,9 +332,9 @@ use ./output/analysis_hospitalised.dta, clear
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
-qui stcox i.case##i.aki_baseline i.diabetes i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case##i.aki_baseline i.diabetes i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store a
-qui stcox i.case i.diabetes i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3
+qui stcox i.case i.diabetes i.sex i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3
 est store b
 qui lrtest b a
 local p0 = r(p)
@@ -368,7 +368,7 @@ local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")")
-qui stcox i.case i.sex i.diabetes i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.sex i.diabetes i.ethnicity i.imd i.urban i.stp i.bmi i.smoking i.ckd_stage i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.month age1 age2 age3, vce(cluster practice_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
