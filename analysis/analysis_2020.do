@@ -377,6 +377,11 @@ gen covidvax3date = date(covid_vax_3_date, "YMD")
 format covidvax3date %td
 gen covidvax4date = date(covid_vax_4_date, "YMD")
 format covidvax4date %td
+*First vaccination in the UK was on 08/12/2020
+*di date("20201208", "YMD") -> 22257
+foreach var of varlist covidvax1date covidvax2date covidvax3date covidvax4date {
+replace `var' = . if `var'<22257
+}
 gen covid_vax = 1
 replace covid_vax = 2 if covidvax1date!=.
 replace covid_vax = 3 if covidvax2date!=.
