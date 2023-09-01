@@ -399,6 +399,7 @@ format covidvax4date %td
 *di date("20201208", "YMD") -> 22257
 foreach var of varlist covidvax1date covidvax2date covidvax3date covidvax4date {
 replace `var' = . if `var'<22257
+replace `var' = . if `var' >= (index_date - 7)
 }
 gen covid_vax = case
 replace covid_vax = 5 if covidvax4date!=.
