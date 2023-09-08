@@ -120,3 +120,4 @@ foreach x of local period {
 file write tablecontent ("`lab`x''") _tab (`cases`i'_events`x'') _n
 }
 }
+file close tablecontent
