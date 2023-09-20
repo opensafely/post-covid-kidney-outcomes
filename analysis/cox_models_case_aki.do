@@ -309,6 +309,8 @@ file write tablecontent _n
 
 *Diabetes
 file write tablecontent ("Diabetes") _n
+label define diabetes 0 "No diabetes" 1 "Diabetes"
+label values diabetes diabetes
 forvalues i=0/1 {
 local label_`i': label diabetes `i'
 }
@@ -386,7 +388,7 @@ file write tablecontent ("`label_1'")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
-qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
+qui stcox i.case i.egfr_group i.ethnicity i.imd i.urban i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store a
 qui stcox i.case##i.egfr_group i.imd i.ethnicity i.urban i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store b
@@ -453,8 +455,10 @@ file write tablecontent _n
 
 *Previous AKI
 file write tablecontent ("Previous AKI") _n
+label define aki_baseline 0 "No previous AKI" 1 "Previous AKI"
+label values aki_baseline aki_baseline
 forvalues i=0/1 {
-local label_`i': label diabetes `i'
+local label_`i': label aki_baseline `i'
 }
 file write tablecontent ("`label_0'")
 foreach x of local cohort {
