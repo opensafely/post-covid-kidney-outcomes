@@ -398,7 +398,7 @@ lincom 1.case, eform
 local int_1b = r(estimate)
 local int_1ll = r(lb)
 local int_1ul = r(ub)
-forvalues i=2/5 {
+forvalues i=2/7 {
 lincom 1.case + 1.case#`i'.egfr_group, eform
 local int_`i'b_`x' = r(estimate)
 local int_`i'll_`x' = r(lb)
