@@ -4,9 +4,9 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_models_case_death.log, replace t
+log using ./logs/cox_models_case_aki.log, replace t
 cap file close tablecontent
-file open tablecontent using ./output/cox_models_case_death.csv, write text replace
+file open tablecontent using ./output/cox_models_case_aki.csv, write text replace
 file write tablecontent _tab ("Pre-pandemic general population comparison") _tab _tab _tab _tab ("Contemporary general population comparison") _n
 file write tablecontent _tab ("COVID-19 crude rate (/100000py) (95% CI)") _tab ("General population crude rate (/100000py) (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _tab ("p-value for interaction") _tab ("COVID-19 crude rate (/100000py) (95% CI)") _tab ("General population crude rate (/100000py) (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _tab ("p-value for interaction") _n
 
@@ -21,7 +21,7 @@ local label_`i': label agegroup `i'
 file write tablecontent ("`label_1'")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.case i.agegroup i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store a
 qui stcox i.case##i.agegroup i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
@@ -65,7 +65,7 @@ local label_`i': label agegroup `i'
 file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t) if agegroup==`i'
 qui su total_follow_up if case==1 & agegroup==`i'
 local cases_py = r(mean)
@@ -97,7 +97,7 @@ local label_`i': label sex `i'
 file write tablecontent ("`label_0'")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.case i.sex i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store a
 qui stcox i.case##i.sex i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
@@ -136,7 +136,7 @@ file write tablecontent _n
 file write tablecontent ("`label_1'")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t) if sex==1
 qui su total_follow_up if case==1 & sex==1
 local cases_py = r(mean)
@@ -167,7 +167,7 @@ local label_`i': label ethnicity `i'
 file write tablecontent ("`label_1'")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store a
 qui stcox i.case##i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
@@ -209,7 +209,7 @@ forvalues i=2/5 {
 file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t) if ethnicity==`i'
 qui su total_follow_up if case==1 & ethnicity==`i'
 local cases_py = r(mean)
@@ -241,7 +241,7 @@ local label_`i': label imd `i'
 file write tablecontent ("`label_1'")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store a
 qui stcox i.case##i.imd i.ethnicity i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
@@ -283,7 +283,7 @@ forvalues i=2/5 {
 file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t) if imd==`i'
 qui su total_follow_up if case==1 & imd==`i'
 local cases_py = r(mean)
@@ -317,7 +317,7 @@ local label_`i': label diabetes `i'
 file write tablecontent ("`label_0'")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store a
 qui stcox i.case##i.diabetes i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
@@ -356,7 +356,7 @@ file write tablecontent _n
 file write tablecontent ("`label_1'")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t) if diabetes==1
 qui su total_follow_up if case==1 & diabetes==1
 local cases_py = r(mean)
@@ -387,7 +387,7 @@ local label_`i': label egfr_group `i'
 file write tablecontent ("`label_1'")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.case i.egfr_group i.ethnicity i.imd i.urban i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store a
 qui stcox i.case##i.egfr_group i.imd i.ethnicity i.urban i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
@@ -429,7 +429,7 @@ forvalues i=2/7 {
 file write tablecontent ("`label_`i''")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t) if egfr_group==`i'
 qui su total_follow_up if case==1 & egfr_group==`i'
 local cases_py = r(mean)
@@ -463,7 +463,7 @@ local label_`i': label aki_baseline `i'
 file write tablecontent ("`label_0'")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store a
 qui stcox i.case##i.aki_baseline i.diabetes i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
@@ -474,7 +474,7 @@ lincom 1.case, eform
 local int_0b = r(estimate)
 local int_0ll = r(lb)
 local int_0ul = r(ub)
-lincom 1.case + 1.case#1.diabetes, eform
+lincom 1.case + 1.case#1.aki_baseline, eform
 local int_1b_`x' = r(estimate)
 local int_1ll_`x' = r(lb)
 local int_1ul_`x' = r(ub)
@@ -502,7 +502,7 @@ file write tablecontent _n
 file write tablecontent ("`label_1'")
 foreach x of local cohort {
 use ./output/analysis_`x'.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t) if aki_baseline==1
 qui su total_follow_up if case==1 & aki_baseline==1
 local cases_py = r(mean)
@@ -532,7 +532,7 @@ local label_`i': label wave `i'
 }
 file write tablecontent ("`label_1'")
 use ./output/analysis_2020.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.case i.wave i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, strata(set_id)
 est store a
 qui stcox i.case##i.wave i.imd i.ethnicity i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, strata(set_id)
@@ -574,7 +574,7 @@ file write tablecontent _n
 forvalues i=2/4 {
 file write tablecontent ("`label_`i''")
 use ./output/analysis_2020.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t) if wave==`i'
 qui su total_follow_up if case==1 & wave==`i'
 local cases_py = r(mean)
@@ -603,7 +603,7 @@ local label_`i': label covid_vax `i'
 }
 file write tablecontent ("`label_1'")
 use ./output/analysis_2020.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 qui stcox i.case i.wave i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, strata(set_id)
 est store a
 qui stcox i.case##i.covid_vax i.wave i.imd i.ethnicity i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
@@ -645,7 +645,7 @@ file write tablecontent _n
 forvalues i=2/5 {
 file write tablecontent ("`label_`i''")
 use ./output/analysis_2020.dta, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t) if covid_vax==`i'
 qui su total_follow_up if case==1 & covid_vax==`i'
 local cases_py = r(mean)
@@ -666,3 +666,5 @@ local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent _tab _tab _tab _tab _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _n
 }
+
+file close tablecontent

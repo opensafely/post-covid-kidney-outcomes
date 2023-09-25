@@ -474,7 +474,7 @@ lincom 1.case, eform
 local int_0b = r(estimate)
 local int_0ll = r(lb)
 local int_0ul = r(ub)
-lincom 1.case + 1.case#1.diabetes, eform
+lincom 1.case + 1.case#1.aki_baseline, eform
 local int_1b_`x' = r(estimate)
 local int_1ll_`x' = r(lb)
 local int_1ul_`x' = r(ub)
@@ -666,3 +666,5 @@ local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent _tab _tab _tab _tab _tab ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _n
 }
+
+file close tablecontent
