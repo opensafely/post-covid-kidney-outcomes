@@ -11,7 +11,7 @@ file write tablecontent _tab ("Crude rate (/100000py) (95% CI)") _n
 file write tablecontent _tab ("COVID-19") _tab ("General population (contemporary)") _tab ("Minimally-adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
-use ./output/analysis_2020.dta, clear
+use ./output/analysis_complete_2020.dta, clear
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
@@ -41,7 +41,7 @@ local minimal_overall_b: display %4.2f table[1,2]
 local minimal_overall_ll: display %4.2f table[5,2]
 local minimal_overall_ul: display %4.2f table[6,2]
 
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.wave i.covid_vax age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -87,7 +87,7 @@ local minimal_overall_b: display %4.2f table[1,2]
 local minimal_overall_ll: display %4.2f table[5,2]
 local minimal_overall_ul: display %4.2f table[6,2]
 
-qui stcox i.case i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.wave i.covid_vax age1 age2 age3, vce(cluster practice_id)
+qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
@@ -99,7 +99,7 @@ file write tablecontent _n
 
 file write tablecontent ("By COVID-19 severity") _n
 
-use ./output/analysis_2020.dta, clear
+use ./output/analysis_complete_2020.dta, clear
 
 local severity1: label covid_severity 1
 local severity2: label covid_severity 2
@@ -121,7 +121,7 @@ local minimal_severity_3b: display %4.2f table[1,4]
 local minimal_severity_3ll: display %4.2f table[5,4]
 local minimal_severity_3ul: display %4.2f table[6,4]
 
-qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.wave i.covid_vax age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_severity i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local full_severity_1b: display %4.2f table[1,2]
 local full_severity_1ll: display %4.2f table[5,2]
@@ -163,7 +163,7 @@ local minimal_severity_3b`x': display %4.2f table[1,4]
 local minimal_severity_3ll`x': display %4.2f table[5,4]
 local minimal_severity_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_severity i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.wave i.covid_vax age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_severity i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id)	strata(set_id)
 matrix table = r(table)
 local full_severity_1b`x': display %4.2f table[1,2]
 local full_severity_1ll`x': display %4.2f table[5,2]
@@ -201,7 +201,7 @@ file write tablecontent _n
 
 file write tablecontent ("By COVID-19 AKI") _n
 
-use ./output/analysis_2020.dta, clear
+use ./output/analysis_complete_2020.dta, clear
 
 local aki1: label covid_aki 1
 local aki2: label covid_aki 2
@@ -223,7 +223,7 @@ local minimal_aki_3b: display %4.2f table[1,4]
 local minimal_aki_3ll: display %4.2f table[5,4]
 local minimal_aki_3ul: display %4.2f table[6,4]
 
-qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.wave i.covid_vax age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_aki i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 matrix table = r(table)
 local full_aki_1b: display %4.2f table[1,2]
 local full_aki_1ll: display %4.2f table[5,2]
@@ -265,7 +265,7 @@ local minimal_aki_3b`x': display %4.2f table[1,4]
 local minimal_aki_3ll`x': display %4.2f table[5,4]
 local minimal_aki_3ul`x': display %4.2f table[6,4]
 
-qui stcox i.covid_aki i.sex i.ethnicity i.imd i.urban i.stp i.region i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.wave i.covid_vax age1 age2 age3, vce(cluster practice_id)	
+qui stcox i.covid_aki i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)	
 matrix table = r(table)
 local full_aki_1b`x': display %4.2f table[1,2]
 local full_aki_1ll`x': display %4.2f table[5,2]
