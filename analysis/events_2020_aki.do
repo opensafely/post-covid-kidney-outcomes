@@ -3,10 +3,10 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/events_2020_aki.log, replace t
+log using ./logs/events_crude_2020_aki.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/events_2020_aki.csv, write text replace
+file open tablecontent using ./output/events_crude_2020_aki.csv, write text replace
 file write tablecontent _tab ("Events") _n
 file write tablecontent _tab ("COVID-19") _tab ("General population (contemporary)") _n
 file write tablecontent ("COVID-19 overall") _n
