@@ -19,7 +19,7 @@ variables_outcomes_2017= generate_outcomes_2017(index_date_variable="case_index_
 
 study = StudyDefinition(
     default_expectations={
-        "date": {"earliest": "1900-01-01", "latest": "2019-11-30"},
+        "date": {"earliest": "1900-01-01", "latest": "2019-12-31"},
         "rate": "uniform",
         "incidence" : 0.2
     },

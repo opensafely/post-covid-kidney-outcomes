@@ -19,7 +19,7 @@ variables_outcomes_2020= generate_outcomes_2020(index_date_variable="case_index_
 
 study = StudyDefinition(
     default_expectations={
-        "date": {"earliest": "1900-01-01", "latest": "2022-11-30"},
+        "date": {"earliest": "1900-01-01", "latest": "2022-12-31"},
         "rate": "uniform",
         "incidence" : 0.2
     },

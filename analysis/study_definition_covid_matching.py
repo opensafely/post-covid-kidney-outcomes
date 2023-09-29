@@ -66,7 +66,7 @@ study = StudyDefinition(
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        between = ["2020-02-01", "2023-01-31"],
+        between = ["2020-02-01", "2022-12-31"],
         return_expectations={"incidence": 0.4, "date": {"earliest": "2020-02-01"}},
     ),
     
@@ -75,7 +75,7 @@ study = StudyDefinition(
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        between = ["2020-02-01", "2023-01-31"],
+        between = ["2020-02-01", "2022-12-31"],
         return_expectations={"incidence": 0.2, "date": {"earliest": "2020-02-01"}},
     ),
 
@@ -84,7 +84,7 @@ study = StudyDefinition(
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        between = ["2020-02-01", "2023-01-31"],
+        between = ["2020-02-01", "2022-12-31"],
         return_expectations={"incidence": 0.1, "date": {"earliest": "2020-02-01"}},
     ),
     

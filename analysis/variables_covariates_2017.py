@@ -548,14 +548,13 @@ def generate_covariates_2017(index_date_variable):
         returning="number_of_matches_in_period",
         return_expectations={"int": {"distribution": "normal", "mean": 1, "stddev": 1},"incidence": 0.6,},
     ),
-    #These need to be done differently
     body_mass_index=patients.most_recent_bmi(
         on_or_before="case_index_date - 1 day",
         minimum_age_at_measurement=18,
         include_measurement_date=True,
         date_format="YYYY-MM-DD",
         return_expectations={
-            "date": {"earliest": "2020-01-01", "latest": "2019-10-31"},
+            "date": {"earliest": "2015-01-01", "latest": "2019-12-31"},
             "float": {"distribution": "normal", "mean": 28, "stddev": 8, "min": 18, "max": 45},
             "incidence": 0.95,
         }
