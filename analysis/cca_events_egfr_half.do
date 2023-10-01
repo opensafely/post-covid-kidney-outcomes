@@ -165,7 +165,6 @@ file write tablecontent _n
 *COVID-19 vaccination status
 file write tablecontent ("COVID-19 vaccination status") _n
 forvalues group=1/5 {
-use ./output/analysis_2020.dta, clear
 local label_`group': label covid_vax `group'
 file write tablecontent ("`label_`group''") _tab
 qui safecount if covid_vax==`group' & case==1 & egfr_half==1
@@ -178,7 +177,6 @@ file write tablecontent _tab _tab (`cases_events') _tab (`controls_events') _n
 *COVID-19 wave
 file write tablecontent ("COVID-19 wave") _n
 forvalues group=1/4 {
-use ./output/analysis_2020.dta, clear
 local label_`group': label wave `group'
 file write tablecontent ("`label_`group''") _tab
 qui safecount if wave==`group' & case==1 & egfr_half==1

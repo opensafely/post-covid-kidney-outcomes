@@ -14,7 +14,7 @@ file write tablecontent _tab ("Rate (/100000py) (95% CI)") _tab ("Rate (/100000p
 *Calculate denominator for each cohort (i.e. 100000 person-years)
 /*local cohort "2017 2020 hospitalised"
 foreach x of local cohort {
-use ./output/analysis_`x'.dta, clear, clear
+use ./output/analysis_`x'.dta, clear
 stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1

@@ -13,7 +13,7 @@ file write tablecontent _tab ("COVID-19 cohort") _tab ("General population cohor
 *Calculate denominator for each cohort (i.e. 100000 person-years)
 /*local cohort "2017 2020 hospitalised"
 foreach x of local cohort {
-use ./output/analysis_`x'.dta, clear, clear
+use ./output/analysis_`x'.dta, clear
 stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1
