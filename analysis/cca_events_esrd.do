@@ -167,11 +167,15 @@ file write tablecontent ("COVID-19 vaccination status") _n
 forvalues group=1/5 {
 local label_`group': label covid_vax `group'
 file write tablecontent ("`label_`group''") _tab
+foreach x of local cohort {
+use ./output/analysis_complete_`x'.dta, clear
 qui safecount if covid_vax==`group' & case==1 & esrd==1
 local cases_events = round(r(N),5)
 qui safecount if covid_vax==`group' & case==0 & esrd==1
 local controls_events = round(r(N),5)
-file write tablecontent _tab _tab (`cases_events') _tab (`controls_events') _n
+file write tablecontent (`cases_events') _tab (`controls_events') _tab
+}
+file write tablecontent _n
 }
 
 *COVID-19 wave
@@ -179,11 +183,15 @@ file write tablecontent ("COVID-19 wave") _n
 forvalues group=1/4 {
 local label_`group': label wave `group'
 file write tablecontent ("`label_`group''") _tab
+foreach x of local cohort {
+use ./output/analysis_complete_`x'.dta, clear
 qui safecount if wave==`group' & case==1 & esrd==1
 local cases_events = round(r(N),5)
 qui safecount if wave==`group' & case==0 & esrd==1
 local controls_events = round(r(N),5)
-file write tablecontent _tab _tab (`cases_events') _tab (`controls_events') _n
+file write tablecontent (`cases_events') _tab (`controls_events') _tab
+}
+file write tablecontent _n
 }
 
 file close tablecontent
