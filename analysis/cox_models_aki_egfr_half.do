@@ -95,6 +95,7 @@ drop if sex!=`i'
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up = total(_t)
 qui su total_follow_up if covid_aki==`j'
 local cases_py = r(mean)
@@ -147,6 +148,7 @@ drop if ethnicity!=`i'
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up = total(_t)
 qui su total_follow_up if covid_aki==`j'
 local cases_py = r(mean)
@@ -199,6 +201,7 @@ drop if imd!=`i'
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up = total(_t)
 qui su total_follow_up if covid_aki==`j'
 local cases_py = r(mean)
@@ -250,6 +253,7 @@ drop if diabetes!=`i'
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up = total(_t)
 qui su total_follow_up if covid_aki==`j'
 local cases_py = r(mean)
@@ -304,6 +308,7 @@ drop if egfr_group!=`i'
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=.&egfr_group!=., cubic nknots(4)
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up = total(_t)
 qui su total_follow_up if covid_aki==`j'
 local cases_py = r(mean)
@@ -354,6 +359,7 @@ drop if aki_baseline!=`i'
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up = total(_t)
 qui su total_follow_up if covid_aki==`j'
 local cases_py = r(mean)
@@ -404,6 +410,7 @@ drop if wave!=`i'
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up = total(_t)
 qui su total_follow_up if covid_aki==`j'
 local cases_py = r(mean)
@@ -453,6 +460,7 @@ drop if covid_vax!=`i'
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up = total(_t)
 qui su total_follow_up if covid_aki==`j'
 local cases_py = r(mean)
