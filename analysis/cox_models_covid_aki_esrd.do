@@ -87,6 +87,7 @@ local int_`j'`i'ul_`x' = r(ub)
 }
 *Obtain stratum-specific rates
 forvalues i=0/1 {
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up_`i' = total(_t) if sex==`i'
 forvalues j=1/3 {
 qui su total_follow_up_`i' if covid_aki==`j' & sex==`i'
@@ -134,6 +135,7 @@ local int_`j'`i'ul_`x' = r(ub)
 }
 *Obtain stratum-specific rates
 forvalues i=1/5 {
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up_`i' = total(_t) if ethnicity==`i'
 forvalues j=1/3 {
 qui su total_follow_up_`i' if covid_aki==`j' & ethnicity==`i'
@@ -180,6 +182,7 @@ local int_`j'`i'ul_`x' = r(ub)
 }
 *Obtain stratum-specific rates
 forvalues i=1/5 {
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up_`i' = total(_t) if imd==`i'
 forvalues j=1/3 {
 qui su total_follow_up_`i' if covid_aki==`j' & imd==`i'
@@ -228,6 +231,7 @@ local int_`j'`i'ul_`x' = r(ub)
 }
 *Obtain stratum-specific rates
 forvalues i=0/1 {
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up_`i' = total(_t) if diabetes==`i'
 forvalues j=1/3 {
 qui su total_follow_up_`i' if covid_aki==`j' & diabetes==`i'
@@ -275,6 +279,7 @@ local int_`j'`i'ul_`x' = r(ub)
 }
 *Obtain stratum-specific rates
 forvalues i=1/7 {
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up_`i' = total(_t) if egfr_group==`i'
 forvalues j=1/3 {
 qui su total_follow_up_`i' if covid_aki==`j' & egfr_group==`i'
@@ -323,6 +328,7 @@ local int_`j'`i'ul_`x' = r(ub)
 }
 *Obtain stratum-specific rates
 forvalues i=0/1 {
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up_`i' = total(_t) if aki_baseline==`i'
 forvalues j=1/3 {
 qui su total_follow_up_`i' if covid_aki==`j' & aki_baseline==`i'
@@ -369,6 +375,7 @@ local int_`j'`i'ul = r(ub)
 }
 *Obtain stratum-specific rates
 forvalues i=1/4 {
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up_`i' = total(_t) if wave==`i'
 forvalues j=1/3 {
 qui su total_follow_up_`i' if covid_aki==`j' & wave==`i'
@@ -412,6 +419,7 @@ local int_`j'`i'ul = r(ub)
 }
 *Obtain stratum-specific rates
 forvalues i=1/5 {
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up_`i' = total(_t) if covid_vax==`i'
 forvalues j=1/3 {
 qui su total_follow_up_`i' if covid_aki==`j' & covid_vax==`i'
