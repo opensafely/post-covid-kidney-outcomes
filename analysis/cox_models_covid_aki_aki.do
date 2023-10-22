@@ -412,6 +412,7 @@ local int_`j'`i'ul = r(ub)
 }
 *Obtain stratum-specific rates
 forvalues i=1/5 {
+capture drop total_follow_up_`i'
 bysort covid_aki: egen total_follow_up_`i' = total(_t) if covid_vax==`i'
 forvalues j=1/3 {
 qui su total_follow_up_`i' if covid_aki==`j' & covid_vax==`i'
