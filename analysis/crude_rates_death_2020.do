@@ -7,8 +7,7 @@ log using ./logs/crude_rates_death_2020.log, replace t
 
 cap file close tablecontent
 file open tablecontent using ./output/crude_rates_death_2020.csv, write text replace
-file write tablecontent _tab ("COVID-19 cohort") _tab ("Matched contemporary cohort") _n
-file write tablecontent _tab ("Rate (/100000py) (95% CI)") _tab ("Rate (/100000py) (95% CI)") _n
+file write tablecontent _tab ("COVID-19 cohort (/100000py) (95% CI))") _tab ("Matched contemporary cohort (/100000py) (95% CI))") _n
 
 *Calculate denominator for each cohort (i.e. 100000 person-years)
 /*local cohort "2020 2020 hospitalised"
@@ -515,6 +514,60 @@ local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
 qui safecount if admissions==`group' & case==0 & death==1 & _st==1
+local controls_`group' = round(r(N),5)
+local controls_events = round(r(N),5)
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
+local controls_ef = exp(1.96/(sqrt(`controls_events')))
+local controls_ul = `controls_rate' * `controls_ef'
+local controls_ll = `controls_rate' / `controls_ef'
+file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _n
+drop total_follow_up
+}
+
+*COVID-19 vaccination status
+file write tablecontent ("COVID-19 vaccination") _n
+forvalues group=1/5 {
+local label_`group': label covid_vax `group'
+file write tablecontent ("`label_`group''") _tab
+bysort case covid_vax: egen total_follow_up = total(_t)
+qui su total_follow_up if case==1 & covid_vax==`group'
+local cases_multip = 100000 / r(mean)
+qui su total_follow_up if case==0 & covid_vax==`group'
+local controls_multip = 100000 / r(mean)
+qui safecount if covid_vax==`group' & case==1 & death==1 & _st==1
+local cases_events = round(r(N),5)
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
+local cases_ef = exp(1.96/(sqrt(`cases_events')))
+local cases_ul = `cases_rate' * `cases_ef'
+local cases_ll = `cases_rate' / `cases_ef'
+qui safecount if covid_vax==`group' & case==0 & death==1 & _st==1
+local controls_`group' = round(r(N),5)
+local controls_events = round(r(N),5)
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
+local controls_ef = exp(1.96/(sqrt(`controls_events')))
+local controls_ul = `controls_rate' * `controls_ef'
+local controls_ll = `controls_rate' / `controls_ef'
+file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _n
+drop total_follow_up
+}
+
+*COVID-19 wave
+file write tablecontent ("COVID-19 wave") _n
+forvalues group=1/4 {
+local label_`group': label wave `group'
+file write tablecontent ("`label_`group''") _tab
+bysort case wave: egen total_follow_up = total(_t)
+qui su total_follow_up if case==1 & wave==`group'
+local cases_multip = 100000 / r(mean)
+qui su total_follow_up if case==0 & wave==`group'
+local controls_multip = 100000 / r(mean)
+qui safecount if wave==`group' & case==1 & death==1 & _st==1
+local cases_events = round(r(N),5)
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
+local cases_ef = exp(1.96/(sqrt(`cases_events')))
+local cases_ul = `cases_rate' * `cases_ef'
+local cases_ll = `cases_rate' / `cases_ef'
+qui safecount if wave==`group' & case==0 & death==1 & _st==1
 local controls_`group' = round(r(N),5)
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip')
