@@ -325,7 +325,6 @@ file write tablecontent %9.0f (`cases_`vax'') (" (") %4.1f (`cases_`vax'_pc') ("
 *COVID-19 wave
 file write tablecontent ("COVID-19 wave") _n
 forvalues wave=1/4 {
-use ./output/analysis_2020.dta
 local label_`wave': label wave `wave'
 file write tablecontent ("`label_`wave''") _tab
 qui safecount if wave==`wave' & case==1
