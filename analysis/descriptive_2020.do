@@ -7,7 +7,7 @@ log using ./logs/descriptive_2020.log, replace t
 
 cap file close tablecontent
 file open tablecontent using ./output/descriptive_2020.csv, write text replace
-file write tablecontent _tab ("COVID-19 cohort (n(%))" _tab ("Matched contemporary cohort (n(%))") _n
+file write tablecontent _tab ("COVID-19 cohort (n(%))") _tab ("Matched contemporary cohort (n(%))") _n
 
 *Total
 file write tablecontent ("Total") _tab

@@ -7,7 +7,7 @@ log using ./logs/cox_forest_2020_death.log, replace t
 
 cap file close tablecontent
 file open tablecontent using ./output/cox_forest_2020_death.csv, write text replace
-file write tablecontent _tab ("Rate (/100,000 person years) (95% CI)") _tab ("rate") _tab ("Fully-adjusted HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _n
+file write tablecontent _tab ("Rate (/100000 person years) (95% CI)") _tab ("rate") _tab ("Fully-adjusted HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _n
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_complete_2020.dta, clear
