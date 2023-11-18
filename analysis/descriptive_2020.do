@@ -7,8 +7,7 @@ log using ./logs/descriptive_2020.log, replace t
 
 cap file close tablecontent
 file open tablecontent using ./output/descriptive_2020.csv, write text replace
-file write tablecontent _tab ("COVID-19 cohort") _tab ("Matched historical cohort") _n
-file write tablecontent _tab ("n (%)") _tab ("n (%)") _n
+file write tablecontent _tab ("COVID-19 cohort (n(%))" _tab ("Matched contemporary cohort (n(%))") _n
 
 *Total
 file write tablecontent ("Total") _tab
@@ -144,6 +143,7 @@ qui safecount if bmi==`bmi' & case==0
 local controls_`bmi' = round(r(N),5)
 local controls_`bmi'_pc = (`controls_`bmi''/`controls_2020')*100
 file write tablecontent %9.0f (`cases_`bmi'') (" (") %4.1f (`cases_`bmi'_pc') (")") _tab %9.0f (`controls_`bmi'') (" (") %4.1f (`controls_`bmi'_pc') (")") _n
+}
 file write tablecontent ("Missing") _tab
 qui safecount if bmi==. & case==1
 local cases = round(r(N),5)
@@ -152,7 +152,7 @@ qui safecount if bmi==. & case==0
 local controls = round(r(N),5)
 local controls_pc = (`controls'/`controls_2020')*100
 file write tablecontent %9.0f (`cases') (" (") %4.1f (`cases_pc') (")") _tab %9.0f (`controls') (" (") %4.1f (`controls_pc') (")") _n
-}
+
 
 *Smoking
 file write tablecontent ("Smoking") _n
@@ -167,6 +167,7 @@ local controls_smoking = round(r(N),5)
 local controls_smoking_pc = (`controls_smoking'/`controls_2020')*100
 file write tablecontent %9.0f (`cases_smoking') (" (") %4.1f (`cases_smoking_pc') (")") _tab %9.0f (`controls_smoking') (" (") %4.1f (`controls_smoking_pc') (")") _n
 file write tablecontent ("Missing") _tab
+}
 qui safecount if smoking==. & case==1
 local cases = round(r(N),5)
 local cases_pc = (`cases'/`cases_2020')*100
@@ -174,7 +175,7 @@ qui safecount if smoking==. & case==0
 local controls = round(r(N),5)
 local controls_pc = (`controls'/`controls_2020')*100
 file write tablecontent %9.0f (`cases') (" (") %4.1f (`cases_pc') (")") _tab %9.0f (`controls') (" (") %4.1f (`controls_pc') (")") _n
-}
+
 
 *Baseline eGFR
 file write tablecontent ("Median baseline eGFR (IQR)") _tab
@@ -325,7 +326,6 @@ file write tablecontent %9.0f (`cases_`vax'') (" (") %4.1f (`cases_`vax'_pc') ("
 *COVID-19 wave
 file write tablecontent ("COVID-19 wave") _n
 forvalues wave=1/4 {
-use ./output/analysis_2020.dta
 local label_`wave': label wave `wave'
 file write tablecontent ("`label_`wave''") _tab
 qui safecount if wave==`wave' & case==1

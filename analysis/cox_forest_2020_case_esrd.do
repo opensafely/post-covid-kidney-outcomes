@@ -210,7 +210,7 @@ file write tablecontent _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-")
 *COVID-19 wave
 file write tablecontent ("COVID-19 wave") _n
 forvalues i=1/4 {
-local label_`i': label covid_vax `i'
+local label_`i': label wave `i'
 }
 qui stcox i.case i.wave i.ethnicity i.covid_vax i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.imd, strata(set_id)
 est store a
@@ -223,7 +223,7 @@ local int_1b = r(estimate)
 local int_1ll = r(lb)
 local int_1ul = r(ub)
 forvalues i=2/4 {
-lincom 1.case + 1.case#`i'.covid_vax, eform
+lincom 1.case + 1.case#`i'.wave, eform
 local int_`i'b = r(estimate)
 local int_`i'll = r(lb)
 local int_`i'ul = r(ub)
