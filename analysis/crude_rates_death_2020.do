@@ -219,6 +219,24 @@ local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _n
+file write tablecontent ("`label_rural'") _tab
+qui su total_follow_up if case==1 & urban==0
+local cases_multip = 100000 / r(mean)
+qui su total_follow_up if case==0 & urban==0
+local controls_multip = 100000 / r(mean)
+qui safecount if urban==0 & case==1 & esrd==1 & _st==1
+local cases_events = round(r(N),5)
+local cases_rate : di %3.2f (`cases_events' * `cases_multip')
+local cases_ef = exp(1.96/(sqrt(`cases_events')))
+local cases_ul = `cases_rate' * `cases_ef'
+local cases_ll = `cases_rate' / `cases_ef'
+qui safecount if urban==0 & case==0 & esrd==1 & _st==1
+local controls_events = round(r(N),5)
+local controls_rate : di %3.2f (`controls_events' * `controls_multip')
+local controls_ef = exp(1.96/(sqrt(`controls_events')))
+local controls_ul = `controls_rate' * `controls_ef'
+local controls_ll = `controls_rate' / `controls_ef'
+file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _n
 drop total_follow_up
 
 *BMI

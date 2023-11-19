@@ -166,8 +166,8 @@ qui safecount if smoking==`smoking' & case==0
 local controls_smoking = round(r(N),5)
 local controls_smoking_pc = (`controls_smoking'/`controls_2020')*100
 file write tablecontent %9.0f (`cases_smoking') (" (") %4.1f (`cases_smoking_pc') (")") _tab %9.0f (`controls_smoking') (" (") %4.1f (`controls_smoking_pc') (")") _n
-file write tablecontent ("Missing") _tab
 }
+file write tablecontent ("Missing") _tab
 qui safecount if smoking==. & case==1
 local cases = round(r(N),5)
 local cases_pc = (`cases'/`cases_2020')*100
