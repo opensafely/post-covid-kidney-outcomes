@@ -4,12 +4,12 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_forest_2017_covid_severity_esrd.log, replace t
+log using ./logs/cox_forest_2020_covid_severity_esrd.log, replace t
 cap file close tablecontent
-file open tablecontent using ./output/cox_forest_2017_covid_severity_esrd.csv, write text replace
+file open tablecontent using ./output/cox_forest_2020_covid_severity_esrd.csv, write text replace
 file write tablecontent _tab ("Fully-adjusted HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
 
-use ./output/analysis_complete_2017.dta, clear
+use ./output/analysis_complete_2020.dta, clear
 replace covid_severity=2 if covid_severity==3
 
 *Age group
