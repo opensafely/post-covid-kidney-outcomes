@@ -3,10 +3,10 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/descriptive_2017_covid_severity.log, replace t
+log using ./logs/descriptive_covid_severity_2017.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/descriptive_2017_covid_severity.csv, write text replace
+file open tablecontent using ./output/descriptive_covid_severity_2017.csv, write text replace
 file write tablecontent _tab ("COVID-19 non-hospitalised") _tab ("COVID-19 hospitalised") _tab ("COVID-19 critical care") _tab ("Matched historical cohort") _n
 file write tablecontent _tab ("n (%)") _tab ("n (%)") _tab ("n (%)") _tab ("n (%)") _n
 
