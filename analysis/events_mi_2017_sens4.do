@@ -33,22 +33,6 @@ mi register imputed ethnicity
 
 noisily mi impute mlogit ethnicity esrd i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.agegroup i.sex i.stp, add(10) rseed(70548) augment force // can maybe remove the force option in the server
 
-safetab ethnicity, m
-
-*Remove invalid sets with ongoing missing ethnicity data
-gen ethnicity_recorded = 0
-replace ethnicity_recorded = 1 if case==1 & ethnicity!=.
-replace ethnicity_recorded = 1 if case==0
-bysort set_id: egen set_mean = mean(ethnicity_recorded)
-drop if set_mean < 1
-drop set_mean ethnicity_recorded
-drop if case==0 & ethnicity==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
-
-safetab ethnicity, m
-
 
 mi stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 drop age1 age2 age3
