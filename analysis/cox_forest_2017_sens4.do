@@ -14,7 +14,7 @@ file write tablecontent _tab ("Rate (/100000 person years) (95% CI)") _tab ("rat
 file write tablecontent ("COVID-19 overall") _tab
 use ./output/analysis_2017.dta, clear
 
-*Sensivity analysis 1 - multiple imputation for missing ethnicity
+*Sensivity analysis 4 - multiple imputation for missing ethnicity
 
 *Remove invalid sets with missing smoking/BMI data
 foreach var of varlist bmi smoking {
