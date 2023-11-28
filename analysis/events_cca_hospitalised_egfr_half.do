@@ -12,6 +12,10 @@ file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemi
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_complete_hospitalised.dta, clear
+
+*50% reduction in eGFR outcome
+drop if baseline_egfr==.
+
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
@@ -50,6 +54,9 @@ file write tablecontent ("By COVID-19 wave") _n
 
 use ./output/analysis_complete_hospitalised.dta, clear
 
+*50% reduction in eGFR outcome
+drop if baseline_egfr==.
+
 local wave1: label wave 1
 local wave2: label wave 2
 local wave3: label wave 3
@@ -87,6 +94,9 @@ file write tablecontent _n
 file write tablecontent ("By COVID-19 vaccination status") _n
 
 use ./output/analysis_complete_hospitalised.dta, clear
+
+*50% reduction in eGFR outcome
+drop if baseline_egfr==.
 
 local vax1: label covid_vax 1
 local vax2: label covid_vax 2

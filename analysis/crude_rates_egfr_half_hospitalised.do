@@ -22,6 +22,8 @@ local controls_multip = 100000 / r(mean)
 }*/
 
 use ./output/analysis_hospitalised.dta, clear
+*50% reduction in eGFR outcome
+drop if baseline_egfr==.
 
 *Total
 file write tablecontent ("Total") _tab

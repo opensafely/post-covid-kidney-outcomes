@@ -12,6 +12,9 @@ file write tablecontent _tab ("COVID-19") _tab ("General population (pre-pandemi
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_hospitalised.dta, clear
+*50% reduction in eGFR outcome - need to remove invalid sets
+drop if baseline_egfr==.
+
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 
 qui safecount if case==1 & _d==1 & _st==1
@@ -42,8 +45,6 @@ file write tablecontent (`cases_events') _tab (`controls_events') _n
 file write tablecontent _n
 
 file write tablecontent ("By COVID-19 wave") _n
-
-use ./output/analysis_hospitalised.dta, clear
 
 local wave1: label wave 1
 local wave2: label wave 2
@@ -76,8 +77,6 @@ file write tablecontent ("`lab`x''") _tab (`cases`i'_events`x'') _n
 file write tablecontent _n
 
 file write tablecontent ("By COVID-19 vaccination status") _n
-
-use ./output/analysis_hospitalised.dta, clear
 
 local vax1: label covid_vax 1
 local vax2: label covid_vax 2
