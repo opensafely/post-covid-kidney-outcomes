@@ -3,14 +3,13 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/events_cca_2017_sens1.log, replace t
+log using ./logs/events_mi_2017_sens4.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/events_cca_2017_sens1.csv, write text replace
+file open tablecontent using ./output/events_mi_2017_sens4.csv, write text replace
 file write tablecontent _tab ("COVID-19") _tab ("Matched historical cohort") _n
 file write tablecontent ("COVID-19 overall")
 use ./output/analysis_2017.dta, clear
-
 
 *Remove invalid sets with missing smoking/BMI data
 foreach var of varlist bmi smoking {
