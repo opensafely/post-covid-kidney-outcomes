@@ -7,8 +7,8 @@ log using ./logs/cca_events_covid_severity_esrd.log, replace t
 
 cap file close tablecontent
 file open tablecontent using ./output/cca_events_covid_severity_esrd.csv, write text replace
-file write tablecontent _tab ("Pre-pandemic general population comparison") _tab _tab _tab _tab ("Contemporary general population comparison") _n
-file write tablecontent _tab ("COVID-19 non-hospitalised") _tab ("COVID-19 hospitalised") _tab ("COVID-19 critical care") _tab ("General population cohort") _tab ("COVID-19 non-hospitalised") _tab ("COVID-19 hospitalised") _tab ("COVID-19 critical care") _tab ("General population cohort") _n
+file write tablecontent _tab ("Pre-pandemic general population comparison") _tab _tab _tab ("Contemporary general population comparison") _n
+file write tablecontent _tab ("COVID-19 non-hospitalised") _tab ("COVID-19 hospitalised") _tab ("Matched historical cohort") _tab ("COVID-19 non-hospitalised") _tab ("COVID-19 hospitalised") _tab ("Matched contemporary cohort") _n
 
 local cohort "2017 2020"
 
@@ -16,13 +16,14 @@ local cohort "2017 2020"
 file write tablecontent ("Total")
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-forvalues i=1/3 {
+replace covid_severity=2 if covid_severity==3
+forvalues i=1/2 {
 qui safecount if covid_severity==`i' & esrd==1
 local cases_events_`i' = round(r(N),5)
 }
 qui safecount if covid_severity==0 & esrd==1
 local controls_events = round(r(N),5)
-file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`cases_events_3') _tab (`controls_events')
+file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`controls_events')
 }
 file write tablecontent _n
 
@@ -33,13 +34,14 @@ local label_`age': label agegroup `age'
 file write tablecontent ("`label_`age''")
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-forvalues i=1/3 {
+replace covid_severity=2 if covid_severity==3
+forvalues i=1/2 {
 qui safecount if agegroup==`age' & covid_severity==`i' & esrd==1
 local cases_events_`i' = round(r(N),5)
 }
 qui safecount if agegroup==`age' & covid_severity==0 & esrd==1
 local controls_events = round(r(N),5)
-file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`cases_events_3') _tab (`controls_events')
+file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`controls_events')
 }
 file write tablecontent _n
 }
@@ -51,13 +53,14 @@ local label_`sex': label sex `sex'
 file write tablecontent ("`label_`sex''")
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-forvalues i=1/3 {
+replace covid_severity=2 if covid_severity==3
+forvalues i=1/2 {
 qui safecount if sex==`sex' & covid_severity==`i' & esrd==1
 local cases_events_`i' = round(r(N),5)
 }
 qui safecount if sex==`sex' & covid_severity==0 & esrd==1
 local controls_events = round(r(N),5)
-file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`cases_events_3') _tab (`controls_events')
+file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`controls_events')
 }
 file write tablecontent _n
 }
@@ -69,13 +72,14 @@ local label_`imd': label imd `imd'
 file write tablecontent ("`label_`imd''")
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-forvalues i=1/3 {
+replace covid_severity=2 if covid_severity==3
+forvalues i=1/2 {
 qui safecount if imd==`imd' & covid_severity==`i' & esrd==1
 local cases_events_`i' = round(r(N),5)
 }
 qui safecount if imd==`imd' & covid_severity==0 & esrd==1
 local controls_events = round(r(N),5)
-file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`cases_events_3') _tab (`controls_events')
+file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`controls_events')
 }
 file write tablecontent _n
 }
@@ -87,26 +91,28 @@ local label_`ethnicity': label ethnicity `ethnicity'
 file write tablecontent ("`label_`ethnicity''")
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-forvalues i=1/3 {
+replace covid_severity=2 if covid_severity==3
+forvalues i=1/2 {
 qui safecount if ethnicity==`ethnicity' & covid_severity==`i' & esrd==1
 local cases_events_`i' = round(r(N),5)
 }
 qui safecount if ethnicity==`ethnicity' & covid_severity==0 & esrd==1
 local controls_events = round(r(N),5)
-file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`cases_events_3') _tab (`controls_events')
+file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`controls_events')
 }
 file write tablecontent _n
 }
 file write tablecontent ("Missing")
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-forvalues i=1/3 {
+replace covid_severity=2 if covid_severity==3
+forvalues i=1/2 {
 qui safecount if ethnicity==. & covid_severity==`i' & esrd==1
 local cases_events_`i' = round(r(N),5)
 }
 qui safecount if ethnicity==. & covid_severity==0 & esrd==1
 local controls_events = round(r(N),5)
-file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`cases_events_3') _tab (`controls_events')
+file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`controls_events')
 }
 file write tablecontent _n
 
@@ -117,33 +123,14 @@ local label_`group': label egfr_group `group'
 file write tablecontent ("`label_`group''")
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-forvalues i=1/3 {
+replace covid_severity=2 if covid_severity==3
+forvalues i=1/2 {
 qui safecount if egfr_group==`group' & covid_severity==`i' & esrd==1
 local cases_events_`i' = round(r(N),5)
 }
 qui safecount if egfr_group==`group' & covid_severity==0 & esrd==1
 local controls_events = round(r(N),5)
-file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`cases_events_3') _tab (`controls_events')
-}
-file write tablecontent _n
-}
-
-*Previous AKI
-file write tablecontent ("Previous AKI") _n
-forvalues aki=0/1 {
-label define aki_baseline 0 "No previous AKI" 1 "Previous AKI"
-label values aki_baseline aki_baseline
-local label_`aki': label aki_baseline `aki'
-file write tablecontent ("`label_`aki''")
-foreach x of local cohort {
-use ./output/analysis_complete_`x'.dta, clear
-forvalues i=1/3 {
-qui safecount if aki_baseline==`aki' & covid_severity==`i' & esrd==1
-local cases_events_`i' = round(r(N),5)
-}
-qui safecount if aki_baseline==`aki' & covid_severity==0 & esrd==1
-local controls_events = round(r(N),5)
-file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`cases_events_3') _tab (`controls_events')
+file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`controls_events')
 }
 file write tablecontent _n
 }
@@ -157,45 +144,16 @@ local label_`diabetes': label diabetes `diabetes'
 file write tablecontent ("`label_`diabetes''")
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-forvalues i=1/3 {
+replace covid_severity=2 if covid_severity==3
+forvalues i=1/2 {
 qui safecount if diabetes==`diabetes' & covid_severity==`i' & esrd==1
 local cases_events_`i' = round(r(N),5)
 }
 qui safecount if diabetes==`diabetes' & covid_severity==0 & esrd==1
 local controls_events = round(r(N),5)
-file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`cases_events_3') _tab (`controls_events')
+file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`controls_events')
 }
 file write tablecontent _n
-}
-
-*COVID-19 vaccination status
-file write tablecontent ("COVID-19 vaccination status") _n
-forvalues group=1/5 {
-use ./output/analysis_complete_2020.dta, clear
-local label_`group': label covid_vax `group'
-file write tablecontent ("`label_`group''")
-forvalues i=1/3 {
-qui safecount if covid_vax==`group' & covid_severity==`i' & esrd==1
-local cases_events_`i' = round(r(N),5)
-}
-qui safecount if covid_vax==`group' & covid_severity==0 & esrd==1
-local controls_events = round(r(N),5)
-file write tablecontent _tab _tab _tab _tab _tab (`cases_events_1') _tab (`cases_events_2') _tab (`cases_events_3') _tab (`controls_events') _n
-}
-
-*COVID-19 wave
-file write tablecontent ("COVID-19 wave") _n
-forvalues group=1/4 {
-use ./output/analysis_complete_2020.dta, clear
-local label_`group': label wave `group'
-file write tablecontent ("`label_`group''")
-forvalues i=1/3 {
-qui safecount if wave==`group' & covid_severity==`i' & esrd==1
-local cases_events_`i' = round(r(N),5)
-}
-qui safecount if wave==`group' & covid_severity==0 & esrd==1
-local controls_events = round(r(N),5)
-file write tablecontent _tab _tab _tab _tab _tab (`cases_events_1') _tab (`cases_events_2') _tab (`cases_events_3') _tab (`controls_events') _n
 }
 
 file close tablecontent
