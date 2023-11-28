@@ -12,6 +12,10 @@ file write tablecontent ("COVID-19 overall") _tab
 use ./output/analysis_complete_2020.dta, clear
 
 *Sensivity analysis 3 - outcome = ESRD + eGFR <30
+drop if baseline_egfr <30
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
 gen egfr30_date=.
 local month_year "feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022 jan2023"
 foreach x of local month_year  {

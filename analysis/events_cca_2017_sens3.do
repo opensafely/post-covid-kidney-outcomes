@@ -13,6 +13,10 @@ use ./output/analysis_complete_2017.dta, clear
 
 *Sensivity analysis 3 - outcome = ESRD + eGFR <30
 gen egfr30_date=.
+drop if baseline_egfr <30
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
 local month_year "feb2017 mar2017 apr2017 may2017 jun2017 jul2017 aug2017 sep2017 oct2017 nov2017 dec2017 jan2018 feb2018 mar2018 apr2018 may2018 jun2018 jul2018 aug2018 sep2018 oct2018 nov2018 dec2018 jan2019 feb2019 mar2019 apr2019 may2019 jun2019 jul2019 aug2019 sep2019 feb2020 mar2020 apr2020 may2020 jun2020 jul2020 aug2020 sep2020 oct2020 nov2020 dec2020 jan2021 feb2021 mar2021 apr2021 may2021 jun2021 jul2021 aug2021 sep2021 oct2021 nov2021 dec2021 jan2022 feb2022 mar2022 apr2022 may2022 jun2022 jul2022 aug2022 sep2022 oct2022 nov2022 dec2022 jan2023"
 foreach x of local month_year  {
   replace egfr30_date=date("15`x'", "DMY") if egfr30_date==.& egfr_creatinine_`x'<30 & date("01`x'", "DMY")>index_date

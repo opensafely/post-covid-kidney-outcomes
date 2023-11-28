@@ -23,6 +23,12 @@ local controls_multip = 100000 / r(mean)
 
 use ./output/analysis_2017.dta, clear
 
+*50% reduction in eGFR outcome - need to remove invalid sets
+drop if baseline_egfr==.
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
+
 *Total
 file write tablecontent ("Total") _tab
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)

@@ -11,6 +11,13 @@ file write tablecontent _tab ("Rate (/100000 person years) (95% CI)") _tab ("rat
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_complete_2017.dta, clear
+
+*50% reduction in eGFR outcome - need to remove invalid sets
+drop if baseline_egfr==.
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
+
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 bysort case: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1
@@ -18,6 +25,7 @@ local cases_py = r(mean)
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0
 local controls_multip = 100000 / r(mean)
+drop total_follow_up
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip')
@@ -49,6 +57,7 @@ local cases_py = r(mean)
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up`x' if case==0
 local controls_multip = 100000 / r(mean)
+drop total_follow_up`x'
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip')
@@ -74,8 +83,6 @@ file write tablecontent  %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll
 file write tablecontent _n
 
 file write tablecontent ("By COVID-19 severity") _n
-
-use ./output/analysis_complete_2017.dta, clear
 
 local severity1: label covid_severity 1
 local severity2: label covid_severity 2
@@ -107,6 +114,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
 local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 }
+drop total_follow_up
 
 foreach x of local period {
 stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
@@ -135,6 +143,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
 local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
 }
+drop total_follow_up`x'
 }
 
 forvalues i=1/3 {
@@ -148,8 +157,6 @@ file write tablecontent _n
 
 
 file write tablecontent ("By COVID-19 AKI") _n
-
-use ./output/analysis_complete_2017.dta, clear
 
 local aki1: label covid_aki 1
 local aki2: label covid_aki 2
@@ -181,6 +188,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
 local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 }
+drop total_follow_up
 
 foreach x of local period {
 stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
@@ -209,6 +217,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
 local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
 }
+drop total_follow_up`x'
 }
 
 forvalues i=1/3 {
@@ -222,8 +231,6 @@ file write tablecontent _n
 
 
 file write tablecontent ("By COVID-19 wave") _n
-
-use ./output/analysis_complete_2017.dta, clear
 
 local wave1: label wave 1
 local wave2: label wave 2
@@ -258,6 +265,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
 local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 }
+drop total_follow_up
 
 foreach x of local period {
 stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
@@ -288,6 +296,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
 local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
 }
+drop total_follow_up`x'
 }
 
 forvalues i=1/4 {
@@ -300,8 +309,6 @@ file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`
 file write tablecontent _n
 
 file write tablecontent ("By COVID-19 vaccination status") _n
-
-use ./output/analysis_complete_2017.dta, clear
 
 local vax1: label covid_vax 1
 local vax2: label covid_vax 2
@@ -340,6 +347,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
 local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 }
+drop total_follow_up
 
 foreach x of local period {
 stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
@@ -373,6 +381,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
 local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
 }
+drop total_follow_up`x'
 }
 
 forvalues i=1/5 {

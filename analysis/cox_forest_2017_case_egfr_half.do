@@ -10,6 +10,11 @@ file open tablecontent using ./output/cox_forest_2017_case_egfr_half.csv, write 
 file write tablecontent _tab ("Fully-adjusted HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
 
 use ./output/analysis_complete_2017.dta, clear
+*50% reduction in eGFR outcome - need to remove invalid sets
+drop if baseline_egfr==.
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
 
 *Age group
 file write tablecontent ("Age") _n

@@ -8,10 +8,17 @@ log using ./logs/cox_models_2020_egfr_half.log, replace t
 cap file close tablecontent
 file open tablecontent using ./output/cox_models_2020_egfr_half.csv, write text replace
 file write tablecontent _tab ("Crude rate (/100000py) (95% CI)") _n
-file write tablecontent _tab ("COVID-19") _tab ("General population (contemporary)") _tab ("Minimally-adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
+file write tablecontent _tab ("COVID-19 cohort") _tab ("Matched historical cohort)") _tab ("Minimally-adjusted HR (95% CI)") _tab ("Fully-adjusted HR (95% CI)") _n
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_complete_2020.dta, clear
+
+*50% reduction in eGFR outcome - need to remove invalid sets
+drop if baseline_egfr==.
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
+
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
@@ -33,6 +40,7 @@ local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
+drop total_follow_up
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 
 qui stcox i.case, vce(cluster practice_id) strata(set_id)
@@ -79,6 +87,7 @@ local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
 local controls_ul = `controls_rate' * `controls_ef'
 local controls_ll = `controls_rate' / `controls_ef'
+drop total_follow_up`x'
 file write tablecontent ("`cases_rate'") (" (") %3.2f (`cases_ll')  ("-") %3.2f (`cases_ul') (")")  _tab ("`controls_rate'") (" (") %3.2f (`controls_ll')  ("-") %3.2f (`controls_ul') (")") _tab
 
 qui stcox i.case, vce(cluster practice_id) strata(set_id)
@@ -98,8 +107,6 @@ file write tablecontent  %4.2f (`minimal_overall_b') (" (") %4.2f (`minimal_over
 file write tablecontent _n
 
 file write tablecontent ("By COVID-19 severity") _n
-
-use ./output/analysis_complete_2020.dta, clear
 
 local severity1: label covid_severity 1
 local severity2: label covid_severity 2
@@ -145,6 +152,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
 local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 }
+drop total_follow_up
 
 foreach x of local period {
 stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
@@ -187,6 +195,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
 local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
 }
+drop total_follow_up`x'
 }
 
 forvalues i=1/3 {
@@ -200,8 +209,6 @@ file write tablecontent _n
 
 
 file write tablecontent ("By COVID-19 AKI") _n
-
-use ./output/analysis_complete_2020.dta, clear
 
 local aki1: label covid_aki 1
 local aki2: label covid_aki 2
@@ -247,6 +254,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul = `cases`i'_rate' * `cases`i'_ef'
 local cases`i'_ll = `cases`i'_rate' / `cases`i'_ef'
 }
+drop total_follow_up
 
 foreach x of local period {
 stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
@@ -289,6 +297,7 @@ local cases`i'_ef = exp(1.96/(sqrt(`cases`i'_events')))
 local cases`i'_ul`x' = `cases`i'_rate`x'' * `cases`i'_ef'
 local cases`i'_ll`x' = `cases`i'_rate`x'' / `cases`i'_ef'
 }
+drop total_follow_up`x'
 }
 
 forvalues i=1/3 {
@@ -298,3 +307,4 @@ foreach x of local period {
 file write tablecontent ("`lab`x''") _tab ("`cases`i'_rate`x''") (" (") %3.2f (`cases`i'_ll`x'')  ("-") %3.2f (`cases`i'_ul`x'') (")")  _tab _tab %4.2f (`minimal_aki_`i'b`x'') (" (") %4.2f (`minimal_aki_`i'll`x'') ("-") %4.2f (`minimal_aki_`i'ul`x'') (")") _tab %4.2f (`full_aki_`i'b`x'') (" (") %4.2f (`full_aki_`i'll`x'') ("-") %4.2f (`full_aki_`i'ul`x'') (")") _n
 }
 }
+file write tablecontent _n
