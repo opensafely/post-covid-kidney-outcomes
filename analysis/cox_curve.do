@@ -9,14 +9,10 @@ foreach var of varlist ethnicity imd urban bmi smoking ckd_stage aki_baseline ca
  tabulate `var', generate(`var'_n)
 }
 drop ethnicity_n1 imd_n1 urban_n2 bmi_n2 smoking_n1 ckd_stage_n1 aki_baseline_n1 cardiovascular_n1 diabetes_n1 hypertension_n1 immunosuppressed_n1 non_haem_cancer_n1 gp_consults_n1 admissions_n1
-sts graph, failure by(case) adjustfor(ethnicity imd_n* urban_n* bmi_n* smoking_n* ckd_stage_n* aki_baseline_n* cardiovascular_n* diabetes_n* hypertension_n* immunosuppressed_n* non_haem_cancer_n* gp_consults_n* admissions_n*) tmax(700) ysc(r(0.2)) ylabel(0 0.05 0.1 0.15 0.2) title("Acute kidney injury") ytitle("Cumulative incidence") xtitle("Follow-up time (days)")
+sts graph, failure by(case) adjustfor(ethnicity imd_n* urban_n* bmi_n* smoking_n* ckd_stage_n* aki_baseline_n* cardiovascular_n* diabetes_n* hypertension_n* immunosuppressed_n* non_haem_cancer_n* gp_consults_n* admissions_n*) tmax(700) ysc(r(0.02)) ylabel(0 0.005 0.01 0.015 0.02) title("Acute kidney injury") ytitle("Cumulative incidence") xtitle("Follow-up time (days)")
 graph export ./output/failure_curve.svg, as(svg) replace
-sts graph, failure strata(case) adjustfor(ethnicity imd_n* urban_n* bmi_n* smoking_n* ckd_stage_n* aki_baseline_n* cardiovascular_n* diabetes_n* hypertension_n* immunosuppressed_n* non_haem_cancer_n* gp_consults_n* admissions_n*) tmax(700) ysc(r(0.2)) ylabel(0 0.05 0.1 0.15 0.2) title("Acute kidney injury") ytitle("Cumulative incidence") xtitle("Follow-up time (days)")
+sts graph, failure strata(case) adjustfor(ethnicity imd_n* urban_n* bmi_n* smoking_n* ckd_stage_n* aki_baseline_n* cardiovascular_n* diabetes_n* hypertension_n* immunosuppressed_n* non_haem_cancer_n* gp_consults_n* admissions_n*) tmax(700) ysc(r(0.02)) ylabel(0 0.005 0.01 0.015 0.02) title("Acute kidney injury") ytitle("Cumulative incidence") xtitle("Follow-up time (days)")
 graph export ./output/failure_curve2.svg, as(svg) replace
-*survival curve*
-stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, vce(cluster practice_id) 
-stcurve, survival at1(case=0) at2(case=1) r(0 700) ysc(r(0.8 1)) ylabel(0.8 0.85 0.9 0.95 1) title("Acute kidney injury") xtitle("Follow-up time (days)")
-graph export ./output/survival_curve.png, as(png) replace
 clear
 
 log close
