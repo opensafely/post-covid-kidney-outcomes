@@ -18,14 +18,14 @@ sum age
 gen age_c=age-r(mean)
 
 *case*
-local yrange_aki "0.4"
-local yscale_aki "0 0.1 "10" 0.2 "20" 0.3 "30" 0.4 "40""
-local yrange_death "0.4"
-local yscale_death "0 0.1 "10" 0.2 "20" 0.3 "30" 0.4 "40""
-local yrange_egfr_half "0.06"
-local yscale_egfr_half "0 0.02 "2" 0.04 "4" 0.06 "6""
-local yrange_esrd "0.04"
-local yscale_esrd "0 0.01 "1" 0.02 "2" 0.03 "3" 0.04 "4""
+local yrange_aki "0.1"
+local yscale_aki "0 0.05 "5" 0.1 "10""
+local yrange_death "0.2"
+local yscale_death "0 0.05 "5" 0.1 "10" 0.15 "15" 0.2 "20""
+local yrange_egfr_half "0.02"
+local yscale_egfr_half "0 0.01 "1" 0.02 "2""
+local yrange_esrd "0.01"
+local yscale_esrd "0 0.005 "0.5" 0.01 "1""
 foreach outcome of varlist esrd egfr_half aki death { 
 stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique)
 local label_`outcome': variable label `outcome'
@@ -36,14 +36,14 @@ graph export ./output/failure_curve_case_`outcome'_hosp.svg, as(svg) replace
 
 
 *covid_vax*
-local yrange_aki "0.4"
-local yscale_aki "0 0.1 "10" 0.2 "20" 0.3 "30" 0.4 "40""
-local yrange_death "0.8"
-local yscale_death "0 0.2 "20" 0.4 "40" 0.6 "60" 0.8 "80""
-local yrange_egfr_half "0.06"
-local yscale_egfr_half "0 0.02 "2" 0.04 "4" 0.06 "6""
-local yrange_esrd "0.04"
-local yscale_esrd "0 0.01 "1" 0.02 "2" 0.03 "3" 0.04 "4""
+local yrange_aki "0.1"
+local yscale_aki "0 0.05 "5" 0.1 "10""
+local yrange_death "0.2"
+local yscale_death "0 0.05 "5" 0.1 "10" 0.15 "15" 0.2 "20""
+local yrange_egfr_half "0.02"
+local yscale_egfr_half "0 0.01 "1" 0.02 "2""
+local yrange_esrd "0.01"
+local yscale_esrd "0 0.005 "0.5" 0.01 "1""
 foreach outcome of varlist esrd egfr_half aki death { 
 stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique)
 local label_`outcome': variable label `outcome'
@@ -53,14 +53,14 @@ graph export ./output/failure_curve_covid_vax_`outcome'_hosp.svg, as(svg) replac
 }
 
 *wave*
-local yrange_aki "0.4"
-local yscale_aki "0 0.1 "10" 0.2 "20" 0.3 "30" 0.4 "40""
-local yrange_death "0.4"
-local yscale_death "0 0.1 "10" 0.2 "20" 0.3 "30" 0.4 "40""
-local yrange_egfr_half "0.06"
-local yscale_egfr_half "0 0.02 "2" 0.04 "4" 0.06 "6""
-local yrange_esrd "0.04"
-local yscale_esrd "0 0.01 "1" 0.02 "2" 0.03 "3" 0.04 "4""
+local yrange_aki "0.1"
+local yscale_aki "0 0.05 "5" 0.1 "10""
+local yrange_death "0.2"
+local yscale_death "0 0.05 "5" 0.1 "10" 0.15 "15" 0.2 "20""
+local yrange_egfr_half "0.02"
+local yscale_egfr_half "0 0.01 "1" 0.02 "2""
+local yrange_esrd "0.01"
+local yscale_esrd "0 0.005 "0.5" 0.01 "1""
 foreach outcome of varlist esrd egfr_half aki death { 
 stset exit_date_`outcome', fail(`outcome'_date) origin(index_date_`outcome') id(unique)
 local label_`outcome': variable label `outcome'
