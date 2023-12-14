@@ -134,6 +134,35 @@ file write tablecontent ("`label_`i''") _tab %4.2f (`int_`j'`i'b') (" (") %4.2f 
 }
 }
 
+*Region
+forvalues i=1/9 {
+local label_`i': label region `i'
+}
+*Obtain p-values for interaction
+qui stcox i.covid_severity i.region i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
+est store a
+qui stcox i.covid_severity##i.region i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
+est store b
+qui lrtest b a
+local p = r(p)
+*Obtain stratum specific HRs
+forvalues j=1/2 {
+forvalues i=1/9 {
+lincom `j'.covid_severity + `j'.covid_severity#`i'.region, eform
+local int_`j'`i'b = r(estimate)
+local int_`j'`i'll = r(lb)
+local int_`j'`i'ul = r(ub)
+}
+}
+file write tablecontent ("region") _tab _tab _tab _tab _tab (`p') _n
+forvalues j=1/2 {
+file write tablecontent ("`label`j''") _n
+file write tablecontent ("`label_1'") _tab %4.2f (`int_`j'1b') (" (") %4.2f (`int_`j'1ll') ("-") %4.2f (`int_`j'1ul') (")") _tab %4.2f (`int_`j'1b') _tab %4.2f (`int_`j'1ll') _tab %4.2f (`int_`j'1ul') _n
+forvalues i=2/9 {
+file write tablecontent ("`label_`i''") _tab %4.2f (`int_`j'`i'b') (" (") %4.2f (`int_`j'`i'll') ("-") %4.2f (`int_`j'`i'ul') (")") _tab %4.2f (`int_`j'`i'b') _tab %4.2f (`int_`j'`i'll') _tab %4.2f (`int_`j'`i'ul') _n
+}
+}
+
 *Diabetes
 label define diabetes 0 "No diabetes" 1 "Diabetes"
 label values diabetes diabetes

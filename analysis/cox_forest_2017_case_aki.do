@@ -123,6 +123,35 @@ file write tablecontent ("`label_`i''")
 file write tablecontent _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
 }
 
+*Region
+file write tablecontent ("Region") _n
+forvalues i=1/9 {
+local label_`i': label region `i'
+}
+qui stcox i.case i.region i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
+est store a
+qui stcox i.case##i.region i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
+est store b
+qui lrtest b a
+local p = r(p)
+lincom 1.case, eform
+local int_1b = r(estimate)
+local int_1ll = r(lb)
+local int_1ul = r(ub)
+forvalues i=2/9 {
+lincom 1.case + 1.case#`i'.region, eform
+local int_`i'b = r(estimate)
+local int_`i'll = r(lb)
+local int_`i'ul = r(ub)
+}
+file write tablecontent ("`label_1'")
+file write tablecontent _tab %4.2f (`int_1b') (" (") %4.2f (`int_1ll') ("-") %4.2f (`int_1ul') (")") _tab %4.2f (`int_1b') _tab %4.2f (`int_1ll') _tab %4.2f (`int_1ul') _tab %5.4f (`p') _n
+forvalues i=2/9 {
+file write tablecontent ("`label_`i''")
+file write tablecontent _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
+}
+
+
 *Diabetes
 file write tablecontent ("Diabetes") _n
 label define diabetes 0 "No diabetes" 1 "Diabetes"
