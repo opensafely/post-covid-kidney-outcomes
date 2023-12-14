@@ -28,11 +28,6 @@ local cohort "2017 2020"
 file write tablecontent ("Total") _tab
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
 qui safecount if case==1 & egfr_half==1
 local cases_events = round(r(N),5)
 qui safecount if case==0 & egfr_half==1
@@ -48,11 +43,6 @@ local label_`age': label agegroup `age'
 file write tablecontent ("`label_`age''") _tab
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
 qui safecount if agegroup==`age' & case==1 & egfr_half==1
 local cases_events = round(r(N),5)
 qui safecount if agegroup==`age' & case==0 & egfr_half==1
@@ -69,11 +59,6 @@ local label_`sex': label sex `sex'
 file write tablecontent ("`label_`sex''") _tab
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
 qui safecount if sex==`sex' & case==1 & egfr_half==1
 local cases_events = round(r(N),5)
 qui safecount if sex==`sex' & case==0 & egfr_half==1
@@ -90,11 +75,6 @@ local label_`imd': label imd `imd'
 file write tablecontent ("`label_`imd''") _tab
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
 qui safecount if imd==`imd' & case==1 & egfr_half==1
 local cases_events = round(r(N),5)
 qui safecount if imd==`imd' & case==0 & egfr_half==1
@@ -111,11 +91,6 @@ local label_`ethnicity': label ethnicity `ethnicity'
 file write tablecontent ("`label_`ethnicity''") _tab
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
 qui safecount if ethnicity==`ethnicity' & case==1 & egfr_half==1
 local cases_events = round(r(N),5)
 qui safecount if ethnicity==`ethnicity' & case==0 & egfr_half==1
@@ -127,11 +102,6 @@ file write tablecontent _n
 file write tablecontent ("Missing") _tab
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
 qui safecount if ethnicity==. & case==1 & egfr_half==1
 local cases_events = round(r(N),5)
 qui safecount if ethnicity==. & case==0 & egfr_half==1
@@ -140,6 +110,22 @@ file write tablecontent (`cases_events') _tab (`controls_events') _tab
 }
 file write tablecontent _n
 
+*Region
+file write tablecontent ("Region") _n
+forvalues region=1/9 {
+local label_`region': label region `region'
+file write tablecontent ("`label_`region''") _tab
+foreach x of local cohort {
+use ./output/analysis_complete_`x'.dta, clear
+qui safecount if region==`region' & case==1 & egfr_half==1
+local cases_events = round(r(N),5)
+qui safecount if region==`region' & case==0 & egfr_half==1
+local controls_events = round(r(N),5)
+file write tablecontent (`cases_events') _tab (`controls_events') _tab
+}
+file write tablecontent _n
+}
+
 *Baseline eGFR
 file write tablecontent ("Baseline eGFR range") _n
 forvalues group=1/7 {
@@ -147,11 +133,6 @@ local label_`group': label egfr_group `group'
 file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
 qui safecount if egfr_group==`group' & case==1 & egfr_half==1
 local cases_events = round(r(N),5)
 qui safecount if egfr_group==`group' & case==0 & egfr_half==1
@@ -170,11 +151,6 @@ local label_`aki': label aki_baseline `aki'
 file write tablecontent ("`label_`aki''") _tab
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
 qui safecount if aki_baseline==`aki' & case==1 & egfr_half==1
 local cases_events = round(r(N),5)
 qui safecount if aki_baseline==`aki' & case==0 & egfr_half==1
@@ -193,11 +169,6 @@ local label_`diabetes': label diabetes `diabetes'
 file write tablecontent ("`label_`diabetes''") _tab
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
 qui safecount if diabetes==`diabetes' & case==1 & egfr_half==1
 local cases_events = round(r(N),5)
 qui safecount if diabetes==`diabetes' & case==0 & egfr_half==1
@@ -214,11 +185,6 @@ local label_`group': label covid_vax `group'
 file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
 qui safecount if covid_vax==`group' & case==1 & egfr_half==1
 local cases_events = round(r(N),5)
 qui safecount if covid_vax==`group' & case==0 & egfr_half==1
@@ -235,11 +201,6 @@ local label_`group': label wave `group'
 file write tablecontent ("`label_`group''") _tab
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
 qui safecount if wave==`group' & case==1 & egfr_half==1
 local cases_events = round(r(N),5)
 qui safecount if wave==`group' & case==0 & egfr_half==1

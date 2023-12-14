@@ -116,6 +116,39 @@ file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`c
 }
 file write tablecontent _n
 
+*Region
+file write tablecontent ("Region") _n
+forvalues region=1/9 {
+local label_`region': label region `region'
+file write tablecontent ("`label_`region''")
+foreach x of local cohort {
+use ./output/analysis_complete_`x'.dta, clear
+replace covid_severity=2 if covid_severity==3
+forvalues i=1/2 {
+qui safecount if region==`region' & covid_severity==`i' & esrd==1
+local cases_events_`i' = round(r(N),5)
+}
+qui safecount if region==`region' & covid_severity==0 & esrd==1
+local controls_events = round(r(N),5)
+file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`controls_events')
+}
+file write tablecontent _n
+}
+file write tablecontent ("Missing")
+foreach x of local cohort {
+use ./output/analysis_complete_`x'.dta, clear
+replace covid_severity=2 if covid_severity==3
+forvalues i=1/2 {
+qui safecount if region==. & covid_severity==`i' & esrd==1
+local cases_events_`i' = round(r(N),5)
+}
+qui safecount if region==. & covid_severity==0 & esrd==1
+local controls_events = round(r(N),5)
+file write tablecontent _tab (`cases_events_1') _tab (`cases_events_2') _tab (`controls_events')
+}
+file write tablecontent _n
+
+
 *Baseline eGFR
 file write tablecontent ("Baseline eGFR range") _n
 forvalues group=1/7 {

@@ -110,6 +110,22 @@ file write tablecontent (`cases_events') _tab (`controls_events') _tab
 }
 file write tablecontent _n
 
+*Region
+file write tablecontent ("Region") _n
+forvalues region=1/9 {
+local label_`region': label region `region'
+file write tablecontent ("`label_`region''") _tab
+foreach x of local cohort {
+use ./output/analysis_complete_`x'.dta, clear
+qui safecount if region==`region' & case==1 & death==1
+local cases_events = round(r(N),5)
+qui safecount if region==`region' & case==0 & death==1
+local controls_events = round(r(N),5)
+file write tablecontent (`cases_events') _tab (`controls_events') _tab
+}
+file write tablecontent _n
+}
+
 *Baseline eGFR
 file write tablecontent ("Baseline eGFR range") _n
 forvalues group=1/7 {
