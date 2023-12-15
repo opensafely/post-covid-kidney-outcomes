@@ -10,6 +10,7 @@ file open tablecontent using ./output/cox_forest_2017_ethnicity_esrd.csv, write 
 file write tablecontent _tab ("Fully-adjusted HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
 
 use ./output/analysis_complete_2017.dta, clear
+stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
 *Ethnicity
 file write tablecontent ("Ethnicity") _n
