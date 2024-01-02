@@ -23,9 +23,10 @@ qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
 file write tablecontent (`cases_events') _tab (`controls_events') _n
 
-local period "29 89 179 max"
+local period "1 29 89 179 max"
 
-local lab29 "0-29 days"
+local lab1 "0 days"
+local lab29 "1-29 days"
 local lab89 "30-89 days"
 local lab179 "90-179 days"
 local labmax "180+ days"
@@ -46,7 +47,46 @@ file write tablecontent (`cases_events') _tab (`controls_events') _n
 
 file write tablecontent _n
 
-file write tablecontent ("By COVID-19 severity") _n
+file write tablecontent ("By COVID-19 hospitalisation") _n
+
+use ./output/analysis_complete_2020.dta, clear
+
+replace covid_severity = 2 if covid_severity==3
+
+local severity1 "COVID-19 non-hospitalised"
+local severity2 "COVID-19 hospitalised"
+
+stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+
+bysort covid_severity: egen total_follow_up = total(_t)
+forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _d==1 & _st==1
+local cases`i'_events = round(r(N),5)
+}
+
+foreach x of local period {
+stset exit_date`x'_esrd, fail(esrd_date`x') origin(index_date`x'_esrd) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+
+forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _d==1 & _st==1
+local cases`i'_events`x' = round(r(N),5)
+}
+}
+
+forvalues i=1/2 {
+file write tablecontent ("`severity`i''") _n
+file write tablecontent ("Overall") _tab (`cases`i'_events') _n
+foreach x of local period {
+file write tablecontent ("`lab`x''") _tab (`cases`i'_events`x'') _n
+}
+}
+file write tablecontent _n
+
+file write tablecontent ("By COVID-19 ICU") _n
 
 use ./output/analysis_complete_2020.dta, clear
 

@@ -46,7 +46,37 @@ file write tablecontent (`cases_events') _tab (`controls_events') _n
 
 file write tablecontent _n
 
-file write tablecontent ("By COVID-19 severity") _n
+file write tablecontent ("By COVID-19 hospitalisation") _n
+
+use ./output/analysis_complete_2017.dta, clear
+
+replace covid_severity = 2 if covid_severity==3
+
+local severity1 "COVID-19 non-hospitalised"
+local severity2 "COVID-19 hospitalised"
+
+stset exit_date_aki, fail(aki_date) origin(index_date_aki) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+
+bysort covid_severity: egen total_follow_up = total(_t)
+forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _d==1 & _st==1
+local cases`i'_events = round(r(N),5)
+}
+
+foreach x of local period {
+stset exit_date`x'_aki, fail(aki_date`x') origin(index_date`x'_aki) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+
+forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _d==1 & _st==1
+local cases`i'_events`x' = round(r(N),5)
+}
+}
+
+file write tablecontent ("By COVID-19 ICU") _n
 
 use ./output/analysis_complete_2017.dta, clear
 

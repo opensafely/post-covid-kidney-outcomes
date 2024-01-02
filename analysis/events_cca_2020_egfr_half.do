@@ -7,17 +7,11 @@ log using ./logs/events_cca_2020_egfr_half.log, replace t
 
 cap file close tablecontent
 file open tablecontent using ./output/events_cca_2020_egfr_half.csv, write text replace
-file write tablecontent _tab ("COVID-19 cohort") _tab ("Matched contemporary cohort") _n
+file write tablecontent _tab ("Events") _n
+file write tablecontent _tab ("COVID-19") _tab ("General population (contemporary)") _n
 file write tablecontent ("COVID-19 overall") _n
 file write tablecontent ("Overall") _tab
 use ./output/analysis_complete_2020.dta, clear
-
-*50% reduction in eGFR outcome - need to remove invalid sets
-drop if baseline_egfr==.
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
-
 stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
@@ -52,7 +46,48 @@ file write tablecontent (`cases_events') _tab (`controls_events') _n
 
 file write tablecontent _n
 
-file write tablecontent ("By COVID-19 severity") _n
+file write tablecontent ("By COVID-19 hospitalisation") _n
+
+use ./output/analysis_complete_2020.dta, clear
+
+replace covid_severity = 2 if covid_severity==3
+
+local severity1 "COVID-19 non-hospitalised"
+local severity2 "COVID-19 hospitalised"
+
+stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+
+bysort covid_severity: egen total_follow_up = total(_t)
+forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _d==1 & _st==1
+local cases`i'_events = round(r(N),5)
+}
+
+foreach x of local period {
+stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
+
+forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _d==1 & _st==1
+local cases`i'_events`x' = round(r(N),5)
+}
+}
+
+forvalues i=1/2 {
+file write tablecontent ("`severity`i''") _n
+file write tablecontent ("Overall") _tab (`cases`i'_events') _n
+foreach x of local period {
+file write tablecontent ("`lab`x''") _tab (`cases`i'_events`x'') _n
+}
+}
+file write tablecontent _n
+
+file write tablecontent ("By COVID-19 ICU") _n
+
+use ./output/analysis_complete_2020.dta, clear
 
 local severity1: label covid_severity 1
 local severity2: label covid_severity 2
@@ -62,11 +97,11 @@ stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
 
+bysort covid_severity: egen total_follow_up = total(_t)
 forvalues i=1/3 {
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 }
-
 
 foreach x of local period {
 stset exit_date`x'_egfr_half, fail(egfr_half_date`x') origin(index_date`x'_egfr_half) id(unique) scale(365.25)
@@ -90,6 +125,8 @@ file write tablecontent _n
 
 
 file write tablecontent ("By COVID-19 AKI") _n
+
+use ./output/analysis_complete_2020.dta, clear
 
 local aki1: label covid_aki 1
 local aki2: label covid_aki 2
