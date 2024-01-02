@@ -183,7 +183,6 @@ file write tablecontent ("Baseline eGFR") _n
 forvalues i=1/7 {
 local label_`i': label egfr_group `i'
 }
-file write tablecontent ("`label_1'")
 qui stcox i.case i.egfr_group i.ethnicity i.imd i.urban i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store a
 qui stcox i.case##i.egfr_group i.imd i.ethnicity i.urban i.bmi i.smoking i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
