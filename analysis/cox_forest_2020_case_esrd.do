@@ -4,9 +4,9 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_forest_2020_ethnicity_esrd.log, replace t
+log using ./logs/cox_forest_2020_case_esrd.log, replace t
 cap file close tablecontent
-file open tablecontent using ./output/cox_forest_2020_ethnicity_esrd.csv, write text replace
+file open tablecontent using ./output/cox_forest_2020_case_esrd.csv, write text replace
 file write tablecontent _tab ("Fully-adjusted HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
 
 use ./output/analysis_complete_2020.dta, clear
