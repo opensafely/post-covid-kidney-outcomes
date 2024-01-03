@@ -39,6 +39,7 @@ stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) scal
 bysort case: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1
 local cases_multip = 100000 / r(mean)
+drop total_follow_up
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip')
@@ -61,11 +62,11 @@ local ard_ul: di %3.2f `cases_rate' - ((1/`full_overall_ul') * `cases_rate')
 **By COVID severity
 
 *Rates
-drop total_follow_up
 bysort covid_severity: egen total_follow_up = total(_t)
 forvalues i=1/2 {
 qui su total_follow_up if covid_severity==`i'
 local cases`i'_multip = 100000 / r(mean)
+drop total_follow_up
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate : di %3.2f (`cases`i'_events' * `cases`i'_multip')
@@ -98,10 +99,10 @@ stset exit_date`x'_`out', fail(`out'_date`x') origin(index_date`x'_`out') id(uni
 **COVID overall
 
 *Rate
-drop total_follow_up`x'
 bysort case: egen total_follow_up`x' = total(_t)
 qui su total_follow_up`x' if case==1
 local cases_multip = 100000 / r(mean)
+drop total_follow_up`x'
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate`x' : di %3.2f (`cases_events' * `cases_multip')
@@ -124,11 +125,11 @@ local ard_ul`x': di %3.2f `cases_rate`x'' - ((1/`full_overall_ul`x'') * `cases_r
 **BY COVID severity
 
 *Rate
-drop total_follow_up`x'
 bysort covid_severity: egen total_follow_up`x' = total(_t)
 forvalues i=1/2 {
 qui su total_follow_up`x' if covid_severity==`i'
 local cases`i'_multip = 100000 / r(mean)
+drop total_follow_up`x'
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 local cases`i'_rate`x' : di %3.2f (`cases`i'_events' * `cases`i'_multip')
