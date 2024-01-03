@@ -732,8 +732,8 @@ recode esrd_time_cat	min/-1=1	///
 						91/180=5	///
 						181/365=6	///
 						366/730=7	///
-						731/973=8	///
-						974/max=9
+						731/1096=8	///
+						1097/max=9
 label define esrd_time_cat	1 "<0 days"			///
 							2 "0 days"			///
 							3 "1 to 28 days"	///
@@ -741,8 +741,8 @@ label define esrd_time_cat	1 "<0 days"			///
 							5 "91 to 180 days"	///
 							6 "181 to 365 days"	///
 							7 "366 to 730 days"	///
-							8 "731 to 973 days"	///
-							9 ">973 days"
+							8 "731 to 1096 days"	///
+							9 ">1096 days"
 label values esrd_time_cat esrd_time_cat
 foreach exposure of varlist 	case			///
 								covid_severity	///
