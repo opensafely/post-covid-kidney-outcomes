@@ -36,7 +36,6 @@ stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) scal
 **COVID overall
 
 *Rates
-drop total_follow_up
 bysort case: egen total_follow_up = total(_t)
 qui su total_follow_up if case==1
 local cases_multip = 100000 / r(mean)
