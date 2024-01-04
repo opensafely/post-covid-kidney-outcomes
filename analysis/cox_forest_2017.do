@@ -62,8 +62,8 @@ local ard_ul: di %3.2f `cases_rate' - ((1/`full_overall_ul') * `cases_rate')
 **By COVID severity
 
 *Rates
-bysort covid_severity: egen total_follow_up = total(_t)
 forvalues i=1/2 {
+bysort covid_severity: egen total_follow_up = total(_t)
 qui su total_follow_up if covid_severity==`i'
 local cases`i'_multip = 100000 / r(mean)
 drop total_follow_up
@@ -125,8 +125,8 @@ local ard_ul`x': di %3.2f `cases_rate`x'' - ((1/`full_overall_ul`x'') * `cases_r
 **BY COVID severity
 
 *Rate
-bysort covid_severity: egen total_follow_up`x' = total(_t)
 forvalues i=1/2 {
+bysort covid_severity: egen total_follow_up`x' = total(_t)
 qui su total_follow_up`x' if covid_severity==`i'
 local cases`i'_multip = 100000 / r(mean)
 drop total_follow_up`x'
