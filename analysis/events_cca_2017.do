@@ -57,7 +57,7 @@ file write tablecontent ("``out'_lab'") _tab ("`severity`i''") _tab ("Overall") 
 foreach x of local period {
 stset exit_date`x'_`out', fail(`out'_date`x') origin(index_date`x'_`out') id(unique) scale(365.25)
 qui safecount if covid_severity==`i' & _d==1 & _st==1
-local cases_events`x' = round(r(N),5)
+local cases_events = round(r(N),5)
 file write tablecontent ("``out'_lab'") _tab ("`severity`i''") _tab ("`lab`x''") _tab (`cases_events') _tab ("N/A") _n
 }
 }
