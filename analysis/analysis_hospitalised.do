@@ -747,8 +747,8 @@ recode esrd_time_cat	min/-1=1	///
 						91/180=5	///
 						181/365=6	///
 						366/730=7	///
-						731/973=8	///
-						974/max=9
+						731/1096=8	///
+						1097/max=9
 label define esrd_time_cat	1 "<0 days"			///
 							2 "0 days"			///
 							3 "1 to 28 days"	///
@@ -756,8 +756,8 @@ label define esrd_time_cat	1 "<0 days"			///
 							5 "91 to 180 days"	///
 							6 "181 to 365 days"	///
 							7 "366 to 730 days"	///
-							8 "731 to 973 days"	///
-							9 ">973 days"
+							8 "731 to 1096 days"	///
+							9 ">1096 days"
 label values esrd_time_cat esrd_time_cat
 foreach exposure of varlist 	case			///
 								critical_care	///
@@ -782,20 +782,20 @@ recode follow_up_cat_esrd	min/-29=1 	///
 						0=3			///
 						1/365=4 	///
 						366/730=5	///
-						731/1040=6	///					
-						1041/max=7
+						731/1096=6	///					
+						1097/max=7
 label define follow_up_cat_esrd 	1 "<-29 days" 	///
 							2 "-28 to -1 days" 		///
 							3 "0 days"				///
 							4 "1 to 365 days"		///
 							5 "366 to 730 days" 	///
-							6 "731 to 1040 days"	///
-							7 ">1040 days"
+							6 "731 to 1096 days"	///
+							7 ">1096 days"
 label values follow_up_cat_esrd follow_up_cat_esrd
 label var follow_up_cat_esrd "Follow_up time"
 tab case follow_up_cat_esrd
 drop if follow_up_time_esrd<1
-drop if follow_up_time_esrd>1040
+drop if follow_up_time_esrd>1096
 tab case follow_up_cat_esrd
 * Time zero variable to account for differences in length of follow-up
 gen time_zero_esrd = date("2000-01-01", "YMD")
