@@ -28,7 +28,7 @@ qui stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) sca
 
 qui safecount if covsev==0 & _d==1 & _st==1
 local events = round(r(N),5)
-file write tablecontent ("Matched population (pre-pandemic)") _tab (`events') _n
+file write tablecontent ("Matched population (contemporary)") _tab (`events') _n
 
 forvalues i=1/3 {
 qui safecount if covsev==`i' & _d==1 & _st==1
