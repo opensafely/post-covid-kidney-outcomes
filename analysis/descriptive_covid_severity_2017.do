@@ -187,14 +187,14 @@ file write tablecontent %9.0f (`controls_`bmi'') (" (") %4.1f (`controls_`bmi'_p
 file write tablecontent ("Missing") _tab
 forvalues i=1/2 {
 qui safecount if bmi==. & covid_severity==`i'
-local cases = round(r(N),5)
-local cases_pc = (`cases'/`cases`i'')*100
-file write tablecontent %9.0f (`cases') (" (") %4.1f (`cases_pc') (")") _tab
+local cases_bmi = round(r(N),5)
+local cases_bmi_pc = (`cases_bmi'/`cases`i'')*100
+file write tablecontent %9.0f (`cases_bmi') (" (") %4.1f (`cases_bmi_pc') (")") _tab
 }
 qui safecount if bmi==. & covid_severity==0
-local controls = round(r(N),5)
-local controls_pc = (`controls'/`controls')*100
-file write tablecontent %9.0f (`controls') (" (") %4.1f (`controls_pc') (")") _n
+local controls_bmi = round(r(N),5)
+local controls_bmi_pc = (`controls_bmi'/`controls')*100
+file write tablecontent %9.0f (`controls_bmi') (" (") %4.1f (`controls_bmi_pc') (")") _n
 
 *Smoking
 file write tablecontent ("Smoking") _n
@@ -215,14 +215,14 @@ file write tablecontent %9.0f (`controls_smoking') (" (") %4.1f (`controls_smoki
 file write tablecontent ("Missing") _tab
 forvalues i=1/2 {
 qui safecount if smoking==. & covid_severity==`i'
-local cases = round(r(N),5)
-local cases_pc = (`cases'/`cases`i'')*100
-file write tablecontent %9.0f (`cases') (" (") %4.1f (`cases_pc') (")") _tab
+local cases_smoking = round(r(N),5)
+local cases_smoking_pc = (`cases_smoking'/`cases`i'')*100
+file write tablecontent %9.0f (`cases_smoking') (" (") %4.1f (`cases_smoking_pc') (")") _tab
 }
 qui safecount if smoking==. & covid_severity==0
-local controls = round(r(N),5)
-local controls_pc = (`controls'/`controls')*100
-file write tablecontent %9.0f (`controls') (" (") %4.1f (`controls_pc') (")") _n
+local controls_smoking = round(r(N),5)
+local controls_smoking_pc = (`controls_smoking'/`controls')*100
+file write tablecontent %9.0f (`controls_smoking') (" (") %4.1f (`controls_smoking_pc') (")") _n
 
 *Baseline eGFR
 file write tablecontent ("Median baseline eGFR (IQR)") _tab
