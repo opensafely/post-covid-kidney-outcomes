@@ -9,18 +9,6 @@ cap file close tablecontent
 file open tablecontent using ./output/crude_rates_esrd_2017.csv, write text replace
 file write tablecontent _tab ("COVID-19 cohort (/100000py) (95% CI))") _tab ("Matched historical cohort (/100000py) (95% CI))") _n
 
-*Calculate denominator for each cohort (i.e. 100000 person-years)
-/*local cohort "2017 2020 hospitalised"
-foreach x of local cohort {
-use ./output/analysis_`x'.dta, clear, clear
-stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
-qui su total_follow_up if case==1
-local cases_multip = 100000 / r(mean)
-qui su total_follow_up if case==0
-local controls_multip = 100000 / r(mean)
-}*/
-
 use ./output/analysis_2017.dta, clear
 
 *Total

@@ -9,18 +9,6 @@ cap file close tablecontent
 file open tablecontent using ./output/crude_rates_death_2020.csv, write text replace
 file write tablecontent _tab ("COVID-19 cohort (/100000py) (95% CI))") _tab ("Matched contemporary cohort (/100000py) (95% CI))") _n
 
-*Calculate denominator for each cohort (i.e. 100000 person-years)
-/*local cohort "2020 2020 hospitalised"
-foreach x of local cohort {
-use ./output/analysis_`x'.dta, clear, clear
-stset exit_date_death, fail(death_date) origin(index_date_death) id(unique) scale(365.25)
-bysort case: egen total_follow_up = total(_t)
-qui su total_follow_up if case==1
-local cases_multip = 100000 / r(mean)
-qui su total_follow_up if case==0
-local controls_multip = 100000 / r(mean)
-}*/
-
 use ./output/analysis_2020.dta, clear
 
 *Total
@@ -224,13 +212,13 @@ qui su total_follow_up if case==1 & urban==0
 local cases_multip = 100000 / r(mean)
 qui su total_follow_up if case==0 & urban==0
 local controls_multip = 100000 / r(mean)
-qui safecount if urban==0 & case==1 & esrd==1 & _st==1
+qui safecount if urban==0 & case==1 & death==1 & _st==1
 local cases_events = round(r(N),5)
 local cases_rate : di %3.2f (`cases_events' * `cases_multip')
 local cases_ef = exp(1.96/(sqrt(`cases_events')))
 local cases_ul = `cases_rate' * `cases_ef'
 local cases_ll = `cases_rate' / `cases_ef'
-qui safecount if urban==0 & case==0 & esrd==1 & _st==1
+qui safecount if urban==0 & case==0 & death==1 & _st==1
 local controls_events = round(r(N),5)
 local controls_rate : di %3.2f (`controls_events' * `controls_multip')
 local controls_ef = exp(1.96/(sqrt(`controls_events')))
