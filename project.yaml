@@ -1732,3 +1732,25 @@ actions:
       moderately_sensitive:
         log: logs/cox_forest_2020_ethnicity_esrd_wave.log
         output: output/cox_forest_2020_ethnicity_esrd_wave.csv
+
+  extract_stroke:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_stroke
+    outputs:
+      highly_sensitive:
+        cohort: output/input_stroke.csv
+
+  cox_forest_2017_ethnicity_stroke:
+    run: stata-mp:latest analysis/cox_forest_2017_ethnicity_stroke.do
+    needs: [extract_stroke, analysis_complete]
+    outputs:
+      moderately_sensitive:
+        log: logs/cox_forest_2017_ethnicity_stroke.log
+        output: output/cox_forest_2017_ethnicity_stroke.csv
+
+  cox_forest_2020_ethnicity_stroke:
+    run: stata-mp:latest analysis/cox_forest_2020_ethnicity_stroke.do
+    needs: [extract_stroke, analysis_complete]
+    outputs:
+      moderately_sensitive:
+        log: logs/cox_forest_2020_ethnicity_stroke.log
+        output: output/cox_forest_2020_ethnicity_stroke.csv

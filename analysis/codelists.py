@@ -250,3 +250,8 @@ immunosuppression_codes = codelist_from_csv(
     system="snomed",
     column="id",
 )
+incident_stroke_codes = codelist_from_csv(
+    "codelists/opensafely-stroke-secondary-care.csv",
+    system="icd10",
+    column="icd",
+)
