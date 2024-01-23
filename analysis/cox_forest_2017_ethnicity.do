@@ -4,14 +4,26 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_forest_2017_ethnicity_esrd.log, replace t
+log using ./logs/cox_forest_2017_ethnicity.log, replace t
 cap file close tablecontent
-file open tablecontent using ./output/cox_forest_2017_ethnicity_esrd.csv, write text replace
+file open tablecontent using ./output/cox_forest_2017_ethnicity.csv, write text replace
 file write tablecontent _tab ("HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
+
+
+local outcomes "esrd egfr_half aki death"
+
+local esrd_lab "Kidney failure"
+local egfr_half_lab "50% reduction in eGFR"
+local aki_lab "AKI"
+local death_lab "Death"
 
 use ./output/analysis_complete_2017.dta, clear
 
-qui stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+foreach out of local outcomes {
+
+qui stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) scale(365.25)
+
+file write tablecontent ("``out'_lab'") _n
 
 file write tablecontent ("Minimally-adjusted") _n
 forvalues i=1/5 {
@@ -68,6 +80,6 @@ forvalues i=2/5 {
 file write tablecontent ("`label_`i''")
 file write tablecontent _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
 }
-
+}
 
 file close tablecontent
