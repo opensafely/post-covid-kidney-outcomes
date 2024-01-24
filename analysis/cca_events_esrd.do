@@ -210,4 +210,64 @@ file write tablecontent (`cases_events') _tab (`controls_events') _tab
 file write tablecontent _n
 }
 
+
+*Cases up to March 2022)
+
+file write tablecontent ("Excluding COVID-19 from April 2022 onwards") _n
+file write tablecontent ("Total") _tab
+foreach x of local cohort {
+use ./output/analysis_complete_`x'.dta, clear
+drop if index_date_esrd > 22735
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
+qui safecount if case==1
+local cases = round(r(N),5)
+qui safecount if case==0
+local controls = round(r(N),5)
+file write tablecontent (`cases') _tab (`controls') _tab
+}
+file write tablecontent _n
+
+*COVID-19 vaccination status
+file write tablecontent ("COVID-19 vaccination status") _n
+forvalues group=1/5 {
+local label_`group': label covid_vax `group'
+file write tablecontent ("`label_`group''") _tab
+foreach x of local cohort {
+use ./output/analysis_complete_`x'.dta, clear
+drop if index_date_esrd > 22735
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
+qui safecount if covid_vax==`group' & case==1 & esrd==1
+local cases_events = round(r(N),5)
+qui safecount if covid_vax==`group' & case==0 & esrd==1
+local controls_events = round(r(N),5)
+file write tablecontent (`cases_events') _tab (`controls_events') _tab
+}
+file write tablecontent _n
+}
+
+*COVID-19 wave
+file write tablecontent ("COVID-19 wave") _n
+forvalues group=1/4 {
+local label_`group': label wave `group'
+file write tablecontent ("`label_`group''") _tab
+foreach x of local cohort {
+use ./output/analysis_complete_`x'.dta, clear
+drop if index_date_esrd > 22735
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
+qui safecount if wave==`group' & case==1 & esrd==1
+local cases_events = round(r(N),5)
+qui safecount if wave==`group' & case==0 & esrd==1
+local controls_events = round(r(N),5)
+file write tablecontent (`cases_events') _tab (`controls_events') _tab
+}
+file write tablecontent _n
+}
+
+
 file close tablecontent
