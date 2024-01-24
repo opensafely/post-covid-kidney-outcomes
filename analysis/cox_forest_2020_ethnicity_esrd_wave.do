@@ -20,10 +20,10 @@ local label_`i': label ethnicity `i'
 forvalues j=1/4 {
 local wave_`j': label wave `j'
 }
-qui stcox i.case##i.ethnicity##i.wave, strata(set_id)
+stcox i.case##i.ethnicity##i.wave, strata(set_id)
 forvalues j=1/4 {
 forvalues i=1/5 {
-lincom 1.case#`j'.wave + 1.case#`i'.ethnicity#`j'.wave, eform
+lincom 1.case + 1.case#`i'.ethnicity#`j'.wave, eform
 local int_`i'`j'b = r(estimate)
 local int_`i'`j'll = r(lb)
 local int_`i'`j'ul = r(ub)
@@ -38,16 +38,10 @@ file write tablecontent ("`label_`i''") _tab ("`wave_`j''") _tab %4.2f (`int_`i'
 
 file write tablecontent ("Fully-adjusted") _n
 
-forvalues i=1/5 {
-local label_`i': label ethnicity `i'
-}
-forvalues j=1/4 {
-local wave_`j': label wave `j'
-}
-qui stcox i.case##i.ethnicity##i.wave i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, strata(set_id)
+stcox i.case##i.ethnicity##i.wave i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, strata(set_id)
 forvalues j=1/4 {
 forvalues i=1/5 {
-lincom 1.case#`j'.wave + 1.case#`i'.ethnicity#`j'.wave, eform
+lincom 1.case + 1.case#`i'.ethnicity#`j'.wave, eform
 local int_`i'`j'b = r(estimate)
 local int_`i'`j'll = r(lb)
 local int_`i'`j'ul = r(ub)
