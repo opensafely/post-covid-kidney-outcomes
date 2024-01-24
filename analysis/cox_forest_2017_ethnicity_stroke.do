@@ -13,7 +13,7 @@ capture noisily import delimited ./output/input_stroke.csv, clear
 keep incident_stroke incident_stroke_date patient_id
 rename incident_stroke stroke
 
-merge 1:1 patient_id using ./output/analysis_complete_2017
+merge 1:m patient_id using ./output/analysis_complete_2017
 
 drop if _merge==1
 drop _merge
