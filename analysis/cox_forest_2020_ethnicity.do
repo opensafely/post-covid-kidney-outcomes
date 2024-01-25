@@ -10,14 +10,22 @@ file open tablecontent using ./output/cox_forest_2020_ethnicity.csv, write text 
 file write tablecontent _tab ("HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
 
 
-local outcomes "esrd egfr_half aki death"
+local outcomes "esrd krt egfr_half aki death"
 
 local esrd_lab "Kidney failure"
+local krt_lab "Kidney replacement therapy"
 local egfr_half_lab "50% reduction in eGFR"
 local aki_lab "AKI"
 local death_lab "Death"
 
 use ./output/analysis_complete_2020.dta, clear
+
+*eGFR = RRT only
+gen index_date_krt = index_date
+gen exit_date_krt = krt_date
+format exit_date_krt %td
+replace exit_date_krt = min(deregistered_date, death_date, end_date) if krt_date==.
+
 
 foreach out of local outcomes {
 
