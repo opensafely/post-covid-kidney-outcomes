@@ -25,9 +25,11 @@ gen exit_date_krt = krt_date
 format exit_date_krt %td
 replace exit_date_krt = min(deregistered_date, death_date, end_date) if krt_date==.
 
-qui safecount if case==1 & krt==1
+stset exit_date_krt, fail(krt_date) origin(index_date_krt) id(unique) scale(365.25)
+
+qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
-qui safecount if case==0 & krt==1
+qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
 file write tablecontent (`cases_events') _tab (`controls_events') _tab
 }
@@ -48,10 +50,11 @@ gen exit_date_krt = krt_date
 format exit_date_krt %td
 replace exit_date_krt = min(deregistered_date, death_date, end_date) if krt_date==.
 
+stset exit_date_krt, fail(krt_date) origin(index_date_krt) id(unique) scale(365.25)
 
-qui safecount if ethnicity==`ethnicity' & case==1 & krt==1
+qui safecount if case==1 & _d==1 & _st==1 & ethnicity==`ethnicity'
 local cases_events = round(r(N),5)
-qui safecount if ethnicity==`ethnicity' & case==0 & krt==1
+qui safecount if case==0 & _d==1 & _st==1 & ethnicity==`ethnicity'
 local controls_events = round(r(N),5)
 file write tablecontent (`cases_events') _tab (`controls_events') _tab
 }
@@ -67,9 +70,11 @@ gen exit_date_krt = krt_date
 format exit_date_krt %td
 replace exit_date_krt = min(deregistered_date, death_date, end_date) if krt_date==.
 
-qui safecount if ethnicity==. & case==1 & krt==1
+stset exit_date_krt, fail(krt_date) origin(index_date_krt) id(unique) scale(365.25)
+
+qui safecount if case==1 & _d==1 & _st==1 & ethnicity==.
 local cases_events = round(r(N),5)
-qui safecount if ethnicity==. & case==0 & krt==1
+qui safecount if case==0 & _d==1 & _st==1 & ethnicity==.
 local controls_events = round(r(N),5)
 file write tablecontent (`cases_events') _tab (`controls_events') _tab
 }
