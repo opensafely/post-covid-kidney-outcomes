@@ -257,6 +257,10 @@ local label_`group': label covid_vax `group'
 file write tablecontent ("`label_`group''")
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
+drop if index_date_esrd > 22735
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
 replace covid_severity=2 if covid_severity==3
 forvalues i=1/2 {
 qui safecount if covid_vax==`group' & covid_severity==`i' & esrd==1
@@ -276,6 +280,10 @@ local label_`group': label wave `group'
 file write tablecontent ("`label_`group''")
 foreach x of local cohort {
 use ./output/analysis_complete_`x'.dta, clear
+drop if index_date_esrd > 22735
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
 replace covid_severity=2 if covid_severity==3
 forvalues i=1/2 {
 qui safecount if wave==`group' & covid_severity==`i' & esrd==1
