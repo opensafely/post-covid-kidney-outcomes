@@ -25,10 +25,10 @@ local lab11 "Final analysis dataset"
 
 **Extracted from OpenSAFELY
 capture noisily import delimited ./output/input_covid_matching.csv, clear
-qui safecount
+safecount
 local covid_1 = round(r(N),5)
 capture noisily import delimited ./output/input_2020_matching.csv, clear
-qui safecount
+safecount
 local 2020_1 = round(r(N),5)
 
 **Excluded as baseline eGFR <15
@@ -62,7 +62,7 @@ gen egfr_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020*max_basel
 replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*(0.993^age)
 replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*1.018 if male==0
 
-qui safecount if egfr_baseline_creatinine_feb2020 <15
+safecount if egfr_baseline_creatinine_feb2020 <15
 local ckd5_feb2020 = r(N)
 
 
@@ -146,7 +146,7 @@ foreach x of  local month_year  {
 replace baseline_egfr=egfr_baseline_creatinine_`x' if covid_month=="`x'"
 drop egfr_baseline_creatinine_`x'
 }
-qui safecount if baseline_egfr <15
+safecount if baseline_egfr <15
 local covid_2 = round((r(N) + `ckd5_feb2020'),5)
 
 **2020
@@ -179,7 +179,7 @@ gen egfr_baseline_creatinine_feb2020 = min_baseline_creatinine_feb2020*max_basel
 replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*(0.993^age)
 replace egfr_baseline_creatinine_feb2020 = egfr_baseline_creatinine_feb2020*1.018 if male==0
 
-qui safecount if egfr_baseline_creatinine_feb2020 <15
+safecount if egfr_baseline_creatinine_feb2020 <15
 local 2020_2 = round(r(N),5)
 
 *Unmatched
@@ -213,15 +213,15 @@ order patient_id set_id match_count case
 gsort set_id -case
 
 *Calculate unmatched
-qui safecount if case==1
+safecount if case==1
 local covid_3 = round(((`covid_1' - `covid_2') - r(N)),5)
-qui safecount if case==0
+safecount if case==0
 local 2020_3 = round(((`2020_1' - `2020_2') - r(N)),5)
 
 *IMD invalid
-qui safecount if case==1 & imd==0
+safecount if case==1 & imd==0
 local covid_4 = round(r(N),5)
-qui safecount if case==0 & imd==0
+safecount if case==0 & imd==0
 local 2020_4 = round(r(N),5)
 
 drop if imd==0
@@ -239,9 +239,9 @@ replace region = 8 if region_string=="West Midlands"
 replace region = 9 if region_string=="Yorkshire and The Humber"
 replace region = 10 if region_string==""
 
-qui safecount if case==1 & region==10
+safecount if case==1 & region==10
 local covid_5 = round(r(N),5)
-qui safecount if case==0 & region==10
+safecount if case==0 & region==10
 local 2020_5 = round(r(N),5)
 drop if region==10
 
@@ -255,9 +255,9 @@ format index_date_28 %td
 gen covid_exit = date(covid_diagnosis_date, "YMD")
 format covid_exit %td
 replace covid_exit=. if case==1
-qui safecount if covid_exit < index_date_28 + 1 & case==1
+safecount if covid_exit < index_date_28 + 1 & case==1
 local covid_6 = round(r(N),5)
-qui safecount if covid_exit < index_date_28 + 1 & case==0
+safecount if covid_exit < index_date_28 + 1 & case==0
 local 2020_6 = round(r(N),5)
 drop if covid_exit < index_date_28 + 1
 
@@ -265,9 +265,9 @@ drop if covid_exit < index_date_28 + 1
 gen deregistered_date = date(date_deregistered, "YMD")
 format deregistered_date %td
 drop date_deregistered 
-qui safecount if deregistered_date < index_date_28 + 1 & case==1
+safecount if deregistered_date < index_date_28 + 1 & case==1
 local covid_7 = round(r(N),5)
-qui safecount if deregistered_date < index_date_28 + 1 & case==0
+safecount if deregistered_date < index_date_28 + 1 & case==0
 local 2020_7 = round(r(N),5)
 drop if deregistered_date < index_date_28 + 1
 
@@ -278,9 +278,9 @@ drop death_date
 rename death_date1 death_date
 gen deceased = 0
 replace deceased = 1 if death_date < index_date_28 + 1
-qui safecount if deceased==1 & case==1
+safecount if deceased==1 & case==1
 local covid_8 = round(r(N),5)
-qui safecount if deceased==1 & case==0
+safecount if deceased==1 & case==0
 local 2020_8 = round(r(N),5)
 drop if deceased==1
 
@@ -359,9 +359,9 @@ drop egfr_baseline_creatinine_`x'
 }
 gen baseline_esrd = 0
 replace baseline_esrd = 1 if baseline_egfr <15
-qui safecount if baseline_esrd==1 & case==1
+safecount if baseline_esrd==1 & case==1
 local covid_9 = round(r(N),5)
-qui safecount if baseline_esrd==1 & case==0
+safecount if baseline_esrd==1 & case==0
 local 2020_9 = round(r(N),5)
 drop if baseline_esrd==1
 
@@ -377,18 +377,18 @@ drop if match_counts==0
 bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 0 then only uncase in set, if 1 then only case in set
 gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set containing both case and uncase
 keep if valid_set==1
-qui safecount if case==1
+safecount if case==1
 local covid_10 = round(r(N),5)
-qui safecount if case==0
+safecount if case==0
 local 2020_10 = round(r(N),5)
 
 
 use ./output/analysis_2020.dta, clear
 
-qui safecount if case==1
+safecount if case==1
 local covid_11 = round(r(N),5)
 
-qui safecount if case==0
+safecount if case==0
 local 2020_11 = round(r(N),5)
 
 forvalues i=1/11 {
