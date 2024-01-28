@@ -10,7 +10,6 @@ cap file close tablecontent
 file open tablecontent using ./output/selection_2020.csv, write text replace
 file write tablecontent _tab ("COVID-19") _tab ("Contemporary comparator") _n
 
-
 local lab1 "Extracted from OpenSAFELY"
 local lab2 "Baseline eGFR <15"
 local lab3 "Unmatched"
@@ -19,8 +18,9 @@ local lab5 "Invalid region"
 local lab6 "COVID-19 date before index date"
 local lab7 "Deregistered from primary care before index date"
 local lab8 "Deceased before index date"
-local lab9 "Remainining in valid matched sets"
-local lab10 "Final analysis dataset"
+local lab9 "Baseline eGFR <15"
+local lab10 "Remaining in valid matched sets"
+local lab11 "Final analysis dataset"
 
 
 **Extracted from OpenSAFELY
@@ -360,9 +360,9 @@ drop egfr_baseline_creatinine_`x'
 gen baseline_esrd = 0
 replace baseline_esrd = 1 if baseline_egfr <15
 qui safecount if baseline_esrd==1 & case==1
-local covid_8 = round(r(N),5)
+local covid_9 = round(r(N),5)
 qui safecount if baseline_esrd==1 & case==0
-local 2020_8 = round(r(N),5)
+local 2020_9 = round(r(N),5)
 drop if baseline_esrd==1
 
 * Exclude unmatched after application of exclusions
@@ -378,20 +378,20 @@ bysort set_id: egen set_case_mean = mean(case) // if mean of exposure var is 0 t
 gen valid_set = (set_case_mean>0 & set_case_mean<1) // ==1 is valid set containing both case and uncase
 keep if valid_set==1
 qui safecount if case==1
-local covid_9 = round(r(N),5)
+local covid_10 = round(r(N),5)
 qui safecount if case==0
-local 2020_9 = round(r(N),5)
+local 2020_10 = round(r(N),5)
 
 
 use ./output/analysis_2020.dta, clear
 
 qui safecount if case==1
-local covid_10 = round(r(N),5)
+local covid_11 = round(r(N),5)
 
 qui safecount if case==0
-local 2020_10 = round(r(N),5)
+local 2020_11 = round(r(N),5)
 
-forvalues i=1/10 {
+forvalues i=1/11 {
 file write tablecontent ("`lab`i''") _tab (`covid_`i'') _tab (`2020_`i'') _n
 }
 
