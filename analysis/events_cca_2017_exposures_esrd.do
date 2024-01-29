@@ -65,4 +65,25 @@ local events = round(r(N),5)
 file write tablecontent ("`covvax`i''") _tab (`events') _n
 }
 
+*Cases up to March 2022)
+file write tablecontent ("Cases up to March 2022") _n
+drop if index_date_esrd > 22735
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
+
+qui stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+
+forvalues i=1/4 {
+qui safecount if wave==`i' & _d==1 & _st==1
+local events = round(r(N),5)
+file write tablecontent ("`wave`i''") _tab (`events') _n
+}
+
+forvalues i=1/5 {
+qui safecount if covvax==`i' & _d==1 & _st==1
+local events = round(r(N),5)
+file write tablecontent ("`covvax`i''") _tab (`events') _n
+}
+
 file close tablecontent
