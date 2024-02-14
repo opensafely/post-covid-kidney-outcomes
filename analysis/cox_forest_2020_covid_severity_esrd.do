@@ -268,6 +268,8 @@ bysort set_id: egen set_n = count(_N)
 drop if set_n <2
 drop set_n
 
+replace covid_severity=2 if covid_severity==3
+
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
 forvalues i=1/5 {
@@ -306,6 +308,8 @@ use ./output/analysis_complete_2020.dta, clear
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
+replace covid_severity=2 if covid_severity==3
+
 file write tablecontent ("COVID-19 wave") _n
 forvalues i=1/4 {
 local label_`i': label wave `i'
@@ -342,6 +346,8 @@ drop if index_date_esrd > 22735
 bysort set_id: egen set_n = count(_N)
 drop if set_n <2
 drop set_n
+
+replace covid_severity=2 if covid_severity==3
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
