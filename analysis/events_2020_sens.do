@@ -213,5 +213,34 @@ forvalues i=1/2 {
 file write tablecontent ("Sensitivity analysis 5") _tab ("Kidney failure (COVID-19 up to March 2022)") _tab ("`severity`i''") _tab (`cases`i'_events') _tab ("N/A") _n
 }
 
+*Sensitivity analysis 6 - excluding individuals with KRT during initial COVID illness
+use ./output/analysis_2020.dta, clear
+drop if covid_krt==3
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
+
+*COVID severity - recode: non-hospitalised = 1 & hospitalised (including ICU) = 2
+replace covid_severity = 2 if covid_severity==3
+local severity1 "COVID-19 non-hospitalised"
+local severity2 "COVID-19 hospitalised"
+
+stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+
+qui safecount if case==1 & _d==1 & _st==1
+local cases_events = round(r(N),5)
+qui safecount if case==0 & _d==1 & _st==1
+local controls_events = round(r(N),5)
+file write tablecontent ("Sensitivity analysis 6") _tab ("Kidney failure (excluding COVID-KRT)") _tab ("Overall") _tab (`cases_events') _tab (`controls_events') _n
+
+forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _d==1 & _st==1
+local cases`i'_events = round(r(N),5)
+}
+
+forvalues i=1/2 {
+file write tablecontent ("Sensitivity analysis 6") _tab ("Kidney failure (excluding COVID-KRT)") _tab ("`severity`i''") _tab (`cases`i'_events') _tab ("N/A") _n
+}
+
 
 file close tablecontent
