@@ -7,7 +7,7 @@ log using ./logs/events_2020_sens.log, replace t
 
 cap file close tablecontent
 file open tablecontent using ./output/events_2020_sens.csv, write text replace
-file write tablecontent ("sens") _tab ("outcome") _tab ("stratum") _tab  ("Events (COVID-19)") _tab ("Events (matched contemporary cohort)") _n
+file write tablecontent ("sens") _tab ("outcome") _tab ("stratum") _tab ("denominator") _tab ("controls") _tab ("Events (COVID-19)") _tab ("Events (matched contemporary cohort)") _n
 use ./output/analysis_complete_2020.dta, clear
 
 *COVID severity - recode: non-hospitalised = 1 & hospitalised (including ICU) = 2
@@ -128,19 +128,25 @@ foreach sens of local sensitivity {
 
 stset exit_date_`sens', fail(`sens'_date) origin(index_date_`sens') id(unique) scale(365.25)
 
+qui safecount if case==1 & _st==1
+local cases_denom = round(r(N),5)
+qui safecount if case==0 & _st==1
+local controls_denom = round(r(N),5)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-file write tablecontent ("``sens'_sens'") _tab ("``sens'_lab'") _tab ("Overall") _tab (`cases_events') _tab (`controls_events') _n
+file write tablecontent ("``sens'_sens'") _tab ("``sens'_lab'") _tab ("Overall") _tab (`cases_denom') _tab (`controls_denom') _tab (`cases_events') _tab (`controls_events') _n
 
 forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _st==1
+local denom`i' = round(r(N),5)
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 }
 
 forvalues i=1/2 {
-file write tablecontent ("``sens'_sens'") _tab ("``sens'_lab'") _tab ("`severity`i''") _tab (`cases`i'_events') _tab ("N/A") _n
+file write tablecontent ("``sens'_sens'") _tab ("``sens'_lab'") _tab ("`severity`i''") _tab ("`denom`i''") _tab ("N/A") _tab (`cases`i'_events') _tab ("N/A") _n
 }
 }
 
@@ -174,19 +180,25 @@ noisily mi impute mlogit ethnicity esrd i.imd i.urban i.bmi i.smoking i.ckd_stag
 
 mi stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
+qui safecount if case==1 & _st==1
+local cases_denom = round(r(N),5)
+qui safecount if case==0 & _st==1
+local controls_denom = round(r(N),5)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-file write tablecontent ("Sensitivity analysis 4") _tab ("Kidney failure (after multiple imputation for missing ethnicity)") _tab ("Overall") _tab (`cases_events') _tab (`controls_events') _n
+file write tablecontent ("Sensitivity analysis 4") _tab ("Kidney failure (after multiple imputation for missing ethnicity)") _tab ("Overall") _tab (`cases_denom') _tab (`controls_denom') _tab (`cases_events') _tab (`controls_events') _n
 
 forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _st==1
+local denom`i' = round(r(N),5)
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 }
 
 forvalues i=1/2 {
-file write tablecontent ("Sensitivity analysis 4") _tab ("Kidney failure (after multiple imputation for missing ethnicity)") _tab ("`severity`i''") _tab (`cases`i'_events') _tab ("N/A") _n
+file write tablecontent ("Sensitivity analysis 4") _tab ("Kidney failure (after multiple imputation for missing ethnicity)") _tab ("`severity`i''") _tab ("`denom`i''") _tab ("N/A") _tab (`cases`i'_events') _tab ("N/A") _n
 }
 
 *Sensitivity analysis 5 - restricting cases up to March 2023 (end of mass testing)
@@ -198,22 +210,29 @@ drop set_n
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
+qui safecount if case==1 & _st==1
+local cases_denom = round(r(N),5)
+qui safecount if case==0 & _st==1
+local controls_denom = round(r(N),5)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-file write tablecontent ("Sensitivity analysis 5") _tab ("Kidney failure (COVID-19 up to March 2022)") _tab ("Overall") _tab (`cases_events') _tab (`controls_events') _n
+file write tablecontent ("Sensitivity analysis 5") _tab ("Kidney failure (COVID-19 up to March 2022)") _tab ("Overall") _tab (`cases_denom') _tab (`controls_denom') _tab (`cases_events') _tab (`controls_events') _n
+
 
 forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _st==1
+local denom`i' = round(r(N),5)
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 }
 
 forvalues i=1/2 {
-file write tablecontent ("Sensitivity analysis 5") _tab ("Kidney failure (COVID-19 up to March 2022)") _tab ("`severity`i''") _tab (`cases`i'_events') _tab ("N/A") _n
+file write tablecontent ("Sensitivity analysis 5") _tab ("Kidney failure (COVID-19 up to March 2022)") _tab ("`severity`i''") _tab ("`denom`i''") _tab ("N/A") _tab (`cases`i'_events') _tab ("N/A") _n
 }
 
-*Sensitivity analysis 6 - excluding individuals with KRT during initial COVID illness
+*Sensitivity analysis 6 - kidney failure excluding individuals with KRT during initial COVID illness
 use ./output/analysis_2020.dta, clear
 drop if covid_krt==3
 bysort set_id: egen set_n = count(_N)
@@ -227,19 +246,62 @@ local severity2 "COVID-19 hospitalised"
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 
+qui safecount if case==1 & _st==1
+local cases_denom = round(r(N),5)
+qui safecount if case==0 & _st==1
+local controls_denom = round(r(N),5)
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 qui safecount if case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
-file write tablecontent ("Sensitivity analysis 6") _tab ("Kidney failure (excluding COVID-KRT)") _tab ("Overall") _tab (`cases_events') _tab (`controls_events') _n
+file write tablecontent ("Sensitivity analysis 6") _tab ("Kidney failure (excluding COVID-KRT)") _tab ("Overall") _tab (`cases_denom') _tab (`controls_denom') _tab (`cases_events') _tab (`controls_events') _n
+
 
 forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _st==1
+local denom`i' = round(r(N),5)
 qui safecount if covid_severity==`i' & _d==1 & _st==1
 local cases`i'_events = round(r(N),5)
 }
 
 forvalues i=1/2 {
-file write tablecontent ("Sensitivity analysis 6") _tab ("Kidney failure (excluding COVID-KRT)") _tab ("`severity`i''") _tab (`cases`i'_events') _tab ("N/A") _n
+file write tablecontent ("Sensitivity analysis 6") _tab ("Kidney failure (excluding COVID-KRT)") _tab ("`severity`i''") _tab ("`denom`i''") _tab ("N/A") _tab (`cases`i'_events') _tab ("N/A") _n
+}
+
+*Sensitivity analysis 7 - 50% reduction in eGFR excluding individuals with KRT during initial COVID illness
+use ./output/analysis_2020.dta, clear
+drop if covid_krt==3
+bysort set_id: egen set_n = count(_N)
+drop if set_n <2
+drop set_n
+
+*COVID severity - recode: non-hospitalised = 1 & hospitalised (including ICU) = 2
+replace covid_severity = 2 if covid_severity==3
+local severity1 "COVID-19 non-hospitalised"
+local severity2 "COVID-19 hospitalised"
+
+stset exit_date_egfr_half, fail(egfr_half_date) origin(index_date_egfr_half) id(unique) scale(365.25)
+
+qui safecount if case==1 & _st==1
+local cases_denom = round(r(N),5)
+qui safecount if case==0 & _st==1
+local controls_denom = round(r(N),5)
+qui safecount if case==1 & _d==1 & _st==1
+local cases_events = round(r(N),5)
+qui safecount if case==0 & _d==1 & _st==1
+local controls_events = round(r(N),5)
+file write tablecontent ("Sensitivity analysis 7") _tab ("50% reduction in eGFR (excluding COVID-KRT)") _tab ("Overall") _tab (`cases_denom') _tab (`controls_denom') _tab (`cases_events') _tab (`controls_events') _n
+
+
+forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _st==1
+local denom`i' = round(r(N),5)
+qui safecount if covid_severity==`i' & _d==1 & _st==1
+local cases`i'_events = round(r(N),5)
+}
+
+forvalues i=1/2 {
+file write tablecontent ("Sensitivity analysis 7") _tab ("50% reduction in eGFR (excluding COVID-KRT)") _tab ("`severity`i''") _tab ("`denom`i''") _tab ("N/A") _tab (`cases`i'_events') _tab ("N/A") _n
 }
 
 
