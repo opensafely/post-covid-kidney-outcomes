@@ -289,7 +289,7 @@ forvalues i=1/2 {
 file write tablecontent ("Sensitivity analysis 4") _tab ("Kidney failure (after multiple imputation for missing ethnicity)") _tab ("`severity`i''") _tab %4.2f (`full_severity_`i'b') (" (") %4.2f (`full_severity_`i'll') ("-") %4.2f (`full_severity_`i'ul') (")") _tab %4.2f (`full_severity_`i'b') _tab %4.2f (`full_severity_`i'll') _tab %4.2f (`full_severity_`i'ul') _tab ("`cases`i'_rate'") (" (") %3.2f (`cases`i'_ll')  ("-") %3.2f (`cases`i'_ul') (")")  _tab ("`cases`i'_rate'") _tab ("`cases`i'_ll'") _tab ("`cases`i'_ll'") _tab ("`ard`i'_b'") (" (") %3.2f (`ard`i'_ll')  ("-") %3.2f (`ard`i'_ul') (")") _tab ("`ard`i'_b'") _tab ("`ard`i'_ll'") _tab ("`ard`i'_ul'") _n
 }
 
-*Sensitivity analysis 5 - restricting cases up to March 2023 (end of mass testing)
+*Sensitivity analysis 5 - restricting cases up to March 2022 (end of mass testing)
 use ./output/analysis_2017.dta, clear
 drop if index_date_esrd > 22735
 bysort set_id: egen set_n = count(_N)
