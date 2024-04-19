@@ -3,10 +3,10 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_forest_2020_sens.log, replace t
+log using ./logs/cox_forest_2020_sens7.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/cox_forest_2020_sens.csv, write text replace
+file open tablecontent using ./output/cox_forest_2020_sens7.csv, write text replace
 file write tablecontent ("sens") _tab ("outcome") _tab ("stratum") _tab ("hr_text") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("rate_text") _tab ("rate") _tab ("rate_ll") _tab ("rate_ul") _tab ("ard_text") _tab ("ard") _tab ("ard_ll") _tab ("ard_ul") _n
 
 *Sensitivity analysis 7 - 50% reduction in eGFR after excluding individuals with KRT during initial COVID illness
