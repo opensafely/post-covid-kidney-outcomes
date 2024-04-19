@@ -255,3 +255,8 @@ incident_stroke_codes = codelist_from_csv(
     system="icd10",
     column="icd",
 )
+asthma_codes = codelist_from_csv(
+    "codelists/opensafely-asthma-exacerbation-secondary-care.csv",
+    system="icd10",
+    column="code",
+)
