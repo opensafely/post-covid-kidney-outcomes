@@ -304,5 +304,22 @@ forvalues i=1/2 {
 file write tablecontent ("Sensitivity analysis 7") _tab ("50% reduction in eGFR (excluding COVID-KRT)") _tab ("`severity`i''") _tab ("`denom`i''") _tab ("N/A") _tab (`cases`i'_events') _tab ("N/A") _n
 }
 
+*ESRD vs 50% reduction in eGFR
+
+qui safecount if case==1 & _d==1 & _st==1 & esrd_date==.
+local cases_events = round(r(N),5)
+file write tablecontent ("Sensitivity analysis 7") _tab ("50% reduction in eGFR only (without ESRD)") _tab ("Overall") _tab ("N/A") _tab ("N/A") _tab (`cases_events') _tab ("N/A") _n
+
+
+forvalues i=1/2 {
+qui safecount if covid_severity==`i' & _d==1 & _st==1 & esrd_date==.
+local cases`i'_events = round(r(N),5)
+}
+
+forvalues i=1/2 {
+file write tablecontent ("Sensitivity analysis 7") _tab ("50% reduction in eGFR only (without ESRD)") _tab ("`severity`i''") _tab ("N/A") _tab ("N/A") _tab (`cases`i'_events') _tab ("N/A") _n
+}
+
+
 
 file close tablecontent
