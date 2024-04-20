@@ -31,6 +31,7 @@ foreach x of local month_year {
   format egfr_half_date %td
 }
 replace egfr_half_date=esrd_date if egfr_half_date==.
+drop exit_date_egfr_half
 gen exit_date_egfr_half = egfr_half_date
 format exit_date_egfr_half %td
 replace exit_date_egfr_half = min(deregistered_date,death_date,end_date,covid_exit) if egfr_half_date==. & index_date_egfr_half!=.
