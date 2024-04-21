@@ -18,9 +18,7 @@ replace esrd_date = chronic_krt_date if esrd_date==.
 drop exit_date_esrd
 gen exit_date_esrd = esrd_date
 format exit_date_esrd %td
-replace exit_date_esrd = min(deregistered_date, death_date, end_date, covid_exit) if esrd_date==.
-replace exit_date_esrd = covid_exit if covid_exit < esrd_date
-replace esrd_date=. if covid_exit<esrd_date&case==0
+replace exit_date_esrd = min(deregistered_date, death_date, end_date) if esrd_date==.
 
 *50% reduction in eGFR redefined by not including KRT codes 28 days before COVID
 drop egfr_half_date
@@ -35,8 +33,7 @@ replace egfr_half_date=esrd_date if egfr_half_date==.
 drop exit_date_egfr_half
 gen exit_date_egfr_half = egfr_half_date
 format exit_date_egfr_half %td
-replace exit_date_egfr_half = min(deregistered_date,death_date,end_date,covid_exit) if egfr_half_date==. & index_date_egfr_half!=.
-replace exit_date_egfr_half = covid_exit if covid_exit < egfr_half_date
+replace exit_date_egfr_half = min(deregistered_date,death_date,end_date) if egfr_half_date==. & index_date_egfr_half!=.
 
 *Re-analyse ESRD & 50% reduction in eGFR outcomes
 cap file close tablecontent
