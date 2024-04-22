@@ -3,12 +3,12 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/events_cca_chronic_2020.log, replace t
+log using ./logs/events_cca_chronic_2017.log, replace t
 
 cap file close tablecontent
 use ./output/analysis_complete_2017.dta, clear
 
-file open tablecontent using ./output/events_cca_chronic_2020.csv, write text replace
+file open tablecontent using ./output/events_cca_chronic_2017.csv, write text replace
 file write tablecontent ("outcome") _tab ("stratum") _tab ("period") _tab ("events_covid") _tab ("events_control") _n
 
 
