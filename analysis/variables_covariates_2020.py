@@ -565,5 +565,11 @@ def generate_covariates_2020(index_date_variable):
         on_or_before="case_index_date - 1 day",
         return_expectations={"incidence": 0.05},
     ),
+    covid_covariate=patients.admitted_to_hospital(
+        with_these_diagnoses=covid_codes,
+        returning="binary_flag",
+        on_or_before="case_index_date - 1 day",
+        return_expectations={"incidence": 0.05},
+    ),
     )
     return variables_covariates_2020
