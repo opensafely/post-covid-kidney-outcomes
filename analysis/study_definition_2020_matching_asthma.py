@@ -57,6 +57,35 @@ study = StudyDefinition(
                 },
             },
         ),
+
+    sgss_positive_date=patients.with_test_result_in_sgss(
+        pathogen="SARS-CoV-2",
+        test_result="positive",
+        returning="date",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        between = ["2020-02-01", "2022-12-31"],
+        return_expectations={"incidence": 0.4, "date": {"earliest": "2020-02-01"}},
+    ),
+    
+    primary_care_covid_date=patients.with_these_clinical_events(
+        any_covid_primary_care_code,
+        returning="date",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        between = ["2020-02-01", "2022-12-31"],
+        return_expectations={"incidence": 0.2, "date": {"earliest": "2020-02-01"}},
+    ),
+
+    hospital_covid_date=patients.admitted_to_hospital(
+        with_these_diagnoses=covid_codes,
+        returning="date_admitted",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        between = ["2020-02-01", "2022-12-31"],
+        return_expectations={"incidence": 0.1, "date": {"earliest": "2020-02-01"}},
+    ),
+
 #Asthma as control exposure
 
     covid_diagnosis_date=patients.admitted_to_hospital(

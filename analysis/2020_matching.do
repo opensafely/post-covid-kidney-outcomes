@@ -2,7 +2,8 @@ cap log close
 log using ./logs/2020_matching, replace t
 clear
 
-import delimited ./output/input_2020_matching.csv, delimiter(comma) varnames(1) case(preserve) 
+*_2020import delimited ./output/input_2020_matching.csv, delimiter(comma) varnames(1) case(preserve) 
+import delimited ./output/input_2020_matching_asthma.csv, delimiter(comma) varnames(1) case(preserve) 
 
 **Exclusions
 * Age <18
