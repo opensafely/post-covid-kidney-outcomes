@@ -150,7 +150,7 @@ study = StudyDefinition(
     baseline_creatinine_feb2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2018-08-01","2017-01-31"],
+        between=["2015-08-01","2017-01-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -159,7 +159,7 @@ study = StudyDefinition(
     baseline_creatinine_mar2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2018-09-01","2017-02-29"],
+        between=["2015-09-01","2017-02-29"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -168,7 +168,7 @@ study = StudyDefinition(
     baseline_creatinine_apr2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2018-10-01","2017-03-31"],
+        between=["2015-10-01","2017-03-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -177,7 +177,7 @@ study = StudyDefinition(
     baseline_creatinine_may2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2018-11-01","2017-04-30"],
+        between=["2015-11-01","2017-04-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -186,7 +186,7 @@ study = StudyDefinition(
     baseline_creatinine_jun2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2018-12-01","2017-05-31"],
+        between=["2015-12-01","2017-05-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -195,7 +195,7 @@ study = StudyDefinition(
     baseline_creatinine_jul2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-01-01","2017-06-30"],
+        between=["2016-01-01","2017-06-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -204,7 +204,7 @@ study = StudyDefinition(
     baseline_creatinine_aug2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-02-01","2017-07-31"],
+        between=["2016-02-01","2017-07-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -213,7 +213,7 @@ study = StudyDefinition(
     baseline_creatinine_sep2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-03-01","2017-08-31"],
+        between=["2016-03-01","2017-08-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -222,7 +222,7 @@ study = StudyDefinition(
     baseline_creatinine_oct2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-04-01","2017-09-30"],
+        between=["2016-04-01","2017-09-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -231,7 +231,7 @@ study = StudyDefinition(
     baseline_creatinine_nov2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-05-01","2017-10-31"],
+        between=["2016-05-01","2017-10-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -240,7 +240,7 @@ study = StudyDefinition(
     baseline_creatinine_dec2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-06-01","2017-11-30"],
+        between=["2016-06-01","2017-11-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -249,7 +249,7 @@ study = StudyDefinition(
     baseline_creatinine_jan2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-07-01","2017-12-31"],
+        between=["2016-07-01","2017-12-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -258,7 +258,7 @@ study = StudyDefinition(
     baseline_creatinine_feb2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-08-01","2018-01-31"],
+        between=["2016-08-01","2018-01-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -267,7 +267,7 @@ study = StudyDefinition(
     baseline_creatinine_mar2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-09-01","2018-02-28"],
+        between=["2016-09-01","2018-02-28"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -276,7 +276,7 @@ study = StudyDefinition(
     baseline_creatinine_apr2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-10-01","2018-03-31"],
+        between=["2016-10-01","2018-03-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -285,7 +285,7 @@ study = StudyDefinition(
     baseline_creatinine_may2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-11-01","2018-04-30"],
+        between=["2016-11-01","2018-04-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -294,7 +294,7 @@ study = StudyDefinition(
     baseline_creatinine_jun2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-12-01","2018-05-31"],
+        between=["2016-12-01","2018-05-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
