@@ -14,6 +14,7 @@ format chronic_krt_date %td
 drop krt_outcome2_date
 replace esrd_date=. if covid_krt==3
 replace esrd_date=egfr15_date if esrd_date==.
+replace esrd_date = chronic_krt_date if chronic_krt_date < esrd_date
 replace esrd_date = chronic_krt_date if esrd_date==.
 drop exit_date_esrd
 gen exit_date_esrd = esrd_date

@@ -571,5 +571,13 @@ def generate_covariates_2020(index_date_variable):
         on_or_before="case_index_date - 1 day",
         return_expectations={"incidence": 0.05},
     ),
+    covid_covariate_date=patients.admitted_to_hospital(
+        with_these_diagnoses=covid_codes,
+        returning="date_admitted",
+        date_format="YYYY-MM-DD",
+        find_first_match_in_period=True,
+        on_or_before="case_index_date",
+        return_expectations={"incidence": 0.1, "date": {"earliest": "2020-02-01"}},
+    ),
     )
     return variables_covariates_2020
