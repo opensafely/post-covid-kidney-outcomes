@@ -12,7 +12,7 @@ from codelists import *
 
 study = StudyDefinition(
     default_expectations={
-        "date": {"earliest": "1980-01-01", "latest": "2023-01-31"},
+        "date": {"earliest": "1980-01-01", "latest": "2020-01-31"},
         "rate": "uniform",
         "incidence": 0.7, 
     },
@@ -30,7 +30,7 @@ study = StudyDefinition(
         """,
     ),  
 
-    index_date="2020-02-01",
+    index_date="2017-02-01",
 
     age=patients.age_as_of(
         "index_date",
@@ -64,8 +64,8 @@ study = StudyDefinition(
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        between = ["2020-02-01", "2022-12-31"],
-        return_expectations={"incidence": 0.4, "date": {"earliest": "2020-02-01"}},
+        between = ["2017-02-01", "2019-12-31"],
+        return_expectations={"incidence": 0.4, "date": {"earliest": "2017-02-01"}},
     ),
     
     primary_care_covid_date=patients.with_these_clinical_events(
@@ -73,8 +73,8 @@ study = StudyDefinition(
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        between = ["2020-02-01", "2022-12-31"],
-        return_expectations={"incidence": 0.2, "date": {"earliest": "2020-02-01"}},
+        between = ["2017-02-01", "2019-12-31"],
+        return_expectations={"incidence": 0.2, "date": {"earliest": "2017-02-01"}},
     ),
 
     hospital_covid_date=patients.admitted_to_hospital(
@@ -82,8 +82,8 @@ study = StudyDefinition(
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        between = ["2020-02-01", "2022-12-31"],
-        return_expectations={"incidence": 0.1, "date": {"earliest": "2020-02-01"}},
+        between = ["2017-02-01", "2019-12-31"],
+        return_expectations={"incidence": 0.1, "date": {"earliest": "2017-02-01"}},
     ),
 
 #Asthma as control exposure
@@ -93,8 +93,8 @@ study = StudyDefinition(
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        between = ["2020-02-01", "2022-12-31"],
-        return_expectations={"incidence": 0.1, "date": {"earliest": "2020-02-01"}},
+        between = ["2017-02-01", "2019-12-31"],
+        return_expectations={"incidence": 0.1, "date": {"earliest": "2017-02-01"}},
     ),
     
     sars_cov_2=patients.categorised_as(
@@ -115,18 +115,18 @@ study = StudyDefinition(
             },
         },
     ),
-    #Exclude all people who died before 2020-02-01
+    #Exclude all people who died before 2017-02-01
     deceased=patients.with_death_recorded_in_primary_care(
         returning="binary_flag",
         between = ["1970-01-01", "index_date"],
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2017-02-01", "latest": "2017-01-31"}},
         ),
-    #Obtain date of death for those who remain alive at 2020-02-01
+    #Obtain date of death for those who remain alive at 2017-02-01
     death_date=patients.with_death_recorded_in_primary_care(
-        between = ["index_date", "2023-01-31"],
+        between = ["index_date", "2020-01-31"],
         returning="date_of_death",
         date_format= "YYYY-MM-DD",
-        return_expectations={"incidence": 0.10, "date": {"earliest" : "2020-02-01", "latest": "2023-01-31"}},
+        return_expectations={"incidence": 0.10, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}},
     ),
     baseline_krt_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
@@ -146,10 +146,10 @@ study = StudyDefinition(
         between = ["1970-01-01", "index_date"],
         return_expectations={"incidence": 0.05},
     ),
-    baseline_creatinine_feb2020=patients.mean_recorded_value(
+    baseline_creatinine_feb2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2018-08-01","2020-01-31"],
+        between=["2018-08-01","2017-01-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -157,27 +157,27 @@ study = StudyDefinition(
     ),
     krt_outcome_primary_care=patients.with_these_clinical_events(
         kidney_replacement_therapy_primary_care_codes,
-        between = ["index_date", "2023-01-31"],
+        between = ["index_date", "2020-01-31"],
         returning="date",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2023-01-31"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}}
     ),
     krt_outcome_icd_10=patients.admitted_to_hospital(
         with_these_diagnoses=kidney_replacement_therapy_icd_10_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between = ["index_date", "2023-01-31"],
+        between = ["index_date", "2020-01-31"],
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2023-01-31"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}}
     ),
     krt_outcome_opcs_4=patients.admitted_to_hospital(
         with_these_procedures=kidney_replacement_therapy_opcs_4_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
-        between = ["index_date", "2023-01-31"],
+        between = ["index_date", "2020-01-31"],
         find_first_match_in_period=True,
-        return_expectations={"incidence": 0.05, "date": {"earliest" : "2020-02-01", "latest": "2023-01-31"}}
+        return_expectations={"incidence": 0.05, "date": {"earliest" : "2017-02-01", "latest": "2020-01-31"}}
     ),
     krt_outcome_date=patients.minimum_of(
         "krt_outcome_primary_care", "krt_outcome_icd_10", "krt_outcome_opcs_4",
@@ -187,7 +187,7 @@ study = StudyDefinition(
         return_expectations={"incidence":0.95},
     ),
     date_deregistered=patients.date_deregistered_from_all_supported_practices(
-        between= ["2020-02-01", "2023-01-31"],
+        between= ["2017-02-01", "2020-01-31"],
         date_format="YYYY-MM-DD",
     ),
 )
