@@ -31,58 +31,58 @@ study = StudyDefinition(
         returning="covid_date", 
         returning_type="date"),
     
-    covid_vax_1_date = patients.with_tpp_vaccination_record(
-        target_disease_matches = "SARS-2 CORONAVIRUS",
-        returning = "date",
-        find_first_match_in_period = True,
-        between = ["2020-11-01", "case_index_date - 7 days"],
-        date_format = "YYYY-MM-DD",
-        return_expectations = {
-        "date": {
-            "earliest": "2020-12-08",
-            "latest": "2022-12-31",
-        }
-        },
-    ),
-    covid_vax_2_date = patients.with_tpp_vaccination_record(
-        target_disease_matches = "SARS-2 CORONAVIRUS",
-        returning = "date",
-        find_first_match_in_period = True,
-        between = ["covid_vax_1_date + 15 days", "case_index_date - 7 days"],
-        date_format = "YYYY-MM-DD",
-        return_expectations = {
-        "date": {
-            "earliest": "2020-12-31",
-            "latest": "2022-12-31",
-        }
-        },
-    ),
-    covid_vax_3_date = patients.with_tpp_vaccination_record(
-        target_disease_matches = "SARS-2 CORONAVIRUS",
-        returning = "date",
-        find_first_match_in_period = True,
-        between = ["covid_vax_2_date + 15 days", "case_index_date - 7 days"],
-        date_format = "YYYY-MM-DD",
-        return_expectations = {
-        "date": {
-            "earliest": "2021-03-31",
-            "latest": "2022-12-31",
-        }
-        },
-    ),
-    covid_vax_4_date = patients.with_tpp_vaccination_record(
-        target_disease_matches = "SARS-2 CORONAVIRUS",    
-        returning = "date",
-        find_first_match_in_period = True,
-        between = ["covid_vax_3_date + 15 days", "case_index_date - 7 days"],
-        date_format = "YYYY-MM-DD",
-        return_expectations = {
-        "date": {
-            "earliest": "2021-04-30",
-            "latest": "2022-12-31",
-        }
-        },
-    ),
+    #covid_vax_1_date = patients.with_tpp_vaccination_record(
+        #target_disease_matches = "SARS-2 CORONAVIRUS",
+        #returning = "date",
+        #find_first_match_in_period = True,
+        #between = ["2020-11-01", "case_index_date - 7 days"],
+        #date_format = "YYYY-MM-DD",
+        #return_expectations = {
+        #"date": {
+            #"earliest": "2020-12-08",
+            #"latest": "2022-12-31",
+        #}
+        #},
+    #),
+    #covid_vax_2_date = patients.with_tpp_vaccination_record(
+        #target_disease_matches = "SARS-2 CORONAVIRUS",
+        #returning = "date",
+        #find_first_match_in_period = True,
+        #between = ["covid_vax_1_date + 15 days", "case_index_date - 7 days"],
+        #date_format = "YYYY-MM-DD",
+        #return_expectations = {
+        #"date": {
+            #"earliest": "2020-12-31",
+            #"latest": "2022-12-31",
+        #}
+        #},
+    #),
+    #covid_vax_3_date = patients.with_tpp_vaccination_record(
+        #target_disease_matches = "SARS-2 CORONAVIRUS",
+        #returning = "date",
+        #find_first_match_in_period = True,
+        #between = ["covid_vax_2_date + 15 days", "case_index_date - 7 days"],
+        #date_format = "YYYY-MM-DD",
+        #return_expectations = {
+        #"date": {
+            #"earliest": "2021-03-31",
+            #"latest": "2022-12-31",
+        #}
+        #},
+    #),
+    #covid_vax_4_date = patients.with_tpp_vaccination_record(
+        #target_disease_matches = "SARS-2 CORONAVIRUS",    
+        #returning = "date",
+        #find_first_match_in_period = True,
+        #between = ["covid_vax_3_date + 15 days", "case_index_date - 7 days"],
+        #date_format = "YYYY-MM-DD",
+        #return_expectations = {
+        #"date": {
+            #"earliest": "2021-04-30",
+            #"latest": "2022-12-31",
+        #}
+        #},
+    #),
 
     **variables_covariates_2020,  
     **variables_outcomes_2020,  

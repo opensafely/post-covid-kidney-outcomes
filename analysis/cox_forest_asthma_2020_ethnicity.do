@@ -4,9 +4,9 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_forest_asthma_2020_ethnicity.log, replace t
+log using ./logs/cox_forest_asthma_2017_ethnicity.log, replace t
 cap file close tablecontent
-file open tablecontent using ./output/cox_forest_asthma_2020_ethnicity.csv, write text replace
+file open tablecontent using ./output/cox_forest_asthma_2017_ethnicity.csv, write text replace
 file write tablecontent _tab ("HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
 
 
@@ -18,7 +18,7 @@ local egfr_half_lab "50% reduction in eGFR"
 local aki_lab "AKI"
 local death_lab "Death"
 
-use ./output/analysis_asthma_2020_complete.dta, clear
+use ./output/analysis_asthma_2017_complete.dta, clear
 
 *eGFR = RRT only
 gen index_date_krt = index_date
@@ -37,9 +37,9 @@ forvalues i=1/5 {
 local label_`i': label ethnicity `i'
 }
 
-qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax i.covid_covariate, strata(set_id)
+qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store a
-qui stcox i.case##i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax i.covid_covariate, strata(set_id)
+qui stcox i.case##i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store b
 qui lrtest b a
 local p = r(p)

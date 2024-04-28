@@ -114,316 +114,316 @@ def generate_covariates_2020(index_date_variable):
     ),
     
     #Clinical covariates
-    baseline_creatinine_feb2020=patients.mean_recorded_value(
+    baseline_creatinine_feb2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2018-08-01","2020-01-31"],
+        between=["2015-08-01","2017-01-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_mar2020=patients.mean_recorded_value(
+    baseline_creatinine_mar2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2018-09-01","2020-02-29"],
+        between=["2015-09-01","2017-02-28"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_apr2020=patients.mean_recorded_value(
+    baseline_creatinine_apr2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2018-10-01","2020-03-31"],
+        between=["2015-10-01","2017-03-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_may2020=patients.mean_recorded_value(
+    baseline_creatinine_may2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2018-11-01","2020-04-30"],
+        between=["2015-11-01","2017-04-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jun2020=patients.mean_recorded_value(
+    baseline_creatinine_jun2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2018-12-01","2020-05-31"],
+        between=["2015-12-01","2017-05-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jul2020=patients.mean_recorded_value(
+    baseline_creatinine_jul2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-01-01","2020-06-30"],
+        between=["2016-01-01","2017-06-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_aug2020=patients.mean_recorded_value(
+    baseline_creatinine_aug2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-02-01","2020-07-31"],
+        between=["2016-02-01","2017-07-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_sep2020=patients.mean_recorded_value(
+    baseline_creatinine_sep2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-03-01","2020-08-31"],
+        between=["2016-03-01","2017-08-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_oct2020=patients.mean_recorded_value(
+    baseline_creatinine_oct2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-04-01","2020-09-30"],
+        between=["2016-04-01","2017-09-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_nov2020=patients.mean_recorded_value(
+    baseline_creatinine_nov2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-05-01","2020-10-31"],
+        between=["2016-05-01","2017-10-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_dec2020=patients.mean_recorded_value(
+    baseline_creatinine_dec2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-06-01","2020-11-30"],
+        between=["2016-06-01","2017-11-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jan2021=patients.mean_recorded_value(
+    baseline_creatinine_jan2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-07-01","2020-12-31"],
+        between=["2016-07-01","2017-12-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_feb2021=patients.mean_recorded_value(
+    baseline_creatinine_feb2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-08-01","2021-01-31"],
+        between=["2016-08-01","2018-01-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_mar2021=patients.mean_recorded_value(
+    baseline_creatinine_mar2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-09-01","2021-02-28"],
+        between=["2016-09-01","2018-02-28"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_apr2021=patients.mean_recorded_value(
+    baseline_creatinine_apr2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-10-01","2021-03-31"],
+        between=["2016-10-01","2018-03-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_may2021=patients.mean_recorded_value(
+    baseline_creatinine_may2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-11-01","2021-04-30"],
+        between=["2016-11-01","2018-04-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jun2021=patients.mean_recorded_value(
+    baseline_creatinine_jun2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2019-12-01","2021-05-31"],
+        between=["2016-12-01","2018-05-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jul2021=patients.mean_recorded_value(
+    baseline_creatinine_jul2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-01-01","2021-06-30"],
+        between=["2017-01-01","2018-06-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_aug2021=patients.mean_recorded_value(
+    baseline_creatinine_aug2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-02-01","2021-07-31"],
+        between=["2017-02-01","2018-07-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_sep2021=patients.mean_recorded_value(
+    baseline_creatinine_sep2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-03-01","2021-08-31"],
+        between=["2017-03-01","2018-08-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_oct2021=patients.mean_recorded_value(
+    baseline_creatinine_oct2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-04-01","2021-09-30"],
+        between=["2017-04-01","2018-09-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_nov2021=patients.mean_recorded_value(
+    baseline_creatinine_nov2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-05-01","2021-10-31"],
+        between=["2017-05-01","2018-10-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_dec2021=patients.mean_recorded_value(
+    baseline_creatinine_dec2018=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-06-01","2021-11-30"],
+        between=["2017-06-01","2018-11-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jan2022=patients.mean_recorded_value(
+    baseline_creatinine_jan2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-07-01","2021-12-31"],
+        between=["2017-07-01","2018-12-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_feb2022=patients.mean_recorded_value(
+    baseline_creatinine_feb2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-08-01","2022-01-31"],
+        between=["2017-08-01","2019-01-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_mar2022=patients.mean_recorded_value(
+    baseline_creatinine_mar2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-09-01","2022-02-28"],
+        between=["2017-09-01","2019-02-28"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_apr2022=patients.mean_recorded_value(
+    baseline_creatinine_apr2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-10-01","2022-03-31"],
+        between=["2017-10-01","2019-03-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_may2022=patients.mean_recorded_value(
+    baseline_creatinine_may2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-11-01","2022-04-30"],
+        between=["2017-11-01","2019-04-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jun2022=patients.mean_recorded_value(
+    baseline_creatinine_jun2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2020-12-01","2022-05-31"],
+        between=["2017-12-01","2019-05-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_jul2022=patients.mean_recorded_value(
+    baseline_creatinine_jul2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2021-01-01","2022-06-30"],
+        between=["2018-01-01","2019-06-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_aug2022=patients.mean_recorded_value(
+    baseline_creatinine_aug2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2021-02-01","2022-07-31"],
+        between=["2018-02-01","2019-07-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_sep2022=patients.mean_recorded_value(
+    baseline_creatinine_sep2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2021-03-01","2022-08-31"],
+        between=["2018-03-01","2019-08-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_oct2022=patients.mean_recorded_value(
+    baseline_creatinine_oct2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2021-04-01","2022-09-30"],
+        between=["2018-04-01","2019-09-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_nov2022=patients.mean_recorded_value(
+    baseline_creatinine_nov2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2021-05-01","2022-10-31"],
+        between=["2018-05-01","2019-10-31"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
         }
     ),
-    baseline_creatinine_dec2022=patients.mean_recorded_value(
+    baseline_creatinine_dec2019=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2021-06-01","2022-11-30"],
+        between=["2018-06-01","2019-11-30"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
@@ -554,7 +554,7 @@ def generate_covariates_2020(index_date_variable):
         include_measurement_date=True,
         date_format="YYYY-MM-DD",
         return_expectations={
-            "date": {"earliest": "2015-01-01", "latest": "2022-12-31"},
+            "date": {"earliest": "2015-01-01", "latest": "2019-12-31"},
             "float": {"distribution": "normal", "mean": 28, "stddev": 8, "min": 18, "max": 45},
             "incidence": 0.95,
         }
@@ -565,19 +565,19 @@ def generate_covariates_2020(index_date_variable):
         on_or_before="case_index_date - 1 day",
         return_expectations={"incidence": 0.05},
     ),
-    covid_covariate=patients.admitted_to_hospital(
-        with_these_diagnoses=covid_codes,
-        returning="binary_flag",
-        on_or_before="case_index_date - 1 day",
-        return_expectations={"incidence": 0.05},
-    ),
-    covid_covariate_date=patients.admitted_to_hospital(
-        with_these_diagnoses=covid_codes,
-        returning="date_admitted",
-        date_format="YYYY-MM-DD",
-        find_first_match_in_period=True,
-        on_or_before="case_index_date",
-        return_expectations={"incidence": 0.1, "date": {"earliest": "2020-02-01"}},
-    ),
+    #covid_covariate=patients.admitted_to_hospital(
+        #with_these_diagnoses=covid_codes,
+        #returning="binary_flag",
+        #on_or_before="case_index_date - 1 day",
+        #return_expectations={"incidence": 0.05},
+    #),
+    #covid_covariate_date=patients.admitted_to_hospital(
+        #with_these_diagnoses=covid_codes,
+        #returning="date_admitted",
+        #date_format="YYYY-MM-DD",
+        #find_first_match_in_period=True,
+        #on_or_before="case_index_date",
+        #return_expectations={"incidence": 0.1, "date": {"earliest": "2017-02-01"}},
+    #),
     )
     return variables_covariates_2020
