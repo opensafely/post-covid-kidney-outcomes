@@ -8,7 +8,7 @@ def generate_outcomes_2020(index_date_variable):
     creatinine_feb2017=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
-        between=["2017-02-01","2017-02-29"],
+        between=["2017-02-01","2017-02-28"],
         return_expectations={
             "float": {"distribution": "normal", "mean": 80, "stddev": 40},
             "incidence": 0.60,
