@@ -89,7 +89,7 @@ study = StudyDefinition(
 #Exposure - Pneumonia hospitalisation
 
     covid_diagnosis_date=patients.admitted_to_hospital(
-        with_these_diagnoses=asthma_codes,
+        with_these_diagnoses=pneumonia_codelist,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
