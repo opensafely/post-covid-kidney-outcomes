@@ -64,7 +64,14 @@ stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) scal
 file write tablecontent ("``out'_lab'") _n
 
 *Total
-file write tablecontent ("Overall") _tab
+file write tablecontent ("Denominator") _tab
+qui safecount if case==1 & _st==1
+local cases_events = round(r(N),5)
+qui safecount if case==0 & _st==1
+local controls_events = round(r(N),5)
+file write tablecontent (`cases_events') _tab (`controls_events') _n
+
+file write tablecontent ("Overall events") _tab
 qui safecount if case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 qui safecount if case==0 & _d==1 & _st==1
@@ -85,19 +92,21 @@ file write tablecontent (`cases_events') _tab (`controls_events') _n
 stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) scale(365.25)
 forvalues ethnicity=1/5 {
 local label_`ethnicity': label ethnicity `ethnicity'
-file write tablecontent ("`label_`ethnicity''") _tab
+
+file write tablecontent ("`label_`ethnicity'' denominator") _tab
+qui safecount if ethnicity==`ethnicity' & case==1 & _st==1
+local cases_events = round(r(N),5)
+qui safecount if ethnicity==`ethnicity' & case==0 & _st==1
+local controls_events = round(r(N),5)
+file write tablecontent (`cases_events') _tab (`controls_events') _n
+
+file write tablecontent ("`label_`ethnicity'' events") _tab
 qui safecount if ethnicity==`ethnicity' & case==1 & _d==1 & _st==1
 local cases_events = round(r(N),5)
 qui safecount if ethnicity==`ethnicity' & case==0 & _d==1 & _st==1
 local controls_events = round(r(N),5)
 file write tablecontent (`cases_events') _tab (`controls_events') _n
 }
-file write tablecontent ("Missing") _tab
-qui safecount if ethnicity==. & case==1 & _d==1 & _st==1
-local cases_events = round(r(N),5)
-qui safecount if ethnicity==. & case==0 & _d==1 & _st==1
-local controls_events = round(r(N),5)
-file write tablecontent (`cases_events') _tab (`controls_events') _n
 }
 
 file close tablecontent
