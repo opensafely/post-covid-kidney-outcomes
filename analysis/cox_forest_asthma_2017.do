@@ -8,7 +8,7 @@ log using ./logs/cox_forest_asthma_2017.log, replace t
 cap file close tablecontent
 file open tablecontent using ./output/cox_forest_asthma_2017.csv, write text replace
 file write tablecontent ("outcome") _tab ("stratum") _tab ("period") _tab ("hr_text") _tab ("hr") _tab ("ll") _tab ("ul") _n
-use ./output/analysis_complete_2017.dta, clear
+use ./output/analysis_asthma_2017_complete.dta, clear
 
 *Time to event
 local period "29 89 179 max"
