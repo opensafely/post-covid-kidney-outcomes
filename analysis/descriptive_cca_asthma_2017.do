@@ -3,15 +3,15 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/descriptive_cca_asthma_2017.log, replace t
+log using ./logs/descriptive_cca_pneumonia_2017.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/descriptive_cca_asthma_2017.csv, write text replace
-file write tablecontent _tab ("Asthma cohort (n(%))") _tab ("Matched contemporary cohort (n(%))") _n
+file open tablecontent using ./output/descriptive_cca_pneumonia_2017.csv, write text replace
+file write tablecontent _tab ("Pneumonia cohort (pre-pandemic) (n(%))") _tab ("Matched cohort (pre-pandemic) (n(%))") _n
 
 *Total
 file write tablecontent ("Total") _tab
-use ./output/analysis_asthma_2017_complete.dta, clear
+use ./output/analysis_pneumonia_2017_complete.dta, clear
 qui safecount if case==1
 local cases_2017 = round(r(N),5)
 qui safecount if case==0
