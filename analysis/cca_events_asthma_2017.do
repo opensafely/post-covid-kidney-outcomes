@@ -17,6 +17,32 @@ gen exit_date_krt = krt_date
 format exit_date_krt %td
 replace exit_date_krt = min(deregistered_date, death_date, end_date) if krt_date==.
 
+gen krt_date29 = krt_date if krt_date < (index_date_krt + 30) 
+gen exit_date29_krt = krt_date29
+gen index_date29_krt = index_date_krt
+format exit_date29_krt %td
+replace exit_date29_krt = min(deregistered_date, death_date, end_date, (index_date_krt + 29)) if krt_date29==.
+
+*30-89 days
+gen krt_date89 = krt_date if krt_date < (index_date_krt + 90) 
+gen exit_date89_krt = krt_date89
+gen index_date89_krt = index_date_krt + 30
+format exit_date89_krt %td
+replace exit_date89_krt = min(deregistered_date, death_date, end_date, (index_date_krt + 89)) if krt_date89==.
+
+*90-179 days
+gen krt_date179 = krt_date if krt_date < (index_date_krt + 180) 
+gen exit_date179_krt = krt_date179
+gen index_date179_krt = index_date_krt + 90
+format exit_date179_krt %td
+replace exit_date179_krt = min(deregistered_date, death_date, end_date, (index_date_krt + 179)) if krt_date179==.
+
+*180+ days
+gen index_datemax_krt = index_date_krt + 180
+gen exit_datemax_krt = exit_date_krt
+gen krt_datemax = krt_date
+
+
 local outcomes "esrd krt egfr_half aki death"
 
 local esrd_lab "Kidney failure"
