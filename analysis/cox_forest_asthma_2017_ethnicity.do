@@ -20,7 +20,7 @@ local death_lab "Death"
 
 use ./output/analysis_asthma_2017_complete.dta, clear
 
-*eGFR = RRT only
+*ESRD = RRT only
 gen index_date_krt = index_date
 gen exit_date_krt = krt_date
 format exit_date_krt %td
