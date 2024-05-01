@@ -9,39 +9,8 @@ cap file close tablecontent
 file open tablecontent using ./output/cox_forest_2020_ethnicity.csv, write text replace
 file write tablecontent _tab ("HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
 
-capture noisily import delimited ./output/input_stroke.csv, clear
-keep incident_stroke incident_stroke_date patient_id
-rename incident_stroke stroke
 
-merge 1:m patient_id using ./output/analysis_complete_2020
-
-drop if _merge==1
-drop _merge
-
-gen stroke_date = date(incident_stroke_date, "YMD")
-format stroke_date %td
-
-drop if stroke_date < (index_date - 28)
-replace stroke_date = index_date + 1 if stroke_date < index_date + 1
-
-bysort set_id: egen set_n = count(_N)
-drop if set_n <2
-drop set_n
-
-gen index_date_stroke = index_date
-gen exit_date_stroke = stroke_date
-format exit_date_stroke %td
-replace exit_date_stroke = min(deregistered_date, death_date, end_date, covid_exit) if stroke_date==.
-replace exit_date_stroke = covid_exit if covid_exit < stroke_date
-replace stroke_date=. if covid_exit<stroke_date&case==0
-gen stroke_denominator = 1
-gen follow_up_time_stroke = (exit_date_stroke - index_date_stroke)
-label var follow_up_time_stroke "Follow-up time (Days)"
-drop if follow_up_time_stroke<1
-drop if follow_up_time_stroke>1096
-gen follow_up_years_stroke = follow_up_time_stroke/365.25
-
-local outcomes "esrd krt chronic_krt egfr_half aki death stroke"
+local outcomes "esrd krt chronic_krt egfr_half aki death"
 
 local esrd_lab "Kidney failure"
 local chronic_krt_lab "Kidney failure (excluding acute KRT)"
@@ -49,7 +18,6 @@ local krt_lab "Kidney replacement therapy"
 local egfr_half_lab "50% reduction in eGFR"
 local aki_lab "AKI"
 local death_lab "Death"
-label stroke_lab "Stroke"
 
 *ESRD = RRT only
 gen index_date_krt = index_date
