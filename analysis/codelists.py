@@ -260,3 +260,8 @@ asthma_codes = codelist_from_csv(
     system="icd10",
     column="code",
 )
+cabg_codes = codelist_from_csv(
+    "codelists/user-viyaasan-coronary-artery-bypass-graft-cabg.csv",
+    system="opcs4",
+    column="code",
+)

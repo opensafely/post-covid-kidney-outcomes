@@ -86,10 +86,10 @@ study = StudyDefinition(
         return_expectations={"incidence": 0.1, "date": {"earliest": "2017-02-01"}},
     ),
 
-#Asthma as control exposure
+#CABG as control exposure
 
     covid_diagnosis_date=patients.admitted_to_hospital(
-        with_these_diagnoses=pneumonia_codelist,
+        with_these_procedures=cabg_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
