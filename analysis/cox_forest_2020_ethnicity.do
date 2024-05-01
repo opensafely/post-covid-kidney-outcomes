@@ -9,6 +9,7 @@ cap file close tablecontent
 file open tablecontent using ./output/cox_forest_2020_ethnicity.csv, write text replace
 file write tablecontent _tab ("HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
 
+use ./output/analysis_complete_2020.dta, clear
 
 local outcomes "esrd krt chronic_krt egfr_half aki death"
 
