@@ -10,9 +10,10 @@ file open tablecontent using ./output/cox_forest_asthma_2017_ethnicity.csv, writ
 file write tablecontent _tab ("HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
 
 
-local outcomes "esrd krt egfr_half aki death"
+local outcomes "esrd krt chronic_krt egfr_half aki death"
 
 local esrd_lab "Kidney failure"
+local chronic_krt_lab "Kidney failure (excluding acute KRT)"
 local krt_lab "Kidney replacement therapy"
 local egfr_half_lab "50% reduction in eGFR"
 local aki_lab "AKI"
@@ -25,6 +26,19 @@ gen index_date_krt = index_date
 gen exit_date_krt = krt_date
 format exit_date_krt %td
 replace exit_date_krt = min(deregistered_date, death_date, end_date) if krt_date==.
+
+*ESRD redefined by not including KRT codes 28 days before index date
+gen chronic_krt_date = date(krt_outcome2_date, "YMD")
+format chronic_krt_date %td
+drop krt_outcome2_date
+replace chronic_krt_date = egfr15_date if egfr15_date < chronic_krt_date
+replace chronic_krt_date=egfr15_date if chronic_krt_date==.
+gen exit_date_chronic_krt = chronic_krt_date
+format exit_date_chronic_krt %td
+replace exit_date_chronic_krt = min(deregistered_date, death_date, end_date, covid_exit) if chronic_krt_date==.
+replace exit_date_chronic_krt = covid_exit if covid_exit < chronic_krt_date
+replace chronic_krt_date=. if covid_exit<chronic_krt_date&case==0
+gen index_date_chronic_krt = index_date
 
 
 foreach out of local outcomes {

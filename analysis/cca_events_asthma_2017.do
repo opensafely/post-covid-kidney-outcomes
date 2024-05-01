@@ -11,41 +11,40 @@ file write tablecontent _tab ("Asthma cohort (pre-pandemic)") _tab ("Matched coh
 
 use ./output/analysis_asthma_2017_complete.dta, clear
 
-*ESRD = RRT only
-gen index_date_krt = index_date
-gen exit_date_krt = krt_date
-format exit_date_krt %td
-replace exit_date_krt = min(deregistered_date, death_date, end_date) if krt_date==.
+local outcomes "krt chronic_krt"
 
-gen krt_date29 = krt_date if krt_date < (index_date_krt + 30) 
-gen exit_date29_krt = krt_date29
-gen index_date29_krt = index_date_krt
-format exit_date29_krt %td
-replace exit_date29_krt = min(deregistered_date, death_date, end_date, (index_date_krt + 29)) if krt_date29==.
+foreach out of local outcomes {
+
+gen `out'_date29 = `out'_date if `out'_date < (index_date_`out' + 30) 
+gen exit_date29_`out' = `out'_date29
+gen index_date29_`out' = index_date_`out'
+format exit_date29_`out' %td
+replace exit_date29_`out' = min(deregistered_date, death_date, end_date, (index_date_`out' + 29)) if `out'_date29==.
 
 *30-89 days
-gen krt_date89 = krt_date if krt_date < (index_date_krt + 90) 
-gen exit_date89_krt = krt_date89
-gen index_date89_krt = index_date_krt + 30
-format exit_date89_krt %td
-replace exit_date89_krt = min(deregistered_date, death_date, end_date, (index_date_krt + 89)) if krt_date89==.
+gen `out'_date89 = `out'_date if `out'_date < (index_date_`out' + 90) 
+gen exit_date89_`out' = `out'_date89
+gen index_date89_`out' = index_date_`out' + 30
+format exit_date89_`out' %td
+replace exit_date89_`out' = min(deregistered_date, death_date, end_date, (index_date_`out' + 89)) if `out'_date89==.
 
 *90-179 days
-gen krt_date179 = krt_date if krt_date < (index_date_krt + 180) 
-gen exit_date179_krt = krt_date179
-gen index_date179_krt = index_date_krt + 90
-format exit_date179_krt %td
-replace exit_date179_krt = min(deregistered_date, death_date, end_date, (index_date_krt + 179)) if krt_date179==.
+gen `out'_date179 = `out'_date if `out'_date < (index_date_`out' + 180) 
+gen exit_date179_`out' = `out'_date179
+gen index_date179_`out' = index_date_`out' + 90
+format exit_date179_`out' %td
+replace exit_date179_`out' = min(deregistered_date, death_date, end_date, (index_date_`out' + 179)) if `out'_date179==.
 
 *180+ days
-gen index_datemax_krt = index_date_krt + 180
-gen exit_datemax_krt = exit_date_krt
-gen krt_datemax = krt_date
+gen index_datemax_`out' = index_date_`out' + 180
+gen exit_datemax_`out' = exit_date_`out'
+gen `out'_datemax = `out'_date
+}
 
-
-local outcomes "esrd krt egfr_half aki death"
+local outcomes "esrd krt chronic_krt egfr_half aki death"
 
 local esrd_lab "Kidney failure"
+local chronic_krt_lab "Kidney failure (excluding acute KRT)"
 local krt_lab "Kidney replacement therapy"
 local egfr_half_lab "50% reduction in eGFR"
 local aki_lab "AKI"
