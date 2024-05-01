@@ -36,16 +36,9 @@ local lab89 "30-89 days"
 local lab179 "90-179 days"
 local labmax "180+ days"
 
-local outcomes "esrd krt chronic_krt egfr_half aki death"
+local outcomes "krt chronic_krt"
 
-local esrd_lab "Kidney failure"
-local chronic_krt_lab "Kidney failure (excluding acute KRT)"
-local krt_lab "Kidney replacement therapy"
-local egfr_half_lab "50% reduction in eGFR"
-local aki_lab "AKI"
-local death_lab "Death"
-
-foreach out of varlist krt chronic_krt {
+foreach out of local outcomes {
 
 gen `out'_date29 = `out'_date if `out'_date < (index_date_`out' + 30) 
 gen exit_date29_`out' = `out'_date29
@@ -72,6 +65,15 @@ gen index_datemax_`out' = index_date_`out' + 180
 gen exit_datemax_`out' = exit_date_`out'
 gen `out'_datemax = `out'_date
 }
+
+local outcomes "esrd krt chronic_krt egfr_half aki death"
+
+local esrd_lab "Kidney failure"
+local chronic_krt_lab "Kidney failure (excluding acute KRT)"
+local krt_lab "Kidney replacement therapy"
+local egfr_half_lab "50% reduction in eGFR"
+local aki_lab "AKI"
+local death_lab "Death"
 
 foreach out of local outcomes {
 
