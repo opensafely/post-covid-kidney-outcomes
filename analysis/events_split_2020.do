@@ -34,7 +34,7 @@ local esrd = round(r(N),5)
 
 qui safecount if case==1 & _d==1 & _st==1 & egfr15_date==. & esrd_date==.
 local no_egfr15 = round(r(N),5)
-qui safecount if case==1 & _d==1 & _st==1 & egfr15_date!=.
+qui safecount if case==1 & _d==1 & _st==1 & egfr15_date!=. & krt_date==.
 local egfr15 = round(r(N),5)
 
 file write tablecontent ("Death") _tab ("Overall") _tab (`overall') _n
