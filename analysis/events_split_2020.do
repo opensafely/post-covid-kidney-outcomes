@@ -6,7 +6,7 @@ macro drop hr
 log using ./logs/events_split_2020.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/events_split_2020, write text replace
+file open tablecontent using ./output/events_split_2020.csv, write text replace
 file write tablecontent ("outcome") _tab ("split") _tab ("events") _n
 use ./output/analysis_complete_2020.dta, clear
 
