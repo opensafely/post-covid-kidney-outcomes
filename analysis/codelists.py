@@ -265,3 +265,8 @@ cabg_codes = codelist_from_csv(
     system="opcs4",
     column="code",
 )
+angio_codes = codelist_from_csv(
+    "codelists/user-viyaasan-coronary-angiography.csv",
+    system="opcs4",
+    column="code",
+)
