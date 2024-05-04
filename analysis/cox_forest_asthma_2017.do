@@ -77,8 +77,6 @@ local death_lab "Death"
 
 foreach out of local outcomes {
 
-file write tablecontent ("Fully-adjusted (stratified hazard ratios)")
-
 stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) scale(365.25)
 
 **COVID overall
@@ -110,6 +108,8 @@ file write tablecontent ("Conditional") _tab ("``out'_lab'") _tab ("COVID-19 ove
 
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&bmi!=.&smoking!=., cubic nknots(4)
+
+**Frequency matched analysis (i.e. not stratified by matched set)
 
 **COVID overall
 

@@ -26,6 +26,9 @@ gen exit_date_krt = krt_date
 format exit_date_krt %td
 replace exit_date_krt = min(deregistered_date, death_date, end_date) if krt_date==.
 
+forvalues i=1/5 {
+local label_`i': label ethnicity `i'
+}
 
 foreach out of local outcomes {
 
@@ -34,9 +37,6 @@ qui stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) 
 file write tablecontent ("``out'_lab'") _n
 
 file write tablecontent ("Minimally-adjusted") _n
-forvalues i=1/5 {
-local label_`i': label ethnicity `i'
-}
 qui stcox i.case i.ethnicity, strata(set_id)
 est store a
 qui stcox i.case##i.ethnicity, strata(set_id)
@@ -47,24 +47,16 @@ lincom 1.case, eform
 local int_1b = r(estimate)
 local int_1ll = r(lb)
 local int_1ul = r(ub)
+file write tablecontent ("`label_1'") _tab %4.2f (`int_1b') (" (") %4.2f (`int_1ll') ("-") %4.2f (`int_1ul') (")") _tab %4.2f (`int_1b') _tab %4.2f (`int_1ll') _tab %4.2f (`int_1ul') _tab %5.4f (`p') _n
 forvalues i=2/5 {
 lincom 1.case + 1.case#`i'.ethnicity, eform
 local int_`i'b = r(estimate)
 local int_`i'll = r(lb)
 local int_`i'ul = r(ub)
+file write tablecontent ("`label_`i''") _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
 }
-file write tablecontent ("`label_1'")
-file write tablecontent _tab %4.2f (`int_1b') (" (") %4.2f (`int_1ll') ("-") %4.2f (`int_1ul') (")") _tab %4.2f (`int_1b') _tab %4.2f (`int_1ll') _tab %4.2f (`int_1ul') _tab %5.4f (`p') _n
-forvalues i=2/5 {
-file write tablecontent ("`label_`i''")
-file write tablecontent _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
-}
-
 
 file write tablecontent ("After adjustment for potential confounders") _n
-forvalues i=1/5 {
-local label_`i': label ethnicity `i'
-}
 
 qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions, strata(set_id)
 est store a
@@ -76,25 +68,17 @@ lincom 1.case, eform
 local int_1b = r(estimate)
 local int_1ll = r(lb)
 local int_1ul = r(ub)
+file write tablecontent ("`label_1'") _tab %4.2f (`int_1b') (" (") %4.2f (`int_1ll') ("-") %4.2f (`int_1ul') (")") _tab %4.2f (`int_1b') _tab %4.2f (`int_1ll') _tab %4.2f (`int_1ul') _tab %5.4f (`p') _n
 forvalues i=2/5 {
 lincom 1.case + 1.case#`i'.ethnicity, eform
 local int_`i'b = r(estimate)
 local int_`i'll = r(lb)
 local int_`i'ul = r(ub)
-}
-file write tablecontent ("`label_1'")
-file write tablecontent _tab %4.2f (`int_1b') (" (") %4.2f (`int_1ll') ("-") %4.2f (`int_1ul') (")") _tab %4.2f (`int_1b') _tab %4.2f (`int_1ll') _tab %4.2f (`int_1ul') _tab %5.4f (`p') _n
-forvalues i=2/5 {
-file write tablecontent ("`label_`i''")
-file write tablecontent _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
+file write tablecontent ("`label_`i''") _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
 }
 }
 
 file write tablecontent ("After adjustment for potential confounders (non-stratified)") _n
-forvalues i=1/5 {
-local label_`i': label ethnicity `i'
-}
-
 qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions
 est store a
 qui stcox i.case##i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions
@@ -105,17 +89,13 @@ lincom 1.case, eform
 local int_1b = r(estimate)
 local int_1ll = r(lb)
 local int_1ul = r(ub)
+file write tablecontent ("`label_1'") _tab %4.2f (`int_1b') (" (") %4.2f (`int_1ll') ("-") %4.2f (`int_1ul') (")") _tab %4.2f (`int_1b') _tab %4.2f (`int_1ll') _tab %4.2f (`int_1ul') _tab %5.4f (`p') _n
 forvalues i=2/5 {
 lincom 1.case + 1.case#`i'.ethnicity, eform
 local int_`i'b = r(estimate)
 local int_`i'll = r(lb)
 local int_`i'ul = r(ub)
-}
-file write tablecontent ("`label_1'")
-file write tablecontent _tab %4.2f (`int_1b') (" (") %4.2f (`int_1ll') ("-") %4.2f (`int_1ul') (")") _tab %4.2f (`int_1b') _tab %4.2f (`int_1ll') _tab %4.2f (`int_1ul') _tab %5.4f (`p') _n
-forvalues i=2/5 {
-file write tablecontent ("`label_`i''")
-file write tablecontent _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
+file write tablecontent ("`label_`i''") _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
 }
 
 
