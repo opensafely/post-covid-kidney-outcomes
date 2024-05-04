@@ -19,6 +19,8 @@ local egfr_half_lab "50% reduction in eGFR"
 local aki_lab "AKI"
 local death_lab "Death"
 
+**Frequency matched analysis (i.e. not stratified by matched set)
+
 use ./output/analysis_pneumonia_2017.dta, clear
 
 *ESRD = RRT only
@@ -40,11 +42,15 @@ replace exit_date_chronic_krt = covid_exit if covid_exit < chronic_krt_date
 replace chronic_krt_date=. if covid_exit<chronic_krt_date&case==0
 gen index_date_chronic_krt = index_date
 
+
 file write tablecontent ("Fully-adjusted (non-stratified)") _n
 
 foreach out of local outcomes {
 
 qui stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) scale(365.25)
+
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&bmi!=.&smoking!=., cubic nknots(4)
 
 file write tablecontent ("``out'_lab'") _n
 
@@ -75,6 +81,8 @@ file write tablecontent ("`label_`i''")
 file write tablecontent _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
 }
 }
+
+**Conditional analysis (i.e. stratified by matched set)
 
 use ./output/analysis_pneumonia_2017_complete.dta, clear
 
