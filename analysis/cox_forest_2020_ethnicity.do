@@ -130,7 +130,7 @@ forvalues i=2/5 {
 file write tablecontent ("`label_`i''")
 file write tablecontent _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
 }
-}
+
 
 
 file close tablecontent

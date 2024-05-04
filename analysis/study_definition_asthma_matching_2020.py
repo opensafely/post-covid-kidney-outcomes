@@ -28,8 +28,7 @@ study = StudyDefinition(
         AND NOT baseline_krt_primary_care = "1"
         AND NOT baseline_krt_icd_10 = "1"
         AND NOT baseline_krt_opcs_4 = "1"
-        AND NOT previous_cabg = "1"
-        AND NOT previous_angio = "1"
+        AND NOT previous_asthma = "1"
         """,
     ),
 
@@ -90,24 +89,13 @@ study = StudyDefinition(
 
 #Exposure - CABG
 
-    cabg_diagnosis_date=patients.admitted_to_hospital(
-        with_these_procedures=cabg_codes,
+    covid_diagnosis_date=patients.admitted_to_hospital(
+        with_these_diagnoses=asthma_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
         between = ["2017-02-01", "2019-12-31"],
         return_expectations={"incidence": 0.1, "date": {"earliest": "2017-02-01"}},
-    ),
-    angio_diagnosis_date=patients.admitted_to_hospital(
-        with_these_procedures=angio_codes,
-        returning="date_admitted",
-        date_format="YYYY-MM-DD",
-        find_first_match_in_period=True,
-        between = ["2017-02-01", "2019-12-31"],
-        return_expectations={"incidence": 0.1, "date": {"earliest": "2017-02-01"}},
-    ),
-    covid_diagnosis_date=patients.minimum_of(
-        "cabg_diagnosis_date", "angio_diagnosis_date",
     ),
     
     sars_cov_2=patients.categorised_as(
@@ -131,19 +119,12 @@ study = StudyDefinition(
 
 #Exclusion variables
 
-    previous_cabg=patients.admitted_to_hospital(
-        with_these_procedures=cabg_codes,
+    previous_asthma=patients.admitted_to_hospital(
+        with_these_diagnoses=asthma_codes,
         returning="binary_flag",
         between = ["1970-01-01", "2017-01-31"],
         return_expectations={"incidence": 0.05},
     ),
-    previous_angio=patients.admitted_to_hospital(
-        with_these_procedures=angio_codes,
-        returning="binary_flag",
-        between = ["1970-01-01", "2017-01-31"],
-        return_expectations={"incidence": 0.05},
-    ),
-
     deceased=patients.with_death_recorded_in_primary_care(
         returning="binary_flag",
         between = ["1970-01-01", "covid_diagnosis_date + 28 days"],
