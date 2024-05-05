@@ -7,7 +7,7 @@ log using ./logs/cca_events_pneumonia_2017.log, replace t
 
 cap file close tablecontent
 file open tablecontent using ./output/cca_events_pneumonia_2017.csv, write text replace
-file write tablecontent _tab ("Pneumonia cohort (pre-pandemic)") _tab ("Matched cohort (pre-pandemic)") _n
+file write tablecontent _tab ("Asthma cohort (pre-pandemic)") _tab ("Matched cohort (pre-pandemic)") _n
 
 use ./output/analysis_pneumonia_2017_complete.dta, clear
 

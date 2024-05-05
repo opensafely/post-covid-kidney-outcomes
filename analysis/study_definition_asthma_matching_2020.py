@@ -28,7 +28,7 @@ study = StudyDefinition(
         AND NOT baseline_krt_primary_care = "1"
         AND NOT baseline_krt_icd_10 = "1"
         AND NOT baseline_krt_opcs_4 = "1"
-        AND NOT previous_asthma = "1"
+        AND NOT previous_pneumonia = "1"
         """,
     ),
 
@@ -87,10 +87,10 @@ study = StudyDefinition(
         return_expectations={"incidence": 0.1, "date": {"earliest": "2017-02-01"}},
     ),
 
-#Exposure - CABG
+#Exposure - Pneumonia
 
     covid_diagnosis_date=patients.admitted_to_hospital(
-        with_these_diagnoses=asthma_codes,
+        with_these_diagnoses=pneumonia_codelist,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
@@ -119,8 +119,8 @@ study = StudyDefinition(
 
 #Exclusion variables
 
-    previous_asthma=patients.admitted_to_hospital(
-        with_these_diagnoses=asthma_codes,
+    previous_pneumonia=patients.admitted_to_hospital(
+        with_these_diagnoses=pneumonia_codelist,
         returning="binary_flag",
         between = ["1970-01-01", "2017-01-31"],
         return_expectations={"incidence": 0.05},
