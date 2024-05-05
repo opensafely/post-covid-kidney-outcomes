@@ -76,7 +76,7 @@ local int_`i'll = r(lb)
 local int_`i'ul = r(ub)
 file write tablecontent ("`label_`i''") _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
 }
-}
+
 
 file write tablecontent ("After adjustment for potential confounders (non-stratified)") _n
 qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions
@@ -97,6 +97,6 @@ local int_`i'll = r(lb)
 local int_`i'ul = r(ub)
 file write tablecontent ("`label_`i''") _tab %4.2f (`int_`i'b') (" (") %4.2f (`int_`i'll') ("-") %4.2f (`int_`i'ul') (")") _tab %4.2f (`int_`i'b') _tab %4.2f (`int_`i'll') _tab %4.2f (`int_`i'ul') _n
 }
-
+}
 
 file close tablecontent
