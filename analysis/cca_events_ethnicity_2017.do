@@ -25,9 +25,7 @@ replace chronic_krt_date = egfr15_date if egfr15_date < chronic_krt_date
 replace chronic_krt_date=egfr15_date if chronic_krt_date==.
 gen exit_date_chronic_krt = chronic_krt_date
 format exit_date_chronic_krt %td
-replace exit_date_chronic_krt = min(deregistered_date, death_date, end_date, covid_exit) if chronic_krt_date==.
-replace exit_date_chronic_krt = covid_exit if covid_exit < chronic_krt_date
-replace chronic_krt_date=. if covid_exit<chronic_krt_date&case==0
+replace exit_date_chronic_krt = min(deregistered_date, death_date, end_date) if chronic_krt_date==.
 gen index_date_chronic_krt = index_date
 
 local outcomes "krt chronic_krt"
