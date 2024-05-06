@@ -7,7 +7,7 @@ log using ./logs/cox_forest_cabg_2017.log, replace t
 
 cap file close tablecontent
 file open tablecontent using ./output/cox_forest_cabg_2017.csv, write text replace
-file write tablecontent ("outcome") _tab ("stratum") _tab ("period") _tab ("hr_text") _tab ("hr") _tab ("ll") _tab ("ul") _n
+file write tablecontent ("model") _tab ("outcome") _tab ("stratum") _tab ("period") _tab ("hr_text") _tab ("hr") _tab ("ll") _tab ("ul") _n
 use ./output/analysis_cabg_2017_complete.dta, clear
 
 *ESRD = RRT only
@@ -88,7 +88,7 @@ local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
 local full_overall_ul: display %4.2f table[6,2]
 
-file write tablecontent ("``out'_lab'") _tab ("COVID-19 overall") _tab ("Overall") _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f (`full_overall_ul') (")") _tab %4.2f (`full_overall_b') _tab %4.2f (`full_overall_ll') _tab (`full_overall_ul') _n
+file write tablecontent ("Conditional") _tab ("``out'_lab'") _tab ("COVID-19 overall") _tab ("Overall") _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f (`full_overall_ul') (")") _tab %4.2f (`full_overall_b') _tab %4.2f (`full_overall_ll') _tab (`full_overall_ul') _n
 
 *Stratified by time to event
 foreach x of local period {
@@ -103,8 +103,44 @@ local full_overall_b: display %4.2f table[1,2]
 local full_overall_ll: display %4.2f table[5,2]
 local full_overall_ul: display %4.2f table[6,2]
 
-file write tablecontent ("``out'_lab'") _tab ("COVID-19 overall") _tab ("`lab`x''") _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f (`full_overall_ul') (")") _tab %4.2f (`full_overall_b') _tab %4.2f (`full_overall_ll') _tab (`full_overall_ul') _n
+file write tablecontent ("Conditional") _tab ("``out'_lab'") _tab ("COVID-19 overall") _tab ("`lab`x''") _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f (`full_overall_ul') (")") _tab %4.2f (`full_overall_b') _tab %4.2f (`full_overall_ll') _tab (`full_overall_ul') _n
 }
+
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&bmi!=.&smoking!=., cubic nknots(4)
+
+**Frequency matched analysis (i.e. not stratified by matched set)
+
+**COVID overall
+
+*HR
+stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3 i.sex i.stp, vce(cluster practice_id)
+matrix table = r(table)
+local full_overall_b: display %4.2f table[1,2]
+local full_overall_ll: display %4.2f table[5,2]
+local full_overall_ul: display %4.2f table[6,2]
+
+file write tablecontent ("Frequency") _tab ("``out'_lab'") _tab ("COVID-19 overall") _tab ("Overall") _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f (`full_overall_ul') (")") _tab %4.2f (`full_overall_b') _tab %4.2f (`full_overall_ll') _tab (`full_overall_ul') _n
+
+*Stratified by time to event
+foreach x of local period {
+stset exit_date`x'_`out', fail(`out'_date`x') origin(index_date`x'_`out') id(unique) scale(365.25)
+
+**COVID overall
+
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&bmi!=.&smoking!=., cubic nknots(4)
+
+*HR
+stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions age1 age2 age3 i.sex i.stp, vce(cluster practice_id)
+matrix table = r(table)
+local full_overall_b: display %4.2f table[1,2]
+local full_overall_ll: display %4.2f table[5,2]
+local full_overall_ul: display %4.2f table[6,2]
+
+file write tablecontent ("Frequency") _tab ("``out'_lab'") _tab ("COVID-19 overall") _tab ("`lab`x''") _tab %4.2f (`full_overall_b') (" (") %4.2f (`full_overall_ll') ("-") %4.2f (`full_overall_ul') (")") _tab %4.2f (`full_overall_b') _tab %4.2f (`full_overall_ll') _tab (`full_overall_ul') _n
+}
+file write tablecontent _n
 }
 
 
