@@ -90,7 +90,7 @@ study = StudyDefinition(
 #Pneumonia as control exposure
 
     covid_diagnosis_date=patients.admitted_to_hospital(
-        with_these_diagnoses=asthma_codelist,
+        with_these_diagnoses=asthma_codes,
         returning="date_admitted",
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
@@ -118,7 +118,7 @@ study = StudyDefinition(
     #Exclude all people who died before 2017-02-01
 
     previous_asthma=patients.admitted_to_hospital(
-        with_these_diagnoses=asthma_codelist,
+        with_these_diagnoses=asthma_codes,
         returning="binary_flag",
         between = ["1970-01-01", "2017-01-31"],
         return_expectations={"incidence": 0.05},
