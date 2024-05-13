@@ -3,8 +3,8 @@ from cohortextractor import filter_codes_by_category, patients, combine_codelist
 from codelists import *
 from datetime import datetime, timedelta
 
-def generate_outcomes_2023(index_date_variable):
-    variables_outcomes_2023 = dict(       
+def generate_outcomes_2020(index_date_variable):
+    variables_outcomes_2020 = dict(       
     creatinine_feb2020=patients.mean_recorded_value(
         creatinine_codes,
         on_most_recent_day_of_measurement=False,
@@ -365,4 +365,4 @@ def generate_outcomes_2023(index_date_variable):
         "krt_outcome_primary_care", "krt_outcome_icd_10", "krt_outcome_opcs_4",
     ),
     )
-    return variables_outcomes_2023
+    return variables_outcomes_2020
