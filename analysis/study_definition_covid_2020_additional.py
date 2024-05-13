@@ -28,7 +28,7 @@ study = StudyDefinition(
     },
     population=patients.which_exist_in_file(COVID), 
     #Start of observation period (note, needs to be called index date)
-    index_date="2017-02-01",
+    index_date="2020-02-01",
     case_index_date=patients.with_value_from_file(
         COVID, 
         returning="covid_date", 
