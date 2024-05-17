@@ -24,7 +24,7 @@ use ./output/analysis_asthma_2020_complete.dta, clear
 gen index_date_krt = index_date
 gen exit_date_krt = krt_date
 format exit_date_krt %td
-replace exit_date_krt = min(deregistered_date, death_date, end_date, covid_date) if krt_date==.
+replace exit_date_krt = min(deregistered_date, death_date, end_date, covid_exit) if krt_date==.
 replace exit_date_krt = covid_exit if covid_exit < krt_date
 replace krt_date=. if covid_exit<esrd_date&case==0
 
