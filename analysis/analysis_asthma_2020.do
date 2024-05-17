@@ -184,7 +184,7 @@ format index_date_28 %td
 gen covid_admission_date = date(covid_covariate_date, "YMD")
 format covid_admission_date %td
 drop covid_covariate_date
-drop if covid_admission_date <= index_date_28 | >= index_date - 28
+drop if covid_admission_date <= index_date_28 & covid_admission_date >= (index_date - 28)
 gen covid_covariate = 0
 replace covid_covariate = 1 if covid_admission_date < index_date
 replace covid_admission_date = . if covid_covariate==1
