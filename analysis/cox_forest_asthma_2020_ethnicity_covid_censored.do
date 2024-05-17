@@ -4,9 +4,9 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_forest_asthma_2020_ethnicity.log, replace t
+log using ./logs/cox_forest_asthma_2020_ethnicity_covid_censored.log, replace t
 cap file close tablecontent
-file open tablecontent using ./output/cox_forest_asthma_2020_ethnicity.csv, write text replace
+file open tablecontent using ./output/cox_forest_asthma_2020_ethnicity_covid_censored.csv, write text replace
 file write tablecontent _tab ("model") _tab ("HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
 
 local outcomes "esrd krt chronic_krt egfr_half aki death"
@@ -46,6 +46,8 @@ local label_`i': label ethnicity `i'
 }
 
 foreach out of local outcomes {
+
+replace exit_date_`out' = covid_admission_date if covid_admission_date <= exit_date_`out'
 
 qui stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) scale(365.25)
 

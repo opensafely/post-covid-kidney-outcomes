@@ -180,11 +180,14 @@ format index_date %td
 gen index_date_28 = index_date + 28
 format index_date_28 %td
 
-*Drop if COVID hospitalisation date same as asthma date
+*Drop if COVID hospitalisation date same as asthma date or up to 28 days before/after
 gen covid_admission_date = date(covid_covariate_date, "YMD")
 format covid_admission_date %td
 drop covid_covariate_date
-drop if covid_admission_date==index_date
+drop if covid_admission_date <= index_date_28 | >= index_date - 28
+gen covid_covariate = 0
+replace covid_covariate = 1 if covid_admission_date < index_date
+replace covid_admission_date = . if covid_covariate==1
 
 * Create exit date for COVID amongst general population comparator
 gen covid_exit = date(covid_diagnosis_date, "YMD")

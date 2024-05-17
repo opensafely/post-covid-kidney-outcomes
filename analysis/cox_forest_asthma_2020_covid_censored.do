@@ -3,10 +3,10 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cox_forest_asthma_2020.log, replace t
+log using ./logs/cox_forest_asthma_2020_covid_censored.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/cox_forest_asthma_2020.csv, write text replace
+file open tablecontent using ./output/cox_forest_asthma_2020_covid_censored.csv, write text replace
 file write tablecontent ("model") _tab ("outcome") _tab ("stratum") _tab ("period") _tab ("hr_text") _tab ("hr") _tab ("ll") _tab ("ul") _n
 use ./output/analysis_asthma_2020_complete.dta, clear
 
@@ -79,6 +79,8 @@ local death_lab "Death"
 
 foreach out of local outcomes {
 
+replace exit_date_`out' = covid_admission_date if covid_admission_date <= exit_date_`out'
+
 stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) scale(365.25)
 
 **COVID overall
@@ -94,6 +96,9 @@ file write tablecontent ("Conditional") _tab ("``out'_lab'") _tab ("COVID-19 ove
 
 *Stratified by time to event
 foreach x of local period {
+
+replace exit_date`x'_`out' = covid_admission_date if covid_admission_date <= exit_date`x'_`out'
+
 stset exit_date`x'_`out', fail(`out'_date`x') origin(index_date`x'_`out') id(unique) scale(365.25)
 
 **COVID overall
