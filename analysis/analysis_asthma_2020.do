@@ -333,50 +333,6 @@ label define case 0 "Contemporary comparator" ///
 label values case case
 safetab case 
 
-* COVID-19 severity
-gen covid_severity = case
-replace covid_severity = 2 if covid_hospitalised==1
-replace covid_severity = 3 if covid_critical_care==1
-replace covid_severity = 3 if covid_critical_days==1
-label define covid_severity	0 "Contemporary comparator"		///
-							1 "Non-hospitalised COVID" ///
-							2 "Hospitalised COVID"		///
-							3 "Critical care COVID"
-label values covid_severity covid_severity
-label var covid_severity "SARS-CoV-2 severity"
-drop covid_critical_care
-drop covid_critical_days
-safetab covid_severity, m
-
-* COVID-19 acute kidney injury
-gen covid_aki = case
-replace covid_aki = 2 if covid_hospitalised==1
-replace covid_aki = 3 if covid_acute_kidney_injury==1
-label define covid_aki	0 "Contemporary comparator" 			///
-						1 "Non-hospitalised COVID"		///
-						2 "Hospitalised COVID"	///
-						3 "Hospitalised COVID-AKI"
-label values covid_aki covid_aki
-label var covid_aki "COVID-19 acute kidney injury"
-drop covid_acute_kidney_injury
-safetab covid_aki, m
-
-* COVID-19 kidney replacement therapy
-gen covid_krt_combined = covid_krt_icd_10
-replace covid_krt_combined = covid_krt_opcs_4 if covid_krt_icd_10==0
-gen covid_krt = case
-replace covid_krt = 2 if covid_hospitalised==1
-replace covid_krt = 3 if covid_krt_combined==1
-label define covid_krt	0 "Contemporary comparator" 			///
-						1 "Non-hospitalised SARS-CoV-2"		///
-						2 "No KRT hospitalised COVID-19"	///
-						3 "KRT hospitalised COVID-19"
-label values covid_krt covid_krt
-label var covid_krt "COVID-19 kidney replacement therapy"
-drop covid_krt_icd_10
-drop covid_krt_opcs_4
-safetab covid_krt, m
-
 * COVID-19 vaccination status
 gen covidvax1date = date(covid_vax_1_date, "YMD")
 format covidvax1date %td
@@ -753,12 +709,6 @@ label define esrd_time_cat	1 "<0 days"			///
 							8 "731 to 1096 days"	///
 							9 ">1096 days"
 label values esrd_time_cat esrd_time_cat
-foreach exposure of varlist 	case			///
-								covid_severity	///
-								covid_aki		{
-								by `exposure',sort: sum esrd_time, de
-								tab esrd_time_cat `exposure', m col chi
-								}
 gen exit_date_esrd = esrd_date
 format exit_date_esrd %td
 gen end_date = date("2023-01-31", "YMD")
@@ -787,11 +737,9 @@ label define follow_up_cat_esrd 	1 "<-29 days" 	///
 label values follow_up_cat_esrd follow_up_cat_esrd
 label var follow_up_cat_esrd "Follow_up time"
 tab case follow_up_cat_esrd
-tab covid_krt follow_up_cat_esrd
 drop if follow_up_time_esrd<1
 drop if follow_up_time_esrd>1096
 tab case follow_up_cat_esrd
-tab covid_krt follow_up_cat_esrd
 gen follow_up_years_esrd = follow_up_time_esrd/365.25
 
 * 50% eGFR reduction (earliest month) (or ESRD)
