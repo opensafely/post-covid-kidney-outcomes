@@ -333,39 +333,6 @@ label define case 0 "Contemporary comparator" ///
 label values case case
 safetab case 
 
-* COVID-19 vaccination status
-gen covidvax1date = date(covid_vax_1_date, "YMD")
-format covidvax1date %td
-gen covidvax2date = date(covid_vax_2_date, "YMD")
-format covidvax2date %td
-gen covidvax3date = date(covid_vax_3_date, "YMD")
-format covidvax3date %td
-gen covidvax4date = date(covid_vax_4_date, "YMD")
-format covidvax4date %td
-*First vaccination in the UK was on 08/12/2020
-*di date("20201208", "YMD") -> 22257
-foreach var of varlist covidvax1date covidvax2date covidvax3date covidvax4date {
-replace `var' = . if `var'<22257
-replace `var' = . if `var' >= (index_date - 7)
-}
-gen covid_vax = 1
-replace covid_vax = 2 if covidvax1date!=.
-replace covid_vax = 3 if covidvax2date!=.
-replace covid_vax = 4 if covidvax3date!=.
-replace covid_vax = 5 if covidvax4date!=.
-drop covidvax1date
-drop covidvax2date
-drop covidvax3date
-drop covidvax4date
-label define covid_vax	1 "Pre-vaccination"			///
-						2 "1 vaccine dose"			///
-						3 "2 vaccine doses"			///
-						4 "3 vaccine doses"			///
-						5 "4 vaccine doses"
-label values covid_vax covid_vax
-label var covid_vax "Vaccination status"
-safetab covid_vax, m
-
 * COVID-19 wave
 gen wave = 1
 replace wave = 2 if index_month=="sep2020"
