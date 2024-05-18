@@ -7,7 +7,7 @@ macro drop hr
 log using ./logs/cox_forest_2020_ethnicity_severity.log, replace t
 cap file close tablecontent
 file open tablecontent using ./output/cox_forest_2020_ethnicity_severity.csv, write text replace
-file write tablecontent _tab ("Fully-adjusted HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
+file write tablecontent _tab ("model") _tab ("Fully-adjusted HR (95% CI)") _tab ("hr") _tab ("ll") _tab ("ul") _tab ("p-value for interaction") _n
 
 use ./output/analysis_complete_2020.dta, clear
 replace covid_severity=2 if covid_severity==3
@@ -66,13 +66,41 @@ local int_`j'`i'll = r(lb)
 local int_`j'`i'ul = r(ub)
 }
 }
-file write tablecontent ("``out'_lab'") _tab _tab _tab _tab _tab (`p') _n
+file write tablecontent ("``out'_lab'") _tab _tab _tab _tab _tab _tab (`p') _n
 forvalues j=1/2 {
 file write tablecontent ("`label`j''") _n
-file write tablecontent ("`label_1'") _tab %4.2f (`int_`j'1b') (" (") %4.2f (`int_`j'1ll') ("-") %4.2f (`int_`j'1ul') (")") _tab %4.2f (`int_`j'1b') _tab %4.2f (`int_`j'1ll') _tab %4.2f (`int_`j'1ul') _n
+file write tablecontent ("`label_1'") _tab ("Conditional") _tab %4.2f (`int_`j'1b') (" (") %4.2f (`int_`j'1ll') ("-") %4.2f (`int_`j'1ul') (")") _tab %4.2f (`int_`j'1b') _tab %4.2f (`int_`j'1ll') _tab %4.2f (`int_`j'1ul') _n
 forvalues i=2/5 {
-file write tablecontent ("`label_`i''") _tab %4.2f (`int_`j'`i'b') (" (") %4.2f (`int_`j'`i'll') ("-") %4.2f (`int_`j'`i'ul') (")") _tab %4.2f (`int_`j'`i'b') _tab %4.2f (`int_`j'`i'll') _tab %4.2f (`int_`j'`i'ul') _n
+file write tablecontent ("`label_`i''") _tab ("Conditional") _tab %4.2f (`int_`j'`i'b') (" (") %4.2f (`int_`j'`i'll') ("-") %4.2f (`int_`j'`i'ul') (")") _tab %4.2f (`int_`j'`i'b') _tab %4.2f (`int_`j'`i'll') _tab %4.2f (`int_`j'`i'ul') _n
 }
+
+drop age1 age2 age3
+mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&bmi!=.&smoking!=., cubic nknots(4)
+
+*Obtain p-values for interaction
+qui stcox i.covid_severity i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3 i.sex i.stp
+est store a
+qui stcox i.covid_severity##i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3 i.sex i.stp 
+est store b
+qui lrtest b a
+local p = r(p)
+*Obtain stratum specific HRs
+forvalues j=1/2 {
+forvalues i=1/5 {
+lincom `j'.covid_severity + `j'.covid_severity#`i'.ethnicity, eform
+local int_`j'`i'b = r(estimate)
+local int_`j'`i'll = r(lb)
+local int_`j'`i'ul = r(ub)
+}
+}
+file write tablecontent ("``out'_lab'") _tab _tab _tab _tab _tab _tab (`p') _n
+forvalues j=1/2 {
+file write tablecontent ("`label`j''") _n
+file write tablecontent ("`label_1'") _tab ("Frequency") _tab %4.2f (`int_`j'1b') (" (") %4.2f (`int_`j'1ll') ("-") %4.2f (`int_`j'1ul') (")") _tab %4.2f (`int_`j'1b') _tab %4.2f (`int_`j'1ll') _tab %4.2f (`int_`j'1ul') _n
+forvalues i=2/5 {
+file write tablecontent ("`label_`i''") _tab ("Frequency") _tab %4.2f (`int_`j'`i'b') (" (") %4.2f (`int_`j'`i'll') ("-") %4.2f (`int_`j'`i'ul') (")") _tab %4.2f (`int_`j'`i'b') _tab %4.2f (`int_`j'`i'll') _tab %4.2f (`int_`j'`i'ul') _n
+}
+
 }
 
 
