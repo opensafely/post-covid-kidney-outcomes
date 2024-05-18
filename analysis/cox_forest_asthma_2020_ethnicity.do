@@ -56,9 +56,9 @@ mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&bmi!=.&smoking!
 
 file write tablecontent ("``out'_lab'") _n
 
-qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax i.covid_covariate age1 age2 age3 i.sex i.stp
+qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_covariate age1 age2 age3 i.sex i.stp
 est store a
-qui stcox i.case##i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax i.covid_covariate age1 age2 age3 i.sex i.stp
+qui stcox i.case##i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_covariate age1 age2 age3 i.sex i.stp
 est store b
 qui lrtest b a
 local p = r(p)
@@ -77,9 +77,9 @@ file write tablecontent ("`label_`i''") _tab ("Frequency") _tab %4.2f (`int_`i'b
 
 **Analysis stratified by matched set
 
-qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax i.covid_covariate, strata(set_id)
+qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_covariate, strata(set_id)
 est store a
-qui stcox i.case##i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax i.covid_covariate, strata(set_id)
+qui stcox i.case##i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_covariate, strata(set_id)
 est store b
 qui lrtest b a
 local p = r(p)

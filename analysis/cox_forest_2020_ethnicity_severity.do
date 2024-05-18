@@ -73,7 +73,7 @@ file write tablecontent ("`label_1'") _tab ("Conditional") _tab %4.2f (`int_`j'1
 forvalues i=2/5 {
 file write tablecontent ("`label_`i''") _tab ("Conditional") _tab %4.2f (`int_`j'`i'b') (" (") %4.2f (`int_`j'`i'll') ("-") %4.2f (`int_`j'`i'ul') (")") _tab %4.2f (`int_`j'`i'b') _tab %4.2f (`int_`j'`i'll') _tab %4.2f (`int_`j'`i'ul') _n
 }
-
+}
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&bmi!=.&smoking!=., cubic nknots(4)
 
@@ -100,8 +100,8 @@ file write tablecontent ("`label_1'") _tab ("Frequency") _tab %4.2f (`int_`j'1b'
 forvalues i=2/5 {
 file write tablecontent ("`label_`i''") _tab ("Frequency") _tab %4.2f (`int_`j'`i'b') (" (") %4.2f (`int_`j'`i'll') ("-") %4.2f (`int_`j'`i'ul') (")") _tab %4.2f (`int_`j'`i'b') _tab %4.2f (`int_`j'`i'll') _tab %4.2f (`int_`j'`i'ul') _n
 }
-
 }
 
+}
 
 file close tablecontent
