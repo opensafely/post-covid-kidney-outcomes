@@ -2292,3 +2292,77 @@ actions:
       moderately_sensitive:
         log: logs/cca_events_ethnicity_2020_wave.log
         output: output/cca_events_ethnicity_2020_wave.csv
+
+  analysis_cabg_2020:
+    run: stata-mp:latest analysis/analysis_cabg_2020.do
+    needs: [extract_asthma_matching_2020, clean_covid_matching_2020, extract_2020_matching_asthma, clean_2020_matching, split_stps_2020, match_2020_stp5, match_2020_stp6, match_2020_stp7, match_2020_stp8, match_2020_stp9, match_2020_stp10, match_2020_stp12, match_2020_stp13, match_2020_stp14, match_2020_stp15, match_2020_stp16, match_2020_stp17, match_2020_stp20, match_2020_stp21, match_2020_stp22, match_2020_stp23, match_2020_stp24, match_2020_stp25, match_2020_stp26, match_2020_stp27, match_2020_stp29, match_2020_stp33, match_2020_stp35, match_2020_stp36, match_2020_stp37, match_2020_stp40, match_2020_stp41, match_2020_stp42, match_2020_stp43, match_2020_stp44, match_2020_stp49, combine_stps_covid_2020, combine_stps_matches_2020, extract_covid_2020_additional, extract_2020_additional]
+    outputs:
+      highly_sensitive:
+        analysis: output/analysis_cabg_2020.dta
+      moderately_sensitive:
+        log: logs/analysis_cabg_2020.log
+
+  analysis_cabg_2020_complete:
+    run: stata-mp:latest analysis/analysis_cabg_2020_complete.do
+    needs: [analysis_cabg_2020]
+    outputs:
+      highly_sensitive:
+        analysis_2020: output/analysis_cabg_2020_complete.dta
+      moderately_sensitive:
+        log: logs/analysis_cabg_2020_complete.log
+
+  descriptive_cca_cabg_2020:
+    run: stata-mp:latest analysis/descriptive_cca_cabg_2020.do
+    needs: [analysis_cabg_2020_complete]
+    outputs:
+      moderately_sensitive:
+        log: logs/descriptive_cca_cabg_2020.log
+        output: output/descriptive_cca_cabg_2020.csv
+
+  cox_forest_cabg_2020_ethnicity:
+    run: stata-mp:latest analysis/cox_forest_cabg_2020_ethnicity.do
+    needs: [analysis_cabg_2020_complete]
+    outputs:
+      moderately_sensitive:
+        log: logs/cox_forest_cabg_2020_ethnicity.log
+        output: output/cox_forest_cabg_2020_ethnicity.csv
+
+  cox_forest_cabg_2020_ethnicity_covid_censored:
+    run: stata-mp:latest analysis/cox_forest_cabg_2020_ethnicity_covid_censored.do
+    needs: [analysis_cabg_2020_complete]
+    outputs:
+      moderately_sensitive:
+        log: logs/cox_forest_cabg_2020_ethnicity_covid_censored.log
+        output: output/cox_forest_cabg_2020_ethnicity_covid_censored.csv
+
+  cca_events_cabg_2020:
+    run: stata-mp:latest analysis/cca_events_cabg_2020.do
+    needs: [analysis_cabg_2020_complete]
+    outputs:
+      moderately_sensitive:
+        log: logs/cca_events_cabg_2020.log
+        output: output/cca_events_cabg_2020.csv
+
+  cca_events_cabg_2020_covid_censored:
+    run: stata-mp:latest analysis/cca_events_cabg_2020_covid_censored.do
+    needs: [analysis_cabg_2020_complete]
+    outputs:
+      moderately_sensitive:
+        log: logs/cca_events_cabg_2020_covid_censored.log
+        output: output/cca_events_cabg_2020_covid_censored.csv
+
+  cox_forest_cabg_2020:
+    run: stata-mp:latest analysis/cox_forest_cabg_2020.do
+    needs: [analysis_cabg_2020_complete]
+    outputs:
+      moderately_sensitive:
+        log: logs/cox_forest_cabg_2020.log
+        output: output/cox_forest_cabg_2020.csv
+
+  cox_forest_cabg_2020_covid_censored:
+    run: stata-mp:latest analysis/cox_forest_cabg_2020_covid_censored.do
+    needs: [analysis_cabg_2020_complete]
+    outputs:
+      moderately_sensitive:
+        log: logs/cox_forest_cabg_2020_covid_censored.log
+        output: output/cox_forest_cabg_2020_covid_censored.csv
