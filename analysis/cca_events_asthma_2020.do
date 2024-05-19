@@ -3,13 +3,13 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cca_events_asthma_2017.log, replace t
+log using ./logs/cca_events_asthma_2020.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/cca_events_asthma_2017.csv, write text replace
+file open tablecontent using ./output/cca_events_asthma_2020.csv, write text replace
 file write tablecontent _tab ("Asthma cohort (pre-pandemic)") _tab ("Matched cohort (pre-pandemic)") _n
 
-use ./output/analysis_asthma_2017_complete.dta, clear
+use ./output/analysis_asthma_2020_complete.dta, clear
 
 *ESRD = RRT only
 gen index_date_krt = index_date
