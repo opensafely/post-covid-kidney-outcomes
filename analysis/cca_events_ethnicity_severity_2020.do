@@ -3,10 +3,10 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/cca_events_ethnicity_2020.log, replace t
+log using ./logs/cca_events_ethnicity_severity_2020.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/cca_events_ethnicity_2020.csv, write text replace
+file open tablecontent using ./output/cca_events_ethnicity_severity_2020.csv, write text replace
 file write tablecontent ("ethnicity") _tab ("outcome") _tab ("severity") _tab ("COVID-19 cohort") _tab ("Matched cohort (pre-pandemic)") _n
 
 use ./output/analysis_complete_2020.dta, clear
