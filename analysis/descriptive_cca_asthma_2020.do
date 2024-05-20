@@ -329,20 +329,6 @@ local controls_covid_covariate = round(r(N),5)
 local controls_covid_covariate_pc = (`controls_covid_covariate'/`controls_2020')*100
 file write tablecontent %9.0f (`cases_covid_covariate') (" (") %4.1f (`cases_covid_covariate_pc') (")") _tab %9.0f (`controls_covid_covariate') (" (") %4.1f (`controls_covid_covariate_pc') (")") _n
 
-*COVID-19 vaccination
-file write tablecontent ("COVID-19 vaccination status") _n
-forvalues vax=1/5 {
-local label_`vax': label covid_vax `vax'
-file write tablecontent ("`label_`vax''") _tab
-qui safecount if covid_vax==`vax' & case==1
-local cases_`vax' = round(r(N),5)
-local cases_`vax'_pc = (`cases_`vax''/`cases_2020')*100
-qui safecount if covid_vax==`vax' & case==0
-local controls_`vax' = round(r(N),5)
-local controls_`vax'_pc = (`controls_`vax''/`controls_2020')*100
-file write tablecontent %9.0f (`cases_`vax'') (" (") %4.1f (`cases_`vax'_pc') (")") _tab %9.0f (`controls_`vax'') (" (") %4.1f (`controls_`vax'_pc') (")") _n
-}
-
 *COVID-19 wave
 file write tablecontent ("COVID-19 wave") _n
 forvalues wave=1/4 {
