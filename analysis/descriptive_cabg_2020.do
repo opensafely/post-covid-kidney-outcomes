@@ -3,15 +3,15 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/descriptive_cca_cabg_2020.log, replace t
+log using ./logs/descriptive_cabg_2020.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/descriptive_cca_cabg_2020.csv, write text replace
+file open tablecontent using ./output/descriptive_cabg_2020.csv, write text replace
 file write tablecontent _tab ("Coronary revascularisation cohort (n(%))") _tab ("Matched contemporary cohort (n(%))") _n
 
 *Total
 file write tablecontent ("Total") _tab
-use ./output/analysis_cabg_2020_complete.dta, clear
+use ./output/analysis_cabg_2020.dta, clear
 qui safecount if case==1
 local cases_2020 = round(r(N),5)
 qui safecount if case==0
