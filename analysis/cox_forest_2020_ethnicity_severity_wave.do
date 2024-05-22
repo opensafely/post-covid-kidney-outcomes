@@ -107,7 +107,7 @@ forvalues i=2/5 {
 file write tablecontent ("`label_`i''") _tab ("Frequency") _tab ("`wave_`w''") _tab ("`severity_`j''") _tab %4.2f (`int_`j'`i'b') (" (") %4.2f (`int_`j'`i'll') ("-") %4.2f (`int_`j'`i'ul') (")") _tab %4.2f (`int_`j'`i'b') _tab %4.2f (`int_`j'`i'll') _tab %4.2f (`int_`j'`i'ul') _n
 }
 }
-
+}
 }
 
 file close tablecontent
