@@ -5,6 +5,8 @@ cap log close
 macro drop hr
 log using ./logs/ph_2020.log, replace t
 
+use ./output/analysis_complete_2020.dta, clear
+
 local outcomes "esrd egfr_half aki death"
 
 foreach out of local outcomes {
