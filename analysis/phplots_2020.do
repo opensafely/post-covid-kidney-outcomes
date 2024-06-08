@@ -45,9 +45,11 @@ foreach out of local outcomes {
 stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) scale(365.25)
 drop age1 age2 age3
 mkspline age = age if _st==1&sex!=.&ethnicity!=.&imd!=.&urban!=.&region!=.&bmi!=.&smoking!=., cubic nknots(4)
-stphplot, by(case) adjustfor(age1 age2 age3 i.sex i.stp i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax)
+qui stcox i.case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3 i.sex i.stp, vce(cluster practice_id)
+stcurve, cumhaz at (case=0 case=1)
 graph export "./output/stph_2020_case_`out'.png", as(png) replace
-stphplot, by(covid_severity) adjustfor(age1 age2 age3 i.sex i.stp i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax)
+qui stcox i.covid_severity i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax age1 age2 age3 i.sex i.stp, vce(cluster practice_id)
+stcurve, cumhaz at (covid_severity=0 covid_severity=1 covid_severity=2)
 graph export "./output/stph_2020_severity_`out'.png", as(png) replace
 }
 
