@@ -39,7 +39,7 @@ replace ckd_stage5 = 1 if ckd_stage==5
 gen ckd_stage6 = 0
 replace ckd_stage6 = 1 if ckd_stage==6
 
-local outcomes "esrd egfr_half death"
+/*local outcomes "esrd egfr_half death"
 
 foreach out of local outcomes {
 stset exit_date_`out', fail(`out'_date) origin(index_date_`out') id(unique) scale(365.25)
@@ -52,6 +52,7 @@ qui stcox i.covid_severity i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage
 stcurve, cumhaz at (covid_severity=0 covid_severity=1 covid_severity=2)
 graph export "./output/stph_2020_severity_`out'.png", as(png) replace
 }
+*/
 
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 qui stcox case ethnicity1 ethnicity2 ethnicity3 ethnicity4 ethnicity5 ckd_stage1 ckd_stage2 ckd_stage3 ckd_stage4 ckd_stage5 ckd_stage6 aki_baseline diabetes i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
