@@ -58,11 +58,11 @@ stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(3
 qui stcox case ethnicity1 ethnicity2 ethnicity3 ethnicity4 ethnicity5 ckd_stage1 ckd_stage2 ckd_stage3 ckd_stage4 ckd_stage5 ckd_stage6 aki_baseline diabetes i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 foreach var of varlist case ckd_stage1 ckd_stage2 ckd_stage3 ckd_stage4 ckd_stage5 ckd_stage6 aki_baseline diabetes {
 estat phtest, plot(`var')
-graph export "./output/phplot_2020_case_esrd_`var'.png", as(png) replace
+graph export "./output/phplot_2020_case_esrd_`var'.svg", as(svg) replace
 }
 qui stcox covid_severity0 covid_severity1 covid_severity2 ethnicity1 ethnicity2 ethnicity3 ethnicity4 ethnicity5 ckd_stage1 ckd_stage2 ckd_stage3 ckd_stage4 ckd_stage5 ckd_stage6 aki_baseline diabetes i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 foreach var of varlist covid_severity0 covid_severity1 covid_severity2 ckd_stage1 ckd_stage2 ckd_stage3 ckd_stage4 ckd_stage5 ckd_stage6 aki_baseline diabetes {
 estat phtest, plot(`var')
-graph export "./output/phplot_2020_severity_esrd_`var'.png", as(png) replace
+graph export "./output/phplot_2020_severity_esrd_`var'.svg", as(svg) replace
 }
 
