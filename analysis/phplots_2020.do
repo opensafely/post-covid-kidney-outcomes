@@ -7,7 +7,7 @@ log using ./logs/phplots_2020.log, replace t
 
 use ./output/analysis_complete_2020.dta, clear
 
-drop ethnicity1
+/*drop ethnicity1
 
 replace covid_severity = 2 if covid_severity==3
 gen covid_severity1 = 0
@@ -37,7 +37,7 @@ replace ckd_stage4 = 1 if ckd_stage==4
 gen ckd_stage5 = 0
 replace ckd_stage5 = 1 if ckd_stage==5
 gen ckd_stage6 = 0
-replace ckd_stage6 = 1 if ckd_stage==6
+replace ckd_stage6 = 1 if ckd_stage==6*/
 
 /*local outcomes "esrd egfr_half death"
 
@@ -68,8 +68,17 @@ graph export "./output/stph_2020_severity_`out'.png", as(png) replace
 }
 */
 
+gen ln_time_esrd = ln(follow_up_time_esrd)
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
-qui stcox case ethnicity1 ethnicity2 ethnicity3 ethnicity4 ethnicity5 ckd_stage1 ckd_stage2 ckd_stage3 ckd_stage4 ckd_stage5 ckd_stage6 aki_baseline diabetes i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
+qui stcox i.case##c.ln_time_esrd i.ethnicity##c.ln_time_esrd i.ckd_stage##c.ln_time_esrd i.aki_baseline##c.ln_time_esrd i.diabetes##c.ln_time_esrd i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
+estat phtest, d
+qui stcox i.covid_severity##c.ln_time_esrd i.ethnicity##c.ln_time_esrd i.ckd_stage##c.ln_time_esrd i.aki_baseline##c.ln_time_esrd i.diabetes##c.ln_time_esrd i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
+estat phtest, d
+
+
+/*
+stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
+qui stcox i.case##c.ln_time_esrd ethnicity1 ethnicity2 ethnicity3 ethnicity4 ethnicity5 ckd_stage1 ckd_stage2 ckd_stage3 ckd_stage4 ckd_stage5 ckd_stage6 aki_baseline diabetes i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 foreach var of varlist case ckd_stage1 ckd_stage2 ckd_stage3 ckd_stage4 ckd_stage5 ckd_stage6 aki_baseline diabetes {
 estat phtest, plot(`var')
 graph export "./output/phplot_2020_case_esrd_`var'.svg", as(svg) replace
@@ -79,4 +88,5 @@ foreach var of varlist covid_severity0 covid_severity1 covid_severity2 ckd_stage
 estat phtest, plot(`var')
 graph export "./output/phplot_2020_severity_esrd_`var'.svg", as(svg) replace
 }
+*/
 
