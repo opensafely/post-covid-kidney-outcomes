@@ -70,9 +70,9 @@ graph export "./output/stph_2020_severity_`out'.png", as(png) replace
 
 gen ln_time_esrd = ln(follow_up_time_esrd)
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
-qui stcox i.case##c.ln_time_esrd i.ethnicity##c.ln_time_esrd i.ckd_stage##c.ln_time_esrd i.aki_baseline##c.ln_time_esrd i.diabetes##c.ln_time_esrd i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
+qui stcox i.case##c.ln_time_esrd i.ethnicity i.ckd_stage i.aki_baseline i.diabetes i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 estat phtest, d
-qui stcox i.covid_severity##c.ln_time_esrd i.ethnicity##c.ln_time_esrd i.ckd_stage##c.ln_time_esrd i.aki_baseline##c.ln_time_esrd i.diabetes##c.ln_time_esrd i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
+qui stcox i.covid_severity##c.ln_time_esrd i.ethnicity i.ckd_stage i.aki_baseline i.diabetes i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 estat phtest, d
 
 
