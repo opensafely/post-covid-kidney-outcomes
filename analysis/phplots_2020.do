@@ -70,18 +70,22 @@ graph export "./output/stph_2020_severity_`out'.png", as(png) replace
 
 
 gen follow_up_esrd = follow_up_time_esrd
-recode follow_up_esrd	min/29=1 	///
-						30/89=2 	///
-						90/179=3			///
-						180/max=4 
+recode follow_up_esrd	min/89=1 	///
+						90/max=2
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 stcox i.case i.ethnicity i.ckd_stage i.aki_baseline i.diabetes i.bmi i.smoking i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 estat phtest, d
 stcox i.case##i.follow_up_esrd i.ethnicity i.ckd_stage i.aki_baseline i.diabetes i.bmi i.smoking i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
+lincom 1.case, eform
+lincom 1.case + 1.case#2.follow_up_esrd, eform
 estat phtest, d
-stcox i.case##i.follow_up_esrd i.ethnicity i.ckd_stage i.aki_baseline i.diabetes i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
-estat phtest, d
-stcox i.case##i.follow_up_esrd i.ethnicity##i.follow_up_esrd i.ckd_stage##i.follow_up_esrd i.aki_baseline##i.follow_up_esrd i.diabetes##i.follow_up_esrd i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
+drop if ckd_stage==5
+replace ckd_stage=5 if ckd_stage==6
+label define ckd_stage2 1 "No CKD" 2 "CKD 3A" 3 "CKD 3B" 4 "CKD 4" 5 "No baseline eGFR measurement"
+label values ckd_stage ckd_stage2
+stcox i.case##i.follow_up_esrd i.ethnicity i.ckd_stage##i.follow_up_esrd i.aki_baseline##i.follow_up_esrd i.diabetes##i.follow_up_esrd i.imd i.urban i.bmi i.smoking i.cardiovascular i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
+lincom 1.case, eform
+lincom 1.case + 1.case#2.follow_up_esrd, eform
 estat phtest, d
 
 
