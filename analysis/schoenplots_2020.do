@@ -17,7 +17,7 @@ graph export ./output/km_2020_case_`out'.svg, as(svg) replace
 sts graph, by(covid_severity) title("`out'") graphregion(fcolor(white)) ylabel(.75(.1)1)
 graph export ./output/km_2020_severity_`out'.svg, as(svg) replace
 
-qui stcox case i.ethnicity /*i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)*/
+qui stcox case i.ethnicity i.imd i.urban i.bmi i.smoking i.ckd_stage i.aki_baseline i.cardiovascular i.diabetes i.hypertension i.immunosuppressed i.non_haem_cancer i.gp_consults i.admissions i.covid_vax, vce(cluster practice_id) strata(set_id)
 estat phtest, detail
 * Plot schoenfeld residuals 
 estat phtest, plot(case) ///
