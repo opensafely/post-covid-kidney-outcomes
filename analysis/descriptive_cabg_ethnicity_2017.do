@@ -3,21 +3,20 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/descriptive_ethnicity_severity_2017.log, replace t
+log using ./logs/descriptive_cabg_ethnicity_2017.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/descriptive_ethnicity_severity_2017.csv, write text replace
-file write tablecontent _tab ("Hospitalised COVID-19 (n(%))") _tab _tab _tab _tab _tab _tab ("Non-hospitalised COVID_19 (n(%))") _tab _tab _tab _tab _tab _tab _n
+file open tablecontent using ./output/descriptive_cabg_ethnicity_2017.csv, write text replace
+file write tablecontent _tab ("COVID-19 cohort (n(%))") _tab _tab _tab _tab _tab _tab ("Matched contemporary cohort (n(%))") _tab _tab _tab _tab _tab _tab _n
 file write tablecontent _tab ("White") _tab ("South Asian") _tab ("Black") _tab ("Mixed") _tab ("Other") _tab ("Unknown") _tab ("White") _tab ("South Asian") _tab ("Black") _tab ("Mixed") _tab ("Other") _tab ("Unknown") _n
 
 *Total
 file write tablecontent ("Total") _tab
-use ./output/analysis_2017.dta, clear
-replace covid_severity=2 if covid_severity==3
+use ./output/analysis_cabg_2017.dta, clear
 forvalues i=1/6 {
-qui safecount if covid_severity==2 & ethnicity1==`i'
+qui safecount if case==1 & ethnicity1==`i'
 local cases_`i' = round(r(N),5)
-qui safecount if covid_severity==1 & ethnicity1==`i'
+qui safecount if case==0 & ethnicity1==`i'
 local controls_`i' = round(r(N),5)
 }
 
@@ -43,11 +42,11 @@ file write tablecontent _n
 *Total follow-up time
 file write tablecontent ("Median follow-up (days) (IQR)") _tab
 forvalues i=1/6 {
-qui sum follow_up_time_esrd if covid_severity==2 & ethnicity1==`i', d
+qui sum follow_up_time_esrd if case==1 & ethnicity1==`i', d
 local cases_q2_`i' = r(p50)
 local cases_q1_`i' = r(p25)
 local cases_q3_`i' = r(p75)
-qui sum follow_up_time_esrd if covid_severity==1 & ethnicity1==`i', d
+qui sum follow_up_time_esrd if case==0 & ethnicity1==`i', d
 local controls_q2_`i' = r(p50)
 local controls_q1_`i' = r(p25)
 local controls_q3_`i' = r(p75)
@@ -76,11 +75,11 @@ file write tablecontent _n
 *Age
 file write tablecontent ("Median age (IQR)") _tab
 forvalues i=1/6 {
-qui sum age if covid_severity==2 & ethnicity1==`i', d
+qui sum age if case==1 & ethnicity1==`i', d
 local cases_q2_`i' = r(p50)
 local cases_q1_`i' = r(p25)
 local cases_q3_`i' = r(p75)
-qui sum age if covid_severity==1 & ethnicity1==`i', d
+qui sum age if case==0 & ethnicity1==`i', d
 local controls_q2_`i' = r(p50)
 local controls_q1_`i' = r(p25)
 local controls_q3_`i' = r(p75)
@@ -110,10 +109,10 @@ forvalues age=1/6 {
 local label_`age': label agegroup `age'
 file write tablecontent ("`label_`age''") _tab
 forvalues i=1/6 {
-qui safecount if agegroup==`age' & covid_severity==2 & ethnicity1==`i'
+qui safecount if agegroup==`age' & case==1 & ethnicity1==`i'
 local cases_`age'_`i' = round(r(N),5)
 local cases_`age'_pc_`i' = (`cases_`age'_`i''/`cases_`i'')*100
-qui safecount if agegroup==`age' & covid_severity==1 & ethnicity1==`i'
+qui safecount if agegroup==`age' & case==0 & ethnicity1==`i'
 local controls_`age'_`i' = round(r(N),5)
 local controls_`age'_pc_`i' = (`controls_`age'_`i''/`controls_`i'')*100
 }
@@ -143,10 +142,10 @@ forvalues sex=0/1 {
 local label_`sex': label sex `sex'
 file write tablecontent ("`label_`sex''") _tab
 forvalues i=1/6 {
-qui safecount if sex==`sex' & covid_severity==2 & ethnicity1==`i'
+qui safecount if sex==`sex' & case==1 & ethnicity1==`i'
 local cases_`sex'_`i' = round(r(N),5)
 local cases_`sex'_pc_`i' = (`cases_`sex'_`i''/`cases_`i'')*100
-qui safecount if sex==`sex' & covid_severity==1 & ethnicity1==`i'
+qui safecount if sex==`sex' & case==0 & ethnicity1==`i'
 local controls_`sex'_`i' = round(r(N),5)
 local controls_`sex'_pc_`i' = (`controls_`sex'_`i''/`controls_`i'')*100
 }
@@ -176,10 +175,10 @@ forvalues imd=1/5 {
 local label_`imd': label imd `imd'
 file write tablecontent ("`label_`imd''") _tab
 forvalues i=1/6 {
-qui safecount if imd==`imd' & covid_severity==2 & ethnicity1==`i'
+qui safecount if imd==`imd' & case==1 & ethnicity1==`i'
 local cases_`imd'_`i' = round(r(N),5)
 local cases_`imd'_pc_`i' = (`cases_`imd'_`i''/`cases_`i'')*100
-qui safecount if imd==`imd' & covid_severity==1 & ethnicity1==`i'
+qui safecount if imd==`imd' & case==0 & ethnicity1==`i'
 local controls_`imd'_`i' = round(r(N),5)
 local controls_`imd'_pc_`i' = (`controls_`imd'_`i''/`controls_`i'')*100
 }
@@ -209,10 +208,10 @@ forvalues region=1/9 {
 local label_`region': label region `region'
 file write tablecontent ("`label_`region''") _tab
 forvalues i=1/6 {
-qui safecount if region==`region' & covid_severity==2 & ethnicity1==`i'
+qui safecount if region==`region' & case==1 & ethnicity1==`i'
 local cases_`region'_`i' = round(r(N),5)
 local cases_`region'_pc_`i' = (`cases_`region'_`i''/`cases_`i'')*100
-qui safecount if region==`region' & covid_severity==1 & ethnicity1==`i'
+qui safecount if region==`region' & case==0 & ethnicity1==`i'
 local controls_`region'_`i' = round(r(N),5)
 local controls_`region'_pc_`i' = (`controls_`region'_`i''/`controls_`i'')*100
 }
@@ -242,10 +241,10 @@ forvalues urban=0/1 {
 local label_`urban': label urban `urban'
 file write tablecontent ("`label_`urban''") _tab
 forvalues i=1/6 {
-qui safecount if urban==`urban' & covid_severity==2 & ethnicity1==`i'
+qui safecount if urban==`urban' & case==1 & ethnicity1==`i'
 local cases_`urban'_`i' = round(r(N),5)
 local cases_`urban'_pc_`i' = (`cases_`urban'_`i''/`cases_`i'')*100
-qui safecount if urban==`urban' & covid_severity==1 & ethnicity1==`i'
+qui safecount if urban==`urban' & case==0 & ethnicity1==`i'
 local controls_`urban'_`i' = round(r(N),5)
 local controls_`urban'_pc_`i' = (`controls_`urban'_`i''/`controls_`i'')*100
 }
@@ -275,10 +274,10 @@ forvalues bmi=1/6 {
 local label_`bmi': label bmi `bmi'
 file write tablecontent ("`label_`bmi''") _tab
 forvalues i=1/6 {
-qui safecount if bmi==`bmi' & covid_severity==2 & ethnicity1==`i'
+qui safecount if bmi==`bmi' & case==1 & ethnicity1==`i'
 local cases_`bmi'_`i' = round(r(N),5)
 local cases_`bmi'_pc_`i' = (`cases_`bmi'_`i''/`cases_`i'')*100
-qui safecount if bmi==`bmi' & covid_severity==1 & ethnicity1==`i'
+qui safecount if bmi==`bmi' & case==0 & ethnicity1==`i'
 local controls_`bmi'_`i' = round(r(N),5)
 local controls_`bmi'_pc_`i' = (`controls_`bmi'_`i''/`controls_`i'')*100
 }
@@ -303,10 +302,10 @@ file write tablecontent _n
 }
 file write tablecontent ("Missing") _tab
 forvalues i=1/6 {
-qui safecount if bmi==. & covid_severity==2 & ethnicity1==`i'
+qui safecount if bmi==. & case==1 & ethnicity1==`i'
 local cases_bmi_`i' = round(r(N),5)
 local cases_bmi_pc_`i' = (`cases_bmi_`i''/`cases_`i'')*100
-qui safecount if bmi==. & covid_severity==1 & ethnicity1==`i'
+qui safecount if bmi==. & case==0 & ethnicity1==`i'
 local controls_bmi_`i' = round(r(N),5)
 local controls_bmi_pc_`i' = (`controls_bmi_`i''/`controls_`i'')*100
 }
@@ -337,10 +336,10 @@ forvalues smoking=0/1 {
 local label_`smoking': label smoking `smoking'
 file write tablecontent ("`label_`smoking''") _tab
 forvalues i=1/6 {
-qui safecount if smoking==`smoking' & covid_severity==2 & ethnicity1==`i'
+qui safecount if smoking==`smoking' & case==1 & ethnicity1==`i'
 local cases_`smoking'_`i' = round(r(N),5)
 local cases_`smoking'_pc_`i' = (`cases_`smoking'_`i''/`cases_`i'')*100
-qui safecount if smoking==`smoking' & covid_severity==1 & ethnicity1==`i'
+qui safecount if smoking==`smoking' & case==0 & ethnicity1==`i'
 local controls_`smoking'_`i' = round(r(N),5)
 local controls_`smoking'_pc_`i' = (`controls_`smoking'_`i''/`controls_`i'')*100
 }
@@ -365,10 +364,10 @@ file write tablecontent _n
 }
 file write tablecontent ("Missing") _tab
 forvalues i=1/6 {
-qui safecount if smoking==. & covid_severity==2 & ethnicity1==`i'
+qui safecount if smoking==. & case==1 & ethnicity1==`i'
 local cases_smoking_`i' = round(r(N),5)
 local cases_smoking_pc_`i' = (`cases_smoking_`i''/`cases_`i'')*100
-qui safecount if smoking==. & covid_severity==1 & ethnicity1==`i'
+qui safecount if smoking==. & case==0 & ethnicity1==`i'
 local controls_smoking_`i' = round(r(N),5)
 local controls_smoking_pc_`i' = (`controls_smoking_`i''/`controls_`i'')*100
 }
@@ -395,11 +394,11 @@ file write tablecontent _n
 *Baseline eGFR
 file write tablecontent ("Median baseline eGFR (IQR)") _tab
 forvalues i=1/6 {
-qui sum baseline_egfr if covid_severity==2 & ethnicity1==`i', d
+qui sum baseline_egfr if case==1 & ethnicity1==`i', d
 local cases_q2_`i' = r(p50)
 local cases_q1_`i' = r(p25)
 local cases_q3_`i' = r(p75)
-qui sum baseline_egfr if covid_severity==1 & ethnicity1==`i', d
+qui sum baseline_egfr if case==0 & ethnicity1==`i', d
 local controls_q2_`i' = r(p50)
 local controls_q1_`i' = r(p25)
 local controls_q3_`i' = r(p75)
@@ -428,10 +427,10 @@ forvalues group=1/7 {
 local label_`group': label egfr_group `group'
 file write tablecontent ("`label_`group''") _tab
 forvalues i=1/6 {
-qui safecount if egfr_group==`group' & covid_severity==2 & ethnicity1==`i'
+qui safecount if egfr_group==`group' & case==1 & ethnicity1==`i'
 local cases_`group'_`i' = round(r(N),5)
 local cases_`group'_pc_`i' = (`cases_`group'_`i''/`cases_`i'')*100
-qui safecount if egfr_group==`group' & covid_severity==1 & ethnicity1==`i'
+qui safecount if egfr_group==`group' & case==0 & ethnicity1==`i'
 local controls_`group'_`i' = round(r(N),5)
 local controls_`group'_pc_`i' = (`controls_`group'_`i''/`controls_`i'')*100
 }
@@ -459,10 +458,10 @@ file write tablecontent _n
 *AKI
 file write tablecontent ("Previous acute kidney injury") _tab
 forvalues i=1/6 {
-qui safecount if aki_baseline==1 & covid_severity==2 & ethnicity1==`i'
+qui safecount if aki_baseline==1 & case==1 & ethnicity1==`i'
 local cases_aki_`i' = round(r(N),5)
 local cases_aki_pc_`i' = (`cases_aki_`i''/`cases_`i'')*100
-qui safecount if aki_baseline==1 & covid_severity==1 & ethnicity1==`i'
+qui safecount if aki_baseline==1 & case==0 & ethnicity1==`i'
 local controls_aki_`i' = round(r(N),5)
 local controls_aki_pc_`i' = (`controls_aki_`i''/`controls_`i'')*100
 }
@@ -488,10 +487,10 @@ file write tablecontent _n
 *Cardiovascular diseases
 file write tablecontent ("Cardiovascular diseases") _tab
 forvalues i=1/6 {
-qui safecount if cardiovascular==1 & covid_severity==2 & ethnicity1==`i'
+qui safecount if cardiovascular==1 & case==1 & ethnicity1==`i'
 local cases_cardiovascular_`i' = round(r(N),5)
 local cases_cardiovascular_pc_`i' = (`cases_cardiovascular_`i''/`cases_`i'')*100
-qui safecount if cardiovascular==1 & covid_severity==1 & ethnicity1==`i'
+qui safecount if cardiovascular==1 & case==0 & ethnicity1==`i'
 local controls_cardiovascular_`i' = round(r(N),5)
 local controls_cardiovascular_pc_`i' = (`controls_cardiovascular_`i''/`controls_`i'')*100
 }
@@ -517,10 +516,10 @@ file write tablecontent _n
 *Diabetes
 file write tablecontent ("Diabetes") _tab
 forvalues i=1/6 {
-qui safecount if diabetes==1 & covid_severity==2 & ethnicity1==`i'
+qui safecount if diabetes==1 & case==1 & ethnicity1==`i'
 local cases_diabetes_`i' = round(r(N),5)
 local cases_diabetes_pc_`i' = (`cases_diabetes_`i''/`cases_`i'')*100
-qui safecount if diabetes==1 & covid_severity==1 & ethnicity1==`i'
+qui safecount if diabetes==1 & case==0 & ethnicity1==`i'
 local controls_diabetes_`i' = round(r(N),5)
 local controls_diabetes_pc_`i' = (`controls_diabetes_`i''/`controls_`i'')*100
 }
@@ -546,10 +545,10 @@ file write tablecontent _n
 *Hypertension
 file write tablecontent ("Hypertension") _tab
 forvalues i=1/6 {
-qui safecount if hypertension==1 & covid_severity==2 & ethnicity1==`i'
+qui safecount if hypertension==1 & case==1 & ethnicity1==`i'
 local cases_hypertension_`i' = round(r(N),5)
 local cases_hypertension_pc_`i' = (`cases_hypertension_`i''/`cases_`i'')*100
-qui safecount if hypertension==1 & covid_severity==1 & ethnicity1==`i'
+qui safecount if hypertension==1 & case==0 & ethnicity1==`i'
 local controls_hypertension_`i' = round(r(N),5)
 local controls_hypertension_pc_`i' = (`controls_hypertension_`i''/`controls_`i'')*100
 }
@@ -575,10 +574,10 @@ file write tablecontent _n
 *Immunosuppressive diseases
 file write tablecontent ("Immunosuppressive diseases") _tab
 forvalues i=1/6 {
-qui safecount if immunosuppressed==1 & covid_severity==2 & ethnicity1==`i'
+qui safecount if immunosuppressed==1 & case==1 & ethnicity1==`i'
 local cases_immunosuppressed_`i' = round(r(N),5)
 local cases_immunosuppressed_pc_`i' = (`cases_immunosuppressed_`i''/`cases_`i'')*100
-qui safecount if immunosuppressed==1 & covid_severity==1 & ethnicity1==`i'
+qui safecount if immunosuppressed==1 & case==0 & ethnicity1==`i'
 local controls_immunosuppressed_`i' = round(r(N),5)
 local controls_immunosuppressed_pc_`i' = (`controls_immunosuppressed_`i''/`controls_`i'')*100
 }
@@ -603,11 +602,12 @@ file write tablecontent _n
 
 *Cancer
 file write tablecontent ("Non-haematological cancer") _tab
+qui safecount if non_haem_cancer==1 & case==1
 forvalues i=1/6 {
-qui safecount if non_haem_cancer==1 & covid_severity==2 & ethnicity1==`i'
+qui safecount if non_haem_cancer==1 & case==1 & ethnicity1==`i'
 local cases_non_haem_cancer_`i' = round(r(N),5)
 local cases_non_haem_cancer_pc_`i' = (`cases_non_haem_cancer_`i''/`cases_`i'')*100
-qui safecount if non_haem_cancer==1 & covid_severity==1 & ethnicity1==`i'
+qui safecount if non_haem_cancer==1 & case==0 & ethnicity1==`i'
 local controls_non_haem_cancer_`i' = round(r(N),5)
 local controls_non_haem_cancer_pc_`i' = (`controls_non_haem_cancer_`i''/`controls_`i'')*100
 }
@@ -633,11 +633,11 @@ file write tablecontent _n
 *GP consultations
 file write tablecontent ("Median GP consultations prior year (IQR)") _tab
 forvalues i=1/6 {
-qui sum gp_count if covid_severity==2 & ethnicity1==`i', d
+qui sum gp_count if case==1 & ethnicity1==`i', d
 local cases_q2_`i' = r(p50)
 local cases_q1_`i' = r(p25)
 local cases_q3_`i' = r(p75)
-qui sum gp_count if covid_severity==1 & ethnicity1==`i', d
+qui sum gp_count if case==0 & ethnicity1==`i', d
 local controls_q2_`i' = r(p50)
 local controls_q1_`i' = r(p25)
 local controls_q3_`i' = r(p75)
@@ -669,10 +669,10 @@ forvalues group=0/2 {
 local label_`group': label admissions `group'
 file write tablecontent ("`label_`group''") _tab
 forvalues i=1/6 {
-qui safecount if admissions==`group' & covid_severity==2 & ethnicity1==`i'
+qui safecount if admissions==`group' & case==1 & ethnicity1==`i'
 local cases_`group'_`i' = round(r(N),5)
 local cases_`group'_pc_`i' = (`cases_`group'_`i''/`cases_`i'')*100
-qui safecount if admissions==`group' & covid_severity==1 & ethnicity1==`i'
+qui safecount if admissions==`group' & case==0 & ethnicity1==`i'
 local controls_`group'_`i' = round(r(N),5)
 local controls_`group'_pc_`i' = (`controls_`group'_`i''/`controls_`i'')*100
 }
@@ -695,4 +695,5 @@ file write tablecontent ("REDACTED") _tab
 }
 file write tablecontent _n
 }
+
 file close tablecontent

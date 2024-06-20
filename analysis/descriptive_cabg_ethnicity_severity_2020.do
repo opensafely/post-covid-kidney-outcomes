@@ -3,16 +3,16 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/descriptive_ethnicity_severity_2017.log, replace t
+log using ./logs/descriptive_cabg_ethnicity_severity_2020.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/descriptive_ethnicity_severity_2017.csv, write text replace
+file open tablecontent using ./output/descriptive_cabg_ethnicity_severity_2020.csv, write text replace
 file write tablecontent _tab ("Hospitalised COVID-19 (n(%))") _tab _tab _tab _tab _tab _tab ("Non-hospitalised COVID_19 (n(%))") _tab _tab _tab _tab _tab _tab _n
 file write tablecontent _tab ("White") _tab ("South Asian") _tab ("Black") _tab ("Mixed") _tab ("Other") _tab ("Unknown") _tab ("White") _tab ("South Asian") _tab ("Black") _tab ("Mixed") _tab ("Other") _tab ("Unknown") _n
 
 *Total
 file write tablecontent ("Total") _tab
-use ./output/analysis_2017.dta, clear
+use ./output/analysis_cabg_2020.dta, clear
 replace covid_severity=2 if covid_severity==3
 forvalues i=1/6 {
 qui safecount if covid_severity==2 & ethnicity1==`i'
@@ -603,6 +603,7 @@ file write tablecontent _n
 
 *Cancer
 file write tablecontent ("Non-haematological cancer") _tab
+qui safecount if non_haem_cancer==1 & covid_severity==2
 forvalues i=1/6 {
 qui safecount if non_haem_cancer==1 & covid_severity==2 & ethnicity1==`i'
 local cases_non_haem_cancer_`i' = round(r(N),5)
@@ -623,6 +624,35 @@ file write tablecontent ("REDACTED") _tab
 forvalues i=1/6 {
 if `controls_non_haem_cancer_`i''>5 & `controls_non_haem_cancer_`i''!=. {
 file write tablecontent %9.0f (`controls_non_haem_cancer_`i'') (" (") %4.1f (`controls_non_haem_cancer_pc_`i'') (")") _tab
+}
+else {
+file write tablecontent ("REDACTED") _tab
+}
+}
+file write tablecontent _n
+
+*COVID-19 hospitalisation
+file write tablecontent ("COVID-19 hospitalisation") _tab
+forvalues i=1/6 {
+qui safecount if covid_covariate==1 & covid_severity==2 & ethnicity1==`i'
+local cases_covid_covariate_`i' = round(r(N),5)
+local cases_covid_covariate_pc_`i' = (`cases_covid_covariate_`i''/`cases_`i'')*100
+qui safecount if covid_covariate==1 & covid_severity==1 & ethnicity1==`i'
+local controls_covid_covariate_`i' = round(r(N),5)
+local controls_covid_covariate_pc_`i' = (`controls_covid_covariate_`i''/`controls_`i'')*100
+}
+forvalues i=1/6 {
+if `cases_covid_covariate_`i''>5 & `cases_covid_covariate_`i''!=. {
+file write tablecontent %9.0f (`cases_covid_covariate_`i'') (" (") %4.1f (`cases_covid_covariate_pc_`i'') (")") _tab
+}
+else {
+file write tablecontent ("REDACTED") _tab
+}
+}
+
+forvalues i=1/6 {
+if `controls_covid_covariate_`i''>5 & `controls_covid_covariate_`i''!=. {
+file write tablecontent %9.0f (`controls_covid_covariate_`i'') (" (") %4.1f (`controls_covid_covariate_pc_`i'') (")") _tab
 }
 else {
 file write tablecontent ("REDACTED") _tab
@@ -688,6 +718,39 @@ file write tablecontent ("REDACTED") _tab
 forvalues i=1/6 {
 if `controls_`group'_`i''>5 & `controls_`group'_`i''!=. {
 file write tablecontent %9.0f (`controls_`group'_`i'') (" (") %4.1f (`controls_`group'_pc_`i'') (")") _tab
+}
+else {
+file write tablecontent ("REDACTED") _tab
+}
+}
+file write tablecontent _n
+}
+
+*COVID-19 wave
+file write tablecontent ("COVID-19 wave") _n
+forvalues wave=1/4 {
+local label_`wave': label wave `wave'
+file write tablecontent ("`label_`wave''") _tab
+forvalues i=1/6 {
+qui safecount if wave==`wave' & covid_severity==2 & ethnicity1==`i'
+local cases_`wave'_`i' = round(r(N),5)
+local cases_`wave'_pc_`i' = (`cases_`wave'_`i''/`cases_`i'')*100
+qui safecount if wave==`wave' & covid_severity==1 & ethnicity1==`i'
+local controls_`wave'_`i' = round(r(N),5)
+local controls_`wave'_pc_`i' = (`controls_`wave'_`i''/`controls_`i'')*100
+}
+forvalues i=1/6 {
+if `cases_`wave'_`i''>5 & `cases_`wave'_`i''!=. {
+file write tablecontent %9.0f (`cases_`wave'_`i'') (" (") %4.1f (`cases_`wave'_pc_`i'') (")") _tab
+}
+else {
+file write tablecontent ("REDACTED") _tab
+}
+}
+
+forvalues i=1/6 {
+if `controls_`wave'_`i''>5 & `controls_`wave'_`i''!=. {
+file write tablecontent %9.0f (`controls_`wave'_`i'') (" (") %4.1f (`controls_`wave'_pc_`i'') (")") _tab
 }
 else {
 file write tablecontent ("REDACTED") _tab

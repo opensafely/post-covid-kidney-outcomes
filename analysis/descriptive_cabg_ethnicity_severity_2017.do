@@ -3,16 +3,16 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/descriptive_ethnicity_severity_2017.log, replace t
+log using ./logs/descriptive_cabg_ethnicity_severity_2017.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/descriptive_ethnicity_severity_2017.csv, write text replace
+file open tablecontent using ./output/descriptive_cabg_ethnicity_severity_2017.csv, write text replace
 file write tablecontent _tab ("Hospitalised COVID-19 (n(%))") _tab _tab _tab _tab _tab _tab ("Non-hospitalised COVID_19 (n(%))") _tab _tab _tab _tab _tab _tab _n
 file write tablecontent _tab ("White") _tab ("South Asian") _tab ("Black") _tab ("Mixed") _tab ("Other") _tab ("Unknown") _tab ("White") _tab ("South Asian") _tab ("Black") _tab ("Mixed") _tab ("Other") _tab ("Unknown") _n
 
 *Total
 file write tablecontent ("Total") _tab
-use ./output/analysis_2017.dta, clear
+use ./output/analysis_cabg_2017.dta, clear
 replace covid_severity=2 if covid_severity==3
 forvalues i=1/6 {
 qui safecount if covid_severity==2 & ethnicity1==`i'
