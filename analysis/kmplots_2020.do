@@ -8,6 +8,9 @@ use ./output/analysis_complete_2020.dta, clear
 
 replace covid_severity = 2 if covid_severity==3
 
+
+
+/* - Already outputted:
 stset exit_date_esrd, fail(esrd_date) origin(index_date_esrd) id(unique) scale(365.25)
 sts graph, by(case) title("esrd") graphregion(fcolor(white)) ylabel(.95(.1)1)
 graph export ./output/km_2020_case_esrd.svg, as(svg) replace
@@ -25,9 +28,10 @@ sts graph, by(case) title("death") graphregion(fcolor(white)) ylabel(.90(.1)1)
 graph export ./output/km_2020_case_death.svg, as(svg) replace
 sts graph, by(covid_severity) title("death") graphregion(fcolor(white)) ylabel(.65(.1)1)
 graph export ./output/km_2020_severity_death.svg, as(svg) replace
+*/
 
 gen covid_severity1 = 0
-replace covid_severity1 = 1 if covid_severity1==1
+replace covid_severity1 = 1 if covid_severity==1
 gen covid_severity2 = 0
 replace covid_severity2 = 1 if covid_severity==2
 

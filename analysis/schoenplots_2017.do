@@ -49,7 +49,7 @@ graph export ./output/schoenplot_2017_case_`out'.svg, as(svg) replace
 }
 
 gen covid_severity1 = 0
-replace covid_severity1 = 1 if covid_severity1==1
+replace covid_severity1 = 1 if covid_severity==1
 gen covid_severity2 = 0
 replace covid_severity2 = 1 if covid_severity==2
 
