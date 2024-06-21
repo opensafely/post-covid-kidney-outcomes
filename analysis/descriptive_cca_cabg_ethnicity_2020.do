@@ -3,10 +3,10 @@ sysdir set PERSONAL ./analysis/adofiles
 pwd
 cap log close
 macro drop hr
-log using ./logs/descriptive_cabg_cca_ethnicity_2020.log, replace t
+log using ./logs/descriptive_cca_cabg_ethnicity_2020.log, replace t
 
 cap file close tablecontent
-file open tablecontent using ./output/descriptive_cabg_cca_ethnicity_2020.csv, write text replace
+file open tablecontent using ./output/descriptive_cca_cabg_ethnicity_2020.csv, write text replace
 file write tablecontent _tab ("COVID-19 cohort (n(%))") _tab _tab _tab _tab _tab ("Matched contemporary cohort (n(%))") _tab _tab _tab _tab _tab _n
 file write tablecontent _tab ("White") _tab ("South Asian") _tab ("Black") _tab ("Mixed") _tab ("Other") _tab ("White") _tab ("South Asian") _tab ("Black") _tab ("Mixed") _tab ("Other") _n
 
