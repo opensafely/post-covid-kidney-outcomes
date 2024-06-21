@@ -672,37 +672,4 @@ file write tablecontent ("REDACTED") _tab
 file write tablecontent _n
 }
 
-*COVID-19 vaccination
-file write tablecontent ("COVID-19 vaccination status") _n
-forvalues vax=1/5 {
-local label_`vax': label covid_vax `vax'
-file write tablecontent ("`label_`vax''") _tab
-forvalues i=1/5 {
-qui safecount if covid_vax==`vax' & case==1 & ethnicity==`i'
-local cases_`vax'_`i' = round(r(N),5)
-local cases_`vax'_pc_`i' = (`cases_`vax'_`i''/`cases_`i'')*100
-qui safecount if covid_vax==`vax' & case==0 & ethnicity==`i'
-local controls_`vax'_`i' = round(r(N),5)
-local controls_`vax'_pc_`i' = (`controls_`vax'_`i''/`controls_`i'')*100
-}
-forvalues i=1/5 {
-if `cases_`vax'_`i''>5 & `cases_`vax'_`i''!=. {
-file write tablecontent %9.0f (`cases_`vax'_`i'') (" (") %4.1f (`cases_`vax'_pc_`i'') (")") _tab
-}
-else {
-file write tablecontent ("REDACTED") _tab
-}
-}
-
-forvalues i=1/5 {
-if `controls_`vax'_`i''>5 & `controls_`vax'_`i''!=. {
-file write tablecontent %9.0f (`controls_`vax'_`i'') (" (") %4.1f (`controls_`vax'_pc_`i'') (")") _tab
-}
-else {
-file write tablecontent ("REDACTED") _tab
-}
-}
-file write tablecontent _n
-}
-
 file close tablecontent
