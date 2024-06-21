@@ -705,36 +705,4 @@ file write tablecontent ("REDACTED") _tab
 file write tablecontent _n
 }
 
-*COVID-19 wave
-file write tablecontent ("COVID-19 wave") _n
-forvalues wave=1/4 {
-local label_`wave': label wave `wave'
-file write tablecontent ("`label_`wave''") _tab
-forvalues i=1/5 {
-qui safecount if wave==`wave' & case==1 & ethnicity==`i'
-local cases_`wave'_`i' = round(r(N),5)
-local cases_`wave'_pc_`i' = (`cases_`wave'_`i''/`cases_`i'')*100
-qui safecount if wave==`wave' & case==0 & ethnicity==`i'
-local controls_`wave'_`i' = round(r(N),5)
-local controls_`wave'_pc_`i' = (`controls_`wave'_`i''/`controls_`i'')*100
-}
-forvalues i=1/5 {
-if `cases_`wave'_`i''>5 & `cases_`wave'_`i''!=. {
-file write tablecontent %9.0f (`cases_`wave'_`i'') (" (") %4.1f (`cases_`wave'_pc_`i'') (")") _tab
-}
-else {
-file write tablecontent ("REDACTED") _tab
-}
-}
-
-forvalues i=1/5 {
-if `controls_`wave'_`i''>5 & `controls_`wave'_`i''!=. {
-file write tablecontent %9.0f (`controls_`wave'_`i'') (" (") %4.1f (`controls_`wave'_pc_`i'') (")") _tab
-}
-else {
-file write tablecontent ("REDACTED") _tab
-}
-}
-file write tablecontent _n
-}
 file close tablecontent
