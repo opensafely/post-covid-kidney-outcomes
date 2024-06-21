@@ -12,7 +12,7 @@ file write tablecontent _tab ("White") _tab ("South Asian") _tab ("Black") _tab 
 
 *Total
 file write tablecontent ("Total") _tab
-use ./output/analysis_asthma_complete_2017.dta, clear
+use ./output/analysis_asthma_2017_complete.dta, clear
 forvalues i=1/5 {
 qui safecount if case==1 & ethnicity==`i'
 local cases_`i' = round(r(N),5)
