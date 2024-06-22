@@ -52,7 +52,7 @@ msymbol(circle_hollow) ///
 scheme(s1mono) ///
 title ("esrd", position(11) size(medsmall)) ///
 note("")
-graph export ./output/schoenplot_2017_severity`i'_esrd.svg, as(svg) replace
+graph export ./output/schoenplot_2020_severity`i'_esrd.svg, as(svg) replace
 }
 
 /*
