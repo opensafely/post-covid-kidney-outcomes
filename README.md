@@ -1,13 +1,11 @@
-# Long-term kidney outcomes after SARS-CoV-2 infection
+# Long-term kidney outcomes after COVID-19
 
-This is the code and configuration for our research: "Long-term kidney outcomes after SARS-CoV-2 infection"
-
-This project is ongoing. Code and results in this repository MUST NOT be considered an accurate or valid representation of the study purpose. These data may reflect an incomplete or incorrect analysis with no further ongoing work. The repository content has ONLY been made public to support the OpenSAFELY open science and transparency principles and to support the sharing of re-usable code for other subsequent users. The results have not been peer-reviewed. No clinical, policy or safety conclusions must be drawn from any of the data here.
+This is the code and configuration for our research: "Long-term kidney outcomes after COVID-19"
 
 You can run this project via [Gitpod](https://gitpod.io) in a web browser by clicking on this badge: [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/opensafely/post-covid-kidney-outcomes)
 
 * Our study protocol can be found [here](https://github.com/opensafely/post-covid-kidney-outcomes/blob/working/Protocol_%20Kidney%20outcomes%20after%20SARS-CoV-2%20infection.pdf)
-* This study is ongoing and is yet to be published()
+* This study has been published in [The Lancet Regional Health - Europe](https://www.thelancet.com/journals/lanepe/article/PIIS2666-7762(25)00130-9/fulltext)
 * Raw model outputs, including charts, crosstabs, etc, will be in `released_outputs/`
 * If you are interested in how we defined our variables, take a look at the [analysis folder](analysis/); this is written in `python`, but non-programmers should be able to understand what is going on there
 * If you are interested in how we defined our code lists, look in the [codelists folder](https://github.com/opensafely/post-covid-kidney-outcomes/tree/working/codelists).
